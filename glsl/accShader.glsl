@@ -168,14 +168,18 @@ struct Vector{
 
 
 //actually flowing along a geodesic
-Vector flow(Vector tv, float t){
+void flow(inout Vector tv, float t){
     //flow distance t in direction tv
-    vec3 res=tv.pos+t*tv.dir;
-    return Vector(res,tv.dir);
+    tv.pos+=t*tv.dir;
 }
 
-void nudge(Vector v, vec3 dir){
+void nudge(inout Vector v, vec3 dir){
     v.pos+=dir*0.01;
+}
+
+
+void nudge(inout Vector v, Vector offset){
+    v.pos+=offset.dir*0.01;
 }
 
 
@@ -221,7 +225,7 @@ struct localData{
 
 float sphereSDF(Vector tv, vec3 center, float rad){
     //if you are looking away from the sphere, stop
-    if(dot(tv.dir,tv.pos-center)>0.){return maxDist;}
+   if(dot(tv.dir,tv.pos-center)>0.){return maxDist;}
     //else return distance to closest point
     return length(tv.pos-center)-rad;
 }
@@ -248,7 +252,7 @@ float planeSDF(Vector tv, vec3 normal, float D){
 }
 
 Vector planeNormal(Vector tv,vec3 normal, float D){
-    return Vector(tv.pos, normal);
+    return Vector(tv.pos, normalize(normal));
 }
 
 
@@ -314,13 +318,17 @@ float raymarch(inout Vector tv, inout localData dat){
                     dat.isSky=false;
                     return depth;
                 }
-                marchStep =localDist;
-               depth += marchStep;
+            
+            
+            marchStep =localDist;
+            depth += marchStep;
             if(depth>maxDist){
                 dat.isSky=true;
                 return maxDist;
             }
-            tv = flow(tv, marchStep);
+            
+            
+            flow(tv, marchStep);
         }
     
     //if you hit nothing
@@ -333,7 +341,7 @@ float raymarch(inout Vector tv, inout localData dat){
 
 
 //march in direction of tv until you hit an object, do color computations at that object
-void stepForward(inout Path path, localData dat){
+void stepForward(inout Path path, inout localData dat){
     
      // shoot a ray out into the world
         raymarch(path.tv,dat);
@@ -362,7 +370,7 @@ void stepForward(inout Path path, localData dat){
 void newBounceSetup(inout Path path, localData dat, uint rngState){
     vec3 newDir;
     // push a bit off the surface
-       path.tv.pos+=0.01*dat.normal.dir;
+       nudge(path.tv,dat.normal);
          
         // calculate new ray direction, in a cosine weighted hemisphere oriented at normal
         newDir = normalize(dat.normal.dir + RandomUnitVector(rngState));
@@ -374,7 +382,7 @@ void newBounceSetup(inout Path path, localData dat, uint rngState){
 
 
 
-vec3 pathTrace(inout Path path, inout uint rngState){
+vec3 pathTrace(inout Path path, uint rngState){
     
     localData dat;
     int maxBounces=3;
