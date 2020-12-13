@@ -2,9 +2,6 @@
         //=============================================
         import * as THREE from './libs/three.module.js';
 
-        import {
-            OrbitControls
-        } from './libs/OrbitControls.js';
 
         import Stats from './libs/stats.module.js';
 
@@ -57,16 +54,6 @@
             return stats;
         }
 
-
-
-        function createControls() {
-            // controls
-            controls = new OrbitControls(camera, container);
-            controls.addEventListener('change', render);
-            controls.minDistance = 10;
-            controls.maxDistance = 50;
-            controls.enablePan = true;
-        }
 
 
 
@@ -165,29 +152,6 @@
 
 
 
-
-
-
-
-        async function init() {
-
-            //set the canvas
-            canvas = document.querySelector('#c');
-
-            stats = createStats();
-
-            createRenderer();
-
-            createCamera();
-
-            await buildScenes();
-
-            createFrameBuffers(canvas);
-
-        }
-
-
-
         function animate() {
 
             requestAnimationFrame(animate);
@@ -205,12 +169,32 @@
 
 
 
+
+        async function main() {
+
+            //set the canvas
+            canvas = document.querySelector('#c');
+
+            stats = createStats();
+
+            createRenderer();
+
+            createCamera();
+
+            await buildScenes();
+
+            createFrameBuffers(canvas);
+
+            animate();
+
+        }
+
+
+
+
+
+
         //Actually Running Things
         //=============================================
 
-
-        init();
-
-        //seems that some errors are thrown at the beginning when animate() runs before init() is done...
-        //but then quickly goes away
-        animate();
+        main();
