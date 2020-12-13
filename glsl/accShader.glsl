@@ -9,7 +9,7 @@ uniform float iFrame;
 // constants
 float eps=0.0001;
 int maxMarchSteps=300;
-float maxDist=100.;
+float maxDist=20.;
 float distToViewer;
 bool isSky=false;
 float fov=100.;
@@ -203,6 +203,9 @@ Path initializePath(Vector tv){
 }
 
 
+
+
+
 struct localData{
     Vector normal;
     Vector reflect;
@@ -214,8 +217,24 @@ struct localData{
 
 
 
+struct Material{
+    vec3 emit;
+    vec3 diffuse;
+};
 
 
+
+
+
+
+
+
+//set the local data to the sky
+void setSky(inout localData dat,Vector tv){
+    dat.diffuse=vec3(0.);
+    dat.emit=0.5*vec3(53./255.,81./255.,92./255.);
+                //SRGBToLinear(skyTex(tv.dir));
+}
 
 
 
@@ -266,21 +285,23 @@ float sceneSDF(Vector tv, inout localData dat){
     float dist= sphereSDF(tv, center1,0.5);
     
     if(dist<eps){
+        dat.isSky=false;
         dat.normal=sphereNormal(tv,center1);
-        dat.diffuse=vec3(0.,0.2,0.5);
+        dat.diffuse=vec3(0.9f, 0.75f, 0.9f);;
         dat.emit=vec3(0.0);
         return dist;
     }
     
     
     //the light source
-    vec3 center2=vec3(0.5,0.2,-1);
+    vec3 center2=vec3(0.5,0.6,-1);
     float dist2=sphereSDF(tv, center2,0.1);
     
     if(dist2<eps){
+        dat.isSky=false;
         dat.normal=sphereNormal(tv,center2);
-        dat.diffuse=vec3(1.);
-        dat.emit=vec3(.5);
+        dat.diffuse=vec3(0.,0.,0.);
+        dat.emit=vec3(1.0f, 0.9f, 0.7f) * 5.0f;
         return dist2;
     }
     
@@ -288,14 +309,30 @@ float sceneSDF(Vector tv, inout localData dat){
         float dist3=planeSDF(tv, pNormal,0.65);
     
     if(dist3<eps){
+        dat.isSky=false;
         dat.normal=planeNormal(tv,pNormal,0.65);
-        dat.diffuse=vec3(1.,0.,0.2);
+        dat.diffuse=vec3(0.7f, 0.7f, 0.7f);
         dat.emit=vec3(0.0);
         return dist3;
     }
     
     
-    return min(min(dist,dist2),dist3);
+    
+    
+         pNormal=vec3(1,0,1);
+        float dist4=planeSDF(tv, pNormal,5.);
+    
+    if(dist4<eps){
+        dat.isSky=false;
+        dat.normal=planeNormal(tv,pNormal,5.);
+        dat.diffuse=vec3(.8,0.2,0.2);
+        dat.emit=vec3(0.0);
+        return dist4;
+    }
+    
+    
+    
+    return min(min(dist,dist2),min(dist3,dist4));
 
 }
 
@@ -306,33 +343,35 @@ float sceneSDF(Vector tv, inout localData dat){
 
 float raymarch(inout Vector tv, inout localData dat){
 
-    distToViewer=0.;
-    float marchStep = 0.;
-    float depth=0.;
+    float toScene;
+    float totalDist=0.;
+    
+    //default= you hit the sky
+    dat.isSky=true;
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-                float localDist = sceneSDF(tv,dat);
+               toScene  = sceneSDF(tv,dat);
            
-                if (localDist < eps){
-                    dat.isSky=false;
-                    return depth;
+                if (toScene < eps){
+                    //local data is set by the sdf
+                    return totalDist;
                 }
             
-            
-            marchStep =localDist;
-            depth += marchStep;
-            if(depth>maxDist){
-                dat.isSky=true;
+           
+            totalDist += toScene;
+            if(totalDist>maxDist){
+                //set local data
+                setSky(dat,tv);
                 return maxDist;
             }
             
-            
-            flow(tv, marchStep);
+            //otherwise keep going
+            flow(tv, toScene);
         }
     
     //if you hit nothing
-    dat.isSky=true;
+    setSky(dat,tv);
     return maxDist;
 }
 
@@ -346,34 +385,24 @@ void stepForward(inout Path path, inout localData dat){
      // shoot a ray out into the world
         raymarch(path.tv,dat);
          
-        // if the ray missed, we are done
-        if (dat.isSky){
-            //add the sky color to the pixel
-            vec3 skyColor=SRGBToLinear(skyTex(path.tv.dir));
-    
-            path.pixel+=path.light*skyColor;
-        }
-   
         // add in emissive lighting
         path.pixel += dat.emit * path.light;
-        //pixel+=dat.diffuse;
          
         // update the colorMultiplier
-    //light+=dat.emit;
         path.light *= dat.diffuse; 
-    
+
 }
 
 
 
 //given a position and local data there, find the new marching direction
-void newBounceSetup(inout Path path, localData dat, uint rngState){
+void newBounceSetup(inout Path path, localData dat, inout uint rngState){
     vec3 newDir;
     // push a bit off the surface
        nudge(path.tv,dat.normal);
          
         // calculate new ray direction, in a cosine weighted hemisphere oriented at normal
-        newDir = normalize(dat.normal.dir + RandomUnitVector(rngState));
+        newDir = normalize(dat.normal.dir+RandomUnitVector(rngState));
         
         //update the tangent vector:
         path.tv.dir=newDir;
@@ -382,10 +411,10 @@ void newBounceSetup(inout Path path, localData dat, uint rngState){
 
 
 
-vec3 pathTrace(inout Path path, uint rngState){
+vec3 pathTrace(inout Path path, inout uint rngState){
     
     localData dat;
-    int maxBounces=3;
+    int maxBounces=10;
     
     
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
@@ -444,8 +473,23 @@ Vector initializeRay(vec2 fragCoord){
 
 
 
-
-
+//
+//
+////get the new frame
+//vec3 newFrame(vec2 fragCoord){
+//    
+//}
+//
+//
+//
+//
+//
+//vec3 accFrames(vec2 fragCoord){
+//    
+//}
+//
+//
+//
 
 
 
@@ -456,7 +500,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // initialize a random number state based on frag coord and frame
 uint rngState = uint(uint(fragCoord.x) * uint(1973) + uint(fragCoord.y) * uint(9277) + uint(iFrame) * uint(26699)) | uint(1);
     
-    Vector normal;
     
     //get the initial tangent vector, path data
     Vector tv=initializeRay(fragCoord);
