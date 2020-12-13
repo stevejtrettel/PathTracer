@@ -333,7 +333,7 @@ float raymarch(inout Vector tv, inout localData dat){
 
 
 //march in direction of tv until you hit an object, do color computations at that object
-void stepForward(inout Path path, localData dat){
+void stepForward(inout Path path, inout localData dat){
     
      // shoot a ray out into the world
         raymarch(path.tv,dat);
