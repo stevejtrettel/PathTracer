@@ -186,8 +186,9 @@ void nudge(inout Vector v, Vector offset){
 
 struct Path{
     Vector tv;
+    bool specularRay;//what type of ray we are shooting
     vec3 pixel;//pixel color
-    vec3 light;
+    vec3 light;//light along path
 };
 
 
@@ -203,6 +204,15 @@ Path initializePath(Vector tv){
 }
 
 
+struct Material{
+    vec3 emit;
+    vec3 diffuse;
+    vec3 specular;
+    float specularPercent;
+    float roughness;
+    
+};
+
 
 
 
@@ -210,17 +220,11 @@ struct localData{
     Vector normal;
     Vector reflect;
     Vector refract;
-    vec3 emit;
-    vec3 diffuse;
+    Material mat;
     bool isSky;
 };
 
 
-
-struct Material{
-    vec3 emit;
-    vec3 diffuse;
-};
 
 
 
@@ -231,9 +235,9 @@ struct Material{
 
 //set the local data to the sky
 void setSky(inout localData dat,Vector tv){
-    dat.diffuse=vec3(0.);
-    dat.emit=0.5*vec3(53./255.,81./255.,92./255.);
-                //SRGBToLinear(skyTex(tv.dir));
+    dat.mat.diffuse=vec3(0.);
+    dat.mat.emit=SRGBToLinear(skyTex(tv.dir));
+        0.5*vec3(53./255.,81./255.,92./255.);
 }
 
 
@@ -281,17 +285,23 @@ Vector planeNormal(Vector tv,vec3 normal, float D){
 //extra data
 float sceneSDF(Vector tv, inout localData dat){
     
+    
+    //sphere 1
     vec3 center1=vec3(0,0,-2.);
     float dist= sphereSDF(tv, center1,0.5);
+    
     
     if(dist<eps){
         dat.isSky=false;
         dat.normal=sphereNormal(tv,center1);
-        dat.diffuse=vec3(0.9f, 0.75f, 0.9f);;
-        dat.emit=vec3(0.0);
+        dat.mat.diffuse=vec3(0.9f, 0.9f, 0.5f);
+        dat.mat.emit=vec3(0.0);
+        dat.mat.specular=vec3(0.9f, 0.9f, 0.9f); 
+        dat.mat.specularPercent=0.1;
+        dat.mat.roughness=0.2;
         return dist;
     }
-    
+
     
     //the light source
     vec3 center2=vec3(0.5,0.6,-1);
@@ -300,37 +310,48 @@ float sceneSDF(Vector tv, inout localData dat){
     if(dist2<eps){
         dat.isSky=false;
         dat.normal=sphereNormal(tv,center2);
-        dat.diffuse=vec3(0.,0.,0.);
-        dat.emit=vec3(1.0f, 0.9f, 0.7f) * 5.0f;
+        dat.mat.diffuse=vec3(0.,0.,0.);
+        dat.mat.emit=vec3(1.0f, 0.9f, 0.7f) * 5.0f;
+        dat.mat.specular=vec3(0.,0.,0.);
+        dat.mat.specularPercent=0.;
+        dat.mat.roughness=0.;
         return dist2;
     }
     
+    
+    //floor
     vec3 pNormal=vec3(0,1,0.1);
         float dist3=planeSDF(tv, pNormal,0.65);
     
     if(dist3<eps){
         dat.isSky=false;
         dat.normal=planeNormal(tv,pNormal,0.65);
-        dat.diffuse=vec3(0.7f, 0.7f, 0.7f);
-        dat.emit=vec3(0.0);
+        dat.mat.diffuse=vec3(0.7f, 0.7f, 0.7f);
+        dat.mat.emit=vec3(0.0);
+        dat.mat.specular=vec3(0.);
+        dat.mat.specularPercent=0.;
+        dat.mat.roughness=0.;
         return dist3;
     }
     
+
     
+//    
+//         pNormal=vec3(1,0,1);
+//        float dist4=planeSDF(tv, pNormal,5.);
+//    
+//    if(dist4<eps){
+//        dat.isSky=false;
+//        dat.normal=planeNormal(tv,pNormal,5.);
+//        dat.mat.diffuse=vec3(.8,0.2,0.2);
+//        dat.mat.emit=vec3(0.0);
+//        dat.mat.specular=vec3(1.,0.,1.);
+//        dat.mat.specularPercent=0.2;
+//        dat.mat.roughness=0.5;
+//        return dist4;
+//    }
     
-    
-         pNormal=vec3(1,0,1);
-        float dist4=planeSDF(tv, pNormal,5.);
-    
-    if(dist4<eps){
-        dat.isSky=false;
-        dat.normal=planeNormal(tv,pNormal,5.);
-        dat.diffuse=vec3(.8,0.2,0.2);
-        dat.emit=vec3(0.0);
-        return dist4;
-    }
-    
-    
+    float dist4=maxDist;
     
     return min(min(dist,dist2),min(dist3,dist4));
 
@@ -380,18 +401,22 @@ float raymarch(inout Vector tv, inout localData dat){
 
 
 //march in direction of tv until you hit an object, do color computations at that object
-void stepForward(inout Path path, inout localData dat){
+void stepForward(inout Path path, inout localData dat,inout uint rngState){
     
      // shoot a ray out into the world
         raymarch(path.tv,dat);
          
         // add in emissive lighting
-        path.pixel += dat.emit * path.light;
+        path.pixel += dat.mat.emit * path.light;
          
         // update the colorMultiplier
-        path.light *= dat.diffuse; 
+    //if specular ray; give specular color.  if diffuse raym diffuse color
+        path.light *= path.specularRay?dat.mat.specular:dat.mat.diffuse;
 
 }
+
+
+
 
 
 
@@ -400,12 +425,24 @@ void newBounceSetup(inout Path path, localData dat, inout uint rngState){
     vec3 newDir;
     // push a bit off the surface
        nudge(path.tv,dat.normal);
-         
-        // calculate new ray direction, in a cosine weighted hemisphere oriented at normal
-        newDir = normalize(dat.normal.dir+RandomUnitVector(rngState));
-        
+    
+    
+        // calculate new diffuse ray direction, in a cosine weighted hemisphere oriented at normal
+        vec3 diffuseDir = normalize(dat.normal.dir+RandomUnitVector(rngState));
+    
+    //calculate the specular direction
+        vec3 specularDir=reflect(path.tv.dir,dat.normal.dir);
+        specularDir = normalize(mix(specularDir, diffuseDir, dat.mat.roughness * dat.mat.roughness));
+    
+    
+        //decide if the new ray is going to be specular or diffuse:
+        path.specularRay=(RandomFloat01(rngState) < dat.mat.specularPercent);
+     
+    
+        vec3 rayDir = path.specularRay?specularDir:diffuseDir;
+            
         //update the tangent vector:
-        path.tv.dir=newDir;
+        path.tv.dir=rayDir;
 }
 
 
@@ -420,8 +457,20 @@ vec3 pathTrace(inout Path path, inout uint rngState){
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
     {
             //march to the next surface, pick up light contributions
-            stepForward(path,dat);
+            stepForward(path,dat,rngState);
             if(dat.isSky){break;}
+            
+                // Russian Roulette
+            // As the light left gets smaller, the ray is more likely to get terminated early.
+            // Survivors have their value boosted to make up for fewer samples being in the average.
+                {
+                    float p = max(path.light.r, max(path.light.g, path.light.b));
+                    if (RandomFloat01(rngState) > p)
+                        break;
+ 
+                    // Add the energy we 'lose' by randomly terminating paths
+                    path.light *= 1.0f / p;
+                }
             
             //set up the new direction to go in
             newBounceSetup(path,dat,rngState);
@@ -441,14 +490,18 @@ vec3 pathTrace(inout Path path, inout uint rngState){
 
 
 
-Vector initializeRay(vec2 fragCoord){
+Vector initializeRay(vec2 fragCoord,inout uint rngState){
     
     // The ray starts at the camera position (the origin)
     vec3 rayPosition = vec3(0.0f, 0.0f, 0.0f);
     
+    // calculate subpixel camera jitter for anti aliasing
+    vec2 jitter = vec2(RandomFloat01(rngState), RandomFloat01(rngState)) - 0.5f;
+    
      // calculate coordinates of the ray target on the imaginary pixel plane.
-    vec2 planeCoords=(fragCoord/iResolution.xy) * 2.0f - 1.0f;
-         // correct for aspect ratio
+    vec2 planeCoords=((fragCoord+jitter)/iResolution.xy) * 2.0f - 1.0f;
+
+    // correct for aspect ratio
     float aspectRatio = iResolution.x / iResolution.y;
     planeCoords.y /= aspectRatio;
     
@@ -473,23 +526,29 @@ Vector initializeRay(vec2 fragCoord){
 
 
 
-//
-//
-////get the new frame
-//vec3 newFrame(vec2 fragCoord){
-//    
-//}
-//
-//
-//
-//
-//
-//vec3 accFrames(vec2 fragCoord){
-//    
-//}
-//
-//
-//
+
+
+
+
+
+//get the new frame
+vec3 newFrame(vec2 fragCoord, inout uint rngState){
+    
+    //get the initial tangent vector, path data
+    Vector tv=initializeRay(fragCoord,rngState);
+    Path path=initializePath(tv);
+    
+    //do one trace out into the scene
+    return pathTrace(path,rngState);
+    
+}
+
+
+//call the previous frame from memory
+vec3 prevFrame(vec2 fragCoord){
+    return texture(acc, fragCoord / iResolution.xy).rgb;
+}
+
 
 
 
@@ -500,28 +559,13 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // initialize a random number state based on frag coord and frame
 uint rngState = uint(uint(fragCoord.x) * uint(1973) + uint(fragCoord.y) * uint(9277) + uint(iFrame) * uint(26699)) | uint(1);
     
+    //get new and old frames
+    vec3 new=newFrame(fragCoord,rngState);
+    vec3 prev=prevFrame(fragCoord);
     
-    //get the initial tangent vector, path data
-    Vector tv=initializeRay(fragCoord);
-    Path path=initializePath(tv);
-    
-    //do one trace out into the scene
-    vec3 color=pathTrace(path,rngState);
-    
-    
-    
-    // add the frames together
-    
-    float weight=1./(iFrame+1.);
-    
-    vec3 prevFrames = texture(acc, fragCoord / iResolution.xy).rgb;
-    
-    color=iFrame*prevFrames+color;
-    
-    color=color/(iFrame+1.);
-    
-    
-    
+    //add together and re-normalize
+    vec3 color=iFrame*prev+new;
+    color/=(iFrame+1.);
     
     fragColor = vec4(color, 1.0f);
 }
