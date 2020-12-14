@@ -36,9 +36,6 @@
 
 
 
-
-
-
         //Creating Basic Components
         //=============================================
 
@@ -60,23 +57,18 @@
 
         function createRenderer() {
             renderer = new THREE.WebGLRenderer({
-                canvas
+                canvas,
+                alpha: true,
+                //  premultipliedAlpha: true,
+                //  preserveDrawingBuffer: true,
+                depth: false,
+                stencil: false
             });
-            renderer.autoClearColor = false;
-
 
             // set the gamma correction so that output colors look
             // correct on our screens
-            //            renderer.gammaFactor = 2.2;
-            //            renderer.gammaOutput = true;
-            //            renderer.physicallyCorrectLights = true;
-            //            //            // tone mapping
-            //                        renderer.toneMapping = THREE.NoToneMapping;
-            //                        renderer.outputEncoding = THREE.sRGBEncoding;
-            //
-            //            renderer.setPixelRatio(window.devicePixelRatio);
-
-            //renderer.setPixelRatio(window.devicePixelRatio);
+            //renderer.gammaFactor = 1.;
+            renderer.outputEncoding = THREE.LinearEncoding;
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
@@ -98,12 +90,23 @@
 
 
 
-        function createFrameBuffers(canvas) {
+        function createFrameBuffers() {
             //make the two textures we will render to\
             //make it canvas sized
-            readTex = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+            readTex = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
 
-            writeTex = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+            writeTex = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
+
+            // writeTex.texture.encoding = THREE.LinearEncoding;
+            // readTex.texture.encoding = THREE.LinearEncoding;
 
         }
 
@@ -143,6 +146,7 @@
 
         function render() {
 
+
             //render to the texture B
             renderer.setRenderTarget(writeTex);
             renderer.render(accScene, camera);
@@ -156,7 +160,6 @@
             //set this as the acc uniform for the displayMaterial
             accMaterial.uniforms.acc.value = readTex.texture;
             dispMaterial.uniforms.acc.value = readTex.texture;
-
 
             //make the next move render to canvas
             renderer.setRenderTarget(null);
@@ -176,8 +179,8 @@
             stats.begin();
 
             //resizeToDisplay();
-            updateUniforms(canvas);
-            console.log(accMaterial.uniforms.iFrame.value);
+            updateUniforms();
+
             render();
 
             stats.end();
@@ -201,7 +204,7 @@
 
             await buildScenes();
 
-            createFrameBuffers(canvas);
+            createFrameBuffers();
 
             animate();
 

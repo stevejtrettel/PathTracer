@@ -4,6 +4,7 @@
 
 
 
+
         //Scene Variables
         //=============================================
 
@@ -87,9 +88,10 @@
 
 
 
-        function updateAccUniforms(canvas) {
+        function updateAccUniforms() {
 
             //  accMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
+            //  accMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
             accMaterial.uniforms.iTime.value = 0;
             accMaterial.uniforms.iFrame.value += 1.;
 
@@ -112,16 +114,16 @@
 
 
             dispUniforms = {
-                iTime: {
-                    value: 0
-                },
+                //                iTime: {
+                //                    value: 0
+                //                },
                 iResolution: {
                     value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
                 },
-                //frame number we are on
-                iFrame: {
-                    value: 0
-                },
+                //                //frame number we are on
+                //                iFrame: {
+                //                    value: 0
+                //                },
                 //raw display texture
                 acc: {
                     value: null
@@ -157,16 +159,14 @@
 
 
 
-        function updateDispUniforms(canvas) {
+        function updateDispUniforms() {
 
             //dispMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
-            dispMaterial.uniforms.iFrame.value += 1.;
-            dispMaterial.uniforms.iTime.value = 0;
+            // dispMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+            //dispMaterial.uniforms.iFrame.value += 1.;
+            //dispMaterial.uniforms.iTime.value = 0;
 
         }
-
-
-
 
 
 
@@ -189,12 +189,10 @@
         }
 
 
-
         //updates materials each time a frame runs: resizing canvas if necessary
-        function updateUniforms(canvas) {
-
-            updateAccUniforms(canvas);
-            updateDispUniforms(canvas);
+        function updateUniforms() {
+            updateAccUniforms();
+            updateDispUniforms();
         }
 
 
