@@ -29,15 +29,13 @@ return vec2(theta,phi);
 
 
 
-
 vec3 skyTex(vec3 v){
 
 vec2 angles=toSphCoords(v);
 float x=(angles.x+3.1415)/(2.*3.1415);
 float y=1.-angles.y/3.1415;
 
-//return texture(skySM,vec2(x,y)).rgb;
-return vec3(0.1);
+return texture(sky,vec2(x,y)).rgb;
 }
 
 
@@ -199,7 +197,7 @@ struct Path{
     Vector tv;
     vec3 pixel;//pixel color
     vec3 light;//light along path
-      bool specularRay;//what type of ray we are shooting
+    bool specularRay;//what type of ray we are shooting
     float rayProbability;
 };
 
@@ -211,7 +209,6 @@ Path initializePath(Vector tv){
     p.tv=tv;//set the initial direction
     p.pixel=vec3(0.);//set the pixel black
     p.light=vec3(1.);//set the light white
-    
     return p;
 }
 
@@ -229,6 +226,72 @@ struct Material{
 };
 
 
+void zeroMat(inout Material mat){
+    //initializes material:
+    mat.emit=vec3(0.);
+    mat.diffuse=vec3(0.);
+    mat.specular=vec3(0.);
+    mat.roughness=0.;
+    mat.IOR=1.;
+    mat.specularChance=0.;
+    mat.refractionChance=0.;
+    mat.specularPercent=0.;
+}
+
+
+
+
+void setMetal(inout Material mat, vec3 color, float specularity,float roughness){
+    zeroMat(mat);//initialize
+    
+    mat.diffuse=color;
+    mat.specular=(vec3(1.)+color)/2.;
+    mat.roughness=roughness;
+    mat.specularChance=specularity;
+    mat.refractionChance=0.;
+    
+    mat.specularPercent=specularity;
+
+}
+
+
+
+void setDielectric(inout Material mat, vec3 color, float specularity, float roughness){
+    zeroMat(mat);//initialize
+    
+    mat.diffuse=color;
+    mat.specular=vec3(0.9);
+    mat.roughness=roughness;
+    mat.specularChance=specularity;
+    mat.refractionChance=0.;
+    
+   mat.specularPercent=specularity;
+    mat.refractionChance=0.3;
+
+}
+
+
+
+void setGlass(inout Material mat, vec3 color, float IOR){
+    
+    zeroMat(mat);//initialize
+    
+}
+
+
+
+void setLight(inout Material mat, vec3 color,float intensity){
+    zeroMat(mat);//initialize
+    
+    mat.emit=intensity*color;
+    
+}
+
+
+
+
+
+
 
 
 struct localData{
@@ -238,7 +301,8 @@ struct localData{
     Material mat;
     bool isSky;
     float dist;
-    bool fromInside;
+    bool inside;
+    //are you inside an object
 };
 
 
@@ -252,9 +316,10 @@ struct localData{
 
 //set the local data to the sky
 void setSky(inout localData dat,Vector tv){
+    dat.isSky=true;
     dat.mat.diffuse=vec3(0.);
-    dat.mat.emit=vec3(0.3);
-        //SRGBToLinear(skyTex(tv.dir));
+    dat.mat.emit=SRGBToLinear(skyTex(tv.dir));
+    //vec3(0.3);
        // 0.5*vec3(53./255.,81./255.,92./255.);
 }
 
@@ -302,7 +367,10 @@ Vector planeNormal(Vector tv,vec3 normal, float D){
 
 //extra data
 float sceneSDF(Vector tv, inout localData dat){
-    
+    vec3 color;
+    float specularity;
+    float roughness;
+    float intensity;
     
     //sphere 0
     vec3 center=vec3(0,-0.35,-2.);
@@ -310,16 +378,16 @@ float sceneSDF(Vector tv, inout localData dat){
     
     
     if(dist<eps){
+        
         dat.isSky=false;
         dat.normal=sphereNormal(tv,center);
-        dat.mat.diffuse=vec3(0.9f, 0.9f, 0.5f);
-        dat.mat.emit=vec3(0.0);
-        dat.mat.specular=vec3(0.9f, 0.9f, 0.9f); 
-        dat.mat.specularPercent=0.3;
-        dat.mat.roughness=0.2;
-        dat.mat.IOR=1.;
-        dat.mat.specularChance=0.3;
-        dat.mat.refractionChance=0.3;
+        
+        color=vec3(0.9,0.9,0.5);
+        specularity=0.3;
+        roughness=0.2;
+        
+        setDielectric(dat.mat, color, specularity, roughness);
+        
         return dist;
     }
     
@@ -332,14 +400,13 @@ float sceneSDF(Vector tv, inout localData dat){
     if(dist1<eps){
         dat.isSky=false;
         dat.normal=sphereNormal(tv,center1);
-        dat.mat.diffuse=vec3(1.);
-        dat.mat.emit=vec3(0.0);
-        dat.mat.specular=vec3(0.9f, 0.9f, 0.9f); 
-        dat.mat.specularPercent=0.5;
-        dat.mat.roughness=0.2;
-            dat.mat.IOR=1.;
-                dat.mat.specularChance=0.3;
-        dat.mat.refractionChance=0.3;
+        
+        color=vec3(0.3,0.2,0.6);
+        specularity=0.5;
+        roughness=0.2;
+        
+        setMetal(dat.mat, color, specularity, roughness);
+        
         return dist1;
     }
 
@@ -352,14 +419,12 @@ float sceneSDF(Vector tv, inout localData dat){
     if(dist2<eps){
         dat.isSky=false;
         dat.normal=sphereNormal(tv,center2);
-        dat.mat.diffuse=vec3(0.,0.,0.);
-        dat.mat.emit=vec3(1.0f, 0.9f, 0.7f) * 10.0;
-        dat.mat.specular=vec3(0.,0.,0.);
-        dat.mat.specularPercent=0.;
-        dat.mat.roughness=0.;
-            dat.mat.IOR=1.;
-                dat.mat.specularChance=0.3;
-        dat.mat.refractionChance=0.;
+        
+        color =vec3(1.,0.9,0.7);
+        intensity=30.;
+        
+        setLight(dat.mat, color,intensity);
+        
         return dist2;
     }
     
@@ -371,14 +436,15 @@ float sceneSDF(Vector tv, inout localData dat){
     if(dist3<eps){
         dat.isSky=false;
         dat.normal=planeNormal(tv,pNormal,1.);
-        dat.mat.diffuse=vec3(0.99f, 0.7f, 0.7f);
-        dat.mat.emit=vec3(0.0);
-        dat.mat.specular=vec3(0.);
-        dat.mat.specularPercent=0.;
-        dat.mat.roughness=0.;
-            dat.mat.IOR=1.;
-                dat.mat.specularChance=0.3;
-        dat.mat.refractionChance=0.;
+        
+        
+        color=vec3(1.,0.7,0.7);
+        specularity=0.1;
+        roughness=0.2;
+        
+        setDielectric(dat.mat, color, specularity, roughness);
+
+    
         return dist3;
     }
     
@@ -391,14 +457,16 @@ float sceneSDF(Vector tv, inout localData dat){
     if(dist4<eps){
         dat.isSky=false;
         dat.normal=planeNormal(tv,pNormal,5.);
-        dat.mat.diffuse=vec3(0.7,0.7,0.8);
-        dat.mat.emit=vec3(0.0);
-        dat.mat.specular=vec3(0.);
-        dat.mat.specularPercent=0.;
-        dat.mat.roughness=0.;
-            dat.mat.IOR=1.;
-                dat.mat.specularChance=0.3;
-        dat.mat.refractionChance=0.;
+        
+        
+        
+        color=vec3(0.7,0.7,0.8);
+        specularity=0.;
+        roughness=0.;
+        
+        setDielectric(dat.mat, color, specularity, roughness);
+        
+        
         return dist4;
     }
     
@@ -410,17 +478,20 @@ float sceneSDF(Vector tv, inout localData dat){
     if(dist5<eps){
         dat.isSky=false;
         dat.normal=planeNormal(tv,pNormal,5.);
-        dat.mat.diffuse=vec3(0.5,0.9,0.5);
-        dat.mat.emit=vec3(0.0);
-        dat.mat.specular=vec3(0.);
-        dat.mat.specularPercent=0.;
-        dat.mat.roughness=0.;
-            dat.mat.IOR=1.;
-                dat.mat.specularChance=0.3;
-        dat.mat.refractionChance=0.;
+    
+                
+        color=vec3(0.5,0.9,0.5);
+        specularity=0.;
+        roughness=0.;
+        
+        setDielectric(dat.mat, color, specularity, roughness);
+        
+
         return dist5;
     }
+    
    // float dist4=maxDist;
+   // float dist5=maxDist;
     
     return min(min(min(dist1,dist2),min(dist3,dist4)),dist5);
 
@@ -433,23 +504,22 @@ float sceneSDF(Vector tv, inout localData dat){
 
 float raymarch(inout Vector tv, inout localData dat){
 
-    float toScene;
+    float distToScene;
     float totalDist=0.;
     
-    //default= you hit the sky
-    dat.isSky=true;
+   // float side=(dat.inside)?-1.:1.;
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-               toScene  = sceneSDF(tv,dat);
+               distToScene  = sceneSDF(tv,dat);
            
-                if (toScene < eps){
+                if (distToScene < eps){
                     //local data is set by the sdf
                     return totalDist;
                 }
             
            
-            totalDist += toScene;
+            totalDist += distToScene;
             if(totalDist>maxDist){
                 //set local data
                 setSky(dat,tv);
@@ -457,7 +527,7 @@ float raymarch(inout Vector tv, inout localData dat){
             }
             
             //otherwise keep going
-            flow(tv, toScene);
+            flow(tv, distToScene);
         }
     
     //if you hit nothing
