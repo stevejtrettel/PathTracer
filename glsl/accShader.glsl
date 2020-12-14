@@ -335,8 +335,8 @@ float sceneSDF(Vector tv, inout localData dat){
         dat.mat.diffuse=vec3(1.);
         dat.mat.emit=vec3(0.0);
         dat.mat.specular=vec3(0.9f, 0.9f, 0.9f); 
-        dat.mat.specularPercent=0.2;
-        dat.mat.roughness=0.3;
+        dat.mat.specularPercent=0.5;
+        dat.mat.roughness=0.2;
             dat.mat.IOR=1.;
                 dat.mat.specularChance=0.3;
         dat.mat.refractionChance=0.3;
@@ -353,7 +353,7 @@ float sceneSDF(Vector tv, inout localData dat){
         dat.isSky=false;
         dat.normal=sphereNormal(tv,center2);
         dat.mat.diffuse=vec3(0.,0.,0.);
-        dat.mat.emit=vec3(1.0f, 0.9f, 0.7f) * 3.0f;
+        dat.mat.emit=vec3(1.0f, 0.9f, 0.7f) * 10.0;
         dat.mat.specular=vec3(0.,0.,0.);
         dat.mat.specularPercent=0.;
         dat.mat.roughness=0.;
@@ -708,7 +708,7 @@ uint rngState = uint(uint(fragCoord.x) * uint(1973) + uint(fragCoord.y) * uint(9
     
     //get new and old frames
     vec3 new=newFrame(fragCoord,rngState);
-    new=clamp(new,0.,1.);
+   // new=clamp(new,0.,1.);
     
     vec4 prev=prevFrame(fragCoord);
     
