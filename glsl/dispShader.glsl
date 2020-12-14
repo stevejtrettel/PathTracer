@@ -4,7 +4,7 @@ uniform vec3 iResolution;
 uniform float iFrame;
 uniform sampler2D acc;
 
-float c_exposure=1.;
+float c_exposure=0.85;
 
 
 vec3 LessThan(vec3 f, float value)

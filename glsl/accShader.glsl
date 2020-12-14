@@ -3,13 +3,14 @@
 uniform vec3 iResolution;
 uniform float iTime;
 uniform sampler2D sky;
+uniform sampler2D skySM;
 uniform sampler2D acc;
 uniform float iFrame;
 
 // constants
-float eps=0.0001;
+float eps=0.001;
 int maxMarchSteps=300;
-float maxDist=20.;
+float maxDist=10.;
 float distToViewer;
 bool isSky=false;
 float fov=100.;
@@ -35,8 +36,8 @@ vec2 angles=toSphCoords(v);
 float x=(angles.x+3.1415)/(2.*3.1415);
 float y=1.-angles.y/3.1415;
 
-return texture(sky,vec2(x,y)).rgb;
-
+//return texture(skySM,vec2(x,y)).rgb;
+return vec3(0.1);
 }
 
 
@@ -120,6 +121,16 @@ vec3 RandomUnitVector(inout uint state)
 
 
 
+
+
+
+
+
+
+
+
+
+
 //tangent vector
 struct Vector{
     vec3 pos;
@@ -186,9 +197,10 @@ void nudge(inout Vector v, Vector offset){
 
 struct Path{
     Vector tv;
-    bool specularRay;//what type of ray we are shooting
     vec3 pixel;//pixel color
     vec3 light;//light along path
+      bool specularRay;//what type of ray we are shooting
+    float rayProbability;
 };
 
 
@@ -208,8 +220,11 @@ struct Material{
     vec3 emit;
     vec3 diffuse;
     vec3 specular;
-    float specularPercent;
     float roughness;
+    float IOR;
+    float specularChance;
+    float refractionChance;
+    float specularPercent;
     
 };
 
@@ -222,6 +237,8 @@ struct localData{
     Vector refract;
     Material mat;
     bool isSky;
+    float dist;
+    bool fromInside;
 };
 
 
@@ -236,8 +253,9 @@ struct localData{
 //set the local data to the sky
 void setSky(inout localData dat,Vector tv){
     dat.mat.diffuse=vec3(0.);
-    dat.mat.emit=SRGBToLinear(skyTex(tv.dir));
-        0.5*vec3(53./255.,81./255.,92./255.);
+    dat.mat.emit=vec3(0.3);
+        //SRGBToLinear(skyTex(tv.dir));
+       // 0.5*vec3(53./255.,81./255.,92./255.);
 }
 
 
@@ -286,74 +304,125 @@ Vector planeNormal(Vector tv,vec3 normal, float D){
 float sceneSDF(Vector tv, inout localData dat){
     
     
-    //sphere 1
-    vec3 center1=vec3(0,0,-2.);
-    float dist= sphereSDF(tv, center1,0.5);
+    //sphere 0
+    vec3 center=vec3(0,-0.35,-2.);
+    float dist= sphereSDF(tv, center,0.5);
     
     
     if(dist<eps){
         dat.isSky=false;
-        dat.normal=sphereNormal(tv,center1);
+        dat.normal=sphereNormal(tv,center);
         dat.mat.diffuse=vec3(0.9f, 0.9f, 0.5f);
         dat.mat.emit=vec3(0.0);
         dat.mat.specular=vec3(0.9f, 0.9f, 0.9f); 
-        dat.mat.specularPercent=0.1;
+        dat.mat.specularPercent=0.3;
         dat.mat.roughness=0.2;
+        dat.mat.IOR=1.;
+        dat.mat.specularChance=0.3;
+        dat.mat.refractionChance=0.3;
         return dist;
     }
+    
+    
+        //sphere 1
+    vec3 center1=vec3(-0.6,-0.63,-1.6);
+    float dist1= sphereSDF(tv, center1,0.25);
+    
+    
+    if(dist1<eps){
+        dat.isSky=false;
+        dat.normal=sphereNormal(tv,center1);
+        dat.mat.diffuse=vec3(1.);
+        dat.mat.emit=vec3(0.0);
+        dat.mat.specular=vec3(0.9f, 0.9f, 0.9f); 
+        dat.mat.specularPercent=0.2;
+        dat.mat.roughness=0.3;
+            dat.mat.IOR=1.;
+                dat.mat.specularChance=0.3;
+        dat.mat.refractionChance=0.3;
+        return dist1;
+    }
 
+    dist1=min(dist,dist1);
     
     //the light source
-    vec3 center2=vec3(0.5,0.6,-1);
+    vec3 center2=vec3(.8,0.0,-0.5);
     float dist2=sphereSDF(tv, center2,0.1);
     
     if(dist2<eps){
         dat.isSky=false;
         dat.normal=sphereNormal(tv,center2);
         dat.mat.diffuse=vec3(0.,0.,0.);
-        dat.mat.emit=vec3(1.0f, 0.9f, 0.7f) * 5.0f;
+        dat.mat.emit=vec3(1.0f, 0.9f, 0.7f) * 3.0f;
         dat.mat.specular=vec3(0.,0.,0.);
         dat.mat.specularPercent=0.;
         dat.mat.roughness=0.;
+            dat.mat.IOR=1.;
+                dat.mat.specularChance=0.3;
+        dat.mat.refractionChance=0.;
         return dist2;
     }
     
     
     //floor
     vec3 pNormal=vec3(0,1,0.1);
-        float dist3=planeSDF(tv, pNormal,0.65);
+        float dist3=planeSDF(tv, pNormal,1.);
     
     if(dist3<eps){
         dat.isSky=false;
-        dat.normal=planeNormal(tv,pNormal,0.65);
-        dat.mat.diffuse=vec3(0.7f, 0.7f, 0.7f);
+        dat.normal=planeNormal(tv,pNormal,1.);
+        dat.mat.diffuse=vec3(0.99f, 0.7f, 0.7f);
         dat.mat.emit=vec3(0.0);
         dat.mat.specular=vec3(0.);
         dat.mat.specularPercent=0.;
         dat.mat.roughness=0.;
+            dat.mat.IOR=1.;
+                dat.mat.specularChance=0.3;
+        dat.mat.refractionChance=0.;
         return dist3;
     }
     
 
     
-//    
-//         pNormal=vec3(1,0,1);
-//        float dist4=planeSDF(tv, pNormal,5.);
-//    
-//    if(dist4<eps){
-//        dat.isSky=false;
-//        dat.normal=planeNormal(tv,pNormal,5.);
-//        dat.mat.diffuse=vec3(.8,0.2,0.2);
-//        dat.mat.emit=vec3(0.0);
-//        dat.mat.specular=vec3(1.,0.,1.);
-//        dat.mat.specularPercent=0.2;
-//        dat.mat.roughness=0.5;
-//        return dist4;
-//    }
     
-    float dist4=maxDist;
+         pNormal=vec3(1,0,1);
+        float dist4=planeSDF(tv, pNormal,5.);
     
-    return min(min(dist,dist2),min(dist3,dist4));
+    if(dist4<eps){
+        dat.isSky=false;
+        dat.normal=planeNormal(tv,pNormal,5.);
+        dat.mat.diffuse=vec3(0.7,0.7,0.8);
+        dat.mat.emit=vec3(0.0);
+        dat.mat.specular=vec3(0.);
+        dat.mat.specularPercent=0.;
+        dat.mat.roughness=0.;
+            dat.mat.IOR=1.;
+                dat.mat.specularChance=0.3;
+        dat.mat.refractionChance=0.;
+        return dist4;
+    }
+    
+    
+        
+         pNormal=vec3(0,0,1);
+        float dist5=planeSDF(tv, pNormal,5.);
+    
+    if(dist5<eps){
+        dat.isSky=false;
+        dat.normal=planeNormal(tv,pNormal,5.);
+        dat.mat.diffuse=vec3(0.5,0.9,0.5);
+        dat.mat.emit=vec3(0.0);
+        dat.mat.specular=vec3(0.);
+        dat.mat.specularPercent=0.;
+        dat.mat.roughness=0.;
+            dat.mat.IOR=1.;
+                dat.mat.specularChance=0.3;
+        dat.mat.refractionChance=0.;
+        return dist5;
+    }
+   // float dist4=maxDist;
+    
+    return min(min(min(dist1,dist2),min(dist3,dist4)),dist5);
 
 }
 
@@ -400,19 +469,32 @@ float raymarch(inout Vector tv, inout localData dat){
 
 
 
-//march in direction of tv until you hit an object, do color computations at that object
-void stepForward(inout Path path, inout localData dat,inout uint rngState){
-    
-     // shoot a ray out into the world
-        raymarch(path.tv,dat);
-         
-        // add in emissive lighting
-        path.pixel += dat.mat.emit * path.light;
-         
-        // update the colorMultiplier
-    //if specular ray; give specular color.  if diffuse raym diffuse color
-        path.light *= path.specularRay?dat.mat.specular:dat.mat.diffuse;
 
+
+
+
+
+
+float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, float f0, float f90)
+{
+        // Schlick aproximation
+        float r0 = (n1-n2) / (n1+n2);
+        r0 *= r0;
+        float cosX = -dot(normal.dir, incident.dir);
+        if (n1 > n2)
+        {
+            float n = n1/n2;
+            float sinT2 = n*n*(1.0-cosX*cosX);
+            // Total internal reflection
+            if (sinT2 > 1.0)
+                return f90;
+            cosX = sqrt(1.0-sinT2);
+        }
+        float x = 1.0-cosX;
+        float ret = r0+(1.0-r0)*x*x*x*x*x;
+ 
+        // adjust reflect multiplier for object reflectivity
+        return mix(f0, f90, ret);
 }
 
 
@@ -420,12 +502,13 @@ void stepForward(inout Path path, inout localData dat,inout uint rngState){
 
 
 
-//given a position and local data there, find the new marching direction
-void newBounceSetup(inout Path path, localData dat, inout uint rngState){
-    vec3 newDir;
-    // push a bit off the surface
-       nudge(path.tv,dat.normal);
+
+
+void updateRayDirection(inout Path path, localData dat, inout uint rngState){
     
+    
+    
+
     
         // calculate new diffuse ray direction, in a cosine weighted hemisphere oriented at normal
         vec3 diffuseDir = normalize(dat.normal.dir+RandomUnitVector(rngState));
@@ -436,14 +519,74 @@ void newBounceSetup(inout Path path, localData dat, inout uint rngState){
     
     
         //decide if the new ray is going to be specular or diffuse:
-        path.specularRay=(RandomFloat01(rngState) < dat.mat.specularPercent);
-     
+    
+    
+    // apply fresnel
+float specularChance = dat.mat.specularPercent;
+if (specularChance > 0.0f)
+{
+    specularChance = FresnelReflectAmount(
+        1.0,
+        dat.mat.IOR,
+        path.tv, dat.normal, dat.mat.specularPercent, 1.0f);  
+}
+       
+// calculate whether we are going to do a diffuse or specular reflection ray 
+    
+     path.specularRay=(RandomFloat01(rngState) < specularChance);
+    
+
+      // get the probability for choosing the ray type we chose
+path.rayProbability = path.specularRay ? specularChance : 1.0f - specularChance;
+         
+// avoid numerical issues causing a divide by zero, or nearly so (more important later, when we add refraction)
+path.rayProbability = max(path.rayProbability, 0.001f);     
+    
+    
+    
+    
     
         vec3 rayDir = path.specularRay?specularDir:diffuseDir;
             
+    
+    
         //update the tangent vector:
+        nudge(path.tv,dat.normal);
         path.tv.dir=rayDir;
+    
+
+    
 }
+
+
+
+
+
+
+
+
+
+//march in direction of tv until you hit an object, do color computations at that object
+void stepForward(inout Path path,inout localData dat,inout uint rngState){
+    
+     // shoot a ray out into the world
+        float dist=raymarch(path.tv,dat);
+    
+    
+        //get the new direction we are going to march in
+        // set the pixel colors appropriately based on ray choice
+        updateRayDirection(path,dat,rngState);
+    
+         
+        // add in emissive lighting
+        path.pixel += dat.mat.emit * path.light;
+         
+        // update the colorMultiplier
+    //if specular ray; give specular color.  if diffuse raym diffuse color
+        path.light *= path.specularRay?dat.mat.specular:dat.mat.diffuse;
+
+}
+
 
 
 
@@ -463,7 +606,13 @@ vec3 pathTrace(inout Path path, inout uint rngState){
                 // Russian Roulette
             // As the light left gets smaller, the ray is more likely to get terminated early.
             // Survivors have their value boosted to make up for fewer samples being in the average.
+            
+            
                 {
+                    // since we chose randomly between diffuse and specular,
+                    // we need to account for the times we didn't do one or the other.
+                    path.light /= path.rayProbability;
+                    
                     float p = max(path.light.r, max(path.light.g, path.light.b));
                     if (RandomFloat01(rngState) > p)
                         break;
@@ -471,9 +620,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
                     // Add the energy we 'lose' by randomly terminating paths
                     path.light *= 1.0f / p;
                 }
-            
-            //set up the new direction to go in
-            newBounceSetup(path,dat,rngState);
+
         }
 
     
@@ -545,8 +692,8 @@ vec3 newFrame(vec2 fragCoord, inout uint rngState){
 
 
 //call the previous frame from memory
-vec3 prevFrame(vec2 fragCoord){
-    return texture(acc, fragCoord / iResolution.xy).rgb;
+vec4 prevFrame(vec2 fragCoord){
+    return texture(acc, fragCoord / iResolution.xy);
 }
 
 
@@ -561,13 +708,20 @@ uint rngState = uint(uint(fragCoord.x) * uint(1973) + uint(fragCoord.y) * uint(9
     
     //get new and old frames
     vec3 new=newFrame(fragCoord,rngState);
-    vec3 prev=prevFrame(fragCoord);
+    new=clamp(new,0.,5.);
     
-    //add together and re-normalize
-    vec3 color=iFrame*prev+new;
-    color/=(iFrame+1.);
+    vec4 prev=prevFrame(fragCoord);
     
-    fragColor = vec4(color, 1.0f);
+     float blend =   (iFrame < 2. || prev.a == 0.0f) ? 1.0f :  1. / (1. + 1./prev.a);
+    
+    
+    vec3 color = ((iFrame-1.)*prev.rgb+new)/(iFrame);
+
+    //color=clamp(color,0.,1.);
+   // vec3 color= ((iFrame-1.)*prev.rgb+new);
+    
+    // show the result
+    fragColor = vec4(color, blend);
 }
 
 

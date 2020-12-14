@@ -11,6 +11,12 @@
         //background sky texture
         const skyTex = new THREE.TextureLoader().load('/js/tex/bk.jpg');
 
+
+        //background sky texture
+        const skyTexSmall = new THREE.TextureLoader().load('/js/tex/bk_sm.jpg');
+
+
+
         // things for building display and accumulation scenes
         let accScene, dispScene;
         let accMaterial, dispMaterial;
@@ -39,7 +45,7 @@
                     value: 0
                 },
                 iResolution: {
-                    value: new THREE.Vector3()
+                    value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
                 },
                 //frame number we are on
                 iFrame: {
@@ -47,6 +53,9 @@
                 },
                 sky: {
                     value: skyTex
+                },
+                skySM: {
+                    value: skyTexSmall
                 },
                 //accumulated texture
                 acc: {
@@ -80,7 +89,7 @@
 
         function updateAccUniforms(canvas) {
 
-            accMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
+            //  accMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
             accMaterial.uniforms.iTime.value = 0;
             accMaterial.uniforms.iFrame.value += 1.;
 
@@ -107,17 +116,12 @@
                     value: 0
                 },
                 iResolution: {
-                    value: new THREE.Vector3()
+                    value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
                 },
                 //frame number we are on
                 iFrame: {
                     value: 0
                 },
-
-                sky: {
-                    value: skyTex
-                },
-
                 //raw display texture
                 acc: {
                     value: null
@@ -155,7 +159,7 @@
 
         function updateDispUniforms(canvas) {
 
-            dispMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
+            //dispMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
             dispMaterial.uniforms.iFrame.value += 1.;
             dispMaterial.uniforms.iTime.value = 0;
 
