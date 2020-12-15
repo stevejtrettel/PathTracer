@@ -115,39 +115,43 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
     // specular takes priority.
     // chanceMultiplier makes sure we keep diffuse / refraction ratio the same.
         
-    float specularChance;
-    float refractChance;
-    float diffuseChance;
+    float specularChance=dat.mat.specularChance;
+    float refractionChance=dat.mat.refractionChance;
+    float diffuseChance=1.-specularChance-refractionChance;
 
-    //if there's a chance of specular: update via Fresnel
+    //if there's a chance of specular
+    //update all chances via fresnel
     if (dat.mat.specularChance > 0.0f)
     {
-        float oldSpecChance=dat.mat.specularChance;
-        
-        dat.mat.specularChance = FresnelReflectAmount(
+        specularChance = FresnelReflectAmount(
             path.inside ? dat.mat.IOR : 1.0,
             !path.inside ? dat.mat.IOR : 1.0,
-            path.tv, dat.normal, oldSpecChance, 1.0);
+            path.tv, dat.normal, dat.mat.specularChance, 1.0);
          
-        float chanceMultiplier = (1.0f - dat.mat.specularChance) / (1.0f - oldSpecChance);
-        dat.mat.refractionChance *= chanceMultiplier;
-        //diffuseChance *= chanceMultiplier;
+        
+        //--- update diffuse and refract accordingly
+        
+        float chanceMultiplier = (1.0f - specularChance) / (1.0f - dat.mat.specularChance);
+        
+        refractionChance = chanceMultiplier*dat.mat.refractionChance;
+        diffuseChance = 
+            1.-refractionChance-specularChance;
     }
      
     // calculate whether we are going to do a diffuse, specular, or refractive ray
         
     float raySelectRoll = RandomFloat01(rngState);
-    if (dat.mat.specularChance > 0.0f && raySelectRoll < dat.mat.specularChance)
+    if (specularChance > 0.0f && raySelectRoll < specularChance)
     {
-        setSpecular(path.type,dat.mat.specularChance);
+        setSpecular(path.type,specularChance);
     }
-    else if (dat.mat.refractionChance > 0.0f && raySelectRoll < dat.mat.specularChance + dat.mat.refractionChance)
+    else if (refractionChance > 0.0f && raySelectRoll < specularChance + refractionChance)
     {
-         setRefract(path.type,dat.mat.refractionChance);
+         setRefract(path.type,refractionChance);
     }
     else
     {
-        setDiffuse(path.type, 1.0f - (dat.mat.specularChance + dat.mat.refractionChance));
+        setDiffuse(path.type, diffuseChance);
     }
      
     // numerical problems can cause rayProbability to become small enough to cause a divide by zero.
@@ -263,12 +267,12 @@ void surfaceColor(inout Path path,localData dat){
         //only do if not refractive (those taken care of with volume)
     path.light=vec3(1.);
     
-//    
-//    if(path.type.refract==0.){
-//        //color choice depends on specular or diffuse
-//        path.light *= (path.type.specular==1.)?dat.mat.specularColor:dat.mat.diffuseColor;
-//    }
-//    
+  
+    if(path.type.refract==0.){
+        //color choice depends on specular or diffuse
+        path.light *= (path.type.specular==1.)?dat.mat.specularColor:dat.mat.diffuseColor;
+    }
+   
 }
 
 
@@ -303,7 +307,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
 //            if(path.inside){
 //                 volumeColor(path,dat);
 //            }
-    
+//    
             //set probabilities for spec, refract, diffuse
             updateProbabilities(path, dat, rngState);
             

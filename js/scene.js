@@ -10,7 +10,7 @@
 
 
         //background sky texture
-        const skyTex = new THREE.TextureLoader().load('/js/tex/bk.jpg');
+        const skyTex = new THREE.TextureLoader().load('/js/tex/glass_hallway.jpg');
 
 
         //background sky texture

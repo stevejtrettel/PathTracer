@@ -41,7 +41,7 @@ void buildScene(){
     
     vec3 normal;
     float offset;
-    
+    vec3 absorb;
     
     
     
@@ -50,7 +50,7 @@ void buildScene(){
     light1.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
-    intensity=30.;
+    intensity=5.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -84,7 +84,7 @@ void buildScene(){
     roughness=0.4;
     
     //ball1.mat= makeDielectric(color,specularity,roughness);
-    ball1.mat=makeGlass(vec3(0.1),1.2);
+    ball1.mat=makeGlass(vec3(0.1),2.3);
 
     
     
@@ -98,8 +98,9 @@ void buildScene(){
     roughness=0.05;
     
     //ball2.mat=makeDielectric(color,specularity,roughness);
-        //ball3.mat.refractionChance=0.6;
-        ball2.mat=makeGlass(vec3(0.),2.3);
+    //ball3.mat.refractionChance=0.6;
+    absorb=vec3(0.3,0.05,0.2);
+    ball2.mat=makeGlass(absorb,2.3);
     
     
     

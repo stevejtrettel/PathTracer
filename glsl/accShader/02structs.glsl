@@ -309,8 +309,8 @@ void setGlass(inout Material mat, vec3 color, float IOR){
     mat.diffuseColor=vec3(1.);
     mat.IOR=IOR;
     mat.refractionColor=vec3(color);
-    mat.specularChance=0.1;
-    mat.refractionChance=0.8;
+    mat.specularChance=0.01;
+    mat.refractionChance=0.99;
     
     
 }
