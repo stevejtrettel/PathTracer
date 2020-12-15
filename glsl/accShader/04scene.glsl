@@ -84,21 +84,22 @@ void buildScene(){
     roughness=0.4;
     
     //ball1.mat= makeDielectric(color,specularity,roughness);
-    ball1.mat=makeGlass(vec3(1.),1.5);
+    ball1.mat=makeGlass(vec3(0.1),1.2);
 
     
     
     
     //----------- BALL 2 -------------------------
-    ball2.center=vec3(-0.6,-0.63,-1.6);
+    ball2.center=vec3(-0.8,-0.63,-1.6);
     ball2.radius=0.25;
     
     color= vec3(0.3,0.2,0.6);
-    specularity=0.5;
+    specularity=0.2;
     roughness=0.05;
     
-    ball2.mat=makeDielectric(color,specularity,roughness);
-    
+    //ball2.mat=makeDielectric(color,specularity,roughness);
+        //ball3.mat.refractionChance=0.6;
+        ball2.mat=makeGlass(vec3(0.),1.5);
     
     
     
@@ -113,8 +114,7 @@ void buildScene(){
     
     ball3.mat=makeDielectric(color,specularity,roughness);
 
-    
-    
+   
     
     
     
@@ -231,7 +231,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
    dist=min(dist,sphereSDF(tv,ball2,dat));
     
-   dist=min(dist,sphereSDF(tv,ball3,dat));
+  // dist=min(dist,sphereSDF(tv,ball3,dat));
     
     
     

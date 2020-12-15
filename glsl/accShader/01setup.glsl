@@ -15,27 +15,17 @@ uniform float iFrame;
 
 
 
-
-
 //-------------------------------------------------
 //Constants
 //-------------------------------------------------
 
 
 // constants
-float eps=0.001;
 float EPSILON=0.001;
 int maxMarchSteps=100;
 float maxDist=10.;
-float distToViewer;
-bool isSky=false;
 float fov=100.;
 
-
-vec3 pixelColor=vec3(0.);
-vec3 lightColor=vec3(1.);
-vec3 albedo;
-vec3 emissive;
 
 
 

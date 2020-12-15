@@ -44,11 +44,11 @@ float cosAng(Vector v, Vector w){
 
 //small shift in the location of a point
 vec3 shiftPoint(vec3 p, vec3 v, float t){
-    return p+eps*v;
+    return p+0.001*v;
 }
 
 Vector shift(Vector tv, vec3 dir, float t){
-    return Vector(tv.pos+eps*dir,tv.dir);
+    return Vector(tv.pos+0.001*dir,tv.dir);
 }
 
 
@@ -62,16 +62,21 @@ void flow(inout Vector tv, float t){
 
 
 void nudge(inout Vector v, vec3 dir){
-    v.pos+=dir*0.01;
+    v.pos+=dir*0.001;
 }
 
 //overload to nudge along a tangent vector
 void nudge(inout Vector v, Vector offset){
-    v.pos+=offset.dir*0.01;
+    v.pos+=offset.dir*0.001;
 }
 
 
-
+//use mix instead of if/then statements to choose
+Vector mix(Vector v, Vector w,float x){
+    vec3 pos=mix(v.pos,w.pos,x);
+    vec3 dir=mix(v.dir,w.dir,x);
+    return Vector(pos,dir);
+}
 
 
 
@@ -222,6 +227,7 @@ void setGlass(inout Material mat, vec3 color, float IOR){
     zeroMat(mat);//initialize
     
     mat.specularColor=vec3(1.);
+    mat.diffuseColor=vec3(1.);
     mat.IOR=IOR;
     mat.refractionColor=vec3(color);
     mat.specularChance=0.1;

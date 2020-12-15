@@ -16,7 +16,7 @@ float raymarch(inout Vector tv, inout localData dat){
             
                distToScene  = side*sceneSDF(tv,dat);
            
-                if (distToScene < eps){
+                if (distToScene < EPSILON){
                     //local data is set by the sdf
                     return totalDist;
                 }
@@ -133,22 +133,12 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
 
 
 
+
+
+
 void updateRay(inout Path path, inout localData dat,float doSpecular, float doRefraction,inout uint rngState){
     
-    
-    //----- update the ray position ----------
-    if (doRefraction == 1.0f)
-    {
-        //push into the material
-       nudge(path.tv,negate(dat.normal));
-    }
-    else
-    {
-        //push off of the material
-       nudge(path.tv,dat.normal);
-    }
-      
-    
+
     
     //----- update the ray direction ----------
     
@@ -174,13 +164,24 @@ void updateRay(inout Path path, inout localData dat,float doSpecular, float doRe
     //choose which one of these we will actually be doing
     //this is a weird way of doing it to avoid a 3-way if statement, unsure if this is necessary
     vec3 rayDir = mix(diffuseDir, specularDir, doSpecular);
-    //rayDir = mix(rayDir, refractionDir, doRefraction);
+    rayDir = mix(rayDir, refractionDir, doRefraction);
     
     
     
     //----- assemble the new tangent vector ----------
-    //position was already nudged above
+    //which side to push the point: in or out rel the normal?
+    float side=(doRefraction == 1.0f)?-1.:1.;
+    
+    path.tv.pos+=0.001*side*dat.normal.dir;
+    
+    //direction is what was chosen above
     path.tv.dir=rayDir;
+    
+    
+    //set the boolean for if we are staying inside or not:
+    //if dot is negative, direction is opposite normal,
+    //this means you are heading inside
+    dat.inside=(dot(rayDir,dat.normal.dir)<0.);
     
 }
 
@@ -230,11 +231,12 @@ void roulette(inout Path path,inout uint rngState){
 
 
 vec3 pathTrace(inout Path path, inout uint rngState){
-    float dist;
     
     localData dat;
-    float doSpecular, doRefraction;
     initializeData(dat);
+    
+    float dist;
+    float doSpecular, doRefraction;
     
     int maxBounces=10;
     
