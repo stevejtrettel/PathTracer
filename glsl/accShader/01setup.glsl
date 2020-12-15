@@ -168,9 +168,16 @@ vec3 RandomUnitVector(inout uint state)
 
 
 
+//--- the function we call in main() which sets rngState
+//--- based on the frag coord and the frame number
 
+uint randomSeed(vec2 fCoord,float frame){
 
+uint rngState = uint(uint(fCoord.x) * uint(1973) + uint(fCoord.y) * uint(9277) + uint(frame) * uint(26699)) | uint(1);
 
+return rngState;
+
+}
 
 
 

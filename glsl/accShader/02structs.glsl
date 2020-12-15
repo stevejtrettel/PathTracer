@@ -93,6 +93,7 @@ struct Path{
     bool specularRay;//what type of ray we are shooting
     float rayProbability;
     bool keepGoing;
+    float distance; //distance traveled on a bounce
 };
 
 
@@ -125,28 +126,28 @@ Path initializePath(Vector tv){
 
 
 struct Material{
-    vec3 emit;
-    vec3 diffuse;
-    vec3 specular;
+    vec3 emitColor;
+    vec3 diffuseColor;
+    vec3 specularColor;
+    vec3 refractionColor;
     float roughness;
     float IOR;
     float specularChance;
     float refractionChance;
-    float specularPercent;
     
 };
 
 
 void zeroMat(inout Material mat){
     //initializes material:
-    mat.emit=vec3(0.);
-    mat.diffuse=vec3(0.);
-    mat.specular=vec3(0.);
+    mat.emitColor=vec3(0.);
+    mat.diffuseColor=vec3(0.);
+    mat.specularColor=vec3(0.);
+    mat.refractionColor=vec3(0.);
     mat.roughness=0.;
     mat.IOR=1.;
     mat.specularChance=0.;
     mat.refractionChance=0.;
-    mat.specularPercent=0.;
 }
 
 
@@ -159,14 +160,11 @@ void zeroMat(inout Material mat){
 void setMetal(inout Material mat, vec3 color, float specularity,float roughness){
     zeroMat(mat);//initialize
     
-    mat.diffuse=color;
-    mat.specular=(vec3(1.)+color)/2.;
+    mat.diffuseColor=color;
+    mat.specularColor=vec3(2.)+0.8*color;
     mat.roughness=roughness;
     mat.specularChance=specularity;
     mat.refractionChance=0.;
-    
-    mat.specularPercent=specularity;
-
 }
 
 
@@ -191,15 +189,12 @@ Material makeMetal(vec3 color, float specularity, float roughness){
 void setDielectric(inout Material mat, vec3 color, float specularity, float roughness){
     zeroMat(mat);//initialize
     
-    mat.diffuse=color;
-    mat.specular=vec3(0.9);
+    mat.diffuseColor=color;
+    mat.specularColor=vec3(0.9);
     mat.roughness=roughness;
     mat.specularChance=specularity;
     mat.refractionChance=0.;
     
-   mat.specularPercent=specularity;
-    mat.refractionChance=0.3;
-
 }
 
 Material makeDielectric(vec3 color, float specularity, float roughness){
@@ -226,6 +221,21 @@ void setGlass(inout Material mat, vec3 color, float IOR){
     
     zeroMat(mat);//initialize
     
+    mat.specularColor=vec3(1.);
+    mat.IOR=IOR;
+    mat.refractionColor=vec3(color);
+    mat.specularChance=0.1;
+    mat.refractionChance=0.8;
+    
+    
+}
+
+
+Material makeGlass(vec3 color, float IOR){
+    Material mat;
+    
+    setGlass(mat, color,IOR);
+    return mat;
 }
 
 
@@ -238,7 +248,7 @@ Material makeLight(vec3 color,float intensity){
     Material mat;
     zeroMat(mat);//initialize
     
-    mat.emit=intensity*color;
+    mat.emitColor=intensity*color;
     
     return mat;
 }
@@ -246,7 +256,7 @@ Material makeLight(vec3 color,float intensity){
 void setLight(inout Material mat, vec3 color,float intensity){
     zeroMat(mat);//initialize
     
-    mat.emit=intensity*color;
+    mat.emitColor=intensity*color;
     
 }
 
@@ -280,11 +290,21 @@ struct localData{
 
 
 
+void initializeData(localData dat){
+    dat.isSky=false;
+    dat.inside=false;
+    dat.dist=0.;
+}
+
+
+
+
+
 //set the local data to the sky
 void setSky(inout localData dat,Vector tv){
     dat.isSky=true;
-    dat.mat.diffuse=vec3(0.);
-    dat.mat.emit=
+    dat.mat.diffuseColor=vec3(0.);
+    dat.mat.emitColor=
         SRGBToLinear(skyTex(tv.dir));
     //
        // 0.5*vec3(53./255.,81./255.,92./255.);

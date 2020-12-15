@@ -27,7 +27,7 @@ Vector sphereNormal(Vector tv, Sphere sph){
 float sphereSDF(Vector tv, Sphere sph,inout localData dat){
     
     //if you are looking away from the sphere, stop
-   if(dot(tv.dir,tv.pos-sph.center)>0.){return maxDist;}
+    //if(dot(tv.dir,tv.pos-sph.center)>0.){return maxDist;}
     
     //else return distance to closest point
     float d = sphDist(tv,sph);
@@ -38,7 +38,6 @@ float sphereSDF(Vector tv, Sphere sph,inout localData dat){
         dat.isSky=false;
         dat.normal=sphereNormal(tv,sph);
         dat.mat=sph.mat;
-        //dat.hit=true;
     }
     
     return d;
@@ -65,6 +64,13 @@ struct Plane{
 };
 
 
+//normalize the plane's vector before adding it:
+void setPlane(inout Plane plane,vec3 normal,float offset){
+    normal=normalize(normal);
+    plane.normal=normal;
+    plane.offset=offset;
+}
+
 
 Vector planeNormal(Vector tv,Plane plane){
     return Vector(tv.pos, normalize(plane.normal));
@@ -78,7 +84,7 @@ float planeSDF(Vector tv, Plane plane, inout localData dat){
     
     //otherwise give distance to closest point
     float d=dot(tv.pos,plane.normal)+plane.offset;
-    d= d/length(plane.normal);
+   
     
         //-----------------
     

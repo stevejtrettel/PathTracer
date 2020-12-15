@@ -10,10 +10,11 @@ float raymarch(inout Vector tv, inout localData dat){
 
     float distToScene;
     float totalDist=0.;
+    float side=dat.inside?-1.:1.;
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-               distToScene  = sceneSDF(tv,dat);
+               distToScene  = side*sceneSDF(tv,dat);
            
                 if (distToScene < eps){
                     //local data is set by the sdf
@@ -44,8 +45,9 @@ float raymarch(inout Vector tv, inout localData dat){
 
 
 
-
-
+//-------------------------------------------------
+// Setting DIRECTIONS and PROBABILITIES
+//-------------------------------------------------
 
 
 
@@ -78,95 +80,112 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
 
 
 
+    void updateProbabilities( inout Path path,inout localData dat, out float doSpecular, out float doRefraction,inout uint rngState){
+        
+    // take fresnel into account for specularChance and adjust other chances.
+    // specular takes priority.
+    // chanceMultiplier makes sure we keep diffuse / refraction ratio the same.
 
-void updateRayDirection(inout Path path, localData dat, inout uint rngState){
-    
-    
-    
-
-    
-        // calculate new diffuse ray direction, in a cosine weighted hemisphere oriented at normal
-        vec3 diffuseDir = normalize(dat.normal.dir+RandomUnitVector(rngState));
-    
-    //calculate the specular direction
-        vec3 specularDir=reflect(path.tv.dir,dat.normal.dir);
-        specularDir = normalize(mix(specularDir, diffuseDir, dat.mat.roughness * dat.mat.roughness));
-    
-    
-        //decide if the new ray is going to be specular or diffuse:
-    
-    
-    // apply fresnel
-float specularChance = dat.mat.specularPercent;
-if (specularChance > 0.0f)
-{
-    specularChance = FresnelReflectAmount(
-        1.0,
-        dat.mat.IOR,
-        path.tv, dat.normal, dat.mat.specularPercent, 1.0f);  
-}
-       
-// calculate whether we are going to do a diffuse or specular reflection ray 
-    
-     path.specularRay=(RandomFloat01(rngState) < specularChance);
-    
-
-      // get the probability for choosing the ray type we chose
-path.rayProbability = path.specularRay ? specularChance : 1.0f - specularChance;
+        
+    //if there's a chance of specular: update via Fresnel
+    if (dat.mat.specularChance > 0.0f)
+    {
+        float oldSpecChance=dat.mat.specularChance;
+        
+        dat.mat.specularChance = FresnelReflectAmount(
+            dat.inside ? dat.mat.IOR : 1.0,
+            !dat.inside ? dat.mat.IOR : 1.0,
+            path.tv, dat.normal, oldSpecChance, 1.0);
          
-// avoid numerical issues causing a divide by zero, or nearly so (more important later, when we add refraction)
-path.rayProbability = max(path.rayProbability, 0.001f);     
+        float chanceMultiplier = (1.0f - dat.mat.specularChance) / (1.0f - oldSpecChance);
+        dat.mat.refractionChance *= chanceMultiplier;
+        //diffuseChance *= chanceMultiplier;
+    }
+     
+    // calculate whether we are going to do a diffuse, specular, or refractive ray
+        
+    //zero out our inputs;
+    doSpecular = 0.0f;
+    doRefraction = 0.0f;
+        
+    float raySelectRoll = RandomFloat01(rngState);
+    if (dat.mat.specularChance > 0.0f && raySelectRoll < dat.mat.specularChance)
+    {
+        doSpecular = 1.0f;
+        path.rayProbability = dat.mat.specularChance;
+    }
+    else if (dat.mat.refractionChance > 0.0f && raySelectRoll < dat.mat.specularChance + dat.mat.refractionChance)
+    {
+        doRefraction = 1.0f;
+        path.rayProbability = dat.mat.refractionChance;
+    }
+    else
+    {
+        path.rayProbability = 1.0f - (dat.mat.specularChance + dat.mat.refractionChance);
+    }
+     
+    // numerical problems can cause rayProbability to become small enough to cause a divide by zero.
+    path.rayProbability = max(path.rayProbability, 0.001f);
+        
+    }
+
+
+
+
+
+void updateRay(inout Path path, inout localData dat,float doSpecular, float doRefraction,inout uint rngState){
     
     
+    //----- update the ray position ----------
+    if (doRefraction == 1.0f)
+    {
+        //push into the material
+       nudge(path.tv,negate(dat.normal));
+    }
+    else
+    {
+        //push off of the material
+       nudge(path.tv,dat.normal);
+    }
+      
     
     
+    //----- update the ray direction ----------
     
-        vec3 rayDir = path.specularRay?specularDir:diffuseDir;
-            
+     // Diffuse uses a normal oriented cosine weighted hemisphere sample.
+     vec3 diffuseDir = normalize(dat.normal.dir+RandomUnitVector(rngState));
     
     
-        //update the tangent vector:
-        nudge(path.tv,dat.normal);
-        path.tv.dir=rayDir;
+    // Perfectly smooth specular uses the reflection ray.
+    vec3 specularDir=reflect(path.tv.dir,dat.normal.dir);
+    
+    // Rough (glossy) specular lerps from the smooth specular to the rough diffuse by the material roughness squared
+    // Squaring the roughness is just a convention to make roughness feel more linear perceptually.
+    specularDir = normalize(mix(specularDir, diffuseDir, dat.mat.roughness * dat.mat.roughness));
     
 
-            // since we chose randomly between diffuse and specular,
-                    // we need to account for the times we didn't do one or the other.
-                    path.light /= path.rayProbability;
+    //get the refracted ray direction from IOR
+    vec3 refractionDir = refract(path.tv.dir, dat.normal.dir, dat.inside ? dat.mat.IOR : 1.0f / dat.mat.IOR);
+    
+    //update refraction ray based on roughness
+    refractionDir = normalize(mix(refractionDir, -diffuseDir, dat.mat.roughness * dat.mat.roughness));
+    
+    
+    //choose which one of these we will actually be doing
+    //this is a weird way of doing it to avoid a 3-way if statement, unsure if this is necessary
+    vec3 rayDir = mix(diffuseDir, specularDir, doSpecular);
+    //rayDir = mix(rayDir, refractionDir, doRefraction);
+    
+    
+    
+    //----- assemble the new tangent vector ----------
+    //position was already nudged above
+    path.tv.dir=rayDir;
     
 }
 
 
 
-
-
-
-//-------------------------------------------------
-// MAKE ONE STEP FORWARD
-//-------------------------------------------------
-
-
-//march in direction of tv until you hit an object, do color computations at that object
-void stepForward(inout Path path,inout localData dat,inout uint rngState){
-    
-     // shoot a ray out into the world
-        float dist=raymarch(path.tv,dat);
-    
-    
-        //get the new direction we are going to march in
-        // set the pixel colors appropriately based on ray choice
-        updateRayDirection(path,dat,rngState);
-    
-    
-         
-        // add in emissive lighting
-        path.pixel += dat.mat.emit * path.light;
-         
-        // update the colorMultiplier
-    //if specular ray; give specular color.  if diffuse raym diffuse color
-        path.light *= path.specularRay?dat.mat.specular:dat.mat.diffuse;
-
-}
 
 
 
@@ -180,6 +199,10 @@ void stepForward(inout Path path,inout localData dat,inout uint rngState){
 
 
 void roulette(inout Path path,inout uint rngState){
+        // since we chose randomly between diffuse and specular,
+    // we need to account for the times we didn't do one or the other.
+    //DONT KNOW IF THIS GOES RIGHT HERE?
+   path.light /= path.rayProbability;
     
                // Russian Roulette
             // As the light left gets smaller, the ray is more likely to get terminated early.
@@ -207,16 +230,44 @@ void roulette(inout Path path,inout uint rngState){
 
 
 vec3 pathTrace(inout Path path, inout uint rngState){
+    float dist;
     
     localData dat;
+    float doSpecular, doRefraction;
+    initializeData(dat);
+    
     int maxBounces=10;
     
     
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
     {
 
-            //march to the next surface, pick up light contributions
-            stepForward(path,dat,rngState);
+            // shoot a ray out into the world
+            dist=raymarch(path.tv,dat);
+            
+            
+            
+            //if you've arrived here by traveling inside
+            //an object, pick up absorbed colors:
+            if(dat.inside){
+                path.light *= exp(-dat.mat.refractionColor * dist);
+            }
+    
+    
+            //set probabilities for spec, refract, diffuse
+            updateProbabilities(path, dat, doSpecular, doRefraction, rngState);
+            
+            //use these probabilities to set the new ray
+            updateRay(path, dat, doSpecular, doRefraction,rngState);    
+                  
+    
+            // add in emissive lighting
+            path.pixel += dat.mat.emitColor * path.light;
+         
+            // update the colorMultiplier
+            //depends on if its a specular ray (set in update)
+            path.light *= path.specularRay?dat.mat.specularColor:dat.mat.diffuseColor;
+
             
             //probabilistically kill rays
             roulette(path,rngState);

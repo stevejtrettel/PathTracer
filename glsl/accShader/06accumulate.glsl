@@ -1,4 +1,8 @@
 
+//-------------------------------------------------
+// Set the Initial Tangent Vector
+//-------------------------------------------------
+
 
 Vector initializeRay(vec2 fragCoord,inout uint rngState){
     
@@ -38,11 +42,20 @@ Vector initializeRay(vec2 fragCoord,inout uint rngState){
 
 
 
+//-------------------------------------------------
+//New and Old Frames
+//-------------------------------------------------
+
+
 
 
 
 //get the new frame
-vec3 newFrame(vec2 fragCoord, inout uint rngState){
+vec3 newFrame(vec2 fragCoord){
+    
+     // initialize a random number state based on frag coord and frame
+    uint rngState = randomSeed(fragCoord,iFrame);
+    
     
     //get the initial tangent vector, path data
     Vector tv=initializeRay(fragCoord,rngState);
@@ -58,8 +71,8 @@ vec3 newFrame(vec2 fragCoord, inout uint rngState){
 }
 
 
-//call the previous frame from memory
-vec4 prevFrame(vec2 fragCoord){
+    //call the previous frame from memory
+    vec4 prevFrame(vec2 fragCoord){
     return texture(acc, fragCoord / iResolution.xy);
 }
 
@@ -67,25 +80,28 @@ vec4 prevFrame(vec2 fragCoord){
 
 
 
+
+
+//-------------------------------------------------
+//Do the Accumulation
+//-------------------------------------------------
+
+
+
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-   
-    // initialize a random number state based on frag coord and frame
-uint rngState = uint(uint(fragCoord.x) * uint(1973) + uint(fragCoord.y) * uint(9277) + uint(iFrame) * uint(26699)) | uint(1);
-    
     //get new and old frames
-    vec3 new=newFrame(fragCoord,rngState);
-   // new=clamp(new,0.,1.);
-    
+    vec3 new=newFrame(fragCoord);
+  
     vec4 prev=prevFrame(fragCoord);
     
-     float blend =   (iFrame < 2. || prev.a == 0.0f) ? 1.0f :  1. / (1. + 1./prev.a);
+    float blend =   (iFrame < 2. || prev.a == 0.0f) ? 1.0f :  1. / (1. + 1./prev.a);
     
     
- //   vec3 color = ((iFrame-1.)*prev.rgb+new)/(iFrame);
+    //vec3 color = ((iFrame-1.)*prev.rgb+new)/(iFrame);
 
     //color=clamp(color,0.,1.);
-  // vec3 color= ((iFrame-1.)*prev.rgb+new)/iFrame;
+    // vec3 color= ((iFrame-1.)*prev.rgb+new)/iFrame;
     vec3 color=mix(prev.rgb,new,blend);
 
     // show the result
