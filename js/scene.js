@@ -4,12 +4,19 @@
 
 
 
+
         //Scene Variables
         //=============================================
 
 
         //background sky texture
         const skyTex = new THREE.TextureLoader().load('/js/tex/bk.jpg');
+
+
+        //background sky texture
+        const skyTexSmall = new THREE.TextureLoader().load('/js/tex/bk_sm.jpg');
+
+
 
         // things for building display and accumulation scenes
         let accScene, dispScene;
@@ -29,17 +36,67 @@
         //=============================================
 
 
-        async function createAccShaderMat() {
-            const accText = await fetch('../glsl/accShader.glsl');
-            accShader = await accText.text();
 
+
+
+        async function buildAccShader() {
+
+            let newShader = '';
+
+
+            const shaders = [] = [
+                {
+                    file: '../glsl/accShader/01setup.glsl'
+                },
+                {
+                    file: '../glsl/accShader/02structs.glsl'
+                },
+                {
+                    file: '../glsl/accShader/03sdfs.glsl'
+                },
+                {
+                    file: '../glsl/accShader/04scene.glsl'
+                },
+                {
+                    file: '../glsl/accShader/05trace.glsl'
+                },
+                {
+                    file: '../glsl/accShader/06accumulate.glsl'
+                }
+    ];
+
+
+            //loop over the list of files
+            let response, text;
+            for (const shader of shaders) {
+                response = await fetch(shader.file);
+                text = await response.text();
+                newShader = newShader + text;
+            }
+
+            return newShader;
+
+        }
+
+
+
+
+        async function createAccShaderMat() {
+
+            //OLD WAY: LOAD SINGLE SHADER
+            //            const accText = await fetch('../glsl/accShader.glsl');
+            //            accShader = await accText.text();
+            //build the shader out of files
+
+            //build the shader text
+            accShader = await buildAccShader();
 
             accUniforms = {
                 iTime: {
                     value: 0
                 },
                 iResolution: {
-                    value: new THREE.Vector3()
+                    value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
                 },
                 //frame number we are on
                 iFrame: {
@@ -47,6 +104,9 @@
                 },
                 sky: {
                     value: skyTex
+                },
+                skySM: {
+                    value: skyTexSmall
                 },
                 //accumulated texture
                 acc: {
@@ -78,9 +138,10 @@
 
 
 
-        function updateAccUniforms(canvas) {
+        function updateAccUniforms() {
 
-            accMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
+            //  accMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
+            //  accMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
             accMaterial.uniforms.iTime.value = 0;
             accMaterial.uniforms.iFrame.value += 1.;
 
@@ -103,21 +164,16 @@
 
 
             dispUniforms = {
-                iTime: {
-                    value: 0
-                },
+                //                iTime: {
+                //                    value: 0
+                //                },
                 iResolution: {
-                    value: new THREE.Vector3()
+                    value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
                 },
-                //frame number we are on
-                iFrame: {
-                    value: 0
-                },
-
-                sky: {
-                    value: skyTex
-                },
-
+                //                //frame number we are on
+                //                iFrame: {
+                //                    value: 0
+                //                },
                 //raw display texture
                 acc: {
                     value: null
@@ -153,16 +209,14 @@
 
 
 
-        function updateDispUniforms(canvas) {
+        function updateDispUniforms() {
 
-            dispMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
-            dispMaterial.uniforms.iFrame.value += 1.;
-            dispMaterial.uniforms.iTime.value = 0;
+            //dispMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
+            // dispMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+            //dispMaterial.uniforms.iFrame.value += 1.;
+            //dispMaterial.uniforms.iTime.value = 0;
 
         }
-
-
-
 
 
 
@@ -185,12 +239,10 @@
         }
 
 
-
         //updates materials each time a frame runs: resizing canvas if necessary
-        function updateUniforms(canvas) {
-
-            updateAccUniforms(canvas);
-            updateDispUniforms(canvas);
+        function updateUniforms() {
+            updateAccUniforms();
+            updateDispUniforms();
         }
 
 

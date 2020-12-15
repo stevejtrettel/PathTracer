@@ -1,19 +1,10 @@
  #include <common>
 
 uniform vec3 iResolution;
-uniform float iTime;
-//uniform sampler2D iChannel0;
 uniform float iFrame;
 uniform sampler2D acc;
-uniform sampler2D sky;
-//
-vec2 toSphCoords(vec3 v){
-float theta=atan(v.z,v.x);
-float phi=acos(v.y);
-return vec2(theta,phi);
-}
 
-
+float c_exposure=0.75;
 
 
 vec3 LessThan(vec3 f, float value)
@@ -65,9 +56,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
     vec3 color = texture(acc, fragCoord / iResolution.xy).rgb;
     
- // color=color/(0.1*iFrame+1.);
     // apply exposure (how long the shutter is open)
-    //color *= c_exposure;
+    color *= c_exposure;
 
     // convert unbounded HDR color range to SDR color range
    color = ACESFilm(color);
@@ -77,6 +67,15 @@ color = LinearToSRGB(color);
     
     fragColor = vec4(color, 1.0f);
 }
+
+
+
+
+
+
+
+
+
 
 
 

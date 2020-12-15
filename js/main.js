@@ -2,9 +2,6 @@
         //=============================================
         import * as THREE from './libs/three.module.js';
 
-        import {
-            OrbitControls
-        } from './libs/OrbitControls.js';
 
         import Stats from './libs/stats.module.js';
 
@@ -39,9 +36,6 @@
 
 
 
-
-
-
         //Creating Basic Components
         //=============================================
 
@@ -59,23 +53,23 @@
 
 
 
-        function createControls() {
-            // controls
-            controls = new OrbitControls(camera, container);
-            controls.addEventListener('change', render);
-            controls.minDistance = 10;
-            controls.maxDistance = 50;
-            controls.enablePan = true;
-        }
-
-
 
 
         function createRenderer() {
             renderer = new THREE.WebGLRenderer({
-                canvas
+                canvas,
+                alpha: true,
+                //  premultipliedAlpha: true,
+                //  preserveDrawingBuffer: true,
+                depth: false,
+                stencil: false
             });
-            renderer.autoClearColor = false;
+
+            // set the gamma correction so that output colors look
+            // correct on our screens
+            //renderer.gammaFactor = 1.;
+            renderer.outputEncoding = THREE.LinearEncoding;
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
 
@@ -96,32 +90,44 @@
 
 
 
-        function createFrameBuffers(canvas) {
+        function createFrameBuffers() {
             //make the two textures we will render to\
             //make it canvas sized
-            readTex = new THREE.WebGLRenderTarget(canvas.width, canvas.height);
+            readTex = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
 
-            writeTex = new THREE.WebGLRenderTarget(canvas.width, canvas.height);
+            writeTex = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
+
+            // writeTex.texture.encoding = THREE.LinearEncoding;
+            // readTex.texture.encoding = THREE.LinearEncoding;
 
         }
 
 
 
         function resizeToDisplay() {
-            canvas = renderer.domElement;
-            const width = canvas.clientWidth;
-            const height = canvas.clientHeight;
-            const needResize = canvas.width !== width || canvas.height !== height;
-            if (needResize) {
-                renderer.setSize(width, height, false);
-
-                //make rendrr targets same size as screen
-                readTex.setSize(width, height);
-                writeTex.setSize(width, height);
-                //reset the count so that the new size begins new render
-                accMaterial.uniforms.iFrame.value = 0.;
-            }
-            return needResize;
+            //            canvas = renderer.domElement;
+            //            const width = canvas.clientWidth;
+            //            const height = canvas.clientHeight;
+            //            const needResize = canvas.width !== width || canvas.height !== height;
+            //            if (needResize) {
+            //                // renderer.setPixelRatio(window.devicePixelRatio);
+            //                renderer.setSize(window.innerWidth, window.innerHeight);
+            //
+            //                //make rendrr targets same size as screen
+            //                readTex.setSize(window.innerWidth, window.innerHeight);
+            //                writeTex.setSize(window.innerWidth, window.innerHeight);
+            //                //reset the count so that the new size begins new render
+            //                accMaterial.uniforms.iFrame.value = 0.;
+            //            }
+            // return needResize;
         }
 
 
@@ -140,12 +146,10 @@
 
         function render() {
 
+
             //render to the texture B
             renderer.setRenderTarget(writeTex);
             renderer.render(accScene, camera);
-
-            //make the next move render to canvas
-            renderer.setRenderTarget(null);
 
             // swap the read and write buffers
             tempTex = readTex;
@@ -157,6 +161,9 @@
             accMaterial.uniforms.acc.value = readTex.texture;
             dispMaterial.uniforms.acc.value = readTex.texture;
 
+            //make the next move render to canvas
+            renderer.setRenderTarget(null);
+
             //render the actual scene to the camera using this
             renderer.render(dispScene, camera);
 
@@ -165,11 +172,26 @@
 
 
 
+        function animate() {
+
+            requestAnimationFrame(animate);
+
+            stats.begin();
+
+            //resizeToDisplay();
+            updateUniforms();
+
+            render();
+
+            stats.end();
+
+        }
 
 
 
 
-        async function init() {
+
+        async function main() {
 
             //set the canvas
             canvas = document.querySelector('#c');
@@ -182,25 +204,13 @@
 
             await buildScenes();
 
-            createFrameBuffers(canvas);
+            createFrameBuffers();
+
+            animate();
 
         }
 
 
-
-        function animate() {
-
-            requestAnimationFrame(animate);
-
-            stats.begin();
-
-            resizeToDisplay();
-            updateUniforms(canvas);
-            render();
-
-            stats.end();
-
-        }
 
 
 
@@ -208,9 +218,4 @@
         //Actually Running Things
         //=============================================
 
-
-        init();
-
-        //seems that some errors are thrown at the beginning when animate() runs before init() is done...
-        //but then quickly goes away
-        animate();
+        main();
