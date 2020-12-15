@@ -24,8 +24,9 @@ uniform float iFrame;
 
 // constants
 float eps=0.001;
-int maxMarchSteps=300;
-float maxDist=6.5;
+float EPSILON=0.001;
+int maxMarchSteps=100;
+float maxDist=10.;
 float distToViewer;
 bool isSky=false;
 float fov=100.;

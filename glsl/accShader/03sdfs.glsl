@@ -10,20 +10,39 @@ struct Sphere{
     Material mat;
 };
 
-float sphereSDF(Vector tv, vec3 center, float rad){
+
+
+float sphDist(Vector tv,Sphere sph){
+    return length(tv.pos-sph.center)-sph.radius;
+}
+
+
+Vector sphereNormal(Vector tv, Sphere sph){
+    return Vector(tv.pos,normalize(tv.pos-sph.center));
+}
+
+
+
+
+float sphereSDF(Vector tv, Sphere sph,inout localData dat){
+    
     //if you are looking away from the sphere, stop
-   if(dot(tv.dir,tv.pos-center)>0.){return maxDist;}
+   if(dot(tv.dir,tv.pos-sph.center)>0.){return maxDist;}
+    
     //else return distance to closest point
-    return length(tv.pos-center)-rad;
+    float d = sphDist(tv,sph);
+    
+    //-----------------
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=sphereNormal(tv,sph);
+        dat.mat=sph.mat;
+        //dat.hit=true;
+    }
+    
+    return d;
 }
-
-Vector sphereNormal(Vector tv, vec3 center){
-    return Vector(tv.pos,normalize(tv.pos-center));
-}
-
-
-
-
 
 
 
@@ -45,20 +64,36 @@ struct Plane{
     Material mat;
 };
 
-float planeSDF(Vector tv, vec3 normal, float D){
-    //does not need to be a unit normal vector
-    //D is the constant in ax+by+cz+d=0
-    if(dot(tv.dir,normal)>0.){return maxDist;}
-    
-    //otherwise give distance to closest point
-   float d=dot(tv.pos,normal)+D;
-   d= d/length(normal);
-    return d;
+
+
+Vector planeNormal(Vector tv,Plane plane){
+    return Vector(tv.pos, normalize(plane.normal));
 }
 
-Vector planeNormal(Vector tv,vec3 normal, float D){
-    return Vector(tv.pos, normalize(normal));
+
+float planeSDF(Vector tv, Plane plane, inout localData dat){
+    //does not need to be a unit normal vector
+    //D is the constant in ax+by+cz+d=0
+    if(dot(tv.dir,plane.normal)>0.){return maxDist;}
+    
+    //otherwise give distance to closest point
+    float d=dot(tv.pos,plane.normal)+plane.offset;
+    d= d/length(plane.normal);
+    
+        //-----------------
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=planeNormal(tv,plane);
+        dat.mat=plane.mat;
+       // dat.hit=true;
+    }
+    
+    return d;
+    
 }
+
+
 
 
 
@@ -83,47 +118,72 @@ struct Ring{
     vec3 center;
     float radius;
     float tubeRad;
-    float height;
+    float stretch;
     Material mat;
 };
 
-float ringSDF(vec3 pos,vec2 rad,float height,vec3 center){
- 
-    //recenter things
-    vec3 q = pos-center;
+
+float ringDist(vec3 pos, Ring ring){
+    
+     //recenter things
+    vec3 q = pos-ring.center;
     //choose the direction of elongation
-    vec3 H=vec3(0,height,0);
+    vec3 H=vec3(0,ring.stretch,0);
     //stretch out the sdf
     vec4 w=vec4(q-clamp(q,-H,H),0.);
     //standard torus SDF
-    vec2 Q=vec2(length(w.xz)-rad.x,w.y);
-    float d=length(Q)-rad.y;
+    vec2 Q=vec2(length(w.xz)-ring.radius,w.y);
+    float d=length(Q)-ring.tubeRad;
 
     return d;
-
 }
 
-
-float ringSDF(Vector tv, vec2 rad,float height,vec3 center){
-    return ringSDF(tv.pos,rad,height,center);
-}
 
 
 //probably a way to do this directly and not sample....
 //should come back to this
-Vector ringNormal(Vector tv, vec2 rad, float height,vec3 center){
-    vec3 pos=tv.pos-center;
+Vector ringNormal(Vector tv, Ring ring){
+    
+    //translate everything
+    vec3 pos=tv.pos-ring.center;
+    
+    //reset ring's center to zero:
+    ring.center=vec3(0.);
+    
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
     
-    vec3 dir= normalize( e.xyy*ringSDF( pos + e.xyy*ep,rad,height,vec3(0.) ) + 
-					  e.yyx*ringSDF( pos + e.yyx*ep,rad,height ,vec3(0.)) + 
-					  e.yxy*ringSDF( pos + e.yxy*ep,rad,height ,vec3(0.)) + 
-					  e.xxx*ringSDF( pos + e.xxx*ep,rad,height ,vec3(0.)) );
+    vec3 dir=  e.xyy*ringDist( pos + e.xyy*ep,ring ) + 
+					  e.yyx*ringDist( pos + e.yyx*ep,ring) + 
+					  e.yxy*ringDist( pos + e.yxy*ep,ring) + 
+					  e.xxx*ringDist( pos + e.xxx*ep,ring);
     
-    return Vector(pos,dir);
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
 }
     
+
+
+
+
+
+float ringSDF(Vector tv, Ring ring,inout localData dat){
+    
+    float d= ringDist(tv.pos,ring);
+    
+    //-----------------
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=ringNormal(tv,ring);
+        dat.mat=ring.mat;
+    }
+    
+    return d;
+}
+
+
 
 
     

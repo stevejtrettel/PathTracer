@@ -92,6 +92,7 @@ struct Path{
     vec3 light;//light along path
     bool specularRay;//what type of ray we are shooting
     float rayProbability;
+    bool keepGoing;
 };
 
 
@@ -102,6 +103,7 @@ Path initializePath(Vector tv){
     p.tv=tv;//set the initial direction
     p.pixel=vec3(0.);//set the pixel black
     p.light=vec3(1.);//set the light white
+    p.keepGoing=true;
     return p;
 }
 
@@ -150,6 +152,10 @@ void zeroMat(inout Material mat){
 
 
 
+
+//------Metals--------------
+
+
 void setMetal(inout Material mat, vec3 color, float specularity,float roughness){
     zeroMat(mat);//initialize
     
@@ -162,6 +168,23 @@ void setMetal(inout Material mat, vec3 color, float specularity,float roughness)
     mat.specularPercent=specularity;
 
 }
+
+
+Material makeMetal(vec3 color, float specularity, float roughness){
+
+    Material mat;
+    
+    setMetal(mat,color,specularity,roughness);
+    
+    return mat;
+
+}
+
+
+
+
+
+//------Dielectrics --------------
 
 
 
@@ -179,6 +202,24 @@ void setDielectric(inout Material mat, vec3 color, float specularity, float roug
 
 }
 
+Material makeDielectric(vec3 color, float specularity, float roughness){
+
+    Material mat;
+    
+    setDielectric(mat,color,specularity,roughness);
+    
+    return mat;
+
+}
+
+
+
+
+
+
+
+//----- Glass --------------
+
 
 
 void setGlass(inout Material mat, vec3 color, float IOR){
@@ -189,17 +230,25 @@ void setGlass(inout Material mat, vec3 color, float IOR){
 
 
 
+
+//------Lights --------------
+
+
+Material makeLight(vec3 color,float intensity){
+    Material mat;
+    zeroMat(mat);//initialize
+    
+    mat.emit=intensity*color;
+    
+    return mat;
+}
+
 void setLight(inout Material mat, vec3 color,float intensity){
     zeroMat(mat);//initialize
     
     mat.emit=intensity*color;
     
 }
-
-
-
-
-
 
 
 
@@ -223,8 +272,9 @@ struct localData{
     Material mat;
     bool isSky;
     float dist;
-    bool inside;
-    //are you inside an object
+    bool inside;//are you inside an object
+    bool hit;//did you hit an object
+    
 };
 
 
@@ -234,8 +284,8 @@ struct localData{
 void setSky(inout localData dat,Vector tv){
     dat.isSky=true;
     dat.mat.diffuse=vec3(0.);
-    dat.mat.emit=vec3(0.2);
-        //SRGBToLinear(skyTex(tv.dir));
+    dat.mat.emit=
+        SRGBToLinear(skyTex(tv.dir));
     //
        // 0.5*vec3(53./255.,81./255.,92./255.);
 }

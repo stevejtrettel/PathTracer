@@ -1,11 +1,15 @@
 
 
+//-------------------------------------------------
+// The RAYMARCHING LOOP
+//-------------------------------------------------
+
+
 float raymarch(inout Vector tv, inout localData dat){
+
 
     float distToScene;
     float totalDist=0.;
-    
-   // float side=(dat.inside)?-1.:1.;
 
         for (int i = 0; i < maxMarchSteps; i++){
             
@@ -19,9 +23,7 @@ float raymarch(inout Vector tv, inout localData dat){
            
             totalDist += distToScene;
             if(totalDist>maxDist){
-                //set local data
-                setSky(dat,tv);
-                return maxDist;
+                break;
             }
             
             //otherwise keep going
@@ -32,6 +34,11 @@ float raymarch(inout Vector tv, inout localData dat){
     setSky(dat,tv);
     return maxDist;
 }
+
+
+
+
+
 
 
 
@@ -123,6 +130,9 @@ path.rayProbability = max(path.rayProbability, 0.001f);
         path.tv.dir=rayDir;
     
 
+            // since we chose randomly between diffuse and specular,
+                    // we need to account for the times we didn't do one or the other.
+                    path.light /= path.rayProbability;
     
 }
 
@@ -131,7 +141,9 @@ path.rayProbability = max(path.rayProbability, 0.001f);
 
 
 
-
+//-------------------------------------------------
+// MAKE ONE STEP FORWARD
+//-------------------------------------------------
 
 
 //march in direction of tv until you hit an object, do color computations at that object
@@ -144,6 +156,7 @@ void stepForward(inout Path path,inout localData dat,inout uint rngState){
         //get the new direction we are going to march in
         // set the pixel colors appropriately based on ray choice
         updateRayDirection(path,dat,rngState);
+    
     
          
         // add in emissive lighting
@@ -159,6 +172,40 @@ void stepForward(inout Path path,inout localData dat,inout uint rngState){
 
 
 
+
+//-------------------------------------------------
+// KILL DIM RAYS
+//-------------------------------------------------
+
+
+
+void roulette(inout Path path,inout uint rngState){
+    
+               // Russian Roulette
+            // As the light left gets smaller, the ray is more likely to get terminated early.
+            // Survivors have their value boosted to make up for fewer samples being in the average.
+                  
+                    float p = max(path.light.r, max(path.light.g, path.light.b));
+                    if (RandomFloat01(rngState) > p){
+                        path.keepGoing=false;
+                    }
+                    // Add the energy we 'lose' by randomly terminating paths
+                    path.light *= 1.0f / p;
+    
+}
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The PATH TRACING LOOP
+//-------------------------------------------------
+
+
 vec3 pathTrace(inout Path path, inout uint rngState){
     
     localData dat;
@@ -167,28 +214,17 @@ vec3 pathTrace(inout Path path, inout uint rngState){
     
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
     {
+
             //march to the next surface, pick up light contributions
             stepForward(path,dat,rngState);
-            if(dat.isSky){break;}
             
-                // Russian Roulette
-            // As the light left gets smaller, the ray is more likely to get terminated early.
-            // Survivors have their value boosted to make up for fewer samples being in the average.
+            //probabilistically kill rays
+            roulette(path,rngState);
+            
+            //if hit sky or killed ray,
+            if(dat.isSky||!path.keepGoing){break;}
             
             
-                {
-                    // since we chose randomly between diffuse and specular,
-                    // we need to account for the times we didn't do one or the other.
-                    path.light /= path.rayProbability;
-                    
-                    float p = max(path.light.r, max(path.light.g, path.light.b));
-                    if (RandomFloat01(rngState) > p)
-                        break;
- 
-                    // Add the energy we 'lose' by randomly terminating paths
-                    path.light *= 1.0f / p;
-                }
-
         }
 
     

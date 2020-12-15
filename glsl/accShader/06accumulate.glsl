@@ -48,6 +48,10 @@ vec3 newFrame(vec2 fragCoord, inout uint rngState){
     Vector tv=initializeRay(fragCoord,rngState);
     Path path=initializePath(tv);
     
+    
+    //build the scene
+    buildScene();
+    
     //do one trace out into the scene
     return pathTrace(path,rngState);
     
