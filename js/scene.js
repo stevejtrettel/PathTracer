@@ -36,10 +36,60 @@
         //=============================================
 
 
-        async function createAccShaderMat() {
-            const accText = await fetch('../glsl/accShader.glsl');
-            accShader = await accText.text();
 
+
+
+        async function buildAccShader() {
+
+            let newShader = '';
+
+
+            const shaders = [] = [
+                {
+                    file: '../glsl/accShader/01setup.glsl'
+                },
+                {
+                    file: '../glsl/accShader/02structs.glsl'
+                },
+                {
+                    file: '../glsl/accShader/03sdfs.glsl'
+                },
+                {
+                    file: '../glsl/accShader/04scene.glsl'
+                },
+                {
+                    file: '../glsl/accShader/05trace.glsl'
+                },
+                {
+                    file: '../glsl/accShader/06accumulate.glsl'
+                }
+    ];
+
+
+            //loop over the list of files
+            let response, text;
+            for (const shader of shaders) {
+                response = await fetch(shader.file);
+                text = await response.text();
+                newShader = newShader + text;
+            }
+
+            return newShader;
+
+        }
+
+
+
+
+        async function createAccShaderMat() {
+
+            //OLD WAY: LOAD SINGLE SHADER
+            //            const accText = await fetch('../glsl/accShader.glsl');
+            //            accShader = await accText.text();
+            //build the shader out of files
+
+            //build the shader text
+            accShader = await buildAccShader();
 
             accUniforms = {
                 iTime: {
