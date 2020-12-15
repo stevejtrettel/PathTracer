@@ -86,31 +86,106 @@ Vector mix(Vector v, Vector w,float x){
 
 
 
+
+
+
+
+
+//-------------------------------------------------
+//The RayType Struct
+//-------------------------------------------------
+
+struct RayType{
+    
+    float diffuse;
+    float specular;
+    float refract;
+    float rayProbability;
+    
+    
+};
+
+
+
+RayType intializeRayType(){
+    RayType type;
+    type.diffuse=1.;
+    type.specular=0.;
+    type.refract=0.;
+    type.rayProbability=1.;
+    
+    return type;
+}
+
+
+
+
+void setSpecular(inout RayType type,float prob){
+    
+    type.diffuse=0.;
+    type.specular=1.;
+    type.refract=0.;
+    type.rayProbability=prob;
+}
+
+
+void setDiffuse(inout RayType type,float prob){
+    
+    type.diffuse=1.;
+    type.specular=0.;
+    type.refract=0.;
+    type.rayProbability=prob;
+}
+
+
+void setRefract(inout RayType type,float prob){
+    
+    type.diffuse=0.;
+    type.specular=0.;
+    type.refract=1.;
+    type.rayProbability=prob;
+}
+
+
+
+
+
 //-------------------------------------------------
 //The Path Struct
 //-------------------------------------------------
 
 
 struct Path{
+    
     Vector tv;
     vec3 pixel;//pixel color
     vec3 light;//light along path
-    bool specularRay;//what type of ray we are shooting
-    float rayProbability;
+
+    RayType type;
+    
+    bool inside;
     bool keepGoing;
     float distance; //distance traveled on a bounce
+    
 };
 
 
 
 
 Path initializePath(Vector tv){
-    Path p;
-    p.tv=tv;//set the initial direction
-    p.pixel=vec3(0.);//set the pixel black
-    p.light=vec3(1.);//set the light white
-    p.keepGoing=true;
-    return p;
+    Path path;
+    
+    path.tv=tv;//set the initial direction
+    path.pixel=vec3(0.);//set the pixel black
+    path.light=vec3(1.);//set the light white
+    
+    path.distance=0.;
+    path.keepGoing=true;
+    path.inside=false;
+    
+    path.type=intializeRayType();
+    
+    return path;
 }
 
 

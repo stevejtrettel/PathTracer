@@ -99,7 +99,7 @@ void buildScene(){
     
     //ball2.mat=makeDielectric(color,specularity,roughness);
         //ball3.mat.refractionChance=0.6;
-        ball2.mat=makeGlass(vec3(0.),1.5);
+        ball2.mat=makeGlass(vec3(0.),0.9);
     
     
     
@@ -237,11 +237,11 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the walls 
     
-    dist=min(dist,planeSDF(tv,wall1,dat));
+   // dist=min(dist,planeSDF(tv,wall1,dat));
     
-    dist=min(dist,planeSDF(tv,wall2,dat));
+   // dist=min(dist,planeSDF(tv,wall2,dat));
     
-    dist=min(dist,planeSDF(tv,wall3,dat));
+   // dist=min(dist,planeSDF(tv,wall3,dat));
     
     
     
