@@ -167,6 +167,8 @@ struct Path{
     bool keepGoing;
     float distance; //distance traveled on a bounce
     
+    vec3 debug;
+    
 };
 
 
@@ -184,6 +186,8 @@ Path initializePath(Vector tv){
     path.inside=false;
     
     path.type=intializeRayType();
+    
+    path.debug=vec3(0.);
     
     return path;
 }
@@ -377,19 +381,6 @@ void initializeData(localData dat){
     dat.dist=0.;
 }
 
-
-
-
-
-//set the local data to the sky
-void setSky(inout localData dat,Vector tv){
-    dat.isSky=true;
-    dat.mat.diffuseColor=vec3(0.);
-    dat.mat.emitColor=
-        SRGBToLinear(skyTex(tv.dir));
-    //
-       // 0.5*vec3(53./255.,81./255.,92./255.);
-}
 
 
 
