@@ -26,13 +26,12 @@ Vector sphereNormal(Vector tv, Sphere sph){
 
 float sphereSDF(Vector tv, Sphere sph,inout localData dat){
     
-    //if you are looking away from the sphere, stop
-    //if(dot(tv.dir,tv.pos-sph.center)>0.){return maxDist;}
-    
-    //else return distance to closest point
+    //distance to closest point:
     float d = sphDist(tv,sph);
     
-    //-----------------
+    //if you are looking away from the sphere, stop
+    if(d>0.&&dot(tv.dir,tv.pos-sph.center)>0.){return maxDist;}
+    
     
     if(d<EPSILON){//set the material
         dat.isSky=false;
@@ -73,7 +72,7 @@ void setPlane(inout Plane plane,vec3 normal,float offset){
 
 
 Vector planeNormal(Vector tv,Plane plane){
-    return Vector(tv.pos, normalize(plane.normal));
+    return Vector(tv.pos, plane.normal);
 }
 
 
@@ -92,7 +91,6 @@ float planeSDF(Vector tv, Plane plane, inout localData dat){
         dat.isSky=false;
         dat.normal=planeNormal(tv,plane);
         dat.mat=plane.mat;
-       // dat.hit=true;
     }
     
     return d;
@@ -175,7 +173,8 @@ Vector ringNormal(Vector tv, Ring ring){
 
 
 float ringSDF(Vector tv, Ring ring,inout localData dat){
-    
+
+
     float d= ringDist(tv.pos,ring);
     
     //-----------------

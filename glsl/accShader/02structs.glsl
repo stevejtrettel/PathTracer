@@ -72,10 +72,18 @@ void nudge(inout Vector v, Vector offset){
 
 
 //use mix instead of if/then statements to choose
-Vector mix(Vector v, Vector w,float x){
+//this is NOT to take an average; x should be 0 or 1.
+Vector select(Vector v, Vector w,float x){
     vec3 pos=mix(v.pos,w.pos,x);
     vec3 dir=mix(v.dir,w.dir,x);
     return Vector(pos,dir);
+}
+
+
+//overload of the usual mix command for vector directions
+Vector mix(Vector v, Vector w, float x){
+     vec3 dir=mix(v.dir,w.dir,x);
+    return Vector(v.pos,dir);
 }
 
 
@@ -100,8 +108,7 @@ struct RayType{
     float diffuse;
     float specular;
     float refract;
-    float rayProbability;
-    
+    float probability;
     
 };
 
@@ -112,7 +119,7 @@ RayType intializeRayType(){
     type.diffuse=1.;
     type.specular=0.;
     type.refract=0.;
-    type.rayProbability=1.;
+    type.probability=1.;
     
     return type;
 }
@@ -125,7 +132,7 @@ void setSpecular(inout RayType type,float prob){
     type.diffuse=0.;
     type.specular=1.;
     type.refract=0.;
-    type.rayProbability=prob;
+    type.probability=prob;
 }
 
 
@@ -134,7 +141,7 @@ void setDiffuse(inout RayType type,float prob){
     type.diffuse=1.;
     type.specular=0.;
     type.refract=0.;
-    type.rayProbability=prob;
+    type.probability=prob;
 }
 
 
@@ -143,7 +150,7 @@ void setRefract(inout RayType type,float prob){
     type.diffuse=0.;
     type.specular=0.;
     type.refract=1.;
-    type.rayProbability=prob;
+    type.probability=prob;
 }
 
 
@@ -213,7 +220,7 @@ struct Material{
     vec3 emitColor;
     vec3 diffuseColor;
     vec3 specularColor;
-    vec3 refractionColor;
+    vec3 absorbColor;
     float roughness;
     float IOR;
     float specularChance;
@@ -227,7 +234,7 @@ void zeroMat(inout Material mat){
     mat.emitColor=vec3(0.);
     mat.diffuseColor=vec3(0.);
     mat.specularColor=vec3(0.);
-    mat.refractionColor=vec3(0.);
+    mat.absorbColor=vec3(0.);
     mat.roughness=0.;
     mat.IOR=1.;
     mat.specularChance=0.;
@@ -301,28 +308,46 @@ Material makeDielectric(vec3 color, float specularity, float roughness){
 
 
 
-void setGlass(inout Material mat, vec3 color, float IOR){
+void setGlass(inout Material mat, vec3 color, float IOR,float refractivity){
     
     zeroMat(mat);//initialize
     
     mat.specularColor=vec3(1.);
     mat.diffuseColor=vec3(1.);
-    mat.IOR=IOR;
-    mat.refractionColor=vec3(color);
-    mat.specularChance=0.01;
-    mat.refractionChance=0.99;
+    mat.absorbColor=vec3(color);
     
+    mat.IOR=IOR;
+    
+    
+    mat.refractionChance=refractivity;
+    float remainder=1.-refractivity;
+    mat.specularChance=0.9*remainder;
+   // mat.diffuseChance=0.1*remainder;
     
 }
 
 
-Material makeGlass(vec3 color, float IOR){
+
+void setGlass(inout Material mat, vec3 color, float IOR){
+    
+setGlass(mat,color,IOR,0.95);
+    
+}
+
+
+//control of transparency
+Material makeGlass(vec3 color, float IOR,float specularity){
     Material mat;
     
-    setGlass(mat, color,IOR);
+    setGlass(mat, color,IOR,specularity);
     return mat;
 }
 
+
+//overload for default transparency
+Material makeGlass(vec3 color, float IOR){
+    return makeGlass(color,IOR,0.95);
+}
 
 
 
@@ -366,10 +391,6 @@ struct localData{
     Vector refract;
     Material mat;
     bool isSky;
-    float dist;
-    bool inside;//are you inside an object
-    bool hit;//did you hit an object
-    
 };
 
 
@@ -377,8 +398,6 @@ struct localData{
 
 void initializeData(localData dat){
     dat.isSky=false;
-    dat.inside=false;
-    dat.dist=0.;
 }
 
 

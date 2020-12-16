@@ -22,7 +22,7 @@ uniform float iFrame;
 
 // constants
 float EPSILON=0.001;
-int maxMarchSteps=100;
+int maxMarchSteps=200;
 float maxDist=10.;
 float fov=100.;
 int maxBounces=10;
@@ -38,30 +38,6 @@ int maxBounces=10;
 
 
 
-
-//-------------------------------------------------
-//Utilities
-//-------------------------------------------------
-
-
-
-
-vec2 toSphCoords(vec3 v){
-float theta=atan(-v.z,v.x);
-float phi=acos(v.y);
-return vec2(theta,phi);
-}
-
-
-
-vec3 skyTex(vec3 v){
-
-vec2 angles=toSphCoords(v);
-float x=(angles.x+3.1415)/(2.*3.1415);
-float y=1.-angles.y/3.1415;
-
-return texture(sky,vec2(x,y)).rgb;
-}
 
 
 
@@ -176,5 +152,57 @@ return rngState;
 
 
 
+
+
+//-------------------------------------------------
+//Utilities
+//-------------------------------------------------
+
+vec3 checkerboard(vec2 v){
+    float x=mod(20.*v.x/6.28,2.);
+    float y=mod(20.*v.y/3.14,2.);
+    
+    if(x<1.&&y<1.||x>1.&&y>1.){
+        return vec3(1.);
+    }
+    else return vec3(0.0);
+}
+
+
+
+vec2 toSphCoords(vec3 v){
+float theta=atan(-v.z,v.x);
+float phi=acos(v.y);
+return vec2(theta,phi);
+}
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//Backgrounds
+//-------------------------------------------------
+
+
+
+vec3 skyTex(vec3 v){
+
+vec2 angles=toSphCoords(v);
+float x=(angles.x+3.1415)/(2.*3.1415);
+float y=1.-angles.y/3.1415;
+
+return SRGBToLinear(texture(sky,vec2(x,y)).rgb);
+}
+
+
+vec3 checkerTex(vec3 v){
+    vec2 p=toSphCoords(v);
+    return checkerboard(p);
+}
 
 

@@ -56,11 +56,9 @@ vec3 newFrame(vec2 fragCoord){
      // initialize a random number state based on frag coord and frame
     uint rngState = randomSeed(fragCoord,iFrame);
     
-    
     //get the initial tangent vector, path data
     Vector tv=initializeRay(fragCoord,rngState);
     Path path=initializePath(tv);
-    
     
     //build the scene
     buildScene();
@@ -97,11 +95,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     
     float blend =   (iFrame < 2. || prev.a == 0.0f) ? 1.0f :  1. / (1. + 1./prev.a);
     
-    
-    //vec3 color = ((iFrame-1.)*prev.rgb+new)/(iFrame);
 
-    //color=clamp(color,0.,1.);
-    // vec3 color= ((iFrame-1.)*prev.rgb+new)/iFrame;
+    //vec3 color= ((iFrame-1.)*prev.rgb+new)/iFrame;
     vec3 color=mix(prev.rgb,new,blend);
 
     // show the result

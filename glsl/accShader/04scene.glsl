@@ -59,7 +59,7 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(0.0,-0.3,0.8);
+    light2.center=vec3(0.3,-0.3,0.8);
     light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -80,11 +80,11 @@ void buildScene(){
     ball1.radius=0.5;
     
     color= vec3(0.9,0.9,0.5);
-    specularity=0.2;
-    roughness=0.4;
+    specularity=0.8;
+    roughness=0.;
     
-    //ball1.mat= makeDielectric(color,specularity,roughness);
-    ball1.mat=makeGlass(vec3(0.1),2.3);
+    ball1.mat= makeMetal(color,specularity,roughness);
+    //ball1.mat=makeGlass(vec3(0.1),2.3);
 
     
     
@@ -97,10 +97,10 @@ void buildScene(){
     specularity=0.2;
     roughness=0.05;
     
-    //ball2.mat=makeDielectric(color,specularity,roughness);
-    //ball3.mat.refractionChance=0.6;
+    ball2.mat=makeDielectric(color,specularity,roughness);
+
     absorb=vec3(0.3,0.05,0.2);
-    ball2.mat=makeGlass(absorb,2.3);
+    //ball2.mat=makeGlass(absorb,2.3);
     
     
     
@@ -113,9 +113,9 @@ void buildScene(){
     specularity=0.1;
     roughness=0.9;
     
-    ball3.mat=makeDielectric(color,specularity,roughness);
+   // ball3.mat=makeDielectric(color,specularity,roughness);
 
-   
+    ball3.mat=makeGlass(vec3(0.),2.3);
     
     
     
@@ -223,7 +223,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light1,dat));
     
-   // dist=min(dist,sphereSDF(tv,light2,dat));
+    //dist=min(dist,sphereSDF(tv,light2,dat));
     
     
     //------the balls
@@ -232,7 +232,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
    dist=min(dist,sphereSDF(tv,ball2,dat));
     
-  // dist=min(dist,sphereSDF(tv,ball3,dat));
+   dist=min(dist,sphereSDF(tv,ball3,dat));
     
     
     
@@ -240,7 +240,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,planeSDF(tv,wall1,dat));
     
-   // dist=min(dist,planeSDF(tv,wall2,dat));
+    //dist=min(dist,planeSDF(tv,wall2,dat));
     
    // dist=min(dist,planeSDF(tv,wall3,dat));
     
@@ -248,7 +248,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //-------a ring
     
-    //dist=min(dist,ringSDF(tv,ring1,dat));
+   // dist=min(dist,ringSDF(tv,ring1,dat));
     
     
     return dist;
