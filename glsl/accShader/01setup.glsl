@@ -22,7 +22,7 @@ uniform float iFrame;
 
 // constants
 float EPSILON=0.001;
-int maxMarchSteps=200;
+int maxMarchSteps=100;
 float maxDist=10.;
 float fov=100.;
 int maxBounces=10;
@@ -139,7 +139,7 @@ vec3 RandomUnitVector(inout uint state)
 
 uint randomSeed(vec2 fCoord,float frame){
 
-uint rngState = uint(uint(fCoord.x) * uint(1973) + uint(fCoord.y) * uint(9277) + uint(frame) * uint(26699)) | uint(1);
+uint rngState = uint(uint(fCoord.x) * uint(1973) + uint(fCoord.y) * uint(925277) + uint(frame) * uint(26699)) | uint(1);
 
 return rngState;
 
@@ -178,6 +178,15 @@ return vec2(theta,phi);
 
 
 
+vec3 toSphCoordsNoSeam(vec3 v){
+    
+    float theta=atan(-v.z,v.x);
+    float theta2=atan(v.y,abs(v.x));
+    float phi=acos(v.y);
+return vec3(theta,phi,theta2);
+}
+
+
 
 
 
@@ -189,15 +198,24 @@ return vec2(theta,phi);
 //-------------------------------------------------
 
 
-
 vec3 skyTex(vec3 v){
 
-vec2 angles=toSphCoords(v);
+vec3 angles=toSphCoordsNoSeam(v);
+    
+//theta coordinates (x=real, y=to trick the derivative so there's no seam)
 float x=(angles.x+3.1415)/(2.*3.1415);
+float z=(angles.z+3.1415)/(2.*3.1415);
+    
 float y=1.-angles.y/3.1415;
 
-return SRGBToLinear(texture(sky,vec2(x,y)).rgb);
+vec2 uv=vec2(x,y);
+vec2 uv2=vec2(z,y);//grab the other arctan piece;
+    
+return SRGBToLinear(textureGrad(sky,uv,dFdx(uv2), dFdy(uv2)).rgb);
+
 }
+
+
 
 
 vec3 checkerTex(vec3 v){

@@ -25,7 +25,7 @@ float raymarch(inout Path path, inout localData dat){
                 }
             
             if(totalDist>maxDist){
-               break;
+                break;
             }
             
             //otherwise keep going
@@ -138,7 +138,7 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
     //increase brightness of path chosen
     //to account for the energy not taken
     //IS THIS RIGHT?!?!
-    path.light /= path.type.probability;
+    //path.light /= path.type.probability;
         
         
     }
@@ -187,7 +187,7 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     //which side to push the point: in or out rel the normal?
     side=(path.type.refract == 1.0f)?-1.:1.;
     
-    path.tv.pos+=0.01*side*normal;
+    path.tv.pos+=0.002*side*normal;
     
 
     //----- change path.inside if refract ----------
@@ -258,7 +258,7 @@ void surfaceColor(inout Path path,localData dat){
 }
 
 
-void skyColor(inout Path path,localData dat){
+void skyColor(inout Path path,inout localData dat){
     vec3 skyColor=skyTex(path.tv.dir);
     //vec3 skyColor=checkerTex(path.tv.dir);
     path.pixel += path.light*skyColor;
@@ -304,11 +304,12 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             roulette(path,rngState);
             
             //if killed ray,
-            if(!path.keepGoing){break;}
+            if(!path.keepGoing||dat.isSky){break;}
             
         }
 
    return path.pixel;
+
 }
 
 

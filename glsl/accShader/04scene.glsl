@@ -83,8 +83,8 @@ void buildScene(){
     specularity=0.8;
     roughness=0.;
     
-    ball1.mat= makeMetal(color,specularity,roughness);
-    //ball1.mat=makeGlass(vec3(0.1),2.3);
+    //ball1.mat= makeMetal(color,specularity,roughness);
+    ball1.mat=makeGlass(vec3(0.1),1.53);
 
     
     
@@ -240,9 +240,9 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,planeSDF(tv,wall1,dat));
     
-    //dist=min(dist,planeSDF(tv,wall2,dat));
+    dist=min(dist,planeSDF(tv,wall2,dat));
     
-   // dist=min(dist,planeSDF(tv,wall3,dat));
+    dist=min(dist,planeSDF(tv,wall3,dat));
     
     
     
