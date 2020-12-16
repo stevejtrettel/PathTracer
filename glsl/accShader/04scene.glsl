@@ -26,6 +26,8 @@ Plane wall3;
 Ring ring1;
 
 
+Lens lens1;
+
 
 
 
@@ -42,15 +44,18 @@ void buildScene(){
     vec3 normal;
     float offset;
     vec3 absorb;
-    
+    float thickness;
+    vec3 axis;
+    vec3 center;
+    float radius;
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(-0.2,0.8,-1.5);
+    light1.center=vec3(-0.2,2.,-1.5);
     light1.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
-    intensity=5.;
+    intensity=40.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -90,12 +95,12 @@ void buildScene(){
     
     
     //----------- BALL 2 -------------------------
-    ball2.center=vec3(-0.8,-0.63,-1.6);
-    ball2.radius=0.25;
+    ball2.center=vec3(-1.,-0.43,-1.6);
+    ball2.radius=0.55;
     
-    color= vec3(0.3,0.2,0.6);
+    color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
-    roughness=0.05;
+    roughness=0.01;
     
     ball2.mat=makeDielectric(color,specularity,roughness);
 
@@ -106,16 +111,16 @@ void buildScene(){
     
     
     //----------- BALL 3 -------------------------
-    ball3.center=vec3(-0.1,-0.7,-1.3);
-    ball3.radius=0.15;
+    ball3.center=vec3(-0.4,-0.85,-0.5);
+    ball3.radius=0.1;
     
-    color= 0.2*vec3(0.7,0.1,0.2);
-    specularity=0.1;
-    roughness=0.9;
+    color= 0.1*vec3(0.7,0.1,0.2);
+    specularity=0.4;
+    roughness=0.1;
     
-   // ball3.mat=makeDielectric(color,specularity,roughness);
+    ball3.mat=makeMetal(color,specularity,roughness);
 
-    ball3.mat=makeGlass(vec3(0.),2.3);
+    //ball3.mat=makeGlass(vec3(0.),2.3);
     
     
     
@@ -181,10 +186,10 @@ void buildScene(){
     //----------- RING 1 -------------------------
     
     
-    ring1.center=vec3(0.,-0.55,-1.4);
-    ring1.radius=0.5;
+    ring1.center=vec3(0.3,-0.75,-.6);
+    ring1.radius=0.3;
     ring1.tubeRad=0.02;
-    ring1.stretch=0.1;
+    ring1.stretch=0.05;
     
     color=vec3(0.7,0.7,0.2);
     specularity=0.8;
@@ -194,6 +199,21 @@ void buildScene(){
     
     
     
+    
+    
+    
+    //----------- LENS 1 -------------------------
+    
+    
+    center=vec3(0.8,-0.4,-1.);
+    radius=0.5;
+    thickness=0.1;
+    axis=vec3(0,1,0);
+    
+    //set the parameters R, c1, c2
+    setLens(lens1,radius,thickness,center,axis);
+    
+    lens1.mat= makeGlass(vec3(0.),2.3,0.95);
     
 }
 
@@ -223,13 +243,13 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light1,dat));
     
-    //dist=min(dist,sphereSDF(tv,light2,dat));
+    dist=min(dist,sphereSDF(tv,light2,dat));
     
     
     //------the balls
     
    dist=min(dist,sphereSDF(tv,ball1,dat));
-    
+  //  
    dist=min(dist,sphereSDF(tv,ball2,dat));
     
    dist=min(dist,sphereSDF(tv,ball3,dat));
@@ -248,7 +268,16 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //-------a ring
     
-   // dist=min(dist,ringSDF(tv,ring1,dat));
+    dist=min(dist,ringSDF(tv,ring1,dat));
+    
+    
+    
+    
+    //-------a lens
+    
+    dist=min(dist,lensSDF(tv,lens1,dat));
+    
+    
     
     
     return dist;

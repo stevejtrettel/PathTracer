@@ -22,7 +22,7 @@ uniform float iFrame;
 
 // constants
 float EPSILON=0.001;
-int maxMarchSteps=100;
+int maxMarchSteps=200;
 float maxDist=10.;
 float fov=100.;
 int maxBounces=10;
