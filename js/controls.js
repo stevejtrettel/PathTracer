@@ -69,38 +69,46 @@ let rotAmt = 0.005;
 function rotControls() {
 
     let rot = new THREE.Matrix4().identity();
-    let mat = new THREE.Matrix3().identity();
+    let mat = new THREE.Matrix4().identity();
 
     // KEYBOARD
     if (rightPressed) {
-        rot = new THREE.Matrix4().makeRotationAxis(vLR, rotAmt);
-        mat.setFromMatrix4(rot);
-    } else if (leftPressed) {
         rot = new THREE.Matrix4().makeRotationAxis(vLR, -rotAmt);
-        mat.setFromMatrix4(rot);
+        mat.multiply(rot);
+
     }
+
+    if (leftPressed) {
+        rot = new THREE.Matrix4().makeRotationAxis(vLR, rotAmt);
+        mat.multiply(rot);
+    }
+
     if (downPressed) {
         rot.makeRotationAxis(vUD, -rotAmt);
-        mat.setFromMatrix4(rot);
-    } else if (upPressed) {
+        mat.multiply(rot);
 
+    }
+
+    if (upPressed) {
         rot.makeRotationAxis(vUD, rotAmt);
-        mat.setFromMatrix4(rot);
+        mat.multiply(rot);
     }
 
     if (CWPressed) {
         rot.makeRotationAxis(vRot, rotAmt);
-        mat.setFromMatrix4(rot);
-    } else if (CCWPressed) {
+        mat.multiply(rot);
+    }
 
+    if (CCWPressed) {
         rot.makeRotationAxis(vRot, -rotAmt);
-        mat.setFromMatrix4(rot);
+        mat.multiply(rot);
     }
 
 
     let reportChange = rightPressed || leftPressed || downPressed || upPressed || CWPressed || CCWPressed;
 
-    return [mat, reportChange];
+    let totalRot = new THREE.Matrix3().setFromMatrix4(mat);
+    return [totalRot, reportChange];
 }
 
 
