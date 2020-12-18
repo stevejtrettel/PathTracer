@@ -51,7 +51,7 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(-0.2,2.,-1.5);
+    light1.center=vec3(-0.2,2.,-0);
     light1.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -64,7 +64,7 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(0.3,-0.3,0.8);
+    light2.center=vec3(3,0,-3);
     light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -148,11 +148,11 @@ void buildScene(){
     
     
     //----------- WALL 2 -------------------------
-    normal=vec3(1,0,1);
+    normal=vec3(0,0,1);
     offset=5.;
     
     color=vec3(0.7,0.7,0.8);
-    specularity=0.1;
+    specularity=0.;
     roughness=0.5;
     
     setPlane(wall2,normal,offset);
@@ -165,8 +165,10 @@ void buildScene(){
     
     
      //----------- WALL 3 -------------------------
-    normal=vec3(-1,0,1);
+    normal=vec3(-1,0,0);
+    //normal=vec3(1,0,0);
     offset=5.;
+    //offset=5.;
     
     color=vec3(0.5,0.9,0.5);
     specularity=0.;
@@ -205,15 +207,15 @@ void buildScene(){
     //----------- LENS 1 -------------------------
     
     
-    center=vec3(0.8,-0.4,-1.);
-    radius=0.5;
-    thickness=0.1;
-    axis=vec3(0,1,0);
+    center=vec3(1,0,-3.);
+    radius=1.;
+    thickness=0.3;
+    axis=vec3(0,0,1);
     
     //set the parameters R, c1, c2
     setLens(lens1,radius,thickness,center,axis);
     
-    lens1.mat= makeGlass(vec3(0.),2.3,0.95);
+    lens1.mat= makeGlass(vec3(0.1,0.0,0.2),2.3,0.999);
     
 }
 
@@ -248,11 +250,11 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the balls
     
-   dist=min(dist,sphereSDF(tv,ball1,dat));
-  //  
-   dist=min(dist,sphereSDF(tv,ball2,dat));
+    dist=min(dist,sphereSDF(tv,ball1,dat));
     
-   dist=min(dist,sphereSDF(tv,ball3,dat));
+    dist=min(dist,sphereSDF(tv,ball2,dat));
+    
+    dist=min(dist,sphereSDF(tv,ball3,dat));
     
     
     
@@ -268,14 +270,14 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //-------a ring
     
-    dist=min(dist,ringSDF(tv,ring1,dat));
+    //dist=min(dist,ringSDF(tv,ring1,dat));
     
     
     
     
     //-------a lens
     
-    dist=min(dist,lensSDF(tv,lens1,dat));
+    //dist=min(dist,lensSDF(tv,lens1,dat));
     
     
     

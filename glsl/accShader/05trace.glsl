@@ -5,7 +5,7 @@
 //-------------------------------------------------
 
 
-float raymarch(inout Path path, inout localData dat){
+void raymarch(inout Path path, inout localData dat){
 
 
     float distToScene=0.;
@@ -21,7 +21,8 @@ float raymarch(inout Path path, inout localData dat){
             
             if (distToScene< EPSILON){
                     //local data is set by the sdf
-                    return totalDist;
+                    path.distance=totalDist;
+                    return;
                 }
             
             if(totalDist>maxDist){
@@ -35,7 +36,7 @@ float raymarch(inout Path path, inout localData dat){
     //if you hit nothing
     dat.isSky=true;
     path.keepGoing=false;
-    return maxDist;
+    path.distance=maxDist;
 }
 
 
@@ -53,42 +54,13 @@ float raymarch(inout Path path, inout localData dat){
 
 
 
-
-float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, float f0, float f90)
-{
-        //probably need to adjust normal vector depending on side
-        
-    
-        // Schlick aproximation
-        float r0 = (n1-n2) / (n1+n2);
-        r0 *= r0;
-        float cosX = -dot(normal.dir, incident.dir);
-        if (n1 > n2)
-        {
-            float n = n1/n2;
-            float sinT2 = n*n*(1.0-cosX*cosX);
-            // Total internal reflection
-            if (sinT2 > 1.0)
-                return f90;
-            cosX = sqrt(1.0-sinT2);
-        }
-        float x = 1.0-cosX;
-        float ret = r0+(1.0-r0)*x*x*x*x*x;
- 
-        // adjust reflect multiplier for object reflectivity
-        return mix(f0, f90, ret);
-}
-
-
-
-
     void updateProbabilities( inout Path path,inout localData dat, inout uint rngState){
         
     
     //update the normal to be the correct direction:
     float side=(path.inside)?-1.:1.;
-    Vector normal=Vector(dat.normal.pos,side*dat.normal.dir);
-        
+    Vector normal=multiplyScalar(side,dat.normal);
+       
     // take fresnel into account for specularChance and adjust other chances.
     // specular takes priority.
     // chanceMultiplier makes sure we keep diffuse / refraction ratio the same.
@@ -138,7 +110,7 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
     //increase brightness of path chosen
     //to account for the energy not taken
     //IS THIS RIGHT?!?!
-    //path.light /= path.type.probability;
+    path.light /= path.type.probability;
         
         
     }
@@ -154,41 +126,44 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
 
     //update the normal to be the correct direction:
     float side=(path.inside)?-1.:1.;
-    vec3 normal=side*dat.normal.dir;
+    Vector normal=multiplyScalar(side,dat.normal);
+    
+    
+    //----- get a uniformly distributed vector on the sphere ----------
+    Vector randomSph=Vector(path.tv.pos,RandomUnitVector(rngState));
     
     
     //----- update the ray direction ----------
     
-     // Diffuse uses a normal oriented cosine weighted hemisphere sample.
-     vec3 diffuseDir = normalize(normal+RandomUnitVector(rngState));
-    
+    // Diffuse uses a normal oriented cosine weighted hemisphere sample.
+    Vector diffuseDir= normalize(add(normal,randomSph));
+        
     // Perfectly smooth specular uses the reflection ray.
-    vec3 specularDir=reflect(path.tv.dir,normal);
+    Vector specularDir=reflect(path.tv,normal);
     
     // Rough (glossy) specular lerps from the smooth specular to the rough diffuse by the material roughness squared
     specularDir = normalize(mix(specularDir, diffuseDir, dat.mat.roughness * dat.mat.roughness));
 
     //get the refracted ray direction from IOR
-    vec3 refractionDir = refract(path.tv.dir, normal, path.inside ? dat.mat.IOR/1.0 : 1.0 / dat.mat.IOR);
+    Vector refractionDir = refract(path.tv, normal, path.inside ? dat.mat.IOR/1.0 : 1.0 / dat.mat.IOR);
     
     //update refraction ray based on roughness
-    refractionDir = normalize(mix(refractionDir, -diffuseDir, dat.mat.roughness * dat.mat.roughness));
+    refractionDir = normalize(mix(refractionDir, negate(diffuseDir), dat.mat.roughness * dat.mat.roughness));
     
     //choose which one of these we will actually be doing
     //this is a weird way of doing it to avoid a 3-way if statement, unsure if this is necessary
-    vec3 rayDir = mix(diffuseDir, specularDir, path.type.specular);
+    Vector rayDir = mix(diffuseDir, specularDir, path.type.specular);
     rayDir = mix(rayDir, refractionDir, path.type.refract);
     
     //use this direction
-    path.tv.dir=rayDir;
+    path.tv=rayDir;
    
     
     //----- update ray position ----------
     //which side to push the point: in or out rel the normal?
     side=(path.type.refract == 1.0f)?-1.:1.;
-    
-    path.tv.pos+=0.002*side*normal;
-    
+    nudge(path.tv,multiplyScalar(side,normal));
+   
 
     //----- change path.inside if refract ----------
     //if you reflect or diffuse you stay on same side
@@ -240,8 +215,10 @@ void roulette(inout Path path,inout uint rngState){
 
 
 void volumeColor(inout Path path,localData dat){
-        path.light *= exp(-dat.mat.absorbColor * path.distance);
+        if(path.inside){path.light *= exp(-dat.mat.absorbColor * 2.);}
 }
+
+
 
 void surfaceColor(inout Path path,localData dat){
     
@@ -277,7 +254,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
 
             // shoot a ray out into the world
             //when you hit a material, update dat accordingly
-            path.distance=raymarch(path,dat);
+            raymarch(path,dat);
             
             //if you hit the sky: stop
             if(dat.isSky){
@@ -285,12 +262,11 @@ vec3 pathTrace(inout Path path, inout uint rngState){
                 break;
             }
             
-            //if you've arrived here by traveling inside
-            //an object, pick up absorbed colors:
-//            if(path.inside){
-//                 volumeColor(path,dat);
-//            }
-//    
+           // pick up any colors absorbed
+           // while traveling inside an object:
+            volumeColor(path,dat);
+
+    
             //set probabilities for spec, refract, diffuse
             updateProbabilities(path, dat, rngState);
             
