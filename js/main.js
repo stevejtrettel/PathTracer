@@ -19,6 +19,12 @@
         } from './scene.js'
 
 
+        import {
+            keyDownHandler,
+            keyUpHandler
+        } from './controls.js'
+
+
 
 
         //Global Variables
@@ -30,6 +36,15 @@
 
         //textures for accumulating frames
         let readTex, writeTex, tempTex;
+
+
+
+
+
+
+        //Keyboard Controls
+        //=============================================
+
 
 
 
@@ -179,6 +194,7 @@
             stats.begin();
 
             //resizeToDisplay();
+
             updateUniforms();
 
             render();
@@ -192,6 +208,9 @@
 
 
         async function main() {
+
+
+
 
             //set the canvas
             canvas = document.querySelector('#c');
@@ -218,4 +237,10 @@
         //Actually Running Things
         //=============================================
 
+        document.addEventListener('keydown', keyDownHandler);
+
+        document.addEventListener('keyup', keyUpHandler);
+
+
+        // run the main function
         main();

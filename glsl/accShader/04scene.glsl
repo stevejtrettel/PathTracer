@@ -88,8 +88,8 @@ void buildScene(){
     specularity=0.8;
     roughness=0.;
     
-    //ball1.mat= makeMetal(color,specularity,roughness);
-    ball1.mat=makeGlass(vec3(0.1),1.53);
+    ball1.mat= makeMetal(color,specularity,roughness);
+    //ball1.mat=makeGlass(vec3(0.1),1.53);
 
     
     
@@ -104,23 +104,23 @@ void buildScene(){
     
     ball2.mat=makeDielectric(color,specularity,roughness);
 
-    absorb=vec3(0.3,0.05,0.2);
+    //absorb=vec3(0.3,0.05,0.2);
     //ball2.mat=makeGlass(absorb,2.3);
     
     
     
     
     //----------- BALL 3 -------------------------
-    ball3.center=vec3(-0.4,-0.85,-0.5);
-    ball3.radius=0.1;
+    ball3.center=vec3(0.7,-0.85,-1.5);
+    ball3.radius=0.6;
     
     color= 0.1*vec3(0.7,0.1,0.2);
     specularity=0.4;
     roughness=0.1;
     
-    ball3.mat=makeMetal(color,specularity,roughness);
+    //ball3.mat=makeMetal(color,specularity,roughness);
 
-    //ball3.mat=makeGlass(vec3(0.),2.3);
+    ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),2.3);
     
     
     
@@ -260,11 +260,11 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the walls 
     
-    dist=min(dist,planeSDF(tv,wall1,dat));
+    //dist=min(dist,planeSDF(tv,wall1,dat));
     
-    dist=min(dist,planeSDF(tv,wall2,dat));
+    //dist=min(dist,planeSDF(tv,wall2,dat));
     
-    dist=min(dist,planeSDF(tv,wall3,dat));
+    //dist=min(dist,planeSDF(tv,wall3,dat));
     
     
     

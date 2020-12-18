@@ -2,7 +2,9 @@
         //=============================================
         import * as THREE from './libs/three.module.js';
 
-
+        import {
+            rotControls
+        } from './controls.js';
 
 
         //Scene Variables
@@ -111,6 +113,9 @@
                 //accumulated texture
                 acc: {
                     value: null
+                },
+                facing: {
+                    value: new THREE.Matrix3().identity()
                 }
             };
 
@@ -140,10 +145,23 @@
 
         function updateAccUniforms() {
 
+
+
             //  accMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
             //  accMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
             accMaterial.uniforms.iTime.value = 0;
             accMaterial.uniforms.iFrame.value += 1.;
+
+
+            let data = rotControls();
+            let mat = data[0];
+            let detectChange = data[1];
+
+            if (detectChange) {
+
+                accMaterial.uniforms.facing.value = accMaterial.uniforms.facing.value.multiply(mat);
+                accMaterial.uniforms.iFrame.value = 0.;
+            }
 
         }
 

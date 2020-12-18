@@ -236,8 +236,8 @@ void surfaceColor(inout Path path,localData dat){
 
 
 void skyColor(inout Path path,inout localData dat){
-    vec3 skyColor=skyTex(path.tv.dir);
-    //vec3 skyColor=checkerTex(path.tv.dir);
+   // vec3 skyColor=skyTex(path.tv.dir);
+    vec3 skyColor=checkerTex(path.tv.dir);
     path.pixel += path.light*skyColor;
 }
 

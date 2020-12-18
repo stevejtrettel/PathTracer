@@ -48,14 +48,15 @@ float cosAng(Vector v, Vector w){
     return dot(normalize(v),normalize(w));
 }
 
-//small shift in the location of a point
-vec3 shiftPoint(vec3 p, vec3 v, float t){
-    return p+0.001*v;
+
+Vector rotateByFacing(Vector v, mat3 facing){
+    return Vector(v.pos,facing*v.dir);
 }
 
-Vector shift(Vector tv, vec3 dir, float t){
-    return Vector(tv.pos+0.001*dir,tv.dir);
-}
+
+
+
+
 
 
 //actually flowing along a geodesic
@@ -75,6 +76,18 @@ void nudge(inout Vector v, vec3 dir){
 void nudge(inout Vector v, Vector offset){
     v.pos+=offset.dir*0.003;
 }
+
+
+//small shift in the location of a point
+vec3 shiftPoint(vec3 p, vec3 v, float t){
+    return p+0.001*v;
+}
+
+Vector shift(Vector tv, vec3 dir, float t){
+    return Vector(tv.pos+0.001*dir,tv.dir);
+}
+
+
 
 
 //use mix instead of if/then statements to choose
