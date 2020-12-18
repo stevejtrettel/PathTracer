@@ -6,8 +6,8 @@
 
 Vector initializeRay(vec2 fragCoord,inout uint rngState){
     
-    // The ray starts at the camera position (the origin)
-    vec3 rayPosition = vec3(0.0f, 0., 1.);
+    // The ray starts at the camera position (a uniform)
+    vec3 rayPosition = location;
     
     // calculate subpixel camera jitter for anti aliasing
     vec2 jitter = vec2(RandomFloat01(rngState), RandomFloat01(rngState)) - 0.5f;
@@ -34,8 +34,9 @@ Vector initializeRay(vec2 fragCoord,inout uint rngState){
     Vector tv=Vector(rayPosition,rayDir);
     
     
-    //rotate by facing:
+    //rotate by facing (a uniform)
     tv=rotateByFacing(tv,facing);
+    
     
     return tv;
     
@@ -57,7 +58,7 @@ Vector initializeRay(vec2 fragCoord,inout uint rngState){
 //get the new frame
 vec3 newFrame(vec2 fragCoord){
     
-     // initialize a random number state based on frag coord and frame
+     // initialize a random number state based on frag coord and frame number (stored as "seed" instead of iFrame so it doean't get reset when flying)
     uint rngState = randomSeed(fragCoord,iFrame);
     
     //get the initial tangent vector, path data

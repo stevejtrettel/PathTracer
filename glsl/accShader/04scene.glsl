@@ -260,11 +260,11 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the walls 
     
-    //dist=min(dist,planeSDF(tv,wall1,dat));
+    dist=min(dist,planeSDF(tv,wall1,dat));
     
-    //dist=min(dist,planeSDF(tv,wall2,dat));
+    dist=min(dist,planeSDF(tv,wall2,dat));
     
-    //dist=min(dist,planeSDF(tv,wall3,dat));
+    dist=min(dist,planeSDF(tv,wall3,dat));
     
     
     

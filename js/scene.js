@@ -3,7 +3,8 @@
         import * as THREE from './libs/three.module.js';
 
         import {
-            rotControls
+            rotControls,
+            translControls
         } from './controls.js';
 
 
@@ -116,6 +117,12 @@
                 },
                 facing: {
                     value: new THREE.Matrix3().identity()
+                },
+                location: {
+                    value: new THREE.Vector3(0, 0, 0)
+                },
+                seed: {
+                    value: 0
                 }
             };
 
@@ -151,17 +158,25 @@
             //  accMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
             accMaterial.uniforms.iTime.value = 0;
             accMaterial.uniforms.iFrame.value += 1.;
+            accMaterial.uniforms.seed.value += 1.;
 
+            let rotData = rotControls();
+            let mat = rotData[0];
+            let detectRot = rotData[1];
 
-            let data = rotControls();
-            let mat = data[0];
-            let detectChange = data[1];
+            let translData = translControls();
+            let vec = translData[0];
+            let detectTransl = translData[1];
 
-            if (detectChange) {
+            if (detectRot || detectTransl) {
 
-                accMaterial.uniforms.facing.value = accMaterial.uniforms.facing.value.multiply(mat);
+                accMaterial.uniforms.facing.value.multiply(mat);
+
+                accMaterial.uniforms.location.value.add(vec);
+
                 accMaterial.uniforms.iFrame.value = 0.;
             }
+
 
         }
 
