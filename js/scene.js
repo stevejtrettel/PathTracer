@@ -55,16 +55,19 @@
                     file: '../glsl/accShader/02structs.glsl'
                 },
                 {
-                    file: '../glsl/accShader/03sdfs.glsl'
+                    file: '../glsl/accShader/03geometry.glsl'
                 },
                 {
-                    file: '../glsl/accShader/04scene.glsl'
+                    file: '../glsl/accShader/04sdfs.glsl'
                 },
                 {
-                    file: '../glsl/accShader/05trace.glsl'
+                    file: '../glsl/accShader/05scene.glsl'
                 },
                 {
-                    file: '../glsl/accShader/06accumulate.glsl'
+                    file: '../glsl/accShader/06trace.glsl'
+                },
+                {
+                    file: '../glsl/accShader/07accumulate.glsl'
                 }
     ];
 

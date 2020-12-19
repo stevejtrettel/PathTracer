@@ -7,7 +7,7 @@
 Vector initializeRay(vec2 fragCoord,inout uint rngState){
     
     // The ray starts at the camera position (a uniform)
-    vec3 rayPosition = location;
+    Point rayPosition = Point(location);
     
     // calculate subpixel camera jitter for anti aliasing
     vec2 jitter = vec2(RandomFloat01(rngState), RandomFloat01(rngState)) - 0.5f;

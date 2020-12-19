@@ -18,12 +18,14 @@ Sphere ball1;
 Sphere ball2;
 Sphere ball3;
 
-Plane wall1;
-Plane wall2;
-Plane wall3;
+
+//
+//Plane wall1;
+//Plane wall2;
+//Plane wall3;
 
 
-Ring ring1;
+//Ring ring1;
 
 
 Lens lens1;
@@ -46,12 +48,12 @@ void buildScene(){
     vec3 absorb;
     float thickness;
     vec3 axis;
-    vec3 center;
+    Point center;
     float radius;
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(0.7,1.3,-1.5);
+    light1.center.coords=vec3(0.7,1.3,-1.5);
     light1.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -64,7 +66,7 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(3,0,1);
+    light2.center.coords=vec3(3,0,1);
     light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -81,7 +83,7 @@ void buildScene(){
     
     
     //----------- BALL 1 -------------------------
-    ball1.center=vec3(0,-0.1,-2.);
+    ball1.center.coords=vec3(0,-0.1,-2.);
     ball1.radius=0.5;
     
     color= vec3(0.9,0.9,0.5);
@@ -95,7 +97,7 @@ void buildScene(){
     
     
     //----------- BALL 2 -------------------------
-    ball2.center=vec3(-1.,-0.43,-1.6);
+    ball2.center.coords=vec3(-1.,-0.43,-1.6);
     ball2.radius=0.55;
     
     color= 0.7*vec3(0.3,0.2,0.6);
@@ -111,7 +113,7 @@ void buildScene(){
     
     
     //----------- BALL 3 -------------------------
-    ball3.center=vec3(0.7,-0.,-1.5);
+    ball3.center.coords=vec3(0.7,-0.,-1.5);
     ball3.radius=0.6;
     
     color= 0.1*vec3(0.7,0.1,0.2);
@@ -125,81 +127,81 @@ void buildScene(){
     
     
     
-    
-    
-    
-    
-    
-    
-    //----------- WALL 1 -------------------------
-    normal=vec3(0,1,0);
-    offset=1.;
-    
-    color=vec3(1.,0.7,0.7);
-    specularity=0.;
-    roughness=0.2;
-    
-    setPlane(wall1,normal,offset);
-    wall1.mat=makeDielectric(color,specularity,roughness);
-
-    
-
-    
-    
-    
-    //----------- WALL 2 -------------------------
-    normal=vec3(0,0,1);
-    offset=5.;
-    
-    color=vec3(0.7,0.7,0.8);
-    specularity=0.;
-    roughness=0.5;
-    
-    setPlane(wall2,normal,offset);
-    wall2.mat=makeDielectric(color,specularity,roughness);
-
-    
-    
-    
-    
-    
-    
-     //----------- WALL 3 -------------------------
-    normal=vec3(-1,0,0);
-    //normal=vec3(1,0,0);
-    offset=5.;
-    //offset=5.;
-    
-    color=vec3(0.5,0.9,0.5);
-    specularity=0.;
-    roughness=0.5;
-    
-    setPlane(wall3,normal,offset);
-    wall3.mat=makeDielectric(color,specularity,roughness);
-
-    
-
-    
-    
-    
+//    
+//    
+//    
+//    
+//    
+//    
+//    //----------- WALL 1 -------------------------
+//    normal=vec3(0,1,0);
+//    offset=1.;
+//    
+//    color=vec3(1.,0.7,0.7);
+//    specularity=0.;
+//    roughness=0.2;
+//    
+//    setPlane(wall1,normal,offset);
+//    wall1.mat=makeDielectric(color,specularity,roughness);
+//
+//    
+//
+//    
+//    
+//    
+//    //----------- WALL 2 -------------------------
+//    normal=vec3(0,0,1);
+//    offset=5.;
+//    
+//    color=vec3(0.7,0.7,0.8);
+//    specularity=0.;
+//    roughness=0.5;
+//    
+//    setPlane(wall2,normal,offset);
+//    wall2.mat=makeDielectric(color,specularity,roughness);
+//
+//    
+//    
+//    
+//    
+//    
+//    
+//     //----------- WALL 3 -------------------------
+//    normal=vec3(-1,0,0);
+//    //normal=vec3(1,0,0);
+//    offset=5.;
+//    //offset=5.;
+//    
+//    color=vec3(0.5,0.9,0.5);
+//    specularity=0.;
+//    roughness=0.5;
+//    
+//    setPlane(wall3,normal,offset);
+//    wall3.mat=makeDielectric(color,specularity,roughness);
+//
+//    
+//
+//    
+//    
+//    
     
     
     
     //----------- RING 1 -------------------------
     
-    
-    ring1.center=vec3(0.3,-0.75,-.6);
-    ring1.radius=0.3;
-    ring1.tubeRad=0.02;
-    ring1.stretch=0.05;
-    
-    color=vec3(0.7,0.7,0.2);
-    specularity=0.8;
-    roughness=0.05;
-    
-    ring1.mat=makeMetal(color,specularity,roughness);
-    
-    
+//    
+//    ring1.center=vec3(0.3,-0.75,-.6);
+//    ring1.radius=0.3;
+//    ring1.tubeRad=0.02;
+//    ring1.stretch=0.05;
+//    
+//    color=vec3(0.7,0.7,0.2);
+//    specularity=0.8;
+//    roughness=0.05;
+//    
+//    ring1.mat=makeMetal(color,specularity,roughness);
+//    
+//    
     
     
     
@@ -207,7 +209,7 @@ void buildScene(){
     //----------- LENS 1 -------------------------
     
     
-    center=vec3(1,0,-3.);
+    center.coords=vec3(1,0,-3.);
     radius=1.;
     thickness=0.3;
     axis=vec3(0,0,1);
@@ -259,15 +261,15 @@ float sceneSDF(Vector tv, inout localData dat){
     
     
     //------the walls 
-    
-    dist=min(dist,planeSDF(tv,wall1,dat));
-    
-    dist=min(dist,planeSDF(tv,wall2,dat));
-    
-    dist=min(dist,planeSDF(tv,wall3,dat));
-    
-    
-    
+//    
+//    dist=min(dist,planeSDF(tv,wall1,dat));
+//    
+//    dist=min(dist,planeSDF(tv,wall2,dat));
+//    
+//    dist=min(dist,planeSDF(tv,wall3,dat));
+//    
+//    
+//    
     //-------a ring
     
     //dist=min(dist,ringSDF(tv,ring1,dat));
