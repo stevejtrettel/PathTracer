@@ -34,12 +34,28 @@ float sphDist(vec3 pos,Sphere sph){
      return exactDist(Point(pos), sph.center) - sph.radius;
 }
 
+//
+//Vector sphereNormal(Vector tv, Sphere sph){
+//    return Vector(tv.pos,normalize(tv.pos.coords-sph.center.coords));
+//}
 
 Vector sphereNormal(Vector tv, Sphere sph){
-    return Vector(tv.pos,normalize(tv.pos.coords-sph.center.coords));
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    vec3 pos=tv.pos.coords;
+    vec3 dir=  e.xyy*sphDist( pos + e.xyy*ep,sph ) + 
+					  e.yyx*sphDist( pos + e.yyx*ep,sph) + 
+					  e.yxy*sphDist( pos + e.yxy*ep,sph) + 
+					  e.xxx*sphDist( pos + e.xxx*ep,sph);
+    
+    dir=normalize(dir);
+    
+    Vector newVec=Vector(tv.pos,dir);
+
+    
+    return newVec;
 }
-
-
 
 
 float sphereSDF(Vector tv, Sphere sph,inout localData dat){

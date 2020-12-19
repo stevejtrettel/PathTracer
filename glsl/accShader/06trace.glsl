@@ -5,43 +5,205 @@
 //-------------------------------------------------
 
 
+
+//right now this is a TOTALLY BAD WAY TO DO THIS
+//I AM HARDCODING A WALL INTO THE RAYMARCHING LOOP:
+
+
+
+bool abovePlane(Vector tv){
+    
+    //set the height of the plane!
+    float height=-5.;
+    
+    
+    if(tv.pos.coords.z>height){return true;}
+    else{return false;}
+}
+
+
+//given the initial conditions AND a distance just before
+//impacting the plane, do a binary search to find the plane:
+Vector findPlane(Vector tv, inout float dist,float stp){
+
+    //flowing dist doesnt hit the plane, dist+step does:
+    float testDist=stp;
+    
+    for(int i=0;i<8;i++){
+        
+        //divide the step size in half
+         testDist=testDist/2.;
+
+        //if you are still above the plane, add to distance.
+        if(abovePlane(flow(tv,dist+testDist))){
+            dist+=testDist;
+        }
+        //if not, then don't add: divide in half and try again
+    
+    }
+    
+    return flow(tv,dist);
+    
+    
+}
+
+
+
+Vector planeNormal(Vector tv){
+    Point p=tv.pos;
+    Isometry trans=makeInvLeftTranslation(p);//pulls p to the origin.
+    //translate the xy plane vectors to the origin:
+    vec4 vX=trans.mat*vec4(1.,0.,0.,0.);
+    vec4 vY=trans.mat*vec4(0.,1.,0.,0.);
+    
+    //find the normal to these two at the origin:
+    //here the metric is the usual one, so we can take the cross product
+    vec3 normal=cross(vX.xyz,vY.xyz);
+    normal=normalize(normal);
+    
+    //THIS IS CUSTOM ONLY FOR THE XY PLANE
+
+    Vector n=Vector(p,normal);
+   // n = tangNormalize(n);
+   // vec4 dir = n.dir;
+    return n;
+}
+
+
+
+
+
 void raymarch(inout Path path, inout localData dat){
 
 
     float distToScene=0.;
     float totalDist=0.;
+    Vector test=path.tv;
+    bool findPlane=false;
     
     //set if you are inside or outside
     float side=path.inside?-1.:1.;
+    
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-            distToScene  = sceneSDF(path.tv,dat);
+            distToScene  = side*sceneSDF(test,dat);
             
             if (distToScene< EPSILON){
                     //local data is set by the sdf
-                    path.distance=totalDist;
+                    path.distance=totalDist+distToScene;
+                    path.tv=flow(path.tv,path.distance);
                     return;
                 }
+            
+            //otherwise keep going
+            totalDist += distToScene;
+            test=flow(test,distToScene);
+            
+            if(!abovePlane(test)){
+                //if you just passed the plane:
+                //step backwards one step
+                path.distance=totalDist-distToScene;
+                path.tv=flow(path.tv,path.distance);
+                //run the binary search for the plane
+                
+                float testDist=distToScene;
+                float dist=0.;
+                Vector testVec=path.tv;
+                for(int i=0;i<8;i++){
+        
+                    //divide the step size in half
+                     testDist=testDist/2.;
+
+                //if you are still above the plane, add to distance.
+                if(abovePlane(flow(testVec,dist+testDist))){
+                        dist+=testDist;
+                }
+                    //if not, then don't add: divide in half and try again
+    
+                }
+                path.distance+=dist;
+                path.tv=flow(path.tv,dist);
+                
+                
+                
+                
+                
+                //set the material properties 
+                dat.normal=planeNormal(path.tv);
+                dat.mat=makeDielectric(0.6*vec3(0.5),0.2,0.1);
+                return;
+            }
             
             if(totalDist>maxDist){
                 break;
             }
-            
-            //otherwise keep going
-            totalDist += 0.5*distToScene;
-            flow(path.tv, 0.5*distToScene);
+
         }
     
     //if you hit nothing
     dat.isSky=true;
     path.keepGoing=false;
     path.distance=maxDist;
+    path.tv=flow(path.tv,path.distance);
 }
 
 
 
 
+
+
+
+
+
+
+
+
+
+//normal raymarch without hardcoded plane
+
+//
+//void raymarch(inout Path path, inout localData dat){
+//
+//
+//    float distToScene=0.;
+//    float totalDist=0.;
+//    Vector test=path.tv;
+//    
+//    //set if you are inside or outside
+//    float side=path.inside?-1.:1.;
+//    
+//
+//        for (int i = 0; i < maxMarchSteps; i++){
+//            
+//            distToScene  = side*sceneSDF(test,dat);
+//            
+//            if (distToScene< EPSILON){
+//                    //local data is set by the sdf
+//                    path.distance=totalDist+distToScene;
+//                    path.tv=flow(path.tv,path.distance);
+//                    return;
+//                }
+//            
+//            if(totalDist>maxDist){
+//                break;
+//            }
+//            
+//            //otherwise keep going
+//            totalDist += distToScene;
+//            test=flow(test,distToScene);
+//        }
+//    
+//    //if you hit nothing
+//    dat.isSky=true;
+//    path.keepGoing=false;
+//    path.distance=maxDist;
+//    path.tv=flow(path.tv,path.distance);
+//}
+//
+//
+//
+//
 
 
 
@@ -237,8 +399,12 @@ void surfaceColor(inout Path path,localData dat){
 
 void skyColor(inout Path path,inout localData dat){
     //vec3 skyColor=skyTex(path.tv.dir);
-    vec3 p=normalize(path.tv.pos.coords);
-    vec3 skyColor=checkerTex(p);
+    
+    //vec3 p=normalize(path.tv.pos.coords);
+    //vec3 skyColor=checkerTex(p);
+    
+    vec3 skyColor=vec3(0.1,0.2,0.3);
+    
     path.pixel += path.light*skyColor;
 }
 
@@ -284,10 +450,8 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             if(!path.keepGoing||dat.isSky){break;}
             
         }
-    
-    
-return dat.normal.dir;
-  // return path.pixel;
+
+   return path.pixel;
 
 }
 

@@ -120,6 +120,23 @@ Isometry makeInvLeftTranslation(Point p) {
 }
 
 
+// overlaod using Vector
+Isometry makeLeftTranslation(Vector v) {
+    return makeLeftTranslation(v.pos);
+}
+
+// overlaod using Vector
+Isometry makeInvLeftTranslation(Vector v) {
+    return makeInvLeftTranslation(v.pos);
+}
+
+
+
+
+
+
+
+
 // Product of two isometries (more precisely isom1 * isom2)
 Isometry composeIsometry(Isometry isom1, Isometry isom2) {
     return Isometry(isom1.mat * isom2.mat, isom1.nil && isom2.nil);
@@ -153,17 +170,6 @@ Point translate(Isometry isom, Point p) {
 }
 
 
-
-
-// overlaod using Vector
-Isometry makeLeftTranslation(Vector v) {
-    return makeLeftTranslation(v.pos);
-}
-
-// overlaod using Vector
-Isometry makeInvLeftTranslation(Vector v) {
-    return makeInvLeftTranslation(v.pos);
-}
 
 // overload to translate a direction
 //SHOULD THIS CHANGE THE DIRECTION?
@@ -464,10 +470,9 @@ float exactDist(Vector u, Vector v){
 
 //returns unit tangent vector t
 void tangDirection(Point p, Point q, out Vector tv, out float len){
-    vec3 difference=q.coords-p.coords;
-    len=length(difference);
     
-    vec3 dir=normalize(difference.xyz);
+    vec3 difference=q.coords-p.coords;
+    vec3 dir=normalize(difference);
         
     tv=Vector(p,dir);
 }
@@ -503,7 +508,7 @@ void tangDirection(Vector u, Vector v, out Vector tv, out float len){
 
 // flow the given vector during time t
 
-Vector flow(Vector v, float t){
+Vector flow(inout Vector v, float t){
     // Follow the geodesic flow during a time t
     // If the tangent vector at the origin is too close to the XY plane,
     // we use an asymptotic expansion of the geodesics.
@@ -574,7 +579,8 @@ Vector flow(Vector v, float t){
         (1. / 12.) * (a * a * t3 + 12. * t1) * c1
         - (1. / 240.) * a * a * t5 * c3
         + (1. / 10080.) * a * a * t7 * c5
-        - (1. / 725760.) * a * a * t9 * c7));
+        - (1. / 725760.) * a * a * t9 * c7)
+                                      );
     }
 
     /*

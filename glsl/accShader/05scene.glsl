@@ -53,11 +53,11 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center.coords=vec3(0.7,1.3,-1.5);
-    light1.radius=0.2;
+    light1.center.coords=vec3(0.,0.,30.);
+    light1.radius=1.;
     
     color= vec3(1.,0.6,0.4);
-    intensity=40.;
+    intensity=3.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -66,11 +66,11 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center.coords=vec3(3,0,1);
+    light2.center.coords=vec3(3,0,15);
     light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
-    intensity=60.;
+    intensity=3.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -83,11 +83,11 @@ void buildScene(){
     
     
     //----------- BALL 1 -------------------------
-    ball1.center.coords=vec3(0,-0.1,-2.);
+    ball1.center.coords=vec3(-2,-1,-1);
     ball1.radius=0.5;
     
-    color= vec3(0.9,0.9,0.5);
-    specularity=0.8;
+    color= 0.7*vec3(0.9,0.9,0.5);
+    specularity=0.2;
     roughness=0.;
     
     ball1.mat= makeMetal(color,specularity,roughness);
@@ -97,12 +97,12 @@ void buildScene(){
     
     
     //----------- BALL 2 -------------------------
-    ball2.center.coords=vec3(-1.,-0.43,-1.6);
+    ball2.center.coords=vec3(-.5,0.2,-1.);
     ball2.radius=0.55;
     
     color= 0.7*vec3(0.3,0.2,0.6);
-    specularity=0.2;
-    roughness=0.01;
+    specularity=0.1;
+    roughness=0.1;
     
     ball2.mat=makeDielectric(color,specularity,roughness);
 
@@ -113,16 +113,16 @@ void buildScene(){
     
     
     //----------- BALL 3 -------------------------
-    ball3.center.coords=vec3(0.7,-0.,-1.5);
+    ball3.center.coords=vec3(2,0.,-1.);
     ball3.radius=0.6;
     
-    color= 0.1*vec3(0.7,0.1,0.2);
-    specularity=0.4;
+    color= 0.7*vec3(0.7,0.1,0.2);
+    specularity=0.1;
     roughness=0.1;
     
-    //ball3.mat=makeMetal(color,specularity,roughness);
+    ball3.mat=makeMetal(color,specularity,roughness);
 
-    ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),2.3);
+    //ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),2.3);
     
     
     
