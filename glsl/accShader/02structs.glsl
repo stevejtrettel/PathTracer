@@ -57,8 +57,6 @@ Vector rotateByFacing(Vector v, mat3 facing){
 
 
 
-
-
 //actually flowing along a geodesic
 void flow(inout Vector tv, float t){
     //flow distance t in direction tv

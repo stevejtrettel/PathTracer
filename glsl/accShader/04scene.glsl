@@ -51,7 +51,7 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(-0.2,2.,-0);
+    light1.center=vec3(0.7,1.3,-1.5);
     light1.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -64,7 +64,7 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(3,0,-3);
+    light2.center=vec3(3,0,1);
     light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -111,7 +111,7 @@ void buildScene(){
     
     
     //----------- BALL 3 -------------------------
-    ball3.center=vec3(0.7,-0.85,-1.5);
+    ball3.center=vec3(0.7,-0.,-1.5);
     ball3.radius=0.6;
     
     color= 0.1*vec3(0.7,0.1,0.2);
@@ -136,7 +136,7 @@ void buildScene(){
     offset=1.;
     
     color=vec3(1.,0.7,0.7);
-    specularity=0.1;
+    specularity=0.;
     roughness=0.2;
     
     setPlane(wall1,normal,offset);
