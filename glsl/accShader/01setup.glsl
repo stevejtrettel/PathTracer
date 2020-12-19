@@ -28,7 +28,7 @@ float maxDist=10.;
 float fov=100.;
 int maxBounces=30;
 
-
+float PI=3.1415926535;
 
 
 

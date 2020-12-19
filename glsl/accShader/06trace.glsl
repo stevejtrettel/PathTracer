@@ -16,8 +16,7 @@ void raymarch(inout Path path, inout localData dat){
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-            distToScene  = side*sceneSDF(path.tv,dat);
-            totalDist += distToScene;
+            distToScene  = sceneSDF(path.tv,dat);
             
             if (distToScene< EPSILON){
                     //local data is set by the sdf
@@ -30,7 +29,8 @@ void raymarch(inout Path path, inout localData dat){
             }
             
             //otherwise keep going
-            flow(path.tv, distToScene);
+            totalDist += 0.5*distToScene;
+            flow(path.tv, 0.5*distToScene);
         }
     
     //if you hit nothing
@@ -237,7 +237,8 @@ void surfaceColor(inout Path path,localData dat){
 
 void skyColor(inout Path path,inout localData dat){
     //vec3 skyColor=skyTex(path.tv.dir);
-    vec3 skyColor=checkerTex(path.tv.dir);
+    vec3 p=normalize(path.tv.pos.coords);
+    vec3 skyColor=checkerTex(p);
     path.pixel += path.light*skyColor;
 }
 
@@ -247,7 +248,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
     
     localData dat;
     initializeData(dat);
-    maxBounces=10;
+    maxBounces=2;
     
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
     {
@@ -283,8 +284,10 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             if(!path.keepGoing||dat.isSky){break;}
             
         }
-
-   return path.pixel;
+    
+    
+return dat.normal.dir;
+  // return path.pixel;
 
 }
 

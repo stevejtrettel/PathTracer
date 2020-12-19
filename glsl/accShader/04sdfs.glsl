@@ -12,8 +12,26 @@ struct Sphere{
 
 
 
+
+
+
+
+float fakeSphDist(vec3 pos, Sphere sph){
+    return fakeDistance(Point(pos),sph.center)-sph.radius;
+}
+
+
+
 float sphDist(vec3 pos,Sphere sph){
-    return length(pos-sph.center.coords)-sph.radius;
+    
+     // more precise computation
+    float fakeDist = fakeDistance(Point(pos), sph.center);
+
+     if (fakeDist > 10. * sph.radius) {
+            return fakeDist - sph.radius;
+        }
+
+     return exactDist(Point(pos), sph.center) - sph.radius;
 }
 
 
@@ -27,12 +45,9 @@ Vector sphereNormal(Vector tv, Sphere sph){
 float sphereSDF(Vector tv, Sphere sph,inout localData dat){
     
     //distance to closest point:
-    float d = sphDist(tv.pos.coords,sph);
+    float d = fakeSphDist(tv.pos.coords,sph);
     
-    //if you are looking away from the sphere, stop
-    if(d>0.&&dot(tv.dir,tv.pos.coords-sph.center.coords)>0.){return maxDist;}
-    
-    
+
     if(d<EPSILON){//set the material
         dat.isSky=false;
         dat.normal=sphereNormal(tv,sph);
