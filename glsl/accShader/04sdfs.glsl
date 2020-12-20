@@ -16,22 +16,9 @@ struct Sphere{
 
 
 
-float fakeSphDist(vec3 pos, Sphere sph){
-    return fakeDistance(Point(pos),sph.center)-sph.radius;
-}
-
-
-
 float sphDist(vec3 pos,Sphere sph){
-    
-     // more precise computation
-    float fakeDist = fakeDistance(Point(pos), sph.center);
 
-     if (fakeDist > 10. * sph.radius) {
-            return fakeDist - sph.radius;
-        }
-
-     return exactDist(Point(pos), sph.center) - sph.radius;
+    return fakeDistance(Point(pos),sph.center)-sph.radius;
 }
 
 //
@@ -61,7 +48,7 @@ Vector sphereNormal(Vector tv, Sphere sph){
 float sphereSDF(Vector tv, Sphere sph,inout localData dat){
     
     //distance to closest point:
-    float d = fakeSphDist(tv.pos.coords,sph);
+    float d = sphDist(tv.pos.coords,sph);
     
 
     if(d<EPSILON){//set the material
@@ -85,48 +72,38 @@ float sphereSDF(Vector tv, Sphere sph,inout localData dat){
 //The PLANE sdf
 //-------------------------------------------------
 
-////the data of a plane is its normal and a constant:
-//
-//struct Plane{
-//    Vector normal;
-//    float offset;
-//    Material mat;
-//};
-//
-//
-////normalize the plane's vector before adding it:
-//void setPlane(inout Plane plane,vec3 normal,float offset){
-//    normal=normalize(normal);
-//    plane.normal=normal;
-//    plane.offset=offset;
-//}
-//
-//
-//Vector planeNormal(Vector tv,Plane plane){
-//    return Vector(tv.pos, plane.normal);
-//}
-//
-//
-//float planeSDF(Vector tv, Plane plane, inout localData dat){
-//    //does not need to be a unit normal vector
-//    //D is the constant in ax+by+cz+d=0
-//    if(dot(tv.dir,plane.normal)>0.){return maxDist;}
-//    
-//    //otherwise give distance to closest point
-//    float d=dot(tv.pos,plane.normal)+plane.offset;
-//   
-//    
-//        //-----------------
-//    
-//    if(d<EPSILON){//set the material
-//        dat.isSky=false;
-//        dat.normal=planeNormal(tv,plane);
-//        dat.mat=plane.mat;
-//    }
-//    
-//    return d;
-//    
-//}
+//the data of a plane is its normal and a constant:
+
+struct EucPlane{
+    float height;
+    Material mat;
+};
+
+
+float planeDist(Point p,EucPlane plane){
+    return p.coords.z-plane.height;
+}
+
+
+Vector planeNormal(Vector tv,EucPlane plane){
+    return Vector(tv.pos, vec3(0,0,1));
+}
+
+
+float planeSDF(Vector tv, EucPlane plane, inout localData dat){
+
+    //otherwise give distance to closest point
+    float d=planeDist(tv.pos,plane);
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=planeNormal(tv,plane);
+        dat.mat=plane.mat;
+    }
+    
+    return d;
+    
+}
 
 
 

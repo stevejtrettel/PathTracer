@@ -20,9 +20,9 @@ Sphere ball3;
 
 
 //
-//Plane wall1;
-//Plane wall2;
-//Plane wall3;
+EucPlane wall1;
+EucPlane wall2;
+EucPlane wall3;
 
 
 //Ring ring1;
@@ -53,11 +53,11 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center.coords=vec3(0.,0.,50.);
-    light1.radius=.05;
+    light1.center.coords=vec3(0.,0.,4.);
+    light1.radius=1.;
     
     color= vec3(1.,0.6,0.4);
-    intensity=100.;
+    intensity=10.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -66,7 +66,7 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center.coords=vec3(3,0,15);
+    light2.center.coords=vec3(3,0,2);
     light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -133,18 +133,16 @@ void buildScene(){
 //    
 //    
 //    
-//    //----------- WALL 1 -------------------------
-//    normal=vec3(0,1,0);
-//    offset=1.;
-//    
-//    color=vec3(1.,0.7,0.7);
-//    specularity=0.;
-//    roughness=0.2;
-//    
-//    setPlane(wall1,normal,offset);
-//    wall1.mat=makeDielectric(color,specularity,roughness);
-//
-//    
+    //----------- WALL 1 -------------------------
+     wall1.height=-5.;
+    
+    color=vec3(1.,0.7,0.7);
+    specularity=0.;
+    roughness=0.2;
+    
+    wall1.mat=makeDielectric(color,specularity,roughness);
+
+    
 //
 //    
 //    
@@ -247,12 +245,12 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light1,dat));
     
-   // dist=min(dist,sphereSDF(tv,light2,dat));
+    dist=min(dist,sphereSDF(tv,light2,dat));
     
     
     //------the balls
     
-  //  dist=min(dist,sphereSDF(tv,ball1,dat));
+    dist=min(dist,sphereSDF(tv,ball1,dat));
   //  
    // dist=min(dist,sphereSDF(tv,ball2,dat));
     
@@ -262,7 +260,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the walls 
 //    
-//    dist=min(dist,planeSDF(tv,wall1,dat));
+    dist=min(dist,planeSDF(tv,wall1,dat));
 //    
 //    dist=min(dist,planeSDF(tv,wall2,dat));
 //    

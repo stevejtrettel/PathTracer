@@ -3,9 +3,24 @@
 //-------------------------------------------------
 
 
-float dot(Vector v, Vector w){
-    return dot(v.dir,w.dir);
+//FOR GLOBAL TANGENT VECTORS
+float dot(Vector u, Vector v){
+    mat3 g = mat3(
+    exp(-2. * u.pos.coords.z), 0., 0.,
+    0., exp(2. * u.pos.coords.z), 0.,
+    0., 0., 1.
+    );
+    return dot(u.dir, g * v.dir);
+
 }
+
+
+//FOR LOCAL TANGENT VECTORS: WE JUST USE
+//float dot(Vector u, Vector v){
+//    return dot(u.dir, v.dir);
+//}
+
+
 
 float norm(Vector v){
     return sqrt(dot(v,v));
@@ -19,6 +34,13 @@ Vector normalize(Vector v){
 
 float cosAng(Vector v, Vector w){
     return dot(normalize(v),normalize(w));
+}
+
+
+Vector rotateFacing(mat4 A, Vector v){
+    // apply an isometry to the tangent vector (both the point and the direction)
+    
+    return Vector(v.pos, (A*vec4(v.dir,0)).xyz);
 }
 
 
@@ -71,7 +93,64 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
 
 
 
+void init_ellip(Vector u) {
+    // initializes all the parameters needed to march along the geodesic directed by u
+    // we assume that the position of u is the origin
+    // if ab = 0 (hyperbolic sheets), all the parameters are not needed,
+    // however their computations are trivial
+    // (all the elliptic integrals becomes, trivial, the AGM stops where it starts, etc)
+    // instead of adding cases, we simply run the computations
 
+    // some renaming to simplify the formulas
+    // by assumption a^2 + b^2 + c^2 = 1
+    float ab = abs(u.dir.x * u.dir.y);
+
+    // some auxiliary value to avoind redundant computations of roots.
+    float aux1 = sqrt(1. - 2. * ab);
+    float aux2 = 2. * sqrt(ab);
+
+    // frequency
+    ell_mu = sqrt(1. + 2. * ab);
+
+    // parameters of the elliptic functions
+    ell_k = aux1 / ell_mu;
+    ell_kprime = aux2 / ell_mu;
+    ell_m = (1. - 2. * ab) / (1. + 2. * ab);
+
+    // complete elliptic integrals and related quantities
+    agm();
+    vec2 KE = ellipke();
+    ell_K = KE.x;
+    ell_E = KE.y;
+
+    // if ab = 0 (hyperbolic sheets) then k' = 0, in which case, L will not be needed and makes no sense here
+    if (ab != 0.) {
+        ell_L = ell_E / (ell_kprime * ell_K) - 0.5 * ell_kprime;
+    }
+
+}
+
+
+
+
+
+//
+//
+//
+//mat3 tangBasis(Point p){
+//    // return a basis of vectors at the point p
+//
+//    vec4 basis_x = vec4(1., 0., 0.);
+//    vec4 basis_y = vec4(0., 1., 0.);
+//    vec4 basis_z = vec4(0., 0., 1.);
+//    mat4 theBasis = mat4(0.);
+//    theBasis[0]=basis_x;
+//    theBasis[1]=basis_y;
+//    theBasis[2]=basis_z;
+//    return theBasis;
+//}
+//
+//
 
 
 
@@ -91,41 +170,36 @@ const Isometry flip = Isometry(mat4(
 1, 0, 0, 0,
 0, 0, -1, 0,
 0, 0, 0, 1
-), false);
+));
 
 
 
-// return the rotation around the z-axis by an angle alpha
-Isometry rotation(float angle){
-    mat4 mat = mat4(
-    cos(angle), sin(angle), 0, 0,
-    -sin(angle), cos(angle), 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1
-    );
-    return Isometry(mat, false);
-}
 
-// Return the isometry sending the origin to p
+
+
 Isometry makeLeftTranslation(Point p) {
-    // this is in COLUMN MAJOR ORDER so the things that LOOK LIKE ROWS are actually FUCKING COLUMNS!
-    mat4 mat = mat4(
-    1., 0., -p.coords.y / 2., 0.,
-    0., 1., p.coords.x / 2., 0.,
-    0., 0., 1., 0.,
-    p.coords.x, p.coords.y, p.coords.z, 1.);
-    return Isometry(mat, true);
+    mat4 matrix =  mat4(
+    exp(p.coords.z), 0., 0., 0.,
+    0., exp(-p.coords.z), 0., 0.,
+    0., 0., 1., 0,
+    p.coords.x, p.coords.y, p.coords.z, 1.
+    );
+    return Isometry(matrix);
 }
 
-// Return the isometry sending p to the origin
 Isometry makeInvLeftTranslation(Point p) {
-    mat4 mat = mat4(
-    1., 0., p.coords.y / 2., 0.,
-    0., 1., -p.coords.x / 2., 0.,
-    0., 0., 1., 0.,
-    -p.coords.x, -p.coords.y, -p.coords.z, 1.);
-    return Isometry(mat, true);
+    mat4 matrix =  mat4(
+    exp(-p.coords.z), 0., 0., 0.,
+    0., exp(p.coords.z), 0., 0.,
+    0., 0., 1., 0,
+    -exp(-p.coords.z) * p.coords.x, -exp(p.coords.z) * p.coords.y, -p.coords.z, 1.
+    );
+    return Isometry(matrix);
 }
+
+
+
+
 
 
 // overlaod using Vector
@@ -139,23 +213,6 @@ Isometry makeInvLeftTranslation(Vector v) {
 }
 
 
-
-// overload to translate a direction
-//SHOULD THIS CHANGE THE DIRECTION?
-Vector translate(Isometry isom, Vector v) {
-    // apply an isometry to the tangent vector (both the point and the direction)
-    if (isom.nil) {
-        return Vector(translate(isom, v.pos), v.dir);
-    }
-    else {
-        Isometry shift = makeLeftTranslation(v.pos);
-        Point target = translate(isom, v.pos);
-        Isometry shiftInv = makeInvLeftTranslation(target);
-        mat4 matDir = shiftInv.mat * isom.mat * shift.mat;
-        vec3 newDir= (matDir * vec4(v.dir,0.)).xyz;
-        return Vector(target,newDir);
-    }
-}
 
 
 
@@ -282,25 +339,9 @@ bool zero_chi(float rhoSq, float z, float phiMin, float phiMax, float s, out flo
 
 
 //----------------------------------------------------------------------------------------------------------------------
-// Global Tangent Directions, Distances Etc
+// DISTANCE FUNCTIONS
 //----------------------------------------------------------------------------------------------------------------------
 
-
-float fakeHeightSq(Point p) {
-    // square of the fake height.
-    // fake height : bound on the height of the ball centered at the origin passing through p
-    float z = abs(p.coords.z);
-
-    if (z < sqrt(6.)){
-        return z * z;
-    }
-    else if (z < 4. * sqrt(3.)){
-        return 12. * (pow(0.75 * z, 2. / 3.) - 1.);
-    }
-    else {
-        return 2. * sqrt(3.) * z;
-    }
-}
 
 float fakeDistance(Point p, Point q){
     // measure the distance between two points in the geometry
@@ -308,116 +349,14 @@ float fakeDistance(Point p, Point q){
 
     Isometry shift = makeInvLeftTranslation(p);
     Point qOrigin = translate(shift, q);
-    // we now need the distance between the origin and p
-    float x = qOrigin.coords.x;
-    float y = qOrigin.coords.y;
-    float rhosq = x * x + y * y;
-    float hsq = fakeHeightSq(qOrigin);
-
-    return pow(0.2 * rhosq * rhosq + 0.8 * hsq * hsq, 0.25);
+    
+    return length(q.coords-p.coords);
 }
 
 float fakeDistance(Vector u, Vector v){
     // overload of the previous function in case we work with tangent vectors
     return fakeDistance(u.pos, v.pos);
 }
-
-float ellipsoidDistance(Point p, Point q){
-    // measure the distance between two points in the geometry
-    // fake distance
-
-    Isometry shift = makeInvLeftTranslation(p);
-    Point qOrigin = translate(shift, q);
-    // we now need the distance between the origin and p
-    float x = qOrigin.coords.x;
-    float y = qOrigin.coords.y;
-    float rhosq = x * x + y * y;
-    float hsq = fakeHeightSq(qOrigin);
-
-    return pow(1. * pow(rhosq, 10.) + 1. * pow(hsq, 2.), 0.25);
-}
-
-float ellipsoidDistance(Vector u, Vector v){
-    // overload of the previous function in case we work with tangent vectors
-    return ellipsoidDistance(u.pos, v.pos);
-}
-
-
-// assume that a geodesic starting from the origin reach the point q
-// after describing an angle phi (in the xy plane)
-// return the length of this geodesic
-// the point q is given in cylinder coordiantes (rho, theta, z)
-// we assume that rho > 0 and z > 0
-void _lengthFromPhi(float rhoSq, float z, float phi, out float len) {
-    float sPhi = sin(0.5 * phi);
-    float c = 2. * sPhi / sqrt(rhoSq + 4.0 * sPhi * sPhi);
-    len = abs(phi / c);
-}
-
-// assume that a geodesic starting from the origin reach the point q
-// after describing an angle phi (in the xy plane)
-// return the unit tangent vector of this geodesic and its length
-// the point q is given in cylinder coordiantes (rho, theta, z)
-// we assume that rho > 0 and z > 0
-void _dirLengthFromPhi(float rhoSq, float theta, float z, float phi, out Vector dir, out float len) {
-    float sPhi = sin(0.5 * phi);
-    float a = sqrt(rhoSq) / sqrt(rhoSq + 4. * sPhi * sPhi);
-    float c = 2. * sPhi / sqrt(rhoSq + 4. * sPhi * sPhi);
-    float alpha = - 0.5 * phi + theta;
-    if (sPhi <  0.) {
-        alpha = alpha + PI;
-    }
-    dir = Vector(ORIGIN, vec3(a * cos(alpha), a * sin(alpha), abs(c)));
-    dir = normalize(dir);
-    len = abs(phi / c);
-}
-
-
-// Compute the exact distance between p and q
-float exactDist(Point p, Point q) {
-    // move p to the origin and q accordingly
-    Isometry shift = makeInvLeftTranslation(p);
-    Point qOrigin = translate(shift, q);
-
-    // if needed we flip the point qOrigin so that its z-coordinates is positive.
-    // this does not change its distance to the origin
-    if (qOrigin.coords.z < 0.){
-        qOrigin = translate(flip, qOrigin);
-    }
-    float x = qOrigin.coords.x;
-    float y = qOrigin.coords.y;
-    float z = qOrigin.coords.z;
-    float rhoSq = x * x + y * y;
-
-    if (z == 0.) {
-        // qOrigin on the xy-plane
-        return sqrt(rhoSq);
-    }
-    else if (rhoSq == 0.){
-        // qOrigin on the z-axis
-        if (z < 2. * PI) {
-            return z;
-        }
-        else {
-            return 2. * PI * sqrt(z / PI - 1.);
-        }
-    }
-    else {
-        // generic position for qOrigin
-        float phi;
-        float length;
-        zero_chi(rhoSq, z, 0., 2. * PI, 1., phi);
-        _lengthFromPhi(rhoSq, z, phi, length);
-        return length;
-    }
-}
-
-float exactDist(Vector u, Vector v){
-    // overload of the previous function in case we work with tangent vectors
-    return exactDist(u.pos, v.pos);
-}
-
-
 
 
 
@@ -454,107 +393,242 @@ float exactDist(Vector u, Vector v){
 
 
 
-// flow the given vector during time t
+Vector numflow(inout Vector tv, float t) {
+    // follow the geodesic flow using a numerical integration
+    // fix the noise for small steps
+    float NUM_STEP = 0.2 * EPSILON;
 
-Vector flow(inout Vector v, float t){
-    // Follow the geodesic flow during a time t
-    // If the tangent vector at the origin is too close to the XY plane,
-    // we use an asymptotic expansion of the geodesics.
-    // This help to get rid of the noise around the XY plane
-    // The threshold is given by the tolerance parameter
-    float tolerance = 0.1;
-
-
-    // move p to the origin
-    Isometry shift = makeLeftTranslation(v.pos);
-
-    // vector at the origin
-    Vector vOrigin = Vector(ORIGIN, v.dir);
-
-    // solve the problem !
-    float c = vOrigin.dir.z;
-    float a = sqrt(1. - c * c);
-    // float alpha = fixedatan(tvOrigin.dir.y, tvOrigin.dir.x);
-    float alpha = atan(vOrigin.dir.y, vOrigin.dir.x);
-
-    Vector achievedFromOrigin;
-
-    if (abs(c * t) < tolerance){
-        // use an asymptotic expansion (computed with SageMath)
-
-        // factorize some computations...
-        float cosa = cos(alpha);
-        float sina = sin(alpha);
-        float t1 = t;
-        float t2 = t1 * t;
-        float t3 = t2 * t;
-        float t4 = t3 * t;
-        float t5 = t4 * t;
-        float t6 = t5 * t;
-        float t7 = t6 * t;
-        float t8 = t7 * t;
-        float t9 = t8 * t;
-
-        float c1 = c;
-        float c2 = c1 * c;
-        float c3 = c2 * c;
-        float c4 = c3 * c;
-        float c5 = c4 * c;
-        float c6 = c5 * c;
-        float c7 = c6 * c;
+    // Isometry moving back to the origin and conversely
+    Isometry isom = makeLeftTranslation(tv);
+    Isometry isomInv = makeInvLeftTranslation(tv);
 
 
+    // pull back of the tangent vector at the origin
+    Vector tvOrigin = translate(isomInv, tv);
 
-        achievedFromOrigin.pos = Point(vec3(
-        a * t1 * cosa
-        - (1. / 2.) * a * t2 * c1 * sina
-        - (1. / 6.) * a * t3 * c2 * cosa
-        + (1. / 24.) * a * t4 * c3 * sina
-        + (1. / 120.) * a * t5 * c4 * cosa
-        - (1. / 720.) * a * t6 * c5 * sina
-        - (1. / 5040.) * a * t7 * c6 * cosa
-        + (1. / 40320.) * a * t8 * c7 * sina,
+    // tangent vector used updated during the numerical integration
+    Vector aux = tvOrigin;
 
-        a * t * sina
-        + (1. / 2.) * a * t2 * c1 * cosa
-        - (1. / 6.) * a * t3 * c2 * sina
-        - (1. / 24.) * a * t4 * c3 * cosa
-        + (1. / 120.) * a * t5 * c4 * sina
-        + (1. / 720.) * a * t6 * c5 * cosa
-        - (1. / 5040.) * a * t7 * c6 * sina
-        - (1. / 40320.) * a * t8 * c7 * cosa,
+    // integrate numerically the flow
+    int n = int(floor(t/NUM_STEP));
+    for (int i = 0; i < n; i++){
+        vec3 fieldPos = aux.dir;
+        vec3 fieldDir = vec3(
+        2. * aux.dir.x * aux.dir.z,
+        -2. * aux.dir.y * aux.dir.z,
+        -exp(-2. * aux.pos.coords.z) * pow(aux.dir.x, 2.) + exp(2. * aux.pos.coords.z) * pow(aux.dir.y, 2.)
+        );
 
-        (1. / 12.) * (a * a * t3 + 12. * t1) * c1
-        - (1. / 240.) * a * a * t5 * c3
-        + (1. / 10080.) * a * a * t7 * c5
-        - (1. / 725760.) * a * a * t9 * c7)
-                                      );
+        aux.pos.coords = aux.pos.coords + NUM_STEP * fieldPos;
+        aux.dir = aux.dir + NUM_STEP * fieldDir;
+        aux = normalize(aux);
     }
 
-    /*
-        For the record, the previous test without the asymptotic expansion
+    Vector res = translate(isom, aux);
+    res = normalize(res);
 
-        if (c == 0.) {
+    return res;
 
-            achievedFromOrigin.pos = Point(vec4(a * cos(theta) * t, a * sin(theta) * t, 0. , 1.));
-            //achievedFromOrigin.dir = tvOrigin.dir;
-    }
-    */
-
-    else {
-        achievedFromOrigin.pos = Point(vec3(
-        2. * (a / c) * sin(0.5 * c * t) * cos(0.5 * c * t + alpha),
-        2. * (a / c) * sin(0.5 * c * t) * sin(0.5 * c * t + alpha),
-        c * t + 0.5 * pow(a / c, 2.) * (c * t - sin(c * t))
-        ));
-    }
-
-    // there is case distinction for the direction (pulled back at the origin)
-    achievedFromOrigin.dir = vec3(a * cos(c * t + alpha), a * sin(c * t + alpha), c);
-
-    // move back to p
-    return translate(shift, achievedFromOrigin);
 }
+
+
+Vector ellflow(inout Vector tv, float t){
+    // follow the geodesic flow during a time t
+
+    // Isometry moving back to the origin and conversely
+    Isometry isom = makeLeftTranslation(tv);
+    Isometry isomInv = makeInvLeftTranslation(tv);
+
+    // pull back of the tangent vector at the origin
+    Vector tvOrigin = translate(isomInv, tv);
+
+    // result to be populated
+    Vector resOrigin = Vector(ORIGIN, vec3(0.));
+
+    // renaming the coordinates of the tangent vector to simplify the formulas
+    float a = tvOrigin.dir.x;
+    float b = tvOrigin.dir.y;
+    float c = tvOrigin.dir.z;
+
+    // we need to distinguish three cases, depending on the type of geodesics
+
+    // tolerance used between the difference cases
+    //float tolerance = 0.0000001;
+
+    //if (abs(a) < tolerance) {
+    if (a == 0.) {
+        // GEODESIC IN THE HYPERBOLIC SHEET X = 0
+        float sht = sinh(t);
+        float cht = cosh(t);
+        float tht = sht/cht;
+
+        resOrigin.pos.coords = vec3(
+        0.,
+        b * sht / (cht + c * sht),
+        log(cht + c * sht)
+        );
+        resOrigin.dir = vec3(
+        0.,
+        b / pow(cht + c * sht, 2.),
+        (c + tht) / (1. + c * tht)
+        );
+    }
+    //else if (abs(b) < tolerance) {
+    else if (b == 0.) {
+        // GEODESIC IN THE HYPERBOLIC SHEET Y = 0
+        float sht = sinh(t);
+        float cht = cosh(t);
+        float tht = sht/cht;
+
+        resOrigin.pos.coords = vec3(
+        a * sht / (cht - c * sht),
+        0.,
+        - log(cht - c * sht)
+        );
+        resOrigin.dir = vec3(
+        a / pow(cht - c * sht, 2.),
+        0.,
+        (c - tht) / (1. - c * tht)
+        );
+    }
+    else {
+
+        // GENERIC CASE
+        // In order to minimizes the computations we adopt the following trick
+        // For long steps, i.e. if mu * t > 4K, then we only march by an integer multiple of the period 4K.
+        // In this way, there is no elliptic function to compute : only the x,y coordinates are shifted by a translation
+        // We only compute elliptic functions for small steps, i.e. if mu * t < 4K
+
+        float steps = floor((ell_mu * t) / (4. * ell_K));
+
+        if (steps > 0.5) {
+            resOrigin.pos.coords = vec3(ell_L * steps * 4. * ell_K, ell_L * steps * 4. * ell_K, 0.);
+            resOrigin.dir = vec3(a, b, c);
+        }
+        else {
+
+            // parameters related to the initial condition of the geodesic flow
+
+            // phase shift (Phi in the handwritten notes)
+            float aux = sqrt(1. - 2. * abs(a * b));
+            // jacobi functions applied to s0 (we don't care about the amplitude am(s0) here)
+            vec3 jacobi_s0 = vec3(
+            - c / aux,
+            (abs(a) - abs(b)) / aux,
+            (abs(a) + abs(b)) / ell_mu
+            );
+
+
+            // sign of a (resp. b)
+            float signa = 1.;
+            if (a < 0.) {
+                signa = -1.;
+            }
+            float signb = 1.;
+            if (b < 0.) {
+                signb = -1.;
+            }
+
+            // some useful intermediate computation
+            float kOkprime = ell_k / ell_kprime;
+            float oneOkprime = 1. / ell_kprime;
+
+            // we are now ready to write down the coordinates of the endpoint
+
+            // amplitude (without the phase shift of s0)
+            // the functions we consider are 4K periodic, hence we can reduce the value of mu * t modulo 4K.
+            // (more a safety check as we assumed that mu * t < 4K)
+            float s = mod(ell_mu * t, 4. * ell_K);
+            // jabobi functions applied to the amplitude s
+            vec3 jacobi_s = ellipj(s);
+
+            // jacobi function applied to mu * t + s0 = s + s0  (using addition formulas)
+            float den = 1. - ell_m * jacobi_s.x * jacobi_s.x * jacobi_s0.x * jacobi_s0.x;
+            vec3 jacobi_ss0 = vec3(
+            (jacobi_s.x * jacobi_s0.y * jacobi_s0.z + jacobi_s0.x * jacobi_s.y * jacobi_s.z) / den,
+            (jacobi_s.y * jacobi_s0.y - jacobi_s.x * jacobi_s.z * jacobi_s0.x * jacobi_s0.z) / den,
+            (jacobi_s.z * jacobi_s0.z - ell_m * jacobi_s.x * jacobi_s.y * jacobi_s0.x * jacobi_s0.y) / den
+            );
+
+            // Z(mu * t + s0) - Z(s0) (using again addition formulas)
+            float zetaj = ellipz(jacobi_s.x / jacobi_s.y) - ell_m * jacobi_s.x * jacobi_s0.x * jacobi_ss0.x;
+
+
+            // wrapping all the computation
+            resOrigin.pos.coords = vec3(
+
+            signa * sqrt(abs(b / a)) * (
+            oneOkprime * zetaj
+            + kOkprime * (jacobi_ss0.x - jacobi_s0.x)
+            + ell_L * ell_mu * t
+            ),
+
+            signb * sqrt(abs(a / b)) * (
+            oneOkprime * zetaj
+            - kOkprime * (jacobi_ss0.x - jacobi_s0.x)
+            + ell_L * ell_mu * t
+            ),
+
+            0.5 * log(abs(b / a)) + asinh(kOkprime * jacobi_ss0.y)
+            );
+
+            resOrigin.dir = vec3(
+
+            signa * abs(b) * pow(kOkprime * jacobi_ss0.y + oneOkprime * jacobi_ss0.z, 2.),
+
+            signb * abs(a) * pow(kOkprime * jacobi_ss0.y - oneOkprime * jacobi_ss0.z, 2.),
+
+            - ell_k * ell_mu * jacobi_ss0.x
+            );
+        }
+    }
+
+    resOrigin = normalize(resOrigin);
+    Vector res = translate(isom, resOrigin);
+    res = normalize(res);
+
+    return res;
+
+}
+
+Vector flow(inout Vector tv, float t) {
+
+    if (abs(t) < 50. * EPSILON) {
+        return numflow(tv, t);
+        //return ellflow(tv, t);
+    }
+    else {
+        return ellflow(tv, t);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

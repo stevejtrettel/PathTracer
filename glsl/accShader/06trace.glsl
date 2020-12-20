@@ -87,7 +87,8 @@ void raymarch(inout Path path, inout localData dat){
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-            distToScene  = side*sceneSDF(test,dat);
+            distToScene  = 1.;
+                //side*sceneSDF(test,dat);
             
             if (distToScene< EPSILON){
                     //local data is set by the sdf
@@ -132,6 +133,7 @@ void raymarch(inout Path path, inout localData dat){
                 //set the material properties 
                 dat.normal=planeNormal(path.tv);
                 dat.mat=makeDielectric(0.6*vec3(0.5),0.,0.5);
+                path.debug=vec3(1.,0,0.);
                 return;
             }
             
@@ -414,7 +416,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
     
     localData dat;
     initializeData(dat);
-    maxBounces=2;
+    maxBounces=1;
     
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
     {
@@ -450,8 +452,8 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             if(!path.keepGoing||dat.isSky){break;}
             
         }
-
-   return path.pixel;
+    return path.debug/10.;
+  // return path.pixel;
 
 }
 

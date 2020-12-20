@@ -70,6 +70,11 @@ Vector multiplyScalar(float a,Vector v) {
     return Vector(v.pos, a * v.dir);
 }
 
+// IN CASE THIS OLD NAME IS USED IN CODE: REMOVE LATER
+Vector scalarMult(float a,Vector v) {
+    return Vector(v.pos, a * v.dir);
+}
+
 
 Vector clone(Vector v){
     return v;
@@ -117,27 +122,21 @@ Vector mix(Vector v, Vector w, float x){
 
 
 struct Isometry {
-    mat4 mat;// the image of the origin by this isometry.
-    bool nil;// say if the element is known to belong to nil (the normal transitive subgroup)
+    mat4 mat;// isometry of the space.
 };
 
-//
-//// Method to unserialized isometries passed to the shader
-//Isometry unserializeIsom(mat4 data) {
-//    return Isometry(data, false);
-//}
 
-const Isometry identity = Isometry(mat4(1), true);
+const Isometry identity = Isometry(mat4(1));
 
 
 // Product of two isometries (more precisely isom1 * isom2)
 Isometry composeIsometry(Isometry isom1, Isometry isom2) {
-    return Isometry(isom1.mat * isom2.mat, isom1.nil && isom2.nil);
+    return Isometry(isom1.mat * isom2.mat);
 }
 
 // Return the inverse of the given isometry
 Isometry getInverse(Isometry isom) {
-    return Isometry(inverse(isom.mat), isom.nil);
+    return Isometry(inverse(isom.mat));
 }
 
 
@@ -150,8 +149,13 @@ Point translate(Isometry isom, Point p) {
 
  
 
-//to translate a vector not just a point need more info: this is done in "geometry"
-
+// overload to translate a direction
+//SHOULD THIS CHANGE THE DIRECTION?
+Vector translate(Isometry isom, Vector v) {
+    // apply an isometry to the tangent vector (both the point and the direction)
+    vec4 vDir=isom.mat*vec4(v.dir,0.);
+        return Vector(translate(isom, v.pos), vDir.xyz);
+}
 
 
 
