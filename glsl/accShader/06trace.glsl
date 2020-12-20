@@ -47,6 +47,7 @@ void raymarch(inout Path path, inout localData dat){
     dat.isSky=true;
     path.keepGoing=false;
     path.distance=maxDist;
+    
 }
 
 

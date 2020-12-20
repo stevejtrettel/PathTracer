@@ -93,6 +93,51 @@ Vector EucPlaneNormal(Vector tv,EucPlane plane){
 }
 
 
+
+
+
+vec3 EucPlaneColor(Vector tv,EucPlane plane){
+    vec3 color=vec3(0.);
+    
+    vec3 origColor=vec3(0.1,0.2,0.35);
+
+    float x=tv.pos.coords.x;
+    float y=tv.pos.coords.y;
+    float z=tv.pos.coords.z;
+    float h=plane.height;
+    
+    float c1=fract(5.*sqrt(2.718)*x);
+    float c2=fract(5.*y/sqrt(2.718));
+    
+    if(0.3<c1&&c1<0.45&& 0.3<c2&&c2<0.45){
+     color=3.*origColor;
+    }
+    
+    else if(0.15<c1&&c1<0.6&& 0.15<c2&&c2<0.6){
+     color=2.*origColor;
+    }
+    else if(c1<0.75&& c2<0.75){
+     color=origColor;
+    }
+    else{
+        color=0.5*origColor;
+    }
+    return color;   
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 float EucPlaneSDF(Vector tv, EucPlane plane, inout localData dat){
 
     //otherwise give distance to closest point
@@ -101,7 +146,8 @@ float EucPlaneSDF(Vector tv, EucPlane plane, inout localData dat){
     if(d<EPSILON){//set the material
         dat.isSky=false;
         dat.normal=EucPlaneNormal(tv,plane);
-        dat.mat=EucPlane.mat;
+        dat.mat=plane.mat;
+        dat.mat.diffuseColor=EucPlaneColor(tv,plane);
     }
     
     return d;

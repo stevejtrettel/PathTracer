@@ -421,6 +421,25 @@ void setLight(inout Material mat, vec3 color,float intensity){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //-------------------------------------------------
 //The LOCAL DATA Struct
 //-------------------------------------------------

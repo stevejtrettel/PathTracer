@@ -233,9 +233,9 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the lights
     
-    dist=min(dist,sphereSDF(tv,light1,dat));
+    //dist=min(dist,sphereSDF(tv,light1,dat));
     
-    dist=min(dist,sphereSDF(tv,light2,dat));
+    //dist=min(dist,sphereSDF(tv,light2,dat));
     
     
     //------the balls
@@ -250,7 +250,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the walls 
 //    
-    dist=min(dist,planeSDF(tv,wall1,dat));
+    dist=min(dist,EucPlaneSDF(tv,wall1,dat));
 //    
     //dist=min(dist,planeSDF(tv,wall2,dat));
 //    
