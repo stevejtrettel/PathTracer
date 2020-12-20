@@ -25,13 +25,6 @@ EucPlane wall2;
 EucPlane wall3;
 
 
-//Ring ring1;
-
-
-Lens lens1;
-
-
-
 
 //this function assigns all the objects their parameters
 void buildScene(){
@@ -66,11 +59,11 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center.coords=vec3(1,0,2);
-    light2.radius=0.2;
+    light2.center.coords=vec3(0,0,1);
+    light2.radius=0.5;
     
     color= vec3(1.,0.6,0.4);
-    intensity=30.;
+    intensity=80.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -131,7 +124,7 @@ void buildScene(){
     wall1.height=-1.;
     wall1.sign=1.;
     
-    color=vec3(1.,0.7,0.7);
+    color=vec3(0.1,0.2,0.35);
     specularity=0.;
     roughness=0.2;
     
@@ -139,10 +132,10 @@ void buildScene(){
 
  
     //----------- WALL 2 -------------------------
-    wall2.height=1.;
+    wall2.height=2.;
     wall2.sign=-1.;
     
-    color=vec3(0.7,0.7,0.8);
+    color=vec3(0.8,0.33,0.);
     specularity=0.;
     roughness=0.5;
     
@@ -171,41 +164,8 @@ void buildScene(){
 //
 //    
 //    
-//    
-    
-    
-    
-    //----------- RING 1 -------------------------
-    
-//    
-//    ring1.center=vec3(0.3,-0.75,-.6);
-//    ring1.radius=0.3;
-//    ring1.tubeRad=0.02;
-//    ring1.stretch=0.05;
-//    
-//    color=vec3(0.7,0.7,0.2);
-//    specularity=0.8;
-//    roughness=0.05;
-//    
-//    ring1.mat=makeMetal(color,specularity,roughness);
-//    
-//    
-    
-    
-    
-    
-    //----------- LENS 1 -------------------------
-    
-    
-    center.coords=vec3(1,0,-3.);
-    radius=1.;
-    thickness=0.3;
-    axis=vec3(0,0,1);
-    
-    //set the parameters R, c1, c2
-    setLens(lens1,radius,thickness,center,axis);
-    
-    lens1.mat= makeGlass(vec3(0.1,0.0,0.2),2.3,0.999);
+//
+
     
 }
 
@@ -235,7 +195,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //dist=min(dist,sphereSDF(tv,light1,dat));
     
-    //dist=min(dist,sphereSDF(tv,light2,dat));
+    dist=min(dist,sphereSDF(tv,light2,dat));
     
     
     //------the balls
@@ -252,24 +212,12 @@ float sceneSDF(Vector tv, inout localData dat){
 //    
     dist=min(dist,EucPlaneSDF(tv,wall1,dat));
 //    
-    //dist=min(dist,planeSDF(tv,wall2,dat));
+    dist=min(dist,EucPlaneSDF(tv,wall2,dat));
 //    
 //    dist=min(dist,planeSDF(tv,wall3,dat));
 //    
 //    
-//    
-    //-------a ring
-    
-    //dist=min(dist,ringSDF(tv,ring1,dat));
-    
-    
-    
-    
-    //-------a lens
-    
-    //dist=min(dist,lensSDF(tv,lens1,dat));
-    
-    
+
     
     
     return dist;

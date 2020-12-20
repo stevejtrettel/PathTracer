@@ -23,8 +23,8 @@ uniform float seed;
 
 // constants
 float EPSILON=0.001;
-int maxMarchSteps=10;
-float maxDist=30.;
+int maxMarchSteps=100;
+float maxDist=50.;
 float fov=90.;
 int maxBounces=30;
 
