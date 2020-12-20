@@ -131,7 +131,7 @@ void raymarch(inout Path path, inout localData dat){
                 
                 //set the material properties 
                 dat.normal=planeNormal(path.tv);
-                dat.mat=makeDielectric(0.6*vec3(0.5),0.2,0.1);
+                dat.mat=makeDielectric(0.6*vec3(0.5),0.,0.5);
                 return;
             }
             

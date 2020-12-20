@@ -86,6 +86,14 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
 //-------------------------------------------------
 
 
+const Isometry flip = Isometry(mat4(
+0, 1, 0, 0,
+1, 0, 0, 0,
+0, 0, -1, 0,
+0, 0, 0, 1
+), false);
+
+
 
 // return the rotation around the z-axis by an angle alpha
 Isometry rotation(float angle){
@@ -128,45 +136,6 @@ Isometry makeLeftTranslation(Vector v) {
 // overlaod using Vector
 Isometry makeInvLeftTranslation(Vector v) {
     return makeInvLeftTranslation(v.pos);
-}
-
-
-
-
-
-
-
-
-// Product of two isometries (more precisely isom1 * isom2)
-Isometry composeIsometry(Isometry isom1, Isometry isom2) {
-    return Isometry(isom1.mat * isom2.mat, isom1.nil && isom2.nil);
-}
-
-// Return the inverse of the given isometry
-Isometry getInverse(Isometry isom) {
-    return Isometry(inverse(isom.mat), isom.nil);
-}
-
-
-
-
-
-Isometry translateByVector(vec3 dir) {
-    //eventually replace wit the isometry which is exponential of dir in Lie algebra
-return makeLeftTranslation(Point(dir));
-}
-
-
-Isometry translateByVector(Vector v) {
-   return translateByVector(v.dir);
-}
-
-
-
-// Translate a point by the given isometry
-Point translate(Isometry isom, Point p) {
-    vec4 coords=isom.mat * vec4(p.coords,1.);
-    return Point(coords.xyz);
 }
 
 
@@ -460,27 +429,6 @@ float exactDist(Vector u, Vector v){
 
 
 
-
-
-
-//----------------------------------------------------------------------------------------------------------------------
-// THESE STILL NEED TO BE REPLACED WITH THE CORRECT FUNCTIONS: FAKE FOR NOW
-//----------------------------------------------------------------------------------------------------------------------
-
-
-//returns unit tangent vector t
-void tangDirection(Point p, Point q, out Vector tv, out float len){
-    
-    vec3 difference=q.coords-p.coords;
-    vec3 dir=normalize(difference);
-        
-    tv=Vector(p,dir);
-}
-
-void tangDirection(Vector u, Vector v, out Vector tv, out float len){
-    // overload of the previous function in case we work with tangent vectors
-    tangDirection(u.pos, v.pos, tv, len);
-}
 
 
 

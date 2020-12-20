@@ -53,11 +53,11 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center.coords=vec3(0.,0.,30.);
-    light1.radius=1.;
+    light1.center.coords=vec3(0.,0.,50.);
+    light1.radius=.05;
     
     color= vec3(1.,0.6,0.4);
-    intensity=3.;
+    intensity=100.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -247,16 +247,16 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light1,dat));
     
-    dist=min(dist,sphereSDF(tv,light2,dat));
+   // dist=min(dist,sphereSDF(tv,light2,dat));
     
     
     //------the balls
     
-    dist=min(dist,sphereSDF(tv,ball1,dat));
+  //  dist=min(dist,sphereSDF(tv,ball1,dat));
+  //  
+   // dist=min(dist,sphereSDF(tv,ball2,dat));
     
-    dist=min(dist,sphereSDF(tv,ball2,dat));
-    
-    dist=min(dist,sphereSDF(tv,ball3,dat));
+  //  dist=min(dist,sphereSDF(tv,ball3,dat));
     
     
     

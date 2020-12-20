@@ -128,19 +128,29 @@ struct Isometry {
 //}
 
 const Isometry identity = Isometry(mat4(1), true);
-const Isometry flip = Isometry(mat4(
-0, 1, 0, 0,
-1, 0, 0, 0,
-0, 0, -1, 0,
-0, 0, 0, 1
-), false);
+
+
+// Product of two isometries (more precisely isom1 * isom2)
+Isometry composeIsometry(Isometry isom1, Isometry isom2) {
+    return Isometry(isom1.mat * isom2.mat, isom1.nil && isom2.nil);
+}
+
+// Return the inverse of the given isometry
+Isometry getInverse(Isometry isom) {
+    return Isometry(inverse(isom.mat), isom.nil);
+}
 
 
 
+// Translate a point by the given isometry
+Point translate(Isometry isom, Point p) {
+    vec4 coords=isom.mat * vec4(p.coords,1.);
+    return Point(coords.xyz);
+}
 
+ 
 
-
-
+//to translate a vector not just a point need more info: this is done in "geometry"
 
 
 
