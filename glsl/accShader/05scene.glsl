@@ -126,15 +126,10 @@ void buildScene(){
     
     
     
-    
-//    
-//    
-//    
-//    
-//    
-//    
+   
     //----------- WALL 1 -------------------------
-     wall1.height=-1.;
+    wall1.height=-1.;
+    wall1.sign=1.;
     
     color=vec3(1.,0.7,0.7);
     specularity=0.;
@@ -142,23 +137,18 @@ void buildScene(){
     
     wall1.mat=makeDielectric(color,specularity,roughness);
 
+ 
+    //----------- WALL 2 -------------------------
+    wall2.height=1.;
+    wall2.sign=-1.;
     
-//
-//    
-//    
-//    
-//    //----------- WALL 2 -------------------------
-//    normal=vec3(0,0,1);
-//    offset=5.;
-//    
-//    color=vec3(0.7,0.7,0.8);
-//    specularity=0.;
-//    roughness=0.5;
-//    
-//    setPlane(wall2,normal,offset);
-//    wall2.mat=makeDielectric(color,specularity,roughness);
-//
-//    
+    color=vec3(0.7,0.7,0.8);
+    specularity=0.;
+    roughness=0.5;
+    
+    wall2.mat=makeDielectric(color,specularity,roughness);
+
+    
 //    
 //    
 //    
@@ -262,7 +252,7 @@ float sceneSDF(Vector tv, inout localData dat){
 //    
     dist=min(dist,planeSDF(tv,wall1,dat));
 //    
-//    dist=min(dist,planeSDF(tv,wall2,dat));
+    //dist=min(dist,planeSDF(tv,wall2,dat));
 //    
 //    dist=min(dist,planeSDF(tv,wall3,dat));
 //    

@@ -43,13 +43,8 @@ Point shiftPoint(Point p, vec3 v, float ep){
 //tangent vector
 struct Vector{
     Point pos;
-    vec3 dir; 
+    vec3 dir; //stored as PULLBACK TO THE ORIGIN
 };
-
-
-//Vector createVector(Point p, vec3 dp) {
-//    return Vector(p, dp);
-//}
 
 
 Vector add(Vector v, Vector w){
@@ -69,21 +64,6 @@ Vector sub(Vector v, Vector w){
 Vector multiplyScalar(float a,Vector v) {
     return Vector(v.pos, a * v.dir);
 }
-
-// IN CASE THIS OLD NAME IS USED IN CODE: REMOVE LATER
-Vector scalarMult(float a,Vector v) {
-    return Vector(v.pos, a * v.dir);
-}
-
-
-Vector clone(Vector v){
-    return v;
-}
-
-Vector rotateByFacing(Vector v, mat3 facing){
-    return Vector(v.pos,facing*v.dir);
-}
-
 
 void nudge(inout Vector v, vec3 dir){
     v.pos.coords+=dir*0.003;
@@ -152,9 +132,10 @@ Point translate(Isometry isom, Point p) {
 // overload to translate a direction
 //SHOULD THIS CHANGE THE DIRECTION?
 Vector translate(Isometry isom, Vector v) {
-    // apply an isometry to the tangent vector (both the point and the direction)
-    vec4 vDir=isom.mat*vec4(v.dir,0.);
-        return Vector(translate(isom, v.pos), vDir.xyz);
+    // apply an isometry to the tangent vector
+    //NO NEED TO CHANGE DIR: STORED AT ORIGIN
+   // vec4 vDir=isom.mat*vec4(v.dir,0.);
+        return Vector(translate(isom, v.pos), v.dir);
 }
 
 

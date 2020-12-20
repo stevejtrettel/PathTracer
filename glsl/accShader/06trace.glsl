@@ -15,6 +15,7 @@
 void raymarch(inout Path path, inout localData dat){
 
     init_ellip(path.tv);
+    
 
     float distToScene=0.;
     float totalDist=0.;
@@ -24,6 +25,7 @@ void raymarch(inout Path path, inout localData dat){
 
         for (int i = 0; i < maxMarchSteps; i++){
             
+            //for now still distance test with the Vector
             distToScene  = side*sceneSDF(path.tv,dat);
             totalDist += distToScene;
             
@@ -38,7 +40,7 @@ void raymarch(inout Path path, inout localData dat){
             }
             
             //otherwise keep going
-            flow(path.tv, distToScene);
+            path.tv=flow(path.tv, distToScene);
         }
     
     //if you hit nothing

@@ -35,7 +35,7 @@ Vector initializeRay(vec2 fragCoord,inout uint rngState){
     
     
     //rotate by facing (a uniform)
-    tv=rotateByFacing(tv,facing);
+    tv=rotateFacing(facing,tv);
     
     
     return tv;

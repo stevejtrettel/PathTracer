@@ -21,27 +21,29 @@ float sphDist(vec3 pos,Sphere sph){
     return fakeDistance(Point(pos),sph.center)-sph.radius;
 }
 
-//
-//Vector sphereNormal(Vector tv, Sphere sph){
-//    return Vector(tv.pos,normalize(tv.pos.coords-sph.center.coords));
-//}
 
 Vector sphereNormal(Vector tv, Sphere sph){
     
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
-    vec3 pos=tv.pos.coords;
-    vec3 dir=  e.xyy*sphDist( pos + e.xyy*ep,sph ) + 
-					  e.yyx*sphDist( pos + e.yyx*ep,sph) + 
-					  e.yxy*sphDist( pos + e.yxy*ep,sph) + 
-					  e.xxx*sphDist( pos + e.xxx*ep,sph);
+    
+    //make matrix which translates observer to origin
+    Isometry shift=makeInvLeftTranslation(tv.pos);
+    
+    //shift the sphere by this:
+    sph.center=translate(shift,sph.center);
+    
+    //find the tangent vector
+    vec3 dir=  e.xyy*sphDist( ORIGIN.coords+ e.xyy*ep,sph ) + 
+					  e.yyx*sphDist( ORIGIN.coords + e.yyx*ep,sph) + 
+					  e.yxy*sphDist( ORIGIN.coords + e.yxy*ep,sph) + 
+					  e.xxx*sphDist( ORIGIN.coords + e.xxx*ep,sph);
     
     dir=normalize(dir);
     
-    Vector newVec=Vector(tv.pos,dir);
+    //make the output vector: original position + this tangent
 
-    
-    return newVec;
+    return Vector(tv.pos,dir);
 }
 
 
@@ -76,29 +78,30 @@ float sphereSDF(Vector tv, Sphere sph,inout localData dat){
 
 struct EucPlane{
     float height;
+    float sign;
     Material mat;
 };
 
 
-float planeDist(Point p,EucPlane plane){
-    return p.coords.z-plane.height;
+float EucPlaneDist(Point p,EucPlane plane){
+    return plane.sign*(p.coords.z-plane.height);
 }
 
 
-Vector planeNormal(Vector tv,EucPlane plane){
-    return Vector(tv.pos, vec3(0,0,1));
+Vector EucPlaneNormal(Vector tv,EucPlane plane){
+    return Vector(tv.pos, plane.sign*vec3(0,0,1));
 }
 
 
-float planeSDF(Vector tv, EucPlane plane, inout localData dat){
+float EucPlaneSDF(Vector tv, EucPlane plane, inout localData dat){
 
     //otherwise give distance to closest point
-    float d=planeDist(tv.pos,plane);
+    float d=EucPlaneDist(tv.pos,plane);
     
     if(d<EPSILON){//set the material
         dat.isSky=false;
-        dat.normal=planeNormal(tv,plane);
-        dat.mat=plane.mat;
+        dat.normal=EucPlaneNormal(tv,plane);
+        dat.mat=EucPlane.mat;
     }
     
     return d;
