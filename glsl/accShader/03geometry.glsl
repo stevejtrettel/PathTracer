@@ -3,7 +3,6 @@
 //-------------------------------------------------
 
 
-//FOR GLOBAL TANGENT VECTORS
 float dot(Vector u, Vector v){
     mat3 g = mat3(
     exp(-2. * u.pos.coords.z), 0., 0.,
@@ -11,15 +10,7 @@ float dot(Vector u, Vector v){
     0., 0., 1.
     );
     return dot(u.dir, g * v.dir);
-
 }
-
-
-//FOR LOCAL TANGENT VECTORS: WE JUST USE
-//float dot(Vector u, Vector v){
-//    return dot(u.dir, v.dir);
-//}
-
 
 
 float norm(Vector v){
@@ -90,9 +81,6 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
 
 
 
-
-
-
 void init_ellip(Vector u) {
     // initializes all the parameters needed to march along the geodesic directed by u
     // we assume that the position of u is the origin
@@ -142,17 +130,6 @@ void init_ellip(Vector u) {
 //-------------------------------------------------
 //Using ISOMETRIES 
 //-------------------------------------------------
-
-
-const Isometry flip = Isometry(mat4(
-0, 1, 0, 0,
-1, 0, 0, 0,
-0, 0, -1, 0,
-0, 0, 0, 1
-));
-
-
-
 
 
 
