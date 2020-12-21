@@ -153,3 +153,90 @@ float EucPlaneSDF(Vector tv, EucPlane plane, inout localData dat){
 
 
 
+
+
+
+
+
+//-------------------------------------------------
+//The HYPERBOLIC SHEET sdf
+//-------------------------------------------------
+
+
+struct HypSheet{
+    float offset;
+    float type;//x or y
+    float sign;//pos or neg
+    Material mat;
+};
+
+
+
+float HypSheetDist(Point p,HypSheet sheet){
+    float h=(sheet.type==1.)?p.coords.x:p.coords.y;
+    return sheet.sign*asinh((h-sheet.offset)*exp(-sheet.type*p.coords.z));
+}
+
+
+Vector HypSheetNormal(Vector tv,HypSheet sheet){
+    vec3 dir=(sheet.type==1.)?vec3(1,0,0):vec3(0,1,0);
+    return Vector(tv.pos,sheet.sign*dir);
+}
+
+
+
+vec3 HypSheetColor(Vector tv, HypSheet sheet,vec3 origColor){
+    
+    vec3 color=vec3(0.);
+
+    float w=(sheet.type==1.)?tv.pos.coords.y:tv.pos.coords.x;
+    float h=tv.pos.coords.z;
+
+    
+    float c1=fract(w);
+    float c2=fract(h);
+    
+    
+    if(0.3<c1&&c1<0.45&& 0.3<c2&&c2<0.45){
+     color=3.*origColor;
+    }
+    
+    else if(0.15<c1&&c1<0.6&& 0.15<c2&&c2<0.6){
+     color=2.*origColor;
+    }
+    else if(c1<0.75&& c2<0.75){
+     color=origColor;
+    }
+    else{
+        color=0.5*origColor;
+    }
+    
+    return color;
+}
+    
+    
+    
+    
+float HypSheetSDF(Vector tv, HypSheet sheet, inout localData dat){
+
+    //otherwise give distance to closest point
+    float d=HypSheetDist(tv.pos,sheet);
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=HypSheetNormal(tv,sheet);
+        dat.mat=sheet.mat;
+    dat.mat.diffuseColor=HypSheetColor(tv,sheet,sheet.mat.diffuseColor);
+    }
+    
+    return d;
+    
+}
+
+
+
+
+
+
+
+

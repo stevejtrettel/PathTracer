@@ -262,7 +262,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
     
     localData dat;
     initializeData(dat);
-    maxBounces=10;
+    maxBounces=3;
     
 //    
 //    raymarch(path,dat); 

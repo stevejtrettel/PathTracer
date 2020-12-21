@@ -18,13 +18,13 @@ Sphere ball1;
 Sphere ball2;
 Sphere ball3;
 
+EucPlane plane1;
+EucPlane plane2;
+EucPlane plane3;
 
-//
-EucPlane wall1;
-EucPlane wall2;
-EucPlane wall3;
-
-
+HypSheet sheet1;
+HypSheet sheet2;
+HypSheet sheet3;
 
 //this function assigns all the objects their parameters
 void buildScene(){
@@ -46,7 +46,7 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center.coords=vec3(-2.,0.,0.);
+    light1.center.coords=vec3(0,0,0.);
     light1.radius=.5;
     
     color= vec3(1.,0.6,0.4);
@@ -59,11 +59,11 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center.coords=vec3(2,0,0);
+    light2.center.coords=vec3(2,2,0);
     light2.radius=0.5;
     
     color= vec3(1.,0.6,0.4);
-    intensity=20.;
+    intensity=50.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -120,26 +120,26 @@ void buildScene(){
     
     
    
-    //----------- WALL 1 -------------------------
-    wall1.height=-.5;
-    wall1.sign=1.;
+    //----------- PLANE 1 -------------------------
+    plane1.height=-.5;
+    plane1.sign=1.;
     
     color=vec3(0.1,0.2,0.35);
     specularity=0.;
     roughness=0.2;
     
-    wall1.mat=makeDielectric(color,specularity,roughness);
+    plane1.mat=makeDielectric(color,specularity,roughness);
 
  
-    //----------- WALL 2 -------------------------
-    wall2.height=.5;
-    wall2.sign=-1.;
+    //----------- PLANE 2 -------------------------
+    plane2.height=.5;
+    plane2.sign=-1.;
     
     color=vec3(0.8,0.33,0.);
     specularity=0.;
     roughness=0.5;
     
-    wall2.mat=makeDielectric(color,specularity,roughness);
+    plane2.mat=makeDielectric(color,specularity,roughness);
 
     
 //    
@@ -162,9 +162,30 @@ void buildScene(){
 //
 //    
 //
-//    
-//    
-//
+
+    //----------- SHEET 1 -------------------------
+    sheet1.offset=-.5;
+    sheet1.type=1.;
+    sheet1.sign=1.;
+    
+    color=vec3(0.51,0.34,0.63);
+    specularity=0.;
+    roughness=0.2;
+    
+    sheet1.mat=makeDielectric(color,specularity,roughness);
+
+    
+    
+    //----------- SHEET 2 -------------------------
+    sheet2.offset=-.5;
+    sheet2.type=-1.;
+    sheet2.sign=1.;
+    
+    color=vec3(0.78,0.24,0.45);
+    specularity=0.;
+    roughness=0.2;
+    
+    sheet2.mat=makeDielectric(color,specularity,roughness);
 
     
 }
@@ -193,7 +214,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the lights
     
-    dist=min(dist,sphereSDF(tv,light1,dat));
+   // dist=min(dist,sphereSDF(tv,light1,dat));
     
     dist=min(dist,sphereSDF(tv,light2,dat));
     
@@ -208,11 +229,22 @@ float sceneSDF(Vector tv, inout localData dat){
     
     
     
-    //------the walls 
+    //------the planes
 //    
-    dist=min(dist,EucPlaneSDF(tv,wall1,dat));
+   // dist=min(dist,EucPlaneSDF(tv,plane1,dat));
 //    
-    dist=min(dist,EucPlaneSDF(tv,wall2,dat));
+    //dist=min(dist,EucPlaneSDF(tv,plane2,dat));
+//    
+//    dist=min(dist,planeSDF(tv,wall3,dat));
+//    
+//    
+
+    
+//------the sheets
+//    
+    dist=min(dist,HypSheetSDF(tv,sheet1,dat));
+//    
+    dist=min(dist,HypSheetSDF(tv,sheet2,dat));
 //    
 //    dist=min(dist,planeSDF(tv,wall3,dat));
 //    
