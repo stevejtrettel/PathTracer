@@ -12,24 +12,6 @@ struct Point {
 const Point ORIGIN = Point(vec3(0, 0, 0));
 
 
-
-//// return the cylinder coordinates (rho, theta, z) of the point in the form (rho^2, theta, z)
-//// avoid one square root computation
-//vec3 toCylSq(Point p) {
-//    return vec3(
-//    pow(p.coords.x, 2.) + pow(p.coords.y, 2.),
-//    atan(p.coords.y, p.coords.x),
-//    p.coords.z
-//    );
-//}
-//
-//// return the cylinder coordinates (rho, theta, z) of the point
-//vec3 toCyl(Point p) {
-//    vec3 aux = toCylSq(p);
-//    return vec3(sqrt(aux.x), aux.yz);
-//}
-
-
 Point shiftPoint(Point p, vec3 v, float ep){
     vec3 s=p.coords.xyz+ep*v;
     return Point(s);

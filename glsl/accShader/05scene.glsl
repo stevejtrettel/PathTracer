@@ -46,7 +46,7 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center.coords=vec3(1.,0.,1.);
+    light1.center.coords=vec3(-2.,0.,0.);
     light1.radius=.5;
     
     color= vec3(1.,0.6,0.4);
@@ -59,11 +59,11 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center.coords=vec3(0,0,1);
+    light2.center.coords=vec3(2,0,0);
     light2.radius=0.5;
     
     color= vec3(1.,0.6,0.4);
-    intensity=80.;
+    intensity=20.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -121,7 +121,7 @@ void buildScene(){
     
    
     //----------- WALL 1 -------------------------
-    wall1.height=-1.;
+    wall1.height=-.5;
     wall1.sign=1.;
     
     color=vec3(0.1,0.2,0.35);
@@ -132,7 +132,7 @@ void buildScene(){
 
  
     //----------- WALL 2 -------------------------
-    wall2.height=2.;
+    wall2.height=.5;
     wall2.sign=-1.;
     
     color=vec3(0.8,0.33,0.);
@@ -193,7 +193,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the lights
     
-    //dist=min(dist,sphereSDF(tv,light1,dat));
+    dist=min(dist,sphereSDF(tv,light1,dat));
     
     dist=min(dist,sphereSDF(tv,light2,dat));
     

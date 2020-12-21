@@ -250,8 +250,8 @@ void skyColor(inout Path path,inout localData dat){
     //vec3 p=normalize(path.tv.pos.coords);
     //vec3 skyColor=checkerTex(p);
     
-    //vec3 skyColor=vec3(0.1,0.2,0.3);
-   vec3 skyColor=vec3(0.);
+    vec3 skyColor=vec3(0.1,0.2,0.3);
+  // vec3 skyColor=vec3(0.);
     
     path.pixel += path.light*skyColor;
 }
@@ -262,14 +262,19 @@ vec3 pathTrace(inout Path path, inout uint rngState){
     
     localData dat;
     initializeData(dat);
-    maxBounces=3;
+    maxBounces=10;
     
+//    
+//    raymarch(path,dat); 
+//    return dat.mat.diffuseColor;
+//    
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
     {
 
             // shoot a ray out into the world
             //when you hit a material, update dat accordingly
             raymarch(path,dat);
+            
             
             //if you hit the sky: stop
             if(dat.isSky){
@@ -279,7 +284,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             
            // pick up any colors absorbed
            // while traveling inside an object:
-            volumeColor(path,dat);
+            //volumeColor(path,dat);
 
     
             //set probabilities for spec, refract, diffuse

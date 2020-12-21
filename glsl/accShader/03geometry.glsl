@@ -7,11 +7,9 @@ float dot(Vector u, Vector v){
     return dot(u.dir,v.dir);
 }
 
-
 float norm(Vector v){
     return sqrt(dot(v,v));
 }
-
 
 Vector normalize(Vector v){
     float length=norm(v);
@@ -25,7 +23,6 @@ float cosAng(Vector v, Vector w){
 
 Vector rotateFacing(mat3 A, Vector v){
     // apply an isometry to the tangent vector (both the point and the direction)
-    
     return Vector(v.pos, A*v.dir);
 }
 
@@ -78,7 +75,7 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
 
 void init_ellip(Vector u) {
     // initializes all the parameters needed to march along the geodesic directed by u
-    // we assume that the position of u is the origin
+    // we assume that u's direction is stored at origin
     // if ab = 0 (hyperbolic sheets), all the parameters are not needed,
     // however their computations are trivial
     // (all the elliptic integrals becomes, trivial, the AGM stops where it starts, etc)
