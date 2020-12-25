@@ -250,7 +250,7 @@ void skyColor(inout Path path,inout localData dat){
     //vec3 p=normalize(path.tv.pos.coords);
     //vec3 skyColor=checkerTex(p);
     
-    vec3 skyColor=vec3(0.1,0.2,0.3);
+    vec3 skyColor=0.2*vec3(0.1,0.2,0.3);
   // vec3 skyColor=vec3(0.);
     
     path.pixel += path.light*skyColor;

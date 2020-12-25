@@ -59,7 +59,7 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center.coords=vec3(2,2,0);
+    light2.center.coords=vec3(0.5,0,-2);
     light2.radius=0.5;
     
     color= vec3(1.,0.6,0.4);
@@ -90,7 +90,7 @@ void buildScene(){
     
     
     //----------- BALL 2 -------------------------
-    ball2.center.coords=vec3(-.5,0.2,-1.);
+    ball2.center.coords=vec3(0.2,0.2,-2.);
     ball2.radius=0.55;
     
     color= 0.7*vec3(0.3,0.2,0.6);
@@ -244,7 +244,7 @@ float sceneSDF(Vector tv, inout localData dat){
 //    
     dist=min(dist,HypSheetSDF(tv,sheet1,dat));
 //    
-    dist=min(dist,HypSheetSDF(tv,sheet2,dat));
+    //dist=min(dist,HypSheetSDF(tv,sheet2,dat));
 //    
 //    dist=min(dist,planeSDF(tv,wall3,dat));
 //    
