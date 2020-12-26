@@ -1,10 +1,9 @@
- #include <common>
 
 uniform vec3 iResolution;
 uniform float iFrame;
 uniform sampler2D acc;
 
-float c_exposure=1.;
+float c_exposure=3.;
 
 
 vec3 LessThan(vec3 f, float value)

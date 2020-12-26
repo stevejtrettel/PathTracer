@@ -147,7 +147,8 @@ vec3 newFrame(vec2 fragCoord){
     
     tv=cameraRay(tv,cam,rngState);
     
-    Path path=initializePath(tv);
+    Path path=initializePath(tv,rngState);
+    
     
     //build the scene
     buildScene();

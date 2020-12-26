@@ -232,6 +232,7 @@ struct Path{
     Vector tv;
     vec3 pixel;//pixel color
     vec3 light;//light along path
+    float wavelength;//wavelength of starting ray
 
     RayType type;
     
@@ -246,12 +247,43 @@ struct Path{
 
 
 
-Path initializePath(Vector tv){
+
+void setLightColor(inout Path path, inout uint rngState){
+    
+    float x=RandomFloat01(rngState);
+    
+    //update path.light and path.wavelength here
+    if(x<0.333){
+        path.light=sampleRed(path.wavelength,rngState);
+        return;
+    }
+    else if(x<0.666){
+        path.light=sampleGreen(path.wavelength,rngState);
+        return;
+    }
+    else{
+        path.light=sampleBlue(path.wavelength,rngState);
+        return;
+}
+}
+
+
+
+
+
+
+
+
+
+Path initializePath(Vector tv,inout uint rngState){
     Path path;
+    
     
     path.tv=tv;//set the initial direction
     path.pixel=vec3(0.);//set the pixel black
-    path.light=vec3(1.);//set the light white
+    
+    
+    setLightColor(path,rngState);//set the initial light color
     
     path.distance=0.;
     path.keepGoing=true;
