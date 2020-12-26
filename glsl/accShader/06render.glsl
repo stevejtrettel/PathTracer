@@ -1,26 +1,5 @@
 
 
-//-------------------------------------------------
-//Struct Camera
-//-------------------------------------------------
-
-
-struct Camera{
-    vec3 pos;
-    mat3 facing;
-    float fov;
-    float aperature;
-    float focalLength;
-};
-
-
-
-
-
-
-
-
-
 
 //-------------------------------------------------
 // Set the Initial Tangent Vector
@@ -64,6 +43,29 @@ Vector initializeRay(vec2 fragCoord,float FOV, inout uint rngState){
     return tv;
     
 }
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//Struct Camera
+//-------------------------------------------------
+
+
+struct Camera{
+    vec3 pos;
+    mat3 facing;
+    float fov;
+    float aperature;
+    float focalLength;
+};
+
+
+
 
 
 
@@ -126,10 +128,8 @@ Vector cameraRay(Vector tv, Camera cam, inout uint rngState){
 
 
 //-------------------------------------------------
-//New and Old Frames
+//New Frame
 //-------------------------------------------------
-
-
 
 
 
@@ -140,7 +140,8 @@ vec3 newFrame(vec2 fragCoord){
     uint rngState = randomSeed(fragCoord,iFrame);
     
     //now set up the camera:
-    Camera cam=Camera(location,facing,fov,0.05,1.5);
+    //all the entries are uniforms or constants in setup
+    Camera cam=Camera(location,facing,fov,aperature,focalLength);
     
     //get the initial tangent vector, path data
     Vector tv=initializeRay(fragCoord,cam.fov,rngState);
@@ -149,68 +150,12 @@ vec3 newFrame(vec2 fragCoord){
     
     Path path=initializePath(tv,rngState);
     
-    
     //build the scene
     buildScene();
     
     //do one trace out into the scene
     return pathTrace(path,rngState);
     
-}
-
-
-    //call the previous frame from memory
-    vec4 prevFrame(vec2 fragCoord){
-    return texture(acc, fragCoord / iResolution.xy);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------
-//Do the Accumulation
-//-------------------------------------------------
-
-
-
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
-{
-    //get new and old frames
-    vec3 new=newFrame(fragCoord);
-  
-    vec4 prev=prevFrame(fragCoord);
+    //return WaveLengthColor(fragCoord.x);
     
-    float blend =   (iFrame < 2. || prev.a == 0.0f) ? 1.0f :  1. / (1. + 1./prev.a);
-    
-
-    //vec3 color= ((iFrame-1.)*prev.rgb+new)/iFrame;
-    vec3 color=mix(prev.rgb,new,blend);
-
-    // show the result
-    fragColor = vec4(color, blend);
 }
-
-
-
-
-
-
-
-
-  void main() {
-    mainImage(gl_FragColor, gl_FragCoord.xy);
-  }

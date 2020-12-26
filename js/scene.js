@@ -64,7 +64,10 @@
                     file: '../glsl/accShader/05trace.glsl'
                 },
                 {
-                    file: '../glsl/accShader/06accumulate.glsl'
+                    file: '../glsl/accShader/06render.glsl'
+                },
+                {
+                    file: '../glsl/accShader/07accumulate.glsl'
                 }
     ];
 

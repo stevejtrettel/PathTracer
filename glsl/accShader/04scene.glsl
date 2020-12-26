@@ -51,11 +51,11 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(0.7,1.3,-1.5);
+    light1.center=vec3(-1.2,1.5,-1.5);
     light1.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
-    intensity=40.;
+    intensity=10.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -68,7 +68,7 @@ void buildScene(){
     light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
-    intensity=60.;
+    intensity=10.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -120,7 +120,7 @@ void buildScene(){
     
     //ball3.mat=makeMetal(color,specularity,roughness);
 
-    ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),2.3);
+    ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.3);
     
     
     
@@ -246,9 +246,9 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the lights
     
-  //  dist=min(dist,sphereSDF(tv,light1,dat));
+    dist=min(dist,sphereSDF(tv,light1,dat));
     
-   // dist=min(dist,sphereSDF(tv,light2,dat));
+    dist=min(dist,sphereSDF(tv,light2,dat));
     
     
     //------the balls

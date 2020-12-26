@@ -26,12 +26,18 @@ float PI=3.1415926;
 float EPSILON=0.001;
 int maxMarchSteps=100;
 float maxDist=15.;
-float fov=100.;
 int maxBounces=30;
 
 
 
+//====camera constants:
+float fov=100.;
+float focalLength=2.;
+float aperature=0.02;
 
+
+//======spectral constants:
+bool doSpectral=true;
 
 
 
@@ -272,6 +278,31 @@ vec3 checkerTex(vec3 v){
 //SPECTRAL TRACING
 //-------------------------------------------------
 
+float redResponse(float wavelength){
+    float R=0.;
+    
+    if(wavelength>575.){
+        return 1.;
+    }
+    return 0.;
+}
+
+
+float greenResponse(float wavelength){
+        if(wavelength>500.&&wavelength<575.){
+        return 1.;
+    }
+    return 0.;
+    
+}
+
+
+float blueResponse(float wavelength){
+    if(wavelength<500.){
+        return 1.;
+    }
+    return 0.;
+}
 
 
 //converting a wavelength into an rgb color
@@ -284,65 +315,66 @@ vec3 WaveLengthColor(float wavelength){
     float attenuation;
     float R,G,B;
     
-    if(wavelength > 380. && wavelength <440.){
-        attenuation = 0.3 + 0.7 * (wavelength - 380.) / (440. - 380.);
-        R = pow(((-(wavelength - 440.) / (440. - 380.)) * attenuation),gamma);
-        G = 0.0;
-        B = pow((1.0 * attenuation),gamma);
-    }
-    else if(wavelength>440.&&wavelength<490.){
-        R = 0.0;
-        G = pow(((wavelength - 440.) / (490. - 440.)), gamma);
-        B = 1.0;
-    }
-    else if(wavelength>490.&&wavelength<510.){
-         R = 0.0;
-        G = 1.0;
-        B = pow((-(wavelength - 510.) / (510. - 490.)) , gamma);
-    }
-    else if(wavelength>510.&&wavelength>580.){
-         R = pow(((wavelength - 510.) / (580. - 510.)) , gamma);
-        G = 1.0;
-        B = 0.0;
-    }
     
-    else if(wavelength>580.&&wavelength<645.){
-        R = 1.0;
-        G = pow((-(wavelength - 645.) / (645. - 580.)), gamma);
-        B = 0.0;
-    }
-    else if(wavelength>645.&&wavelength<750.){
-        attenuation = 0.3 + 0.7 * (750. - wavelength) / (750. - 645.);
-        R = pow(1.0 * attenuation, gamma);
-        G = 0.0;
-        B = 0.0;
-    }
-    else{
-        R = 0.0;
-        G = 0.0;
-        B = 0.0;
-        
-    }
-return vec3(R,G,B);
     
-//        if(wavelength<500.){
-//        return vec3(0,0,1);
-//    }
-//    else if(wavelength<575.){
-//        return vec3(0,1,0);
-//    }
-//    else{return vec3(1,0,0);}
+    float wl=wavelength;
+     
+        if (wl >= 380. && wl < 440.) {
+            R = -1. * (wl - 440.) / (440. - 380.);
+            G = 0.;
+            B = 1.;
+       } else if (wl >= 440. && wl < 490.) {
+           R = 0.;
+           G = (wl - 440.) / (490.- 440.);
+           B = 1.;  
+        } else if (wl >= 490. && wl < 510.) {
+            R = 0.;
+            G = 1.;
+            B = -1. * (wl - 510.) / (510. - 490.);
+        } else if (wl >= 510. && wl < 580.) {
+            R = (wl - 510.) / (580. - 510.);
+            G = 1.;
+            B = 0.;
+        } else if (wl >= 580. && wl < 645.) {
+            R = 1.;
+            G = -1. * (wl - 645.) / (645. - 580.);
+            B = 0.0;
+        } else if (wl >= 645. && wl <= 780.) {
+            R = 1.;
+            G = 0.;
+            B = 0.;
+        } else {
+            R = 0.;
+            G = 0.;
+            B = 0.;
+        }
+    
 //    
+//    R=redResponse(wavelength);
+//    G=greenResponse(wavelength);
+//    B=blueResponse(wavelength);
     
-    
+    return SRGBToLinear(vec3(R,G,B)); 
+
 }
     
     
     
+
     
-    
-    
-    
+    vec3 sampleSpectrum(inout float wavelength, inout uint state){
+        
+        float percent=RandomFloat01(state);
+        
+        float min=380.;
+        float max=650.;
+        float spread=max-min;
+ 
+        wavelength=spread*percent+min;
+        
+        return WaveLengthColor(wavelength);
+        
+    }
     
 
 

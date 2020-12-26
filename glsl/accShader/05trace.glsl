@@ -52,6 +52,12 @@ void raymarch(inout Path path, inout localData dat){
 // Setting DIRECTIONS and PROBABILITIES
 //-------------------------------------------------
 
+    void updateRefraction(inout Material mat,float wavelength){
+        mat.IOR+=10./(wavelength-300.);
+    }
+
+
+
 
 
     void updateProbabilities( inout Path path,inout localData dat, inout uint rngState){
@@ -60,6 +66,10 @@ void raymarch(inout Path path, inout localData dat){
     //update the normal to be the correct direction:
     float side=(path.inside)?-1.:1.;
     Vector normal=multiplyScalar(side,dat.normal);
+
+        
+    //update the refractive index for the light wavelength:
+    updateRefraction(dat.mat, path.wavelength);
        
     // take fresnel into account for specularChance and adjust other chances.
     // specular takes priority.
@@ -236,8 +246,8 @@ void surfaceColor(inout Path path,localData dat){
 
 
 void skyColor(inout Path path,inout localData dat){
-    vec3 skyColor=skyTex(path.tv.dir);
-    //vec3 skyColor=checkerTex(path.tv.dir);
+    //vec3 skyColor=skyTex(path.tv.dir);
+    vec3 skyColor=0.1*checkerTex(path.tv.dir);
     path.pixel += path.light*skyColor;
 }
 
