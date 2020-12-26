@@ -81,8 +81,8 @@ void buildScene(){
     
     
     //----------- BALL 1 -------------------------
-    ball1.center=vec3(0,-0.1,-2.);
-    ball1.radius=0.5;
+    ball1.center=vec3(0,1.,-5.4);
+    ball1.radius=2.;
     
     color= vec3(0.9,0.9,0.5);
     specularity=0.8;
@@ -135,7 +135,8 @@ void buildScene(){
     normal=vec3(0,1,0);
     offset=1.;
     
-    color=vec3(1.,0.7,0.7);
+    color=vec3(0.5,0.9,0.5);
+       // vec3(1.,0.7,0.7);
     specularity=0.;
     roughness=0.2;
     
@@ -149,9 +150,10 @@ void buildScene(){
     
     //----------- WALL 2 -------------------------
     normal=vec3(0,0,1);
-    offset=5.;
+    offset=8.;
     
-    color=vec3(0.7,0.7,0.8);
+    color=vec3(0.9,0.5,0.5);
+    //color=vec3(0.7,0.7,0.8);
     specularity=0.;
     roughness=0.5;
     
@@ -170,7 +172,8 @@ void buildScene(){
     offset=5.;
     //offset=5.;
     
-    color=vec3(0.5,0.9,0.5);
+    color=vec3(0.7,0.7,0.8);
+      //  vec3(0.5,0.9,0.5);
     specularity=0.;
     roughness=0.5;
     
@@ -259,14 +262,13 @@ float sceneSDF(Vector tv, inout localData dat){
     
     
     //------the walls 
-    
     dist=min(dist,planeSDF(tv,wall1,dat));
     
-    dist=min(dist,planeSDF(tv,wall2,dat));
-    
-    dist=min(dist,planeSDF(tv,wall3,dat));
-    
-    
+   dist=min(dist,planeSDF(tv,wall2,dat));
+//    
+   dist=min(dist,planeSDF(tv,wall3,dat));
+//    
+//    
     
     //-------a ring
     

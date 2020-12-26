@@ -5,13 +5,13 @@
 //The VECTOR Struct
 //-------------------------------------------------
 
+vec3 ORIGIN=vec3(0,0,0);
 
 //tangent vector
 struct Vector{
     vec3 pos;
     vec3 dir; 
 };
-
 
 Vector add(Vector v, Vector w){
     //this only makes sense if v and w are based at the same point

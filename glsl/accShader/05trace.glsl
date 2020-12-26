@@ -266,7 +266,6 @@ vec3 pathTrace(inout Path path, inout uint rngState){
            // while traveling inside an object:
             volumeColor(path,dat);
 
-    
             //set probabilities for spec, refract, diffuse
             updateProbabilities(path, dat, rngState);
             
