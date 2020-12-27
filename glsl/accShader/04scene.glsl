@@ -62,11 +62,11 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(0,0,1);
+    light1.center=vec3(2,0,5);
     light1.radius=0.2;
     
-    color= vec3(1.,1.6,0.4);
-    intensity=10.;
+    color= vec3(1.,.6,0.4);
+    intensity=90.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -75,11 +75,11 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(0,8,-2);
-    light2.radius=0.5;
+    light2.center=vec3(0,3,0.5);
+    light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
-    intensity=50.;
+    intensity=90.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -173,9 +173,9 @@ void buildScene(){
     offset=2.;
     
     //color=vec3(0.5,0.9,0.5);
-      color= vec3(.2);
-    specularity=0.;
-    roughness=0.2;
+     color= vec3(.2);
+    specularity=0.0;
+    roughness=0.5;
     
     setPlane(wall1,normal,offset);
     wall1.mat=makeDielectric(color,specularity,roughness);
@@ -187,13 +187,13 @@ void buildScene(){
     
     //----------- WALL 2 -------------------------
     normal=vec3(0,0,1);
-    offset=8.;
+    offset=3.;
     
     //color=vec3(0.9,0.5,0.5);
      color= vec3(0.2);
     //color=vec3(0.7,0.7,0.8);
-    specularity=0.;
-    roughness=0.;
+    specularity=0.05;
+    roughness=0.5;
     
     setPlane(wall2,normal,offset);
     wall2.mat=makeDielectric(color,specularity,roughness);
@@ -211,10 +211,10 @@ void buildScene(){
     //offset=5.;
     
    // color=vec3(0.7,0.7,0.8);
-     color= vec3(0.2);
-      //  vec3(0.5,0.9,0.5);
-    specularity=0.;
-    roughness=0.;
+    color= vec3(0.2);
+    //color=vec3(0.5,0.9,0.5);
+    specularity=0.05;
+    roughness=0.5;
     
     setPlane(wall3,normal,offset);
     wall3.mat=makeDielectric(color,specularity,roughness);
@@ -230,18 +230,18 @@ void buildScene(){
     //----------- RING 1 -------------------------
     
     
-    ring1.center=vec3(0,0,0);
-    ring1.radius=0.3;
-    ring1.tubeRad=0.02;
-    ring1.stretch=0.05;
+    ring1.center=vec3(0,-0.2,0);
+    ring1.radius=1.;
+    ring1.tubeRad=0.1;
+    ring1.stretch=0.2;
     
     color=vec3(0.7,0.7,0.2);
     specularity=0.8;
     roughness=0.05;
     
     
-        ring1.mat= makeGlass(vec3(0.),2.43,1.);
-    //ring1.mat=makeMetal(color,specularity,roughness);
+        
+    ring1.mat=makeMetal(color,specularity,roughness);
     
     
     
@@ -298,8 +298,12 @@ void buildScene(){
     
     perm1.center=center;
     perm1.side=3.;
-    perm1.mat= makeGlass(vec3(0.),2.43,0.999);
+   // perm1.mat= makeGlass(vec3(0.),2.43,0.999);
     
+    color=vec3(0.6,0.6,0.1);
+    specularity=0.5;
+    roughness=0.0;
+    perm1.mat=makeMetal(color,specularity,roughness);
     
     
     
@@ -347,7 +351,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light2,dat));
     
-    dist=min(dist,sphereSDF(tv,light3,dat));
+   // dist=min(dist,sphereSDF(tv,light3,dat));
     
    // dist=min(dist,sphereSDF(tv,light4,dat));
     
@@ -367,12 +371,12 @@ float sceneSDF(Vector tv, inout localData dat){
     
    dist=min(dist,planeSDF(tv,wall2,dat));
    
-    dist=min(dist,planeSDF(tv,wall3,dat));
+   // dist=min(dist,planeSDF(tv,wall3,dat));
    
     
     //-------a ring
     
-    //dist=min(dist,ringSDF(tv,ring1,dat));
+    dist=min(dist,ringSDF(tv,ring1,dat));
     
     
     
@@ -400,7 +404,7 @@ float sceneSDF(Vector tv, inout localData dat){
         
     //-------a permutohedron
     
-    dist=min(dist,permutohedronSDF(tv,perm1,dat));
+  //  dist=min(dist,permutohedronSDF(tv,perm1,dat));
     
     
     

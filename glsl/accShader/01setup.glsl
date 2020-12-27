@@ -25,7 +25,7 @@ uniform float seed;
 float PI=3.1415926;
 float EPSILON=0.001;
 int maxMarchSteps=200;
-float maxDist=80.;
+float maxDist=10.;
 int maxBounces=50;
 
 
