@@ -6,6 +6,8 @@ var rightPressed = false;
 var leftPressed = false;
 var upPressed = false;
 var downPressed = false;
+var fwdPressed = false;
+var bkPressed = false;
 
 
 var rotRightPressed = false;
@@ -19,8 +21,10 @@ var CCWPressed = false;
 var KeyboardHelper = {
     right: 39,
     left: 37,
-    up: 38,
-    down: 40,
+    up: 222,
+    down: 191,
+    fwd: 38,
+    bk: 40,
     rotLeft: 65,
     rotUp: 87,
     rotRight: 68,
@@ -40,6 +44,11 @@ function keyDownHandler(event) {
         downPressed = true;
     } else if (event.keyCode == KeyboardHelper.up) {
         upPressed = true;
+    }
+    if (event.keyCode == KeyboardHelper.bk) {
+        bkPressed = true;
+    } else if (event.keyCode == KeyboardHelper.fwd) {
+        fwdPressed = true;
     }
     if (event.keyCode == KeyboardHelper.rotRight) {
         rotRightPressed = true;
@@ -70,6 +79,12 @@ function keyUpHandler(event) {
         downPressed = false;
     } else if (event.keyCode == KeyboardHelper.up) {
         upPressed = false;
+    }
+
+    if (event.keyCode == KeyboardHelper.bk) {
+        bkPressed = false;
+    } else if (event.keyCode == KeyboardHelper.fwd) {
+        fwdPressed = false;
     }
 
     if (event.keyCode == KeyboardHelper.rotRight) {
@@ -152,6 +167,7 @@ let transFwd = new THREE.Vector3(0, 0, 1);
 let transSide = new THREE.Vector3(1, 0, 0);
 let transUp = new THREE.Vector3(0, 1, 0);
 
+
 function translControls() {
 
     let totalTrans = new THREE.Vector3(0, 0, 0);
@@ -170,17 +186,29 @@ function translControls() {
     }
 
     if (downPressed) {
-        newTrans = transFwd.clone().multiplyScalar(transAmt);
+        newTrans = transUp.clone().multiplyScalar(-transAmt);
         totalTrans.add(newTrans);
 
     }
 
     if (upPressed) {
+        newTrans = transUp.clone().multiplyScalar(transAmt);
+        totalTrans.add(newTrans);
+    }
+
+    if (fwdPressed) {
+        newTrans = transFwd.clone().multiplyScalar(transAmt);
+        totalTrans.add(newTrans);
+
+    }
+
+    if (bkPressed) {
         newTrans = transFwd.clone().multiplyScalar(-transAmt);
         totalTrans.add(newTrans);
     }
 
-    let reportChange = rightPressed || leftPressed || downPressed || upPressed;
+
+    let reportChange = rightPressed || leftPressed || downPressed || upPressed || bkPressed || fwdPressed;
 
     return [totalTrans, reportChange];
 
