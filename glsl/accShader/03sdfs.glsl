@@ -440,3 +440,260 @@ float octahedronSDF(Vector tv, Octahedron oct, inout localData dat){
     
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The BOX sdf
+//-------------------------------------------------
+
+struct Box{
+vec3 center;
+vec3 sides;
+float rounded;
+Material mat;
+};
+
+
+float boxDist( vec3 p, Box box)
+{
+  vec3 q = abs(p-box.center) - box.sides;
+  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - box.rounded;
+}
+
+
+
+//probably a way to do this directly and not sample....
+Vector boxNormal(Vector tv, Box box){
+    
+    //translate everything
+    vec3 pos=tv.pos-box.center;
+    
+    //reset prism's center to zero:
+    box.center=vec3(0.);
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    vec3 dir=  e.xyy*boxDist( pos + e.xyy*ep,box) + 
+					  e.yyx*boxDist( pos + e.yyx*ep,box) + 
+					  e.yxy*boxDist( pos + e.yxy*ep,box) + 
+					  e.xxx*boxDist( pos + e.xxx*ep,box);
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+}
+    
+
+
+
+float boxSDF(Vector tv, Box box, inout localData dat){
+    
+    
+    float d= boxDist(tv.pos,box);
+    
+    //-----------------
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=boxNormal(tv,box);
+        dat.mat=box.mat;
+    }
+    
+    return d;
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The PERMUTOHEDRON sdf
+//-------------------------------------------------
+
+struct Permutohedron{
+vec3 center;
+float side;
+Material mat;
+};
+
+
+float permutohedronDist( vec3 p, Permutohedron perm)
+{
+ 
+Octahedron oct;
+oct.center=perm.center;
+oct.side=perm.side;
+    
+Box box;
+box.center=perm.center;
+box.sides=0.66*vec3(perm.side,perm.side,perm.side);
+    
+//octahedron distance:
+float octDist=octahedronDist(p,oct);
+float cubeDist=boxDist(p,box);
+    
+return max(octDist,cubeDist);
+}
+
+
+
+//probably a way to do this directly and not sample....
+Vector permutohedronNormal(Vector tv, Permutohedron perm){
+    
+    //translate everything
+    vec3 pos=tv.pos-perm.center;
+    
+    //reset prism's center to zero:
+    perm.center=vec3(0.);
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    vec3 dir=  e.xyy*permutohedronDist( pos + e.xyy*ep,perm) + 
+					  e.yyx*permutohedronDist( pos + e.yyx*ep,perm) + 
+					  e.yxy*permutohedronDist( pos + e.yxy*ep,perm) + 
+					  e.xxx*permutohedronDist( pos + e.xxx*ep,perm);
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+}
+    
+
+
+
+float permutohedronSDF(Vector tv, Permutohedron perm, inout localData dat){
+    
+    
+    float d= permutohedronDist(tv.pos,perm);
+    
+    //-----------------
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=permutohedronNormal(tv,perm);
+        dat.mat=perm.mat;
+    }
+    
+    return d;
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The COCKTAIL sdf
+//-------------------------------------------------
+
+struct Cocktail{
+vec3 center;
+float radius;
+float height;
+float rounded;
+float base;
+Material mat;
+};
+
+
+
+//useful sdf
+float sdRoundedCylinder( vec3 p, float ra, float rb, float h )
+{
+  vec2 d = vec2( length(p.xz)-2.0*ra+rb, abs(p.y) - h );
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rb;
+}
+
+
+float cocktailDist( vec3 p, Cocktail glass)
+{
+    vec3 q1=p-glass.center;
+    vec3 q2=q1-vec3(0,glass.base,0);
+    
+    float outer=sdRoundedCylinder(q1,glass.radius,glass.rounded,glass.height);
+    
+   float inner=sdRoundedCylinder(q2,glass.radius-0.15,glass.rounded,glass.height);
+    
+    vec3 ballCenter=glass.center-vec3(0.,glass.height-glass.base/3.,0.);
+    float ball=length(p-ballCenter)-glass.base/2.;
+    
+    float dist=smax(outer,-ball,0.1);
+    return max(dist,-inner);
+    
+}
+
+
+
+
+//probably a way to do this directly and not sample....
+Vector cocktailNormal(Vector tv, Cocktail glass){
+    vec3 pos=tv.pos;
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    vec3 dir=  e.xyy*cocktailDist( pos + e.xyy*ep,glass) + 
+					  e.yyx*cocktailDist( pos + e.yyx*ep,glass) + 
+					  e.yxy*cocktailDist( pos + e.yxy*ep,glass) + 
+					  e.xxx*cocktailDist( pos + e.xxx*ep,glass);
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+}
+    
+
+
+
+float cocktailSDF(Vector tv, Cocktail glass, inout localData dat){
+    
+    
+    float d= cocktailDist(tv.pos,glass);
+    
+    //-----------------
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=cocktailNormal(tv,glass);
+        dat.mat=glass.mat;
+    }
+    
+    return d;
+    
+}
+

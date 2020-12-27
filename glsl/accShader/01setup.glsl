@@ -24,9 +24,9 @@ uniform float seed;
 // constants
 float PI=3.1415926;
 float EPSILON=0.001;
-int maxMarchSteps=100;
-float maxDist=50.;
-int maxBounces=30;
+int maxMarchSteps=200;
+float maxDist=80.;
+int maxBounces=50;
 
 
 
@@ -37,7 +37,7 @@ float aperature=0.0;
 
 
 //======spectral constants:
-bool doSpectral=true;
+bool doSpectral=false;
 
 
 
@@ -192,6 +192,24 @@ return rngState;
 //-------------------------------------------------
 //Utilities
 //-------------------------------------------------
+
+
+// polynomial smooth min (k = 0.1);
+float smin( float a, float b, float k )
+{
+    float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
+    return mix( b, a, h ) - k*h*(1.0-h);
+}
+
+
+float smax( float a, float b, float k )
+{
+    return -smin(-a,-b,k);
+}
+
+
+
+
 
 vec3 checkerboard(vec2 v){
     float x=mod(20.*v.x/6.28,2.);

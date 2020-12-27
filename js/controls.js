@@ -163,7 +163,7 @@ function rotControls() {
 
 
 let transAmt = 0.03;
-let transFwd = new THREE.Vector3(0, 0, 1);
+let transFwd = new THREE.Vector3(0, 0, -1);
 let transSide = new THREE.Vector3(1, 0, 0);
 let transUp = new THREE.Vector3(0, 1, 0);
 

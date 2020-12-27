@@ -100,9 +100,8 @@ void raymarch(inout Path path, inout localData dat){
         diffuseChance = 
             1.-refractionChance-specularChance;
     }
-     
+//     
     // calculate whether we are going to do a diffuse, specular, or refractive ray
-        
     float raySelectRoll = RandomFloat01(rngState);
     if (specularChance > 0.0f && raySelectRoll < specularChance)
     {
@@ -118,7 +117,7 @@ void raymarch(inout Path path, inout localData dat){
     }
      
     // numerical problems can cause ray Probability to become small enough to cause a divide by zero.
-    path.type.probability = max(path.type.probability, 0.001f);
+    path.type.probability = max(path.type.probability, 0.0001f);
         
     //increase brightness of path chosen
     //to account for the energy not taken
@@ -249,8 +248,9 @@ void surfaceColor(inout Path path,localData dat){
 
 
 void skyColor(inout Path path,inout localData dat){
-   // vec3 skyColor=skyTex(path.tv.dir);
-    vec3 skyColor=0.1*checkerTex(path.tv.dir);
+    //vec3 skyColor=skyTex(path.tv.dir);
+    //vec3 skyColor=0.1*checkerTex(path.tv.dir);
+    vec3 skyColor=vec3(0.1);
     path.pixel += path.light*skyColor;
 }
 
@@ -260,7 +260,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
     
     localData dat;
     initializeData(dat);
-    maxBounces=30;
+    maxBounces=50;
     
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
     {

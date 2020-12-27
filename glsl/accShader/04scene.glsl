@@ -13,6 +13,8 @@
 //global variables which are the names of the possible objects in the scene
 Sphere light1;
 Sphere light2;
+Sphere light3;
+Sphere light4;
 
 Sphere ball1;
 Sphere ball2;
@@ -32,8 +34,10 @@ Prism prism1;
 
 Octahedron oct1;
 Octahedron oct2;
-Octahedron oct3;
 
+Permutohedron perm1;
+
+Cocktail glass1;
 
 
 //this function assigns all the objects their parameters
@@ -58,11 +62,11 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(-1.,0.5,0.2);
+    light1.center=vec3(0,0,1);
     light1.radius=0.2;
     
-    color= vec3(1.,0.6,0.4);
-    intensity=50.;
+    color= vec3(1.,1.6,0.4);
+    intensity=10.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -71,13 +75,39 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(1,1,1);
-    light2.radius=0.2;
+    light2.center=vec3(0,8,-2);
+    light2.radius=0.5;
     
     color= vec3(1.,0.6,0.4);
     intensity=50.;
     
     light2.mat=makeLight(color,intensity);
+
+    
+    
+            
+    //----------- LIGHT 3 -------------------------
+    light3.center=1.25*vec3(0,2,-4);
+    light3.radius=0.6;
+    
+    color= vec3(1.,0.6,0.4);
+    intensity=5.;
+    
+    light3.mat=makeLight(color,intensity);
+
+    
+    
+    
+    
+            
+    //----------- LIGHT 4 -------------------------
+    light4.center=vec3(3,0,-2);
+    light4.radius=0.2;
+    
+    color= vec3(1.,0.6,0.4);
+    intensity=10.;
+    
+    light4.mat=makeLight(color,intensity);
 
     
     
@@ -102,7 +132,7 @@ void buildScene(){
     
     
     //----------- BALL 2 -------------------------
-    ball2.center=vec3(-1.,-0.43,-1.6);
+    ball2.center=vec3(0,0,4);
     ball2.radius=0.55;
     
     color= 0.7*vec3(0.3,0.2,0.6);
@@ -160,7 +190,7 @@ void buildScene(){
     offset=8.;
     
     //color=vec3(0.9,0.5,0.5);
-     color= vec3(1.);
+     color= vec3(0.2);
     //color=vec3(0.7,0.7,0.8);
     specularity=0.;
     roughness=0.;
@@ -181,7 +211,7 @@ void buildScene(){
     //offset=5.;
     
    // color=vec3(0.7,0.7,0.8);
-     color= vec3(1.);
+     color= vec3(0.2);
       //  vec3(0.5,0.9,0.5);
     specularity=0.;
     roughness=0.;
@@ -210,7 +240,7 @@ void buildScene(){
     roughness=0.05;
     
     
-        ring1.mat= makeGlass(vec3(0.),2.43,0.999);
+        ring1.mat= makeGlass(vec3(0.),2.43,1.);
     //ring1.mat=makeMetal(color,specularity,roughness);
     
     
@@ -262,14 +292,30 @@ void buildScene(){
     oct1.mat= makeGlass(vec3(0.),2.43,0.999);
     
     
+    //----------- PERMUTOHEDRON -------------------------
     
-    //----------- OCTAHEDRON 1 -------------------------
+    center=vec3(0,0,-4.);
     
-    center=vec3(-2.,0.,-1.);
+    perm1.center=center;
+    perm1.side=3.;
+    perm1.mat= makeGlass(vec3(0.),2.43,0.999);
     
-    oct2.center=center;
-    oct2.side=1.;
-    oct2.mat= makeGlass(vec3(0.),1.5,0.999);
+    
+    
+    
+    
+    //----------- COCKTAIL 1 -------------------------
+    
+    glass1.center=vec3(0.,0.,-4.);
+    glass1.radius=1.;
+    glass1.height=2.;
+    glass1.rounded=0.1;
+    glass1.base=1.;
+    
+    glass1.mat= makeGlass(0.3*vec3(0.3,0.05,0.2),1.5,0.99);
+    
+    
+    
     
 }
 
@@ -299,7 +345,11 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light1,dat));
     
-   dist=min(dist,sphereSDF(tv,light2,dat));
+    dist=min(dist,sphereSDF(tv,light2,dat));
+    
+    dist=min(dist,sphereSDF(tv,light3,dat));
+    
+   // dist=min(dist,sphereSDF(tv,light4,dat));
     
     
     //------the balls
@@ -313,16 +363,16 @@ float sceneSDF(Vector tv, inout localData dat){
     
     
     //------the walls 
-    //dist=min(dist,planeSDF(tv,wall1,dat));
+    dist=min(dist,planeSDF(tv,wall1,dat));
     
-   //dist=min(dist,planeSDF(tv,wall2,dat));
+   dist=min(dist,planeSDF(tv,wall2,dat));
    
     dist=min(dist,planeSDF(tv,wall3,dat));
    
     
     //-------a ring
     
-    dist=min(dist,ringSDF(tv,ring1,dat));
+    //dist=min(dist,ringSDF(tv,ring1,dat));
     
     
     
@@ -338,7 +388,20 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //-------an octahedron
     
-   // dist=min(dist,octahedronSDF(tv,oct1,dat));
+    //dist=min(dist,octahedronSDF(tv,oct1,dat));
+    
+    
+    
+    //-------an cocktail glass
+    
+    //dist=min(dist,cocktailSDF(tv,glass1,dat));
+    
+    
+        
+    //-------a permutohedron
+    
+    dist=min(dist,permutohedronSDF(tv,perm1,dat));
+    
     
     
     
