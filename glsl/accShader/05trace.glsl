@@ -53,7 +53,10 @@ void raymarch(inout Path path, inout localData dat){
 //-------------------------------------------------
 
     void updateRefraction(inout Material mat,float wavelength){
-        mat.IOR+=10./(wavelength-300.);
+        
+       // mat.IOR=mat.IOR-0.6*wavelength/1000.;
+
+         mat.IOR=mat.IOR+100./(wavelength-350.);
     }
 
 
@@ -246,7 +249,7 @@ void surfaceColor(inout Path path,localData dat){
 
 
 void skyColor(inout Path path,inout localData dat){
-    //vec3 skyColor=skyTex(path.tv.dir);
+   // vec3 skyColor=skyTex(path.tv.dir);
     vec3 skyColor=0.1*checkerTex(path.tv.dir);
     path.pixel += path.light*skyColor;
 }
@@ -257,7 +260,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
     
     localData dat;
     initializeData(dat);
-    maxBounces=10;
+    maxBounces=30;
     
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
     {

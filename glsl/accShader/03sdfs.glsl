@@ -285,3 +285,158 @@ float lensSDF(Vector tv, Lens lens, inout localData dat){
     return d;
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The PRISM sdf
+//-------------------------------------------------
+
+struct Prism{
+vec3 center;
+float length;
+float width;
+Material mat;
+};
+
+
+
+float prismDist( vec3 p, Prism prism)
+{
+  vec3 q = abs(p-prism.center);
+  return max(q.z-prism.length,max(q.x*0.866025+p.y*0.5,-p.y)-prism.width*0.5);
+}
+
+
+
+
+//probably a way to do this directly and not sample....
+Vector prismNormal(Vector tv, Prism prism){
+    
+    //translate everything
+    vec3 pos=tv.pos-prism.center;
+    
+    //reset prism's center to zero:
+    prism.center=vec3(0.);
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    vec3 dir=  e.xyy*prismDist( pos + e.xyy*ep,prism ) + 
+					  e.yyx*prismDist( pos + e.yyx*ep,prism) + 
+					  e.yxy*prismDist( pos + e.yxy*ep,prism) + 
+					  e.xxx*prismDist( pos + e.xxx*ep,prism);
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+}
+    
+
+
+
+float prismSDF(Vector tv, Prism prism, inout localData dat){
+    
+    
+    float d= prismDist(tv.pos,prism);
+    
+    //-----------------
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=prismNormal(tv,prism);
+        dat.mat=prism.mat;
+    }
+    
+    return d;
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The OCTAHEDRON sdf
+//-------------------------------------------------
+
+struct Octahedron{
+vec3 center;
+float side;
+Material mat;
+};
+
+
+
+
+float octahedronDist( vec3 p, Octahedron oct)
+{
+ p = abs(p-oct.center);
+  return (p.x+p.y+p.z-oct.side)*0.57735027;
+}
+
+
+
+
+//probably a way to do this directly and not sample....
+Vector octahedronNormal(Vector tv, Octahedron oct){
+    
+    //translate everything
+    vec3 pos=tv.pos-oct.center;
+    
+    //reset prism's center to zero:
+    oct.center=vec3(0.);
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    vec3 dir=  e.xyy*octahedronDist( pos + e.xyy*ep,oct) + 
+					  e.yyx*octahedronDist( pos + e.yyx*ep,oct) + 
+					  e.yxy*octahedronDist( pos + e.yxy*ep,oct) + 
+					  e.xxx*octahedronDist( pos + e.xxx*ep,oct);
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+}
+    
+
+
+
+float octahedronSDF(Vector tv, Octahedron oct, inout localData dat){
+    
+    
+    float d= octahedronDist(tv.pos,oct);
+    
+    //-----------------
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=octahedronNormal(tv,oct);
+        dat.mat=oct.mat;
+    }
+    
+    return d;
+    
+}
+

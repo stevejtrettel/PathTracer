@@ -28,6 +28,11 @@ Ring ring1;
 
 Lens lens1;
 
+Prism prism1;
+
+Octahedron oct1;
+Octahedron oct2;
+Octahedron oct3;
 
 
 
@@ -48,14 +53,16 @@ void buildScene(){
     vec3 axis;
     vec3 center;
     float radius;
+    float length;
+    float width;
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(-1.2,1.5,-1.5);
+    light1.center=vec3(-1.,0.5,0.2);
     light1.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
-    intensity=10.;
+    intensity=50.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -64,11 +71,11 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(3,0,1);
+    light2.center=vec3(1,1,1);
     light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
-    intensity=10.;
+    intensity=50.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -133,10 +140,10 @@ void buildScene(){
     
     //----------- WALL 1 -------------------------
     normal=vec3(0,1,0);
-    offset=1.;
+    offset=2.;
     
-    color=vec3(0.5,0.9,0.5);
-       // vec3(1.,0.7,0.7);
+    //color=vec3(0.5,0.9,0.5);
+      color= vec3(.2);
     specularity=0.;
     roughness=0.2;
     
@@ -152,10 +159,11 @@ void buildScene(){
     normal=vec3(0,0,1);
     offset=8.;
     
-    color=vec3(0.9,0.5,0.5);
+    //color=vec3(0.9,0.5,0.5);
+     color= vec3(1.);
     //color=vec3(0.7,0.7,0.8);
     specularity=0.;
-    roughness=0.5;
+    roughness=0.;
     
     setPlane(wall2,normal,offset);
     wall2.mat=makeDielectric(color,specularity,roughness);
@@ -172,10 +180,11 @@ void buildScene(){
     offset=5.;
     //offset=5.;
     
-    color=vec3(0.7,0.7,0.8);
+   // color=vec3(0.7,0.7,0.8);
+     color= vec3(1.);
       //  vec3(0.5,0.9,0.5);
     specularity=0.;
-    roughness=0.5;
+    roughness=0.;
     
     setPlane(wall3,normal,offset);
     wall3.mat=makeDielectric(color,specularity,roughness);
@@ -191,7 +200,7 @@ void buildScene(){
     //----------- RING 1 -------------------------
     
     
-    ring1.center=vec3(0.3,-0.75,-.6);
+    ring1.center=vec3(0,0,0);
     ring1.radius=0.3;
     ring1.tubeRad=0.02;
     ring1.stretch=0.05;
@@ -200,7 +209,9 @@ void buildScene(){
     specularity=0.8;
     roughness=0.05;
     
-    ring1.mat=makeMetal(color,specularity,roughness);
+    
+        ring1.mat= makeGlass(vec3(0.),2.43,0.999);
+    //ring1.mat=makeMetal(color,specularity,roughness);
     
     
     
@@ -219,6 +230,46 @@ void buildScene(){
     setLens(lens1,radius,thickness,center,axis);
     
     lens1.mat= makeGlass(vec3(0.1,0.0,0.2),2.3,0.999);
+    
+    
+    
+        
+    //----------- PRISM 1 -------------------------
+    
+    
+    center=vec3(2.,0.,-1.);
+    width=1.;
+    length=2.;
+    
+    prism1.center=center;
+    prism1.width=width;
+    prism1.length=length;
+    prism1.mat= makeGlass(vec3(0.),1.5,0.999);
+    
+    
+    
+    
+    
+    
+    
+    
+    //----------- OCTAHEDRON 1 -------------------------
+    
+    center=vec3(2.,0.,-1.);
+    
+    oct1.center=center;
+    oct1.side=3.;
+    oct1.mat= makeGlass(vec3(0.),2.43,0.999);
+    
+    
+    
+    //----------- OCTAHEDRON 1 -------------------------
+    
+    center=vec3(-2.,0.,-1.);
+    
+    oct2.center=center;
+    oct2.side=1.;
+    oct2.mat= makeGlass(vec3(0.),1.5,0.999);
     
 }
 
@@ -248,31 +299,30 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light1,dat));
     
-    dist=min(dist,sphereSDF(tv,light2,dat));
+   dist=min(dist,sphereSDF(tv,light2,dat));
     
     
     //------the balls
     
-    dist=min(dist,sphereSDF(tv,ball1,dat));
+    //dist=min(dist,sphereSDF(tv,ball1,dat));
     
-    dist=min(dist,sphereSDF(tv,ball2,dat));
+    //dist=min(dist,sphereSDF(tv,ball2,dat));
     
-    dist=min(dist,sphereSDF(tv,ball3,dat));
+   // dist=min(dist,sphereSDF(tv,ball3,dat));
     
     
     
     //------the walls 
-    dist=min(dist,planeSDF(tv,wall1,dat));
+    //dist=min(dist,planeSDF(tv,wall1,dat));
     
-   dist=min(dist,planeSDF(tv,wall2,dat));
-//    
-   dist=min(dist,planeSDF(tv,wall3,dat));
-//    
-//    
+   //dist=min(dist,planeSDF(tv,wall2,dat));
+   
+    dist=min(dist,planeSDF(tv,wall3,dat));
+   
     
     //-------a ring
     
-    //dist=min(dist,ringSDF(tv,ring1,dat));
+    dist=min(dist,ringSDF(tv,ring1,dat));
     
     
     
@@ -281,6 +331,14 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //dist=min(dist,lensSDF(tv,lens1,dat));
     
+    //-------a prism
+    
+    //dist=min(dist,prismSDF(tv,prism1,dat));
+    
+    
+    //-------an octahedron
+    
+   // dist=min(dist,octahedronSDF(tv,oct1,dat));
     
     
     

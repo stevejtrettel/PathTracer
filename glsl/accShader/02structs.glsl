@@ -261,8 +261,8 @@ void setLightColor(inout Path path, inout uint rngState){
     
     
     //otherwise, sample one of the cones:
-    //float x=RandomFloat01(rngState);
-    
+//    float x=RandomFloat01(rngState);
+//    
 //    //update path.light and path.wavelength here
 //    if(x<0.333){
 //        path.light=sampleRed(path.wavelength,rngState);
@@ -278,7 +278,7 @@ void setLightColor(inout Path path, inout uint rngState){
 //}
 //    
     
-    path.light=sampleSpectrum(path.wavelength,rngState);
+  path.light=sampleSpectrum(path.wavelength,rngState);
     
     
     

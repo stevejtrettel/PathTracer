@@ -25,7 +25,7 @@ uniform float seed;
 float PI=3.1415926;
 float EPSILON=0.001;
 int maxMarchSteps=100;
-float maxDist=15.;
+float maxDist=50.;
 int maxBounces=30;
 
 
@@ -33,7 +33,7 @@ int maxBounces=30;
 //====camera constants:
 float fov=100.;
 float focalLength=2.;
-float aperature=0.02;
+float aperature=0.0;
 
 
 //======spectral constants:
