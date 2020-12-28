@@ -41,8 +41,8 @@ void raymarch(inout Path path, inout localData dat){
             
             if (distToScene< EPSILON){
                     //march forward by epsilon to get onto the other side:
-                    otherSideMat(path,dat);
-      
+                   // otherSideMat(path,dat);
+                   // dat.otherMat=dat.mat;
                     //local data is set by the sdf
                     path.distance=totalDist;
                     return;

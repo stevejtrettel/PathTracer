@@ -22,15 +22,18 @@
 
     void updateProbabilities( inout Path path,inout localData dat, inout uint rngState){
         
-        if(path.inside){
-            //use the current surface we hit if inside
-            dat.mat=dat.currentMat;
-        }
-        else{
-            //if we were outside, use the other surface
-            dat.mat=dat.otherMat;
-        }
-    
+       // dat.mat=dat.otherMat;
+        
+        
+//        if(path.inside){
+//            //use the current surface we hit if inside
+//            dat.mat=dat.currentMat;
+//        }
+//        else{
+//            //if we were outside, use the other surface
+//            dat.mat=dat.otherMat;
+//        }
+//    
     //update the normal to be the correct direction:
     float side=(path.inside)?-1.:1.;
     Vector normal=multiplyScalar(side,dat.normal);
@@ -52,8 +55,8 @@
     if (dat.mat.specularChance > 0.0)
     {
         specularChance = FresnelReflectAmount(
-            path.inside ? dat.otherMat.IOR : dat.currentMat.IOR,
-            !path.inside ? dat.otherMat.IOR : dat.currentMat.IOR,
+            path.inside ? dat.mat.IOR : 1.,
+            !path.inside ? dat.mat.IOR :1.,
             path.tv, normal, dat.mat.specularChance, 1.0);
          
         
@@ -77,7 +80,7 @@
     {
          setRefract(path.type,refractionChance);
         //current mat changes as we moved:
-        dat.currentMat=dat.otherMat;
+       // dat.currentMat=dat.otherMat;
     }
     else
     {

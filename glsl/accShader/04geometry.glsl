@@ -305,31 +305,3 @@ Isometry makeIsometry(Point pos,vec3 axis, float angle){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-//==== THINGS TO REPLACE AS NEEDED
-
-
-
-//small shift in the location of a point
-vec3 shiftPoint(vec3 p, vec3 v, float t){
-    return p+0.001*v;
-}
-
-Vector shift(Vector tv, vec3 dir, float t){
-    return Vector(Point(tv.pos.coords+0.001*dir),tv.dir);
-}
-
-
-

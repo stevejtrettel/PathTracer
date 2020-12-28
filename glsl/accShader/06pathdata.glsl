@@ -73,8 +73,7 @@ struct Path{
     float wavelength;//wavelength of starting ray
 
     RayType type;
-    Material mat;//material we are CURRENTLY tracing inside
-    
+
     float side;
     bool inside;
     bool keepGoing;
@@ -153,8 +152,8 @@ Path initializePath(Vector tv,inout uint rngState){
 
 struct localData{
     Vector normal;
-    Vector reflect;
-    Vector refract;
+   // Vector reflect;
+   // Vector refract;
     Material mat;//material used in coloring
     Material otherMat;//material on other side of what we hit
     Material currentMat;//material we are currently inside of
