@@ -52,23 +52,41 @@
                     file: '../glsl/accShader/01setup.glsl'
                 },
                 {
-                    file: '../glsl/accShader/02structs.glsl'
+                    file: '../glsl/accShader/02random.glsl'
                 },
                 {
-                    file: '../glsl/accShader/03sdfs.glsl'
+                    file: '../glsl/accShader/03spectral.glsl'
                 },
                 {
-                    file: '../glsl/accShader/04scene.glsl'
+                    file: '../glsl/accShader/04geometry.glsl'
                 },
                 {
-                    file: '../glsl/accShader/05trace.glsl'
+                    file: '../glsl/accShader/05materials.glsl'
                 },
                 {
-                    file: '../glsl/accShader/06render.glsl'
+                    file: '../glsl/accShader/06pathdata.glsl'
                 },
                 {
-                    file: '../glsl/accShader/07accumulate.glsl'
-                }
+                    file: '../glsl/accShader/07sdfs.glsl'
+                },
+                {
+                    file: '../glsl/accShader/08compoundSDFs.glsl'
+                },
+                {
+                    file: '../glsl/accShader/09scene.glsl'
+                },
+                {
+                    file: '../glsl/accShader/10bsdf.glsl'
+                },
+                {
+                    file: '../glsl/accShader/11trace.glsl'
+                },
+                {
+                    file: '../glsl/accShader/12render.glsl'
+                },
+                {
+                    file: '../glsl/accShader/13accumulate.glsl'
+                },
     ];
 
 
