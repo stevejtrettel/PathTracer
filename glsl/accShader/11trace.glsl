@@ -1,3 +1,26 @@
+//-------------------------------------------------
+// Sample Other Material
+//-------------------------------------------------
+
+Material otherSideMat(Vector tv,Vector normal){
+    //reverse the normal vector so its pointing inwards
+    normal=negate(normal);
+    
+    //nudge tv in the direction of the normal
+    nudge(tv,normal,2.*EPSILON);
+    
+    float d=sceneSDF(tv,trashDat);
+    
+    return trashDat.mat;
+}
+
+
+
+
+
+
+
+
 
 
 //-------------------------------------------------
@@ -10,6 +33,7 @@ void raymarch(inout Path path, inout localData dat){
 
     float distToScene=0.;
     float totalDist=0.;
+    Vector trashTV;
     
     //set if you are inside or outside
     float side=path.inside?-1.:1.;
@@ -20,6 +44,12 @@ void raymarch(inout Path path, inout localData dat){
             totalDist += distToScene;
             
             if (distToScene< EPSILON){
+                 
+                    //if(path.inside){
+                          //march forward by epsilon to get onto the other side:
+                        dat.mat=otherSideMat(path.tv,dat.normal);
+                   // }
+                
                     //local data is set by the sdf
                     path.distance=totalDist;
                     return;

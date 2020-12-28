@@ -382,11 +382,11 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the balls
     
-    //dist=min(dist,sphereSDF(tv,ball1,dat));
+    dist=min(dist,sphereSDF(tv,ball1,dat));
     
     //dist=min(dist,sphereSDF(tv,ball2,dat));
     
-   // dist=min(dist,sphereSDF(tv,ball3,dat));
+    dist=min(dist,sphereSDF(tv,ball3,dat));
     
     
     
@@ -422,9 +422,9 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //-------an cocktail glass
     
-    dist=min(dist,cocktailSDF(tv,glass1,dat));
+    //dist=min(dist,cocktailSDF(tv,glass1,dat));
         
-    dist=min(dist,cylinderSDF(tv,drink1,dat));
+    //dist=min(dist,cylinderSDF(tv,drink1,dat));
     
     
         

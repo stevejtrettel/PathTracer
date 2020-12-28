@@ -12,6 +12,9 @@ struct Point {
 // origin of the space
 const Point ORIGIN = Point(vec3(0, 0, 0));
 
+//in case we need something in a function
+Point trashPoint;
+
 Point createPoint(vec3 p){
     return Point(p);
 }
@@ -40,7 +43,7 @@ struct Vector{
     vec3 dir; //tangent vector, 
 };
 
-
+Vector trashVector;
 
 //--basic geometry free operations
 
@@ -82,6 +85,20 @@ Vector mix(Vector v, Vector w, float x){
      vec3 dir=mix(v.dir,w.dir,x);
     return Vector(v.pos,dir);
 }
+
+
+
+void nudge(inout Vector v, vec3 dir,float amt){
+    v.pos.coords+=dir*amt;
+}
+
+//overload to nudge along a tangent vector
+void nudge(inout Vector v, Vector offset,float amt){
+    nudge(v,offset.dir,amt);
+}
+
+
+
 
 
 
@@ -193,6 +210,8 @@ struct Isometry {
 };
 
 
+Isometry trashIsometry;
+
 const Isometry identity = Isometry(mat4(1));
 
 
@@ -230,18 +249,56 @@ Vector translate(Isometry isom, Vector v) {
 
 
 
+//---- making Isometries --------------
 
 
 
+//make isometry taking origin to p
+Isometry makeTranslation(vec3 p){
+    //remember matrices are entered BACKWARDS
+    mat4 mat=mat4(1.,0.,0.,0.,
+                  0.,1.,0.,0.,
+                  0.,0.,1.,0.,
+                  p.x,p.y,p.z,1.);
+    return Isometry(mat);
+}
+
+//overload for points
+Isometry makeTranslation(Point p){
+    return makeTranslation(p.coords);
+}
+
+//return isometry rotating angle around axis
+Isometry makeRotation(vec3 axis, float angle)
+{
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+    mat4 mat= mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                0.0,                                0.0,                                0.0,                                1.0);
+    return Isometry(mat);
+}
 
 
+//roate about an axis then translate
+Isometry makeIsometry(vec3 pos, vec3 axis, float angle){
+    
+    Isometry trans=makeTranslation(pos);
+    Isometry rot=makeRotation(axis, angle);
+    
+    //first rotate using point stabilizer, then translate
+    return composeIsometry(trans,rot);
+    
+}
 
 
-
-
-
-
-
+//overload for point
+Isometry makeIsometry(Point pos,vec3 axis, float angle){
+    return makeIsometry(pos.coords, axis, angle);
+}
 
 
 
@@ -263,15 +320,6 @@ Vector translate(Isometry isom, Vector v) {
 
 //==== THINGS TO REPLACE AS NEEDED
 
-
-void nudge(inout Vector v, vec3 dir){
-    v.pos.coords+=dir*0.003;
-}
-
-//overload to nudge along a tangent vector
-void nudge(inout Vector v, Vector offset){
-    nudge(v,offset.dir);
-}
 
 
 //small shift in the location of a point

@@ -116,31 +116,3 @@ vec3 WaveLengthColor(float wavelength){
 
 
 
-
-vec3 sampleRed(inout float wavelength, inout uint state){
-    
-    wavelength=RandomNormal(600.,25.,state);
-    
-    return WaveLengthColor(wavelength);
-}
-
-
-
-vec3 sampleGreen(inout float wavelength,inout uint state){
-    
-    wavelength=RandomNormal(550.,25.,state);
-    
-    
-    return WaveLengthColor(wavelength);
-}
-
-
-vec3 sampleBlue(inout float wavelength, inout uint state){
-    
-    wavelength=RandomNormal(450.,25.,state);
-    
-    return WaveLengthColor(wavelength);
-}
-
-
-

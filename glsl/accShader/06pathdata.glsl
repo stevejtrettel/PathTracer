@@ -73,6 +73,7 @@ struct Path{
     float wavelength;//wavelength of starting ray
 
     RayType type;
+    Material mat;//material we are CURRENTLY tracing inside
     
     bool inside;
     bool keepGoing;
@@ -88,40 +89,17 @@ struct Path{
 
 void setLightColor(inout Path path, inout uint rngState){
     
-    
-    
     //if we dont want to run a spectral tracer
     if(!doSpectral){
         path.light=vec3(1.);
         path.wavelength=550.;
         return;
     }
-    
-    
-    //otherwise, sample one of the cones:
-//    float x=RandomFloat01(rngState);
-//    
-//    //update path.light and path.wavelength here
-//    if(x<0.333){
-//        path.light=sampleRed(path.wavelength,rngState);
-//        return;
-//    }
-//    else if(x<0.666){
-//        path.light=sampleGreen(path.wavelength,rngState);
-//        return;
-//    }
-//    else{
-//        path.light=sampleBlue(path.wavelength,rngState);
-//        return;
-//}
-//    
+      
     
   path.light=sampleSpectrum(path.wavelength,rngState);
     
-    
-    
-    
-    
+
 }
 
 
@@ -176,7 +154,7 @@ struct localData{
     Vector normal;
     Vector reflect;
     Vector refract;
-    Material mat;
+    Material mat;//material on the other side of what we just hit
     bool isSky;
 };
 

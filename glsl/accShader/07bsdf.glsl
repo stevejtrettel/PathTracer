@@ -44,8 +44,8 @@
     if (dat.mat.specularChance > 0.0f)
     {
         specularChance = FresnelReflectAmount(
-            path.inside ? dat.mat.IOR : 1.0,
-            !path.inside ? dat.mat.IOR : 1.0,
+            path.inside ? dat.mat.IOR : path.mat.IOR,
+            !path.inside ? dat.mat.IOR : path.mat.IOR,
             path.tv, normal, dat.mat.specularChance, 1.0);
          
         
@@ -63,18 +63,22 @@
     if (specularChance > 0.0f && raySelectRoll < specularChance)
     {
         setSpecular(path.type,specularChance);
+        //do not change current mat: we stay in same material
     }
     else if (refractionChance > 0.0f && raySelectRoll < specularChance + refractionChance)
     {
          setRefract(path.type,refractionChance);
+        //current mat changes as we moved:
+        path.mat=dat.mat;
     }
     else
     {
         setDiffuse(path.type, diffuseChance);
+        //current mat does not change, as we reflect
     }
      
     // numerical problems can cause ray Probability to become small enough to cause a divide by zero.
-    path.type.probability = max(path.type.probability, 0.0001f);
+    path.type.probability = max(path.type.probability, 0.001);
         
     //increase brightness of path chosen
     //to account for the energy not taken
@@ -137,7 +141,7 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     //----- update ray position ----------
     //which side to push the point: in or out rel the normal?
     side=(path.type.refract == 1.0f)?-1.:1.;
-    nudge(path.tv,multiplyScalar(side,normal));
+    nudge(path.tv,multiplyScalar(side,normal),0.003);
    
 
     //----- change path.inside if refract ----------

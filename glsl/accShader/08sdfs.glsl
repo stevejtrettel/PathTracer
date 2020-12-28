@@ -11,28 +11,41 @@ struct Sphere{
 };
 
 
+//----distance or directed sdf
 
 float sphDist(vec3 pos,Sphere sph){
-
     return length(pos-sph.center.coords)-sph.radius;
 }
 
-
-Vector sphereNormal(Vector tv, Sphere sph){
-    return Vector(tv.pos,normalize(tv.pos.coords-sph.center. coords));
+float sphDist(Point pos,Sphere sph){
+    return length(pos.coords-sph.center.coords)-sph.radius;
 }
 
-
-
-
-float sphereSDF(Vector tv, Sphere sph,inout localData dat){
+float sphDist(Vector tv,Sphere sph){
     
-    //distance to closest point:
-    float d = sphDist(tv.pos.coords,sph);
+    float d = sphDist(tv.pos,sph);
     
     //if you are looking away from the sphere, stop
     if(d>0.&&dot(tv.dir,tv.pos.coords-sph.center.coords)>0.){return maxDist;}
     
+    //otherwise return the actual distance
+    return d;
+}
+
+
+//----normal vector
+Vector sphereNormal(Vector tv, Sphere sph){
+    vec3 dir=tv.pos.coords-sph.center. coords;
+    return Vector(tv.pos,normalize(dir));
+}
+
+
+
+//------sdf
+float sphereSDF(Vector tv, Sphere sph,inout localData dat){
+    
+    //distance to closest point:
+    float d = sphDist(tv,sph);
     
     if(d<EPSILON){//set the material
         dat.isSky=false;
