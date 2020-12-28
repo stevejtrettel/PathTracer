@@ -66,7 +66,7 @@ void buildScene(){
     light1.radius=0.2;
     
     color= vec3(1.,.6,0.4);
-    intensity=90.;
+    intensity=190.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -367,7 +367,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     
     //------the walls 
-    dist=min(dist,planeSDF(tv,wall1,dat));
+    //dist=min(dist,planeSDF(tv,wall1,dat));
     
    dist=min(dist,planeSDF(tv,wall2,dat));
    

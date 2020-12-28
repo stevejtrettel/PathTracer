@@ -93,7 +93,7 @@ void raymarch(inout Path path, inout localData dat,inout uint state){
         
        // mat.IOR=mat.IOR-0.6*wavelength/1000.;
 
-         mat.IOR=mat.IOR+100./(wavelength-350.);
+         mat.IOR=mat.IOR+50./(wavelength-350.);
     }
 
 
