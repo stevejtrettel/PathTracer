@@ -5,7 +5,32 @@
 //-------------------------------------------------
 
 
-void raymarch(inout Path path, inout localData dat){
+
+float probScatter(float L){
+    return 1.-exp(-L/8.);
+}
+
+
+void scatterRay(inout Vector tv,float L,inout uint state){
+
+    //choose random number in [0,L]
+    float d=L*RandomFloat01(state);
+    //travel that far along the ray
+    flow(tv,d);
+    
+    //choose the scattering direction
+    vec3 dir=RandomUnitVector(state);
+    
+    //add it to given direction, normalize
+    tv.dir=0.5*tv.dir+dir;
+    tv.dir=normalize(tv.dir);
+
+    //now set to start again from here:
+}
+
+
+
+void raymarch(inout Path path, inout localData dat,inout uint state){
 
 
     float distToScene=0.;
@@ -29,8 +54,20 @@ void raymarch(inout Path path, inout localData dat){
                 break;
             }
             
+            
             //otherwise keep going
+            //first, see if we scatter along the path
+            float prob=probScatter(distToScene);
+            float flip=RandomFloat01(state);
+            //if the flip is less than the probability, we scatter
+            if(flip<prob){
+               scatterRay(path.tv,distToScene,state);
+            }
+            
+            else{
+            //otherwise we flow the whole distance
             flow(path.tv, distToScene);
+            }
         }
     
     //if you hit nothing
@@ -267,7 +304,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
 
             // shoot a ray out into the world
             //when you hit a material, update dat accordingly
-            raymarch(path,dat);
+            raymarch(path,dat,rngState);
             
             //if you hit the sky: stop
             if(dat.isSky){

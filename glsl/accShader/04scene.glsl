@@ -62,7 +62,7 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(2,0,5);
+    light1.center=vec3(0,4,-2);
     light1.radius=0.2;
     
     color= vec3(1.,.6,0.4);
@@ -75,7 +75,7 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(0,3,0.5);
+    light2.center=vec3(4,0,-2);
     light2.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -148,8 +148,8 @@ void buildScene(){
     
     
     //----------- BALL 3 -------------------------
-    ball3.center=vec3(0.7,-0.,-1.5);
-    ball3.radius=0.6;
+    ball3.center=vec3(0,0.5,-2);
+    ball3.radius=0.9;
     
     color= 0.1*vec3(0.7,0.1,0.2);
     specularity=0.4;
@@ -157,7 +157,7 @@ void buildScene(){
     
     //ball3.mat=makeMetal(color,specularity,roughness);
 
-    ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.3);
+    ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.15);
     
     
     
@@ -192,7 +192,7 @@ void buildScene(){
     //color=vec3(0.9,0.5,0.5);
      color= vec3(0.2);
     //color=vec3(0.7,0.7,0.8);
-    specularity=0.05;
+    specularity=0.0;
     roughness=0.5;
     
     setPlane(wall2,normal,offset);
@@ -213,7 +213,7 @@ void buildScene(){
    // color=vec3(0.7,0.7,0.8);
     color= vec3(0.2);
     //color=vec3(0.5,0.9,0.5);
-    specularity=0.05;
+    specularity=0.0;
     roughness=0.5;
     
     setPlane(wall3,normal,offset);
@@ -349,7 +349,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light1,dat));
     
-    dist=min(dist,sphereSDF(tv,light2,dat));
+   // dist=min(dist,sphereSDF(tv,light2,dat));
     
    // dist=min(dist,sphereSDF(tv,light3,dat));
     
@@ -362,7 +362,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //dist=min(dist,sphereSDF(tv,ball2,dat));
     
-   // dist=min(dist,sphereSDF(tv,ball3,dat));
+    dist=min(dist,sphereSDF(tv,ball3,dat));
     
     
     
@@ -371,12 +371,12 @@ float sceneSDF(Vector tv, inout localData dat){
     
    dist=min(dist,planeSDF(tv,wall2,dat));
    
-   // dist=min(dist,planeSDF(tv,wall3,dat));
+   dist=min(dist,planeSDF(tv,wall3,dat));
    
     
     //-------a ring
     
-    dist=min(dist,ringSDF(tv,ring1,dat));
+   // dist=min(dist,ringSDF(tv,ring1,dat));
     
     
     
