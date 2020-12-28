@@ -13,7 +13,7 @@ void otherSideMat(Path path,inout localData dat){
     
     float d=sceneSDF(path,trashDat);
     
-    dat.otherMat=trashDat.mat;
+    dat.otherSide=trashDat.mat;
 }
 
 

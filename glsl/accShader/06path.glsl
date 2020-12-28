@@ -155,8 +155,8 @@ struct localData{
    // Vector reflect;
    // Vector refract;
     Material mat;//material used in coloring
-    Material otherMat;//material on other side of what we hit
-    Material currentMat;//material we are currently inside of
+    Material otherSide;//material on other side of what we hit
+    Material currentSide;//material we are currently inside of
     bool isSky;
 };
 

@@ -64,7 +64,7 @@
                     file: '../glsl/accShader/05materials.glsl'
                 },
                 {
-                    file: '../glsl/accShader/06pathdata.glsl'
+                    file: '../glsl/accShader/06path.glsl'
                 },
                 {
                     file: '../glsl/accShader/07bsdf.glsl'
