@@ -13,6 +13,7 @@ struct Sphere{
 
 
 float sphDist(vec3 pos,Sphere sph){
+
     return length(pos-sph.center)-sph.radius;
 }
 
@@ -391,6 +392,8 @@ Material mat;
 
 float octahedronDist( vec3 p, Octahedron oct)
 {
+//    vec3 c=vec3(2);
+//p = mod(p+0.5*c,c)-0.5*c;
  p = abs(p-oct.center);
   return (p.x+p.y+p.z-oct.side)*0.57735027;
 }
@@ -609,6 +612,68 @@ float permutohedronSDF(Vector tv, Permutohedron perm, inout localData dat){
 
 
 
+//-------------------------------------------------
+// The ROUNDED CYLINDER sdf
+//-------------------------------------------------
+
+struct Cylinder{
+    vec3 center;
+    float radius;
+    float height;
+    float rounded;
+    Material mat;
+};
+
+
+
+float cylDist( vec3 p, Cylinder cyl )
+{
+    p=p-cyl.center;
+  vec2 d = vec2( length(p.xz)-2.0*cyl.radius+cyl.rounded, abs(p.y) - cyl.height );
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - cyl.rounded;
+}
+
+
+
+
+
+//probably a way to do this directly and not sample....
+Vector cylinderNormal(Vector tv, Cylinder cyl){
+    vec3 pos=tv.pos;
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    vec3 dir=  e.xyy*cylDist( pos + e.xyy*ep,cyl) + 
+					  e.yyx*cylDist( pos + e.yyx*ep,cyl) + 
+					  e.yxy*cylDist( pos + e.yxy*ep,cyl) + 
+					  e.xxx*cylDist( pos + e.xxx*ep,cyl);
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+}
+    
+
+
+
+float cylinderSDF(Vector tv, Cylinder cyl, inout localData dat){
+    
+    
+    float d= cylDist(tv.pos,cyl);
+    
+    //-----------------
+    
+    if(d<EPSILON){//set the material
+        dat.isSky=false;
+        dat.normal=cylinderNormal(tv,cyl);
+        dat.mat=cyl.mat;
+    }
+    
+    return d;
+    
+}
+
 
 
 
@@ -642,17 +707,19 @@ float sdRoundedCylinder( vec3 p, float ra, float rb, float h )
 
 float cocktailDist( vec3 p, Cocktail glass)
 {
-    vec3 q1=p-glass.center;
-    vec3 q2=q1-vec3(0,glass.base,0);
+    vec3 q1=p-glass.center+vec3(0,glass.base,0);;
+    vec3 q2=p-glass.center;
     
-    float outer=sdRoundedCylinder(q1,glass.radius,glass.rounded,glass.height);
+    float outer=sdRoundedCylinder(q1,glass.radius+0.15,glass.rounded,glass.height);
     
-   float inner=sdRoundedCylinder(q2,glass.radius-0.15,glass.rounded,glass.height);
+   float inner=sdRoundedCylinder(q2,glass.radius,glass.rounded,glass.height);
     
-    vec3 ballCenter=glass.center-vec3(0.,glass.height-glass.base/3.,0.);
+    
+    float heightAdjust=glass.height+0.66*glass.base;
+    vec3 ballCenter=glass.center-vec3(0.,heightAdjust,0.);
     float ball=length(p-ballCenter)-glass.base/2.;
     
-    float dist=smax(outer,-ball,0.1);
+    float dist=smax(outer,-ball,0.2);
     return max(dist,-inner);
     
 }

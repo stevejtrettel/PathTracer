@@ -156,8 +156,14 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     // Rough (glossy) specular lerps from the smooth specular to the rough diffuse by the material roughness squared
     specularDir = normalize(mix(specularDir, diffuseDir, dat.mat.roughness * dat.mat.roughness));
 
+    Vector refractionDir;
+    if(inLiquid(path.tv)){
+   refractionDir=path.tv;   
+    }
+    else{
     //get the refracted ray direction from IOR
-    Vector refractionDir = refract(path.tv, normal, path.inside ? dat.mat.IOR/1.0 : 1.0 / dat.mat.IOR);
+     refractionDir = refract(path.tv, normal, path.inside ? dat.mat.IOR/1.0 : 1.0 / dat.mat.IOR);
+    }
     
     //update refraction ray based on roughness
     refractionDir = normalize(mix(refractionDir, negate(diffuseDir), dat.mat.roughness * dat.mat.roughness));

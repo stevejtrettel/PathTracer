@@ -508,7 +508,7 @@ struct localData{
 };
 
 
-
+localData trashDat;
 
 void initializeData(localData dat){
     dat.isSky=false;

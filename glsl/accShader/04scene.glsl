@@ -38,6 +38,7 @@ Octahedron oct2;
 Permutohedron perm1;
 
 Cocktail glass1;
+Cylinder drink1;
 
 
 //this function assigns all the objects their parameters
@@ -62,11 +63,11 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(2,0,5);
-    light1.radius=0.2;
+    light1.center=vec3(7,1,-5);
+    light1.radius=0.7;
     
     color= vec3(1.,.6,0.4);
-    intensity=90.;
+    intensity=100.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -75,11 +76,11 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(0,3,0.5);
-    light2.radius=0.2;
+    light2.center=vec3(0,0,-8);
+    light2.radius=0.5;
     
     color= vec3(1.,0.6,0.4);
-    intensity=90.;
+    intensity=40.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -170,7 +171,7 @@ void buildScene(){
     
     //----------- WALL 1 -------------------------
     normal=vec3(0,1,0);
-    offset=2.;
+    offset=3.25;
     
     //color=vec3(0.5,0.9,0.5);
      color= vec3(.2);
@@ -182,17 +183,19 @@ void buildScene(){
 
     
 
+   // wall1.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.3,0.6);
+    
     
     
     
     //----------- WALL 2 -------------------------
     normal=vec3(0,0,1);
-    offset=3.;
+    offset=10.;
     
     //color=vec3(0.9,0.5,0.5);
      color= vec3(0.2);
     //color=vec3(0.7,0.7,0.8);
-    specularity=0.05;
+    specularity=0.0;
     roughness=0.5;
     
     setPlane(wall2,normal,offset);
@@ -285,11 +288,11 @@ void buildScene(){
     
     //----------- OCTAHEDRON 1 -------------------------
     
-    center=vec3(2.,0.,-1.);
+    center=vec3(0.);
     
     oct1.center=center;
-    oct1.side=3.;
-    oct1.mat= makeGlass(vec3(0.),2.43,0.999);
+    oct1.side=1.;
+    oct1.mat= makeGlass(vec3(0.),1.5,0.999);
     
     
     //----------- PERMUTOHEDRON -------------------------
@@ -319,6 +322,14 @@ void buildScene(){
     glass1.mat= makeGlass(0.3*vec3(0.3,0.05,0.2),1.5,0.99);
     
     
+    drink1.center=vec3(0.,-1.,-4.);
+    drink1.radius=1.;
+    drink1.height=1.;
+    drink1.rounded=0.1;
+    
+    drink1.mat= makeGlass(0.85*vec3(0.2,0.5,0.5),1.3,0.99);
+    
+    
     
     
 }
@@ -329,6 +340,19 @@ void buildScene(){
 
 
 
+
+
+
+
+
+
+//decide if we are in the liquid or not:
+bool inLiquid(Vector tv){
+    if(cylinderSDF(tv,drink1,trashDat)<0.){
+        return true;
+    }
+    return false;
+}
 
 
 
@@ -349,7 +373,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light1,dat));
     
-    dist=min(dist,sphereSDF(tv,light2,dat));
+// dist=min(dist,sphereSDF(tv,light2,dat));
     
    // dist=min(dist,sphereSDF(tv,light3,dat));
     
@@ -371,12 +395,12 @@ float sceneSDF(Vector tv, inout localData dat){
     
    dist=min(dist,planeSDF(tv,wall2,dat));
    
-   // dist=min(dist,planeSDF(tv,wall3,dat));
+//dist=min(dist,planeSDF(tv,wall3,dat));
    
     
     //-------a ring
     
-    dist=min(dist,ringSDF(tv,ring1,dat));
+   // dist=min(dist,ringSDF(tv,ring1,dat));
     
     
     
@@ -392,13 +416,15 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //-------an octahedron
     
-    //dist=min(dist,octahedronSDF(tv,oct1,dat));
+   // dist=min(dist,octahedronSDF(tv,oct1,dat));
     
     
     
     //-------an cocktail glass
     
-    //dist=min(dist,cocktailSDF(tv,glass1,dat));
+    dist=min(dist,cocktailSDF(tv,glass1,dat));
+        
+    dist=min(dist,cylinderSDF(tv,drink1,dat));
     
     
         
@@ -408,7 +434,10 @@ float sceneSDF(Vector tv, inout localData dat){
     
     
     
-    
+    if(dist>EPSILON){
+        
+        zeroMat(dat.mat);
+    }
     return dist;
 }
 
