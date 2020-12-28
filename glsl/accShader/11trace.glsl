@@ -2,23 +2,19 @@
 // Sample Other Material
 //-------------------------------------------------
 
-Material otherSideMat(Vector tv,Vector normal){
+//this is kind of a hacky way to get the material on the other side.....
+
+void otherSideMat(Path path,inout localData dat){
     //reverse the normal vector so its pointing inwards
-    normal=negate(normal);
+    Vector normal=negate(dat.normal);
     
     //nudge tv in the direction of the normal
-    nudge(tv,normal,2.*EPSILON);
+    nudge(path.tv,normal,EPSILON);
     
-    float d=sceneSDF(tv,trashDat);
+    float d=sceneSDF(path,trashDat);
     
-    return trashDat.mat;
+    dat.otherMat=trashDat.mat;
 }
-
-
-
-
-
-
 
 
 
@@ -40,16 +36,13 @@ void raymarch(inout Path path, inout localData dat){
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-            distToScene  = side*sceneSDF(path.tv,dat);
+            distToScene  = side*sceneSDF(path,dat);
             totalDist += distToScene;
             
             if (distToScene< EPSILON){
-                 
-                    //if(path.inside){
-                          //march forward by epsilon to get onto the other side:
-                        dat.mat=otherSideMat(path.tv,dat.normal);
-                   // }
-                
+                    //march forward by epsilon to get onto the other side:
+                    otherSideMat(path,dat);
+      
                     //local data is set by the sdf
                     path.distance=totalDist;
                     return;

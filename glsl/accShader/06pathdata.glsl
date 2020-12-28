@@ -75,6 +75,7 @@ struct Path{
     RayType type;
     Material mat;//material we are CURRENTLY tracing inside
     
+    float side;
     bool inside;
     bool keepGoing;
     float distance; //distance traveled on a bounce
@@ -154,7 +155,9 @@ struct localData{
     Vector normal;
     Vector reflect;
     Vector refract;
-    Material mat;//material on the other side of what we just hit
+    Material mat;//material used in coloring
+    Material otherMat;//material on other side of what we hit
+    Material currentMat;//material we are currently inside of
     bool isSky;
 };
 

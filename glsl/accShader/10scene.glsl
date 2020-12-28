@@ -362,7 +362,7 @@ void buildScene(){
 
 
 
-float sceneSDF(Vector tv, inout localData dat){
+float sceneSDF(Path path, inout localData dat){
 
     float dist=maxDist;
     
@@ -371,7 +371,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the lights
     
-    dist=min(dist,sphereSDF(tv,light1,dat));
+    dist=min(dist,sphereSDF(path,light1,dat));
     
 // dist=min(dist,sphereSDF(tv,light2,dat));
     
@@ -382,18 +382,18 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------the balls
     
-    dist=min(dist,sphereSDF(tv,ball1,dat));
+    dist=min(dist,sphereSDF(path,ball1,dat));
     
     //dist=min(dist,sphereSDF(tv,ball2,dat));
     
-    dist=min(dist,sphereSDF(tv,ball3,dat));
+    dist=min(dist,sphereSDF(path,ball3,dat));
     
     
     
     //------the walls 
-    dist=min(dist,planeSDF(tv,wall1,dat));
+    dist=min(dist,planeSDF(path,wall1,dat));
     
-   dist=min(dist,planeSDF(tv,wall2,dat));
+   dist=min(dist,planeSDF(path,wall2,dat));
    
 //dist=min(dist,planeSDF(tv,wall3,dat));
    
@@ -434,10 +434,10 @@ float sceneSDF(Vector tv, inout localData dat){
     
     
     
-    if(dist>EPSILON){
-        
-        zeroMat(dat.mat);
-    }
+//    if(dist>EPSILON){
+//        
+//        zeroMat(dat.mat);
+//    }
     return dist;
 }
 

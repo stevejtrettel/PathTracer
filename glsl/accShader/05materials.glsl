@@ -5,6 +5,7 @@
 
 
 struct Material{
+    bool isSolid;
     vec3 emitColor;
     vec3 diffuseColor;
     vec3 specularColor;
@@ -19,6 +20,7 @@ struct Material{
 
 void zeroMat(inout Material mat){
     //initializes material:
+    mat.isSolid=false;
     mat.emitColor=vec3(0.);
     mat.diffuseColor=vec3(0.);
     mat.specularColor=vec3(0.);
@@ -38,7 +40,7 @@ void zeroMat(inout Material mat){
 
 void setMetal(inout Material mat, vec3 color, float specularity,float roughness){
     zeroMat(mat);//initialize
-    
+    mat.isSolid=true;
     mat.diffuseColor=color;
     mat.specularColor=vec3(2.)+0.8*color;
     mat.roughness=roughness;
@@ -68,6 +70,7 @@ Material makeMetal(vec3 color, float specularity, float roughness){
 void setDielectric(inout Material mat, vec3 color, float specularity, float roughness){
     zeroMat(mat);//initialize
     
+    mat.isSolid=true;
     mat.diffuseColor=color;
     mat.specularColor=vec3(0.9);
     mat.roughness=roughness;
@@ -100,6 +103,7 @@ void setGlass(inout Material mat, vec3 color, float IOR,float refractivity){
     
     zeroMat(mat);//initialize
     
+    mat.isSolid=true;
     mat.specularColor=vec3(1.);
     mat.diffuseColor=vec3(1.);
     mat.absorbColor=vec3(color);
@@ -145,6 +149,8 @@ Material makeLight(vec3 color,float intensity){
     Material mat;
     zeroMat(mat);//initialize
     
+    
+    mat.isSolid=true;
     mat.emitColor=intensity*color;
     
     return mat;
@@ -153,6 +159,7 @@ Material makeLight(vec3 color,float intensity){
 void setLight(inout Material mat, vec3 color,float intensity){
     zeroMat(mat);//initialize
     
+    mat.isSolid=true;
     mat.emitColor=intensity*color;
     
 }

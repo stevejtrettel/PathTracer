@@ -22,6 +22,14 @@
 
     void updateProbabilities( inout Path path,inout localData dat, inout uint rngState){
         
+        if(path.inside){
+            //use the current surface we hit if inside
+            dat.mat=dat.currentMat;
+        }
+        else{
+            //if we were outside, use the other surface
+            dat.mat=dat.otherMat;
+        }
     
     //update the normal to be the correct direction:
     float side=(path.inside)?-1.:1.;
@@ -37,21 +45,21 @@
         
     float specularChance=dat.mat.specularChance;
     float refractionChance=dat.mat.refractionChance;
-    float diffuseChance=1.-specularChance-refractionChance;
+    float diffuseChance=1.0-specularChance-refractionChance;
 
     //if there's a chance of specular
     //update all chances via fresnel
-    if (dat.mat.specularChance > 0.0f)
+    if (dat.mat.specularChance > 0.0)
     {
         specularChance = FresnelReflectAmount(
-            path.inside ? dat.mat.IOR : path.mat.IOR,
-            !path.inside ? dat.mat.IOR : path.mat.IOR,
+            path.inside ? dat.otherMat.IOR : dat.currentMat.IOR,
+            !path.inside ? dat.otherMat.IOR : dat.currentMat.IOR,
             path.tv, normal, dat.mat.specularChance, 1.0);
          
         
         //--- update diffuse and refract accordingly
         
-        float chanceMultiplier = (1.0f - specularChance) / (1.0f - dat.mat.specularChance);
+        float chanceMultiplier = (1.0 - specularChance) / (1.0 - dat.mat.specularChance);
         
         refractionChance = chanceMultiplier*dat.mat.refractionChance;
         diffuseChance = 
@@ -60,16 +68,16 @@
 //     
     // calculate whether we are going to do a diffuse, specular, or refractive ray
     float raySelectRoll = RandomFloat01(rngState);
-    if (specularChance > 0.0f && raySelectRoll < specularChance)
+    if (specularChance > 0.0 && raySelectRoll < specularChance)
     {
         setSpecular(path.type,specularChance);
         //do not change current mat: we stay in same material
     }
-    else if (refractionChance > 0.0f && raySelectRoll < specularChance + refractionChance)
+    else if (refractionChance > 0.0 && raySelectRoll < specularChance + refractionChance)
     {
          setRefract(path.type,refractionChance);
         //current mat changes as we moved:
-        path.mat=dat.mat;
+        dat.currentMat=dat.otherMat;
     }
     else
     {

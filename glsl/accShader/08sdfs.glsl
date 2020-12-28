@@ -42,16 +42,21 @@ Vector sphereNormal(Vector tv, Sphere sph){
 
 
 //------sdf
-float sphereSDF(Vector tv, Sphere sph,inout localData dat){
+float sphereSDF(Path path, Sphere sph,inout localData dat){
+    
+    float side=(path.inside)?-1.:1.;
     
     //distance to closest point:
-    float d = sphDist(tv,sph);
+    float d = sphDist(path.tv,sph);
     
-    if(d<EPSILON){//set the material
+    if(side*d<EPSILON){//set the material
         dat.isSky=false;
-        dat.normal=sphereNormal(tv,sph);
+        dat.normal=sphereNormal(path.tv,sph);
+            if(side*d<0.){
         dat.mat=sph.mat;
+        }
     }
+
     
     return d;
 }
@@ -90,22 +95,25 @@ Vector planeNormal(Vector tv,Plane plane){
 }
 
 
-float planeSDF(Vector tv, Plane plane, inout localData dat){
+float planeSDF(Path path, Plane plane, inout localData dat){
     //does not need to be a unit normal vector
     //D is the constant in ax+by+cz+d=0
-    if(dot(tv.dir,plane.normal)>0.){return maxDist;}
+    if(dot(path.tv.dir,plane.normal)>0.){return maxDist;}
     
     //otherwise give distance to closest point
-    float d=dot(tv.pos.coords,plane.normal)+plane.offset;
+    float d=dot(path.tv.pos.coords,plane.normal)+plane.offset;
    
     
-        //-----------------
+    //-----------------
     
-    if(d<EPSILON){//set the material
+    if(d<EPSILON){//hit something: set normal
         dat.isSky=false;
-        dat.normal=planeNormal(tv,plane);
+        dat.normal=planeNormal(path.tv,plane);
+        if(d<0.){//inside something: set the material
         dat.mat=plane.mat;
+        }
     }
+
     
     return d;
     
