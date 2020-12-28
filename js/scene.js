@@ -67,16 +67,16 @@
                     file: '../glsl/accShader/06pathdata.glsl'
                 },
                 {
-                    file: '../glsl/accShader/07sdfs.glsl'
+                    file: '../glsl/accShader/07bsdf.glsl'
                 },
                 {
-                    file: '../glsl/accShader/08compoundSDFs.glsl'
+                    file: '../glsl/accShader/08sdfs.glsl'
                 },
                 {
-                    file: '../glsl/accShader/09scene.glsl'
+                    file: '../glsl/accShader/09compoundSDFs.glsl'
                 },
                 {
-                    file: '../glsl/accShader/10bsdf.glsl'
+                    file: '../glsl/accShader/10scene.glsl'
                 },
                 {
                     file: '../glsl/accShader/11trace.glsl'

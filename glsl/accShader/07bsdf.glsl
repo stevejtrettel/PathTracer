@@ -114,13 +114,13 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     specularDir = normalize(mix(specularDir, diffuseDir, dat.mat.roughness * dat.mat.roughness));
 
     Vector refractionDir;
-    if(inLiquid(path.tv)){
-   refractionDir=path.tv;   
-    }
-    else{
+    //if(inLiquid(path.tv)){
+   //refractionDir=path.tv;   
+   // }
+    //else{
     //get the refracted ray direction from IOR
      refractionDir = refract(path.tv, normal, path.inside ? dat.mat.IOR/1.0 : 1.0 / dat.mat.IOR);
-    }
+   // }
     
     //update refraction ray based on roughness
     refractionDir = normalize(mix(refractionDir, negate(diffuseDir), dat.mat.roughness * dat.mat.roughness));

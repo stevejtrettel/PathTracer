@@ -347,12 +347,12 @@ void buildScene(){
 
 
 //decide if we are in the liquid or not:
-bool inLiquid(Vector tv){
-    if(cylinderSDF(tv,drink1,trashDat)<0.){
-        return true;
-    }
-    return false;
-}
+//bool inLiquid(Vector tv){
+//    if(cylinderSDF(tv,drink1,trashDat)<0.){
+//        return true;
+//    }
+//    return false;
+//}
 
 
 
