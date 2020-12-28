@@ -232,7 +232,6 @@ struct Path{
     Vector tv;
     vec3 pixel;//pixel color
     vec3 light;//light along path
-    float wavelength;//wavelength of starting ray
 
     RayType type;
     
@@ -244,47 +243,6 @@ struct Path{
     
 };
 
-
-
-
-
-void setLightColor(inout Path path, inout uint rngState){
-    
-    
-    
-    //if we dont want to run a spectral tracer
-    if(!doSpectral){
-        path.light=vec3(1.);
-        path.wavelength=550.;
-        return;
-    }
-    
-    
-    //otherwise, sample one of the cones:
-//    float x=RandomFloat01(rngState);
-//    
-//    //update path.light and path.wavelength here
-//    if(x<0.333){
-//        path.light=sampleRed(path.wavelength,rngState);
-//        return;
-//    }
-//    else if(x<0.666){
-//        path.light=sampleGreen(path.wavelength,rngState);
-//        return;
-//    }
-//    else{
-//        path.light=sampleBlue(path.wavelength,rngState);
-//        return;
-//}
-//    
-    
-  path.light=sampleSpectrum(path.wavelength,rngState);
-    
-    
-    
-    
-    
-}
 
 
 
@@ -301,7 +259,7 @@ Path initializePath(Vector tv,inout uint rngState){
     path.tv=tv;//set the initial direction
     path.pixel=vec3(0.);//set the pixel black
     
-    setLightColor(path,rngState);//set the initial light color
+    path.light=vec3(1.);
     
     path.distance=0.;
     path.keepGoing=true;

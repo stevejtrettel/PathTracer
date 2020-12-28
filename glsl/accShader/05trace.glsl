@@ -52,13 +52,6 @@ void raymarch(inout Path path, inout localData dat){
 // Setting DIRECTIONS and PROBABILITIES
 //-------------------------------------------------
 
-    void updateRefraction(inout Material mat,float wavelength){
-        
-       // mat.IOR=mat.IOR-0.6*wavelength/1000.;
-
-         mat.IOR=mat.IOR+100./(wavelength-350.);
-    }
-
 
 
 
@@ -71,9 +64,6 @@ void raymarch(inout Path path, inout localData dat){
     Vector normal=multiplyScalar(side,dat.normal);
 
         
-    //update the refractive index for the light wavelength:
-    updateRefraction(dat.mat, path.wavelength);
-       
     // take fresnel into account for specularChance and adjust other chances.
     // specular takes priority.
     // chanceMultiplier makes sure we keep diffuse / refraction ratio the same.
