@@ -63,7 +63,7 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(7,1,-5);
+    light1.center=Point(vec3(7,1,-5));
     light1.radius=0.7;
     
     color= vec3(1.,.6,0.4);
@@ -76,7 +76,7 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(0,0,-8);
+    light2.center=Point(vec3(0,0,-8));
     light2.radius=0.5;
     
     color= vec3(1.,0.6,0.4);
@@ -88,7 +88,7 @@ void buildScene(){
     
             
     //----------- LIGHT 3 -------------------------
-    light3.center=1.25*vec3(0,2,-4);
+    light3.center=Point(1.25*vec3(0,2,-4));
     light3.radius=0.6;
     
     color= vec3(1.,0.6,0.4);
@@ -102,7 +102,7 @@ void buildScene(){
     
             
     //----------- LIGHT 4 -------------------------
-    light4.center=vec3(3,0,-2);
+    light4.center=Point(vec3(3,0,-2));
     light4.radius=0.2;
     
     color= vec3(1.,0.6,0.4);
@@ -119,7 +119,7 @@ void buildScene(){
     
     
     //----------- BALL 1 -------------------------
-    ball1.center=vec3(0,1.,-5.4);
+    ball1.center=Point(vec3(0,1.,-5.4));
     ball1.radius=2.;
     
     color= vec3(0.9,0.9,0.5);
@@ -133,7 +133,7 @@ void buildScene(){
     
     
     //----------- BALL 2 -------------------------
-    ball2.center=vec3(0,0,4);
+    ball2.center=Point(vec3(0,0,4));
     ball2.radius=0.55;
     
     color= 0.7*vec3(0.3,0.2,0.6);
@@ -149,7 +149,7 @@ void buildScene(){
     
     
     //----------- BALL 3 -------------------------
-    ball3.center=vec3(0.7,-0.,-1.5);
+    ball3.center=Point(vec3(0.7,-0.,-1.5));
     ball3.radius=0.6;
     
     color= 0.1*vec3(0.7,0.1,0.2);

@@ -9,7 +9,7 @@
 Vector initializeRay(vec2 fragCoord,float FOV, inout uint rngState){
     
     // The ray starts at the camera position (a uniform)
-    vec3 rayPosition = ORIGIN;
+    Point rayPosition = ORIGIN;
     
     // calculate subpixel camera jitter for anti aliasing
     vec2 jitter = vec2(RandomFloat01(rngState), RandomFloat01(rngState)) - 0.5f;
@@ -91,27 +91,27 @@ vec2 sampleAperature(Camera cam,inout uint rngState){
 Vector cameraRay(Vector tv, Camera cam, inout uint rngState){
 
     //find the focal point for the ray tv:
-    vec3 focalPt=tv.pos+cam.focalLength*tv.dir;
+    vec3 focalPt=tv.pos.coords+cam.focalLength*tv.dir;
     
     //reset the position by jittering inside the aperature
     vec2 offset=sampleAperature(cam,rngState);
-    vec3 pos=tv.pos;
+    vec3 pos=tv.pos.coords;
     pos.xy+=offset;
     
     //now set the direction based on the focal length:
     vec3 dir=normalize(focalPt-pos); 
     
     //update the tangent vector
-    tv=Vector(pos,dir);
+    tv=Vector(Point(pos),dir);
     
     
     //rotate position to be in the right spot
     //THIS IS A HACK: BASED ON LENS BEING CENTERED AT ORIGIN
     //to be corect should first translate to origin; do this, then translate back
-    tv.pos=facing*tv.pos;
+    tv.pos.coords=facing*tv.pos.coords;
     
     //translate by the right amount
-    tv.pos+=cam.pos;
+    tv.pos.coords+=cam.pos;
     
     
     //rotate by facing (a uniform)

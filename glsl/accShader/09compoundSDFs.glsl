@@ -15,8 +15,8 @@ struct Lens{
     vec3 axis;
     Material mat;
     float R;
-    vec3 c1;
-    vec3 c2;
+    Point c1;
+    Point c2;
 };
 
 
@@ -35,8 +35,8 @@ void setLens(inout Lens lens, float r,float d, vec3 center, vec3 axis){
     vec3 c2=center-(R-d)*axis;
     
     lens.R=R;
-    lens.c1=c1;
-    lens.c2=c2;
+    lens.c1=Point(c1);
+    lens.c2=Point(c2);
 }
 
 
@@ -58,8 +58,8 @@ Vector lensNormal(Vector tv,Lens lens){
     Sphere sph1=Sphere(lens.c1,lens.R,lens.mat);
     Sphere sph2=Sphere(lens.c2,lens.R,lens.mat);
     
-    float s1=abs(sphDist(tv.pos,sph1));
-    float s2=abs(sphDist(tv.pos,sph2));
+    float s1=abs(sphDist(tv.pos.coords,sph1));
+    float s2=abs(sphDist(tv.pos.coords,sph2));
     
     if(s1<s2){//closer to surface of s1 than s2
         return sphereNormal(tv,sph1);
@@ -75,7 +75,7 @@ Vector lensNormal(Vector tv,Lens lens){
 float lensSDF(Vector tv, Lens lens, inout localData dat){
     
     
-    float d= lensDist(tv.pos,lens);
+    float d= lensDist(tv.pos.coords,lens);
     
     //-----------------
     
@@ -153,7 +153,7 @@ float cocktailDist( vec3 p, Cocktail glass)
 
 //probably a way to do this directly and not sample....
 Vector cocktailNormal(Vector tv, Cocktail glass){
-    vec3 pos=tv.pos;
+    vec3 pos=tv.pos.coords;
     
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
@@ -174,7 +174,7 @@ Vector cocktailNormal(Vector tv, Cocktail glass){
 float cocktailSDF(Vector tv, Cocktail glass, inout localData dat){
     
     
-    float d= cocktailDist(tv.pos,glass);
+    float d= cocktailDist(tv.pos.coords,glass);
     
     //-----------------
     

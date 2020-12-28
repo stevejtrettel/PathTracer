@@ -5,7 +5,7 @@
 
 //the data of a sphere is its center and radius
 struct Sphere{
-    vec3 center;
+    Point center;
     float radius;
     Material mat;
 };
@@ -14,12 +14,12 @@ struct Sphere{
 
 float sphDist(vec3 pos,Sphere sph){
 
-    return length(pos-sph.center)-sph.radius;
+    return length(pos-sph.center.coords)-sph.radius;
 }
 
 
 Vector sphereNormal(Vector tv, Sphere sph){
-    return Vector(tv.pos,normalize(tv.pos-sph.center));
+    return Vector(tv.pos,normalize(tv.pos.coords-sph.center. coords));
 }
 
 
@@ -28,10 +28,10 @@ Vector sphereNormal(Vector tv, Sphere sph){
 float sphereSDF(Vector tv, Sphere sph,inout localData dat){
     
     //distance to closest point:
-    float d = sphDist(tv.pos,sph);
+    float d = sphDist(tv.pos.coords,sph);
     
     //if you are looking away from the sphere, stop
-    if(d>0.&&dot(tv.dir,tv.pos-sph.center)>0.){return maxDist;}
+    if(d>0.&&dot(tv.dir,tv.pos.coords-sph.center.coords)>0.){return maxDist;}
     
     
     if(d<EPSILON){//set the material
@@ -83,7 +83,7 @@ float planeSDF(Vector tv, Plane plane, inout localData dat){
     if(dot(tv.dir,plane.normal)>0.){return maxDist;}
     
     //otherwise give distance to closest point
-    float d=dot(tv.pos,plane.normal)+plane.offset;
+    float d=dot(tv.pos.coords,plane.normal)+plane.offset;
    
     
         //-----------------
@@ -150,7 +150,7 @@ float ringDist(vec3 pos, Ring ring){
 Vector ringNormal(Vector tv, Ring ring){
     
     //translate everything
-    vec3 pos=tv.pos-ring.center;
+    vec3 pos=tv.pos.coords-ring.center;
     
     //reset ring's center to zero:
     ring.center=vec3(0.);
@@ -176,7 +176,7 @@ Vector ringNormal(Vector tv, Ring ring){
 float ringSDF(Vector tv, Ring ring,inout localData dat){
 
 
-    float d= ringDist(tv.pos,ring);
+    float d= ringDist(tv.pos.coords,ring);
     
     //-----------------
     
@@ -233,7 +233,7 @@ float prismDist( vec3 p, Prism prism)
 Vector prismNormal(Vector tv, Prism prism){
     
     //translate everything
-    vec3 pos=tv.pos-prism.center;
+    vec3 pos=tv.pos.coords-prism.center;
     
     //reset prism's center to zero:
     prism.center=vec3(0.);
@@ -257,7 +257,7 @@ Vector prismNormal(Vector tv, Prism prism){
 float prismSDF(Vector tv, Prism prism, inout localData dat){
     
     
-    float d= prismDist(tv.pos,prism);
+    float d= prismDist(tv.pos.coords,prism);
     
     //-----------------
     
@@ -312,7 +312,7 @@ float octahedronDist( vec3 p, Octahedron oct)
 Vector octahedronNormal(Vector tv, Octahedron oct){
     
     //translate everything
-    vec3 pos=tv.pos-oct.center;
+    vec3 pos=tv.pos.coords-oct.center;
     
     //reset prism's center to zero:
     oct.center=vec3(0.);
@@ -336,7 +336,7 @@ Vector octahedronNormal(Vector tv, Octahedron oct){
 float octahedronSDF(Vector tv, Octahedron oct, inout localData dat){
     
     
-    float d= octahedronDist(tv.pos,oct);
+    float d= octahedronDist(tv.pos.coords,oct);
     
     //-----------------
     
@@ -386,7 +386,7 @@ float boxDist( vec3 p, Box box)
 Vector boxNormal(Vector tv, Box box){
     
     //translate everything
-    vec3 pos=tv.pos-box.center;
+    vec3 pos=tv.pos.coords-box.center;
     
     //reset prism's center to zero:
     box.center=vec3(0.);
@@ -410,7 +410,7 @@ Vector boxNormal(Vector tv, Box box){
 float boxSDF(Vector tv, Box box, inout localData dat){
     
     
-    float d= boxDist(tv.pos,box);
+    float d= boxDist(tv.pos.coords,box);
     
     //-----------------
     
@@ -472,7 +472,7 @@ return max(octDist,cubeDist);
 Vector permutohedronNormal(Vector tv, Permutohedron perm){
     
     //translate everything
-    vec3 pos=tv.pos-perm.center;
+    vec3 pos=tv.pos.coords-perm.center;
     
     //reset prism's center to zero:
     perm.center=vec3(0.);
@@ -496,7 +496,7 @@ Vector permutohedronNormal(Vector tv, Permutohedron perm){
 float permutohedronSDF(Vector tv, Permutohedron perm, inout localData dat){
     
     
-    float d= permutohedronDist(tv.pos,perm);
+    float d= permutohedronDist(tv.pos.coords,perm);
     
     //-----------------
     
@@ -546,7 +546,7 @@ float cylDist( vec3 p, Cylinder cyl )
 
 //probably a way to do this directly and not sample....
 Vector cylinderNormal(Vector tv, Cylinder cyl){
-    vec3 pos=tv.pos;
+    vec3 pos=tv.pos.coords;
     
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
@@ -567,7 +567,7 @@ Vector cylinderNormal(Vector tv, Cylinder cyl){
 float cylinderSDF(Vector tv, Cylinder cyl, inout localData dat){
     
     
-    float d= cylDist(tv.pos,cyl);
+    float d= cylDist(tv.pos.coords,cyl);
     
     //-----------------
     
