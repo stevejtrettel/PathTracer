@@ -119,7 +119,6 @@ Path initializePath(Vector tv,inout uint rngState){
     path.distance=0.;
     path.keepGoing=true;
     path.inside=false;
-    
     path.type=intializeRayType();
     
     path.debug=vec3(0.);
@@ -150,6 +149,7 @@ Path initializePath(Vector tv,inout uint rngState){
 struct localData{
     bool isSky;
     Vector normal;
+    bool interiorEdge;
     Material mat;//material used in coloring
 };
 
@@ -158,6 +158,7 @@ localData trashDat;
 
 void initializeData(localData dat){
     dat.isSky=false;
+    dat.interiorEdge=false;
 }
 
 

@@ -22,9 +22,11 @@
         
 
     //update the normal to be the correct direction:
-    float side=(path.inside)?-1.:1.;
-    Vector normal=multiplyScalar(side,dat.normal);
+    //float side=(path.inside)?-1.:1.;
+    //Vector normal=multiplyScalar(side,dat.normal);
 
+    //always assume the normal is outward facing for the surface we are at
+    Vector normal=dat.normal;
         
     //update the refractive index for the light wavelength:
     updateRefraction(dat.mat, path.wavelength);
@@ -96,9 +98,10 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     
 
     //update the normal to be the correct direction:
-    float side=(path.inside)?-1.:1.;
-    Vector normal=multiplyScalar(side,dat.normal);
+   // float side=(path.inside)?-1.:1.;
+   // Vector normal=multiplyScalar(side,dat.normal);
     
+    Vector normal=dat.normal;
     
     //----- get a uniformly distributed vector on the sphere ----------
     Vector randomSph=Vector(path.tv.pos,RandomUnitVector(rngState));
@@ -121,7 +124,7 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
    // }
     //else{
     //get the refracted ray direction from IOR
-     refractionDir = refract(path.tv, normal, path.inside ? dat.mat.IOR/1.0 : 1.0 / dat.mat.IOR);
+     refractionDir = refract(path.tv, normal, 1./dat.mat.IOR);
    // }
     
     //update refraction ray based on roughness
@@ -138,13 +141,14 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     
     //----- update ray position ----------
     //which side to push the point: in or out rel the normal?
-    side=(path.type.refract == 1.0f)?-1.:1.;
+    float side=(path.type.refract == 1.0f)?-1.:1.;
     nudge(path.tv,multiplyScalar(side,normal),0.003);
    
 
     //----- change path.inside if refract ----------
     //if you reflect or diffuse you stay on same side
-    if(path.type.refract==1.){
+    if(path.type.refract==1.&&!dat.interiorEdge){
+        //if you refract and you are not at an interior surface, you switch
         path.inside=!path.inside;
     }
     

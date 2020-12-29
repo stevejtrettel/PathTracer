@@ -335,12 +335,12 @@ void buildScene(){
     //-------- NEGRONI-----------------
     
     negroni.center=vec3(0,0,-4);
-    negroni.radius=0.7;
-    negroni.height=1.3;
+    negroni.radius=0.75;
+    negroni.height=1.5;
     negroni.thickness=0.1;
     negroni.base=0.3;
-    negroni.cup=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5,0.99);
-    negroni.drink=makeGlass(0.85*vec3(0.2,0.5,0.5),1.3,0.99);
+    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
+    negroni.drink=makeGlass(0.2*vec3(0.2,0.5,0.5),1.3,0.99);
     
     
     

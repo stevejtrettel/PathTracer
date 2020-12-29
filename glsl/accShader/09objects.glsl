@@ -235,10 +235,10 @@ float  cupDist( vec3 p, Negroni negroni)
     outside.height=negroni.height;
     outside.rounded=0.1;
 
-    inside.center=negroni.center+vec3(0,negroni.base,0);
+    inside.center=negroni.center+vec3(0,2.*negroni.base,0);
     inside.radius=negroni.radius-negroni.thickness;
     inside.height=negroni.height;
-    outside.rounded=0.1;
+    inside.rounded=0.;
 
     float outsideGlass=cylinderDist(p,outside);
     float insideGlass=cylinderDist(p,inside);
@@ -270,10 +270,10 @@ float drinkDist(vec3 p, Negroni negroni){
     
     Cylinder inside;
     
-    inside.center=negroni.center+vec3(0,negroni.base,0);
+    inside.center=negroni.center+vec3(0,2.*negroni.base,0);
     inside.radius=negroni.radius-negroni.thickness;
     inside.height=negroni.height;
-    inside.rounded=0.3;
+    inside.rounded=0.;
     
     float fullDrink=cylinderDist(p,inside);
     
@@ -306,61 +306,80 @@ Vector drinkNormal(Vector tv,Negroni negroni){
 }
 
 
+
+
+void setNegroniData(float cup, float drink, Negroni negroni,Path path, inout localData dat){
+    
+      
+    //near cup away from drink
+  if(abs(cup)<EPSILON &&abs(drink)>2.*EPSILON){
+        dat.isSky=false;
+        dat.normal=cupNormal(path.tv,negroni);
+        dat.mat=negroni.cup;
+        dat.interiorEdge=false;
+        //no change to IOR
+      dat.mat.IOR=(cup<0.)?1./dat.mat.IOR:dat.mat.IOR;
+  }
+    
+  //near drink away from cup
+ if(abs(drink)<EPSILON&&abs(cup)>2.*EPSILON){
+        dat.isSky=false;
+        dat.normal=drinkNormal(path.tv,negroni);
+        dat.mat=negroni.drink;
+        dat.interiorEdge=false;
+             //no change to IOR
+      dat.mat.IOR=(drink<0.)?1./dat.mat.IOR:dat.mat.IOR;
+    }
+    
+        
+    //if we are inside the cup's glass and near the drink
+ if(cup<0.&& abs(drink)<EPSILON){
+        dat.isSky=false;
+        //the drink's normal is inward pointing at glass
+        dat.normal=negate(cupNormal(path.tv,negroni));
+        dat.mat=negroni.cup;
+        //change in IOR
+        dat.mat.IOR=1.;
+        // negroni.cup.IOR/negroni.drink.IOR;
+        dat.interiorEdge=true;
+    }
+    
+        
+//if we are inside the drink near the glass
+if(drink<0.&& abs(cup)<EPSILON){
+        dat.isSky=false;
+        //the cups normal is inward pointing for drink
+        dat.normal=negate(drinkNormal(path.tv,negroni));
+        dat.mat=negroni.drink;
+        //change in IOR
+        dat.mat.IOR=1.;
+        //negroni.drink.IOR/negroni.cup.IOR;
+        dat.interiorEdge=true;
+    }
+    
+}
+
+
+
+
+
+
+
+
 float negroniSDF(Path path,Negroni negroni, inout localData dat){
     
     float cup=cupDist(path.tv.pos.coords,negroni);
     float drink=drinkDist(path.tv.pos.coords, negroni);
     
-    //cup away from drink
-    if(abs(cup)<EPSILON &&abs(drink)>EPSILON){
-        dat.isSky=false;
-        dat.normal=cupNormal(path.tv,negroni);
-        dat.mat=negroni.cup;
-        //no change to IOR
+    float d=min(abs(cup),abs(drink));
+    //float d=abs(cup);
+    
+    if(d<EPSILON){
+        //this means we are near somehing!
+        setNegroniData(cup,drink,negroni,path,dat);
     }
     
-    //drink away from cup
-    if(abs(drink)<EPSILON&&abs(cup)>EPSILON){
-        dat.isSky=false;
-        dat.normal=drinkNormal(path.tv,negroni);
-        dat.mat=negroni.drink;
-        //no change to IOR
-    }
-    
-    //if we are inside the glass and near the drink
-    else if(cup<0.&& abs(drink)<5.*EPSILON){
-                dat.isSky=false;
-        dat.normal=cupNormal(path.tv,negroni);
-        dat.mat=negroni.cup;
-        //change in IOR
-        dat.mat.IOR=negroni.cup.IOR/negroni.drink.IOR;
-    }
-    
-    //if we are inside the drink near the glass
-    else if(drink<0.&& abs(cup)<5.*EPSILON){
-        dat.isSky=false;
-        dat.normal=drinkNormal(path.tv,negroni);
-        dat.mat=negroni.drink;
-        //change in IOR
-        dat.mat.IOR=negroni.drink.IOR/negroni.cup.IOR;
-    }
-    
-    
-//    
-//     if(cup<EPSILON){//set the material
-//        dat.isSky=false;
-//        dat.normal=cupNormal(path.tv,negroni);
-//        dat.mat=negroni.cup;
-//    }
-//    
-//    if(drink<EPSILON){
-//         dat.isSky=false;
-//        dat.normal=drinkNormal(path.tv,negroni);
-//        dat.mat=negroni.drink;
-//    }
-
-    return min(cup,drink);
-         
+    return min(cup,drink);     
 }
 
 
