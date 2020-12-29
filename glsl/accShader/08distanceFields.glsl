@@ -7,13 +7,20 @@
 struct Sphere{
     Point center;
     float radius;
+   // Isometry isom;
     Material mat;
 };
 
+void setSphere(inout Sphere sphere,Point center, float radius){
+    sphere.center=center;
+    sphere.radius=radius;
+    //sphere.isom=makeTranslation(-center.coords);
+}
 
 //----distance or directed sdf
 
 float sphDist(vec3 pos,Sphere sph){
+    
     return length(pos-sph.center.coords)-sph.radius;
 }
 
@@ -49,12 +56,10 @@ float sphereSDF(Path path, Sphere sph,inout localData dat){
     //distance to closest point:
     float d = sphDist(path.tv,sph);
     
-    if(d<EPSILON){//set the material
+    if(abs(d)<EPSILON){//set the material
         dat.isSky=false;
         dat.normal=sphereNormal(path.tv,sph);
-           // if(side*d<0.){
         dat.mat=sph.mat;
-      //  }
     }
 
     
@@ -106,12 +111,15 @@ float planeSDF(Path path, Plane plane, inout localData dat){
     
     //-----------------
     
-    if(d<EPSILON){//hit something: set normal
+    if(abs(d)<EPSILON){
         dat.isSky=false;
+        
+       // if(d>0.){//hit something: set normal
         dat.normal=planeNormal(path.tv,plane);
-        //if(d<0.){//inside something: set the material
+       // }
         dat.mat=plane.mat;
-        //}
+        
+        
     }
 
     
@@ -141,6 +149,7 @@ float planeSDF(Path path, Plane plane, inout localData dat){
 //the data of a ring is its center, its radius, its tubeRadius, and the height elongation
 
 struct Ring{
+    Isometry isom;
     vec3 center;
     float radius;
     float tubeRad;
@@ -320,10 +329,9 @@ Material mat;
 
 float octahedronDist( vec3 p, Octahedron oct)
 {
-//    vec3 c=vec3(2);
-//p = mod(p+0.5*c,c)-0.5*c;
  p = abs(p-oct.center);
-  return (p.x+p.y+p.z-oct.side)*0.57735027;
+ float dist= (p.x+p.y+p.z-oct.side)*0.57735027;
+    return dist;
 }
 
 
@@ -354,16 +362,16 @@ Vector octahedronNormal(Vector tv, Octahedron oct){
 
 
 
-float octahedronSDF(Vector tv, Octahedron oct, inout localData dat){
+float octahedronSDF(Path path, Octahedron oct, inout localData dat){
     
     
-    float d= octahedronDist(tv.pos.coords,oct);
+    float d= octahedronDist(path.tv.pos.coords,oct);
     
     //-----------------
     
     if(d<EPSILON){//set the material
         dat.isSky=false;
-        dat.normal=octahedronNormal(tv,oct);
+        dat.normal=octahedronNormal(path.tv,oct);
         dat.mat=oct.mat;
     }
     
@@ -550,11 +558,12 @@ struct Cylinder{
     float height;
     float rounded;
     Material mat;
+    Isometry isom;
 };
 
 
 
-float cylDist( vec3 p, Cylinder cyl )
+float cylinderDist( vec3 p, Cylinder cyl )
 {
     p=p-cyl.center;
   vec2 d = vec2( length(p.xz)-2.0*cyl.radius+cyl.rounded, abs(p.y) - cyl.height );
@@ -572,10 +581,10 @@ Vector cylinderNormal(Vector tv, Cylinder cyl){
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
     
-    vec3 dir=  e.xyy*cylDist( pos + e.xyy*ep,cyl) + 
-					  e.yyx*cylDist( pos + e.yyx*ep,cyl) + 
-					  e.yxy*cylDist( pos + e.yxy*ep,cyl) + 
-					  e.xxx*cylDist( pos + e.xxx*ep,cyl);
+    vec3 dir=  e.xyy*cylinderDist( pos + e.xyy*ep,cyl) + 
+					  e.yyx*cylinderDist( pos + e.yyx*ep,cyl) + 
+					  e.yxy*cylinderDist( pos + e.yxy*ep,cyl) + 
+					  e.xxx*cylinderDist( pos + e.xxx*ep,cyl);
     
     dir=normalize(dir);
     
@@ -588,7 +597,7 @@ Vector cylinderNormal(Vector tv, Cylinder cyl){
 float cylinderSDF(Vector tv, Cylinder cyl, inout localData dat){
     
     
-    float d= cylDist(tv.pos.coords,cyl);
+    float d= cylinderDist(tv.pos.coords,cyl);
     
     //-----------------
     

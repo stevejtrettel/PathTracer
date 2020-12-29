@@ -4,17 +4,17 @@
 
 //this is kind of a hacky way to get the material on the other side.....
 
-void otherSideMat(Path path,inout localData dat){
-    //reverse the normal vector so its pointing inwards
-    Vector normal=negate(dat.normal);
-    
-    //nudge tv in the direction of the normal
-    nudge(path.tv,normal,EPSILON);
-    
-    float d=sceneSDF(path,trashDat);
-    
-    dat.otherSide=trashDat.mat;
-}
+//void otherSideMat(Path path,inout localData dat){
+//    //reverse the normal vector so its pointing inwards
+//    Vector normal=negate(dat.normal);
+//    
+//    //nudge tv in the direction of the normal
+//    nudge(path.tv,normal,EPSILON);
+//    
+//    float d=sceneSDF(path,trashDat);
+//    
+//    dat.otherSide=trashDat.mat;
+//}
 
 
 
@@ -26,11 +26,9 @@ void otherSideMat(Path path,inout localData dat){
 
 void raymarch(inout Path path, inout localData dat){
 
-
     float distToScene=0.;
     float totalDist=0.;
-    Vector trashTV;
-    
+
     //set if you are inside or outside
     float side=path.inside?-1.:1.;
 
@@ -41,7 +39,7 @@ void raymarch(inout Path path, inout localData dat){
             
             if (distToScene< EPSILON){
                     //march forward by epsilon to get onto the other side:
-                   // otherSideMat(path,dat);
+                 //   otherSideMat(path,dat);
                    // dat.otherMat=dat.mat;
                     //local data is set by the sdf
                     path.distance=totalDist;

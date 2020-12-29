@@ -1,7 +1,4 @@
 
-
-
-
 //-------------------------------------------------
 //The RayType Struct
 //-------------------------------------------------
@@ -151,13 +148,9 @@ Path initializePath(Vector tv,inout uint rngState){
 
 
 struct localData{
-    Vector normal;
-   // Vector reflect;
-   // Vector refract;
-    Material mat;//material used in coloring
-    Material otherSide;//material on other side of what we hit
-    Material currentSide;//material we are currently inside of
     bool isSky;
+    Vector normal;
+    Material mat;//material used in coloring
 };
 
 

@@ -35,6 +35,8 @@ Cocktail glass1;
 Cylinder drink1;
 
 
+Negroni negroni;
+
 //this function assigns all the objects their parameters
 void buildScene(){
     
@@ -57,7 +59,7 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=Point(vec3(7,1,-5));
+    light1.center=Point(vec3(4,2,-4));
     light1.radius=0.7;
     
     color= vec3(1.,.6,0.4);
@@ -282,10 +284,10 @@ void buildScene(){
     
     //----------- OCTAHEDRON 1 -------------------------
     
-    center=vec3(0.);
+    center=vec3(0.,0,-4.);
     
     oct1.center=center;
-    oct1.side=1.;
+    oct1.side=2.;
     oct1.mat= makeGlass(vec3(0.),1.5,0.999);
     
     
@@ -322,6 +324,23 @@ void buildScene(){
     drink1.rounded=0.1;
     
     drink1.mat= makeGlass(0.85*vec3(0.2,0.5,0.5),1.3,0.99);
+    
+    
+    
+    
+    
+    
+    
+    
+    //-------- NEGRONI-----------------
+    
+    negroni.center=vec3(0,0,-4);
+    negroni.radius=0.7;
+    negroni.height=1.3;
+    negroni.thickness=0.1;
+    negroni.base=0.3;
+    negroni.cup=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5,0.99);
+    negroni.drink=makeGlass(0.85*vec3(0.2,0.5,0.5),1.3,0.99);
     
     
     
@@ -376,20 +395,20 @@ float sceneSDF(Path path, inout localData dat){
     
     //------the balls
     
-    dist=min(dist,sphereSDF(path,ball1,dat));
+   // dist=min(dist,sphereSDF(path,ball1,dat));
     
     //dist=min(dist,sphereSDF(tv,ball2,dat));
     
-    dist=min(dist,sphereSDF(path,ball3,dat));
+    //dist=min(dist,sphereSDF(path,ball3,dat));
     
     
     
     //------the walls 
     dist=min(dist,planeSDF(path,wall1,dat));
     
-   dist=min(dist,planeSDF(path,wall2,dat));
+    dist=min(dist,planeSDF(path,wall2,dat));
    
-//dist=min(dist,planeSDF(tv,wall3,dat));
+    //dist=min(dist,planeSDF(tv,wall3,dat));
    
     
     //-------a ring
@@ -410,15 +429,15 @@ float sceneSDF(Path path, inout localData dat){
     
     //-------an octahedron
     
-   // dist=min(dist,octahedronSDF(tv,oct1,dat));
+    //dist=min(dist,octahedronSDF(path,oct1,dat));
     
     
     
     //-------an cocktail glass
     
-    //dist=min(dist,cocktailSDF(tv,glass1,dat));
+    //dist=min(dist,cocktailSDF(path,glass1,dat));
         
-    //dist=min(dist,cylinderSDF(tv,drink1,dat));
+  //  dist=min(dist,cylinderSDF(path.tv,drink1,dat));
     
     
         
@@ -427,11 +446,17 @@ float sceneSDF(Path path, inout localData dat){
   //  dist=min(dist,permutohedronSDF(tv,perm1,dat));
     
     
-    
-//    if(dist>EPSILON){
-//        
+    //if you are outside of everything
+//    if(dist>0.){
 //        zeroMat(dat.mat);
 //    }
+//    
+    
+    dist=min(dist,negroniSDF(path,negroni,dat));
+    
+    
+    
+    
     return dist;
 }
 

@@ -18,22 +18,9 @@
 
 
 
-
-
     void updateProbabilities( inout Path path,inout localData dat, inout uint rngState){
         
-       // dat.mat=dat.otherMat;
-        
-        
-//        if(path.inside){
-//            //use the current surface we hit if inside
-//            dat.mat=dat.currentMat;
-//        }
-//        else{
-//            //if we were outside, use the other surface
-//            dat.mat=dat.otherMat;
-//        }
-//    
+
     //update the normal to be the correct direction:
     float side=(path.inside)?-1.:1.;
     Vector normal=multiplyScalar(side,dat.normal);
