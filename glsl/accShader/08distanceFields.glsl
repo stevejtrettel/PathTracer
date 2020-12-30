@@ -1,39 +1,149 @@
-
 //-------------------------------------------------
-//The SPHERE sdf
+//-------------------------------------------------
+//==========TEMPLATES 
+//===========FOR THESE
+//=======TYPES OF FUNCTIONS
+//-------------------------------------------------
 //-------------------------------------------------
 
-//the data of a sphere is its center and radius
-struct Sphere{
-    Point center;
-    float radius;
-   // Isometry isom;
-    Material mat;
-};
 
-void setSphere(inout Sphere sphere,Point center, float radius){
-    sphere.center=center;
-    sphere.radius=radius;
-    //sphere.isom=makeTranslation(-center.coords);
+
+//for a 3d object
+float objDistance(vec3 pos){
+    //just calculate the distance
+    return 3.;
 }
 
-//----distance or directed sdf
 
-float sphDist(vec3 pos,Sphere sph){
+
+//hopefully in most cases will find an analytic formula for the normal vector.  But if not, this is a default version
+
+Vector objGradient(vec3 pos){
     
-    return length(pos-sph.center.coords)-sph.radius;
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    float vxyy=objDistance( pos + e.xyy*ep);
+    float vyyx=objDistance( pos + e.yyx*ep);
+    float vyxy=objDistance( pos + e.yxy*ep);
+    float vxxx=objDistance( pos + e.xxx*ep);
+    
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+    
+    dir=normalize(dir);
+    
+    return Vector(Point(pos),dir);
+    
 }
 
-//float sphDist(Point pos,Sphere sph){
-//    return length(pos.coords-sph.center.coords)-sph.radius;
-//}
 
-float sphDist(Vector tv,Sphere sph){
+
+//-------------------------------------------------
+//  Rotating 2D Objects
+//-------------------------------------------------
+
+
+float objDistance2D(vec2 p){
+    return 3.;
+}
+
+vec2 objNormal2D(vec2 p){
+    return vec2(1.,0.);
+}
+
+
+float objDistanceRot(vec3 p){
+    float r=length(p.xz);
+    vec2 v=vec2(r,p.y);
+    return objDistance2D(v);
+}
+
+
+vec3 objNormalRot(vec3 p){
+    float r=length(p.xz);
+    vec2 v=vec2(r,p.y);
+    vec2 n=objNormal2D(v);
     
-    float d = sphDist(tv.pos.coords,sph);
+    //get the right directions in 3D to point the vector
+    vec3 rVec=normalize(vec3(p.x,0,p.z));
+    vec3 hVec=vec3(0,1,0);
+    
+    return n.x*rVec+n.y*hVec;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+//=====useful 
+//====OPERATIONS
+//-------------------------------------------------
+//-------------------------------------------------
+
+
+//get the input for a 2d sdf/normal from a 3d point
+vec2 opRevolution( in vec3 p, float w )
+{
+    return vec2( length(p.xz) - w, p.y );
+}
+
+vec3 opRevolutionOutputNormal(in vec3 p, float w, vec2 n){
+    
+    //right now this STRAIGHT UP IGNORES W
+    vec3 rVec=normalize(vec3(p.x,0,p.z));
+    vec3 hVec=vec3(0,1,0);
+    
+    return n.x*rVec+n.y*hVec;
+}
+
+
+
+
+
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+//=====distance to a 
+//========SPHERE
+//-------------------------------------------------
+//-------------------------------------------------
+
+
+//-------------------------------------------------
+//  Basic Functions 
+//-------------------------------------------------
+
+float sphereDist(vec3 pos, float radius){
+    
+    return length(pos)-radius;
+}
+
+
+//the directed distance function: this can be improved with a better sphere locator test
+float sphereDist(Vector tv, float radius){
+    
+    float d = sphereDist(tv.pos.coords, radius);
     
     //if you are looking away from the sphere, stop
-    if(d>0.&&dot(tv.dir,tv.pos.coords-sph.center.coords)>0.){return maxDist;}
+    if(d>0.&&dot(tv.dir,tv.pos.coords)>0.){return maxDist;}
     
     //otherwise return the actual distance
     return d;
@@ -41,737 +151,213 @@ float sphDist(Vector tv,Sphere sph){
 
 
 //----normal vector
-Vector sphereNormal(Vector tv, Sphere sph){
-    vec3 dir=tv.pos.coords-sph.center. coords;
-    return Vector(tv.pos,normalize(dir));
-}
-
-
-void sphereData(inout Path path, inout localData dat, float dist,Sphere sph){
-    
-    //set the material
-    dat.isSky=false;
-    dat.mat=sph.mat;
-
-    
-    if(dist<0.){
-        path.inside=true;
-        //normal is inwward pointing;
-        dat.normal=negate(sphereNormal(path.tv,sph));
-        //IOR is current/enteing
-        dat.IOR=sph.mat.IOR/1.;
-        
-        dat.reflectAbsorb=sph.mat.absorbColor;
-        dat.refractAbsorb=vec3(0.);
-    }
-    
-    else{
-        path.inside=false;
-        //normal is inwward pointing;
-        dat.normal=sphereNormal(path.tv,sph);
-        //IOR is current/enteing
-        dat.IOR=1./sph.mat.IOR;
-        
-        dat.reflectAbsorb=vec3(0.);
-        dat.refractAbsorb=sph.mat.absorbColor;
-        
-    }
-    
-    
-    
+vec3 sphereGrad(Vector tv,  float radius){
+    return normalize(tv.pos.coords);
 }
 
 
 
 
-//------sdf
-float sphereSDF(inout Path path, Sphere sph,inout localData dat){
-    
-    //float side=(path.inside)?-1.:1.;
-    
-    //distance to closest point:
-    float dist = sphDist(path.tv,sph);
-    
-    if(abs(dist)<EPSILON){//set the material
-        sphereData(path,dat,dist,sph);
-    }
 
+
+
+
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+//=====distance to a 
+//========PLANE
+//-------------------------------------------------
+//-------------------------------------------------
+
+
+//-------------------------------------------------
+//  Basic Functions 
+//-------------------------------------------------
+
+
+float planeDist(vec3 pos, vec3 normal){
+    
+    return dot(pos,normal);
+}
+
+
+float planeDist(Vector tv, vec3 normal){
+    
+     if(dot(tv.dir,normal)>0.){return maxDist;}
+    //otherwise, aimed at plane
+    return planeDist(tv.pos.coords,normal);
+}
+
+
+vec3 planeGrad(vec3 pos, vec3 normal){
+    return normal;
+}
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+//=====distance to a 
+//========BOX
+//-------------------------------------------------
+//-------------------------------------------------
+
+float boxDist(vec3 pos,vec3 sides,float rounded){
+    
+    vec3 q=pos-sides;
+    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - rounded;
+}
+
+
+float boxDist(Vector tv, vec3 sides, float rounded){
+    return boxDist(tv.pos.coords, sides, rounded);
+}
+
+
+vec3 boxGrad(vec3 pos, vec3 sides, float rounded){
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    float vxyy=boxDist( pos + e.xyy*ep,sides,rounded);
+    float vyyx=boxDist( pos + e.yyx*ep,sides,rounded);
+    float vyxy=boxDist( pos + e.yxy*ep,sides, rounded);
+    float vxxx=boxDist( pos + e.xxx*ep,sides, rounded);
+    
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+    
+    return normalize(dir);
+    
+}
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+//=====distance to a 
+//========CYLINDER
+//-------------------------------------------------
+//-------------------------------------------------
+
+//float cylinderDistance(vec3 pos, float radius, float height, float rounded){
+//    
+//    vec2 d = vec2( length(pos.xz)-2.0*radius+rounded, abs(pos.y) - height );
+//  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rounded;
+//    
+//}
+
+
+//float cylinderDistance(Vector tv, float radius, float height, float rounded){
+//    return cylinderDistance(tv.pos.coords, radius, height, rounded);
+//}
+
+
+
+//
+//
+//
+//
+//
+//Vector cylinderNormal(vec3 pos, float radius, float height,float rounded){
+//    
+//    const float ep = 0.0001;
+//    vec2 e = vec2(1.0,-1.0)*0.5773;
+//    
+//    float vxyy=cylinderDistance( pos + e.xyy*ep,radius, height,rounded);
+//    float vyyx=cylinderDistance( pos + e.yyx*ep,radius, height,rounded);
+//    float vyxy=cylinderDistance( pos + e.yxy*ep,radius, height,rounded);
+//    float vxxx=cylinderDistance( pos + e.xxx*ep,radius, height,rounded);
+//    
+//    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+//    
+//    dir=normalize(dir);
+//    
+//    return Vector(Point(pos),dir);
+//    
+//}
+
+
+//Vector cylinderNormal(Vector tv, float radius, float height, float rounded){
+//    vec3 pos=tv.pos.coords;
+//    return cylinderNormal(pos,radius, height, rounded);
+//}
+//
+//
+//
+
+
+
+
+
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+//=====distance to an
+//=======CYLINDER
+//==from rotating a box
+//-------------------------------------------------
+//-------------------------------------------------
+
+
+//from https://www.iquilezles.org/www/articles/distgradfunctions2d/distgradfunctions2d.htm
+//get the distnance as .x and the 2d normal as .yz
+vec3 sdgBox( in vec2 p, in vec2 b )
+{
+    vec2 w = abs(p)-b;
+    vec2 s = vec2(p.x<0.0?-1:1,p.y<0.0?-1:1);
+    float g = max(w.x,w.y);
+    vec2  q = max(w,0.0);
+    float l = length(q);
+    return vec3(   (g>0.0)?l  :g,
+                s*((g>0.0)?q/l:((w.x>w.y)?vec2(1,0):vec2(0,1))));
+}
+
+
+
+float cylinderDist(vec3 pos, float radius, float height, float rounded){
+    
+    vec2 p=opRevolution(pos,0.);
+    vec2 b=vec2(2.*radius, height);
+    
+    vec2 w = abs(p)-b;
+    float g = max(w.x,w.y);
+    vec2  q = max(w,0.0);
+    float l = length(q);
+     
+    float dist= (g>0.0) ?  l  :g;
     return dist;
 }
 
 
 
-
-
-
-
-
-
-//-------------------------------------------------
-//The PLANE sdf
-//-------------------------------------------------
-
-//the data of a plane is its normal and a constant:
-
-struct Plane{
-    vec3 normal;
-    float offset;
-    Material mat;
-};
-
-
-//normalize the plane's vector before adding it:
-void setPlane(inout Plane plane,vec3 normal,float offset){
-    normal=normalize(normal);
-    plane.normal=normal;
-    plane.offset=offset;
+vec3 cylinderGrad(vec3 pos, float radius, float height, float rounded){
+    
+    vec2 p=opRevolution(pos,0.);
+    vec2 b=vec2(2.*radius, height);
+    
+    //this gives distance and normal information
+    vec3 ret=sdgBox(p,b);
+    //second two coordinates are the 2d normal
+    vec2 n=ret.yz;
+    
+    vec3 dir=opRevolutionOutputNormal(pos, 0., n);
+    
+    return normalize(dir);
 }
-
-
-Vector planeNormal(Vector tv,Plane plane){
-    return Vector(tv.pos, plane.normal);
-}
-
-
-float planeSDF(Path path, Plane plane, inout localData dat){
-    //does not need to be a unit normal vector
-    //D is the constant in ax+by+cz+d=0
-    if(dot(path.tv.dir,plane.normal)>0.){return maxDist;}
-    
-    //otherwise give distance to closest point
-    float d=dot(path.tv.pos.coords,plane.normal)+plane.offset;
-   
-    
-    //-----------------
-    
-    if(abs(d)<EPSILON){
-        dat.isSky=false;
-        
-       // if(d>0.){//hit something: set normal
-        dat.normal=planeNormal(path.tv,plane);
-       // }
-        dat.mat=plane.mat;
-        
-        
-    }
-
-    
-    return d;
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------
-// The RING sdf
-//-------------------------------------------------
-
-
-//the data of a ring is its center, its radius, its tubeRadius, and the height elongation
-
-struct Ring{
-    Isometry isom;
-    vec3 center;
-    float radius;
-    float tubeRad;
-    float stretch;
-    Material mat;
-};
-
-
-float ringDist(vec3 pos, Ring ring){
-    
-     //recenter things
-    vec3 q = pos-ring.center;
-    //choose the direction of elongation
-    vec3 H=vec3(0,ring.stretch,0);
-    //stretch out the sdf
-    vec4 w=vec4(q-clamp(q,-H,H),0.);
-    //standard torus SDF
-    vec2 Q=vec2(length(w.xz)-ring.radius,w.y);
-    float d=length(Q)-ring.tubeRad;
-
-    return d;
-}
-
-
-
-//probably a way to do this directly and not sample....
-//should come back to this
-Vector ringNormal(Vector tv, Ring ring){
-    
-    //translate everything
-    vec3 pos=tv.pos.coords-ring.center;
-    
-    //reset ring's center to zero:
-    ring.center=vec3(0.);
-    
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-    
-    vec3 dir=  e.xyy*ringDist( pos + e.xyy*ep,ring ) + 
-					  e.yyx*ringDist( pos + e.yyx*ep,ring) + 
-					  e.yxy*ringDist( pos + e.yxy*ep,ring) + 
-					  e.xxx*ringDist( pos + e.xxx*ep,ring);
-    
-    dir=normalize(dir);
-    
-    return Vector(tv.pos,dir);
-}
-    
-
-
-
-
-
-float ringSDF(Vector tv, Ring ring,inout localData dat){
-
-
-    float d= ringDist(tv.pos.coords,ring);
-    
-    //-----------------
-    
-    if(d<EPSILON){//set the material
-        dat.isSky=false;
-        dat.normal=ringNormal(tv,ring);
-        dat.mat=ring.mat;
-    }
-    
-    return d;
-}
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------
-// The PRISM sdf
-//-------------------------------------------------
-
-struct Prism{
-vec3 center;
-float length;
-float width;
-Material mat;
-};
-
-
-
-float prismDist( vec3 p, Prism prism)
-{
-  vec3 q = abs(p-prism.center);
-  return max(q.z-prism.length,max(q.x*0.866025+p.y*0.5,-p.y)-prism.width*0.5);
-}
-
-
-
-
-//probably a way to do this directly and not sample....
-Vector prismNormal(Vector tv, Prism prism){
-    
-    //translate everything
-    vec3 pos=tv.pos.coords-prism.center;
-    
-    //reset prism's center to zero:
-    prism.center=vec3(0.);
-    
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-    
-    vec3 dir=  e.xyy*prismDist( pos + e.xyy*ep,prism ) + 
-					  e.yyx*prismDist( pos + e.yyx*ep,prism) + 
-					  e.yxy*prismDist( pos + e.yxy*ep,prism) + 
-					  e.xxx*prismDist( pos + e.xxx*ep,prism);
-    
-    dir=normalize(dir);
-    
-    return Vector(tv.pos,dir);
-}
-    
-
-
-
-float prismSDF(Vector tv, Prism prism, inout localData dat){
-    
-    
-    float d= prismDist(tv.pos.coords,prism);
-    
-    //-----------------
-    
-    if(d<EPSILON){//set the material
-        dat.isSky=false;
-        dat.normal=prismNormal(tv,prism);
-        dat.mat=prism.mat;
-    }
-    
-    return d;
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------
-// The OCTAHEDRON sdf
-//-------------------------------------------------
-
-struct Octahedron{
-vec3 center;
-float side;
-Material mat;
-};
-
-
-
-
-float octahedronDist( vec3 p, Octahedron oct)
-{
- p = abs(p-oct.center);
- float dist= (p.x+p.y+p.z-oct.side)*0.57735027;
-    return dist;
-}
-
-
-
-
-//probably a way to do this directly and not sample....
-Vector octahedronNormal(Vector tv, Octahedron oct){
-    
-    //translate everything
-    vec3 pos=tv.pos.coords-oct.center;
-    
-    //reset prism's center to zero:
-    oct.center=vec3(0.);
-    
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-    
-    vec3 dir=  e.xyy*octahedronDist( pos + e.xyy*ep,oct) + 
-					  e.yyx*octahedronDist( pos + e.yyx*ep,oct) + 
-					  e.yxy*octahedronDist( pos + e.yxy*ep,oct) + 
-					  e.xxx*octahedronDist( pos + e.xxx*ep,oct);
-    
-    dir=normalize(dir);
-    
-    return Vector(tv.pos,dir);
-}
-    
-
-
-
-float octahedronSDF(Path path, Octahedron oct, inout localData dat){
-    
-    
-    float d= octahedronDist(path.tv.pos.coords,oct);
-    
-    //-----------------
-    
-    if(d<EPSILON){//set the material
-        dat.isSky=false;
-        dat.normal=octahedronNormal(path.tv,oct);
-        dat.mat=oct.mat;
-    }
-    
-    return d;
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------
-// The BOX sdf
-//-------------------------------------------------
-
-struct Box{
-vec3 center;
-vec3 sides;
-float rounded;
-Material mat;
-};
-
-
-float boxDist( vec3 p, Box box)
-{
-  vec3 q = abs(p-box.center) - box.sides;
-  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - box.rounded;
-}
-
-
-
-//probably a way to do this directly and not sample....
-Vector boxNormal(Vector tv, Box box){
-    
-    //translate everything
-    vec3 pos=tv.pos.coords-box.center;
-    
-    //reset prism's center to zero:
-    box.center=vec3(0.);
-    
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-    
-    vec3 dir=  e.xyy*boxDist( pos + e.xyy*ep,box) + 
-					  e.yyx*boxDist( pos + e.yyx*ep,box) + 
-					  e.yxy*boxDist( pos + e.yxy*ep,box) + 
-					  e.xxx*boxDist( pos + e.xxx*ep,box);
-    
-    dir=normalize(dir);
-    
-    return Vector(tv.pos,dir);
-}
-    
-
-
-
-float boxSDF(Vector tv, Box box, inout localData dat){
-    
-    
-    float d= boxDist(tv.pos.coords,box);
-    
-    //-----------------
-    
-    if(d<EPSILON){//set the material
-        dat.isSky=false;
-        dat.normal=boxNormal(tv,box);
-        dat.mat=box.mat;
-    }
-    
-    return d;
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------
-// The PERMUTOHEDRON sdf
-//-------------------------------------------------
-
-struct Permutohedron{
-vec3 center;
-float side;
-Material mat;
-};
-
-
-float permutohedronDist( vec3 p, Permutohedron perm)
-{
- 
-Octahedron oct;
-oct.center=perm.center;
-oct.side=perm.side;
-    
-Box box;
-box.center=perm.center;
-box.sides=0.66*vec3(perm.side,perm.side,perm.side);
-    
-//octahedron distance:
-float octDist=octahedronDist(p,oct);
-float cubeDist=boxDist(p,box);
-    
-return max(octDist,cubeDist);
-}
-
-
-
-//probably a way to do this directly and not sample....
-Vector permutohedronNormal(Vector tv, Permutohedron perm){
-    
-    //translate everything
-    vec3 pos=tv.pos.coords-perm.center;
-    
-    //reset prism's center to zero:
-    perm.center=vec3(0.);
-    
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-    
-    vec3 dir=  e.xyy*permutohedronDist( pos + e.xyy*ep,perm) + 
-					  e.yyx*permutohedronDist( pos + e.yyx*ep,perm) + 
-					  e.yxy*permutohedronDist( pos + e.yxy*ep,perm) + 
-					  e.xxx*permutohedronDist( pos + e.xxx*ep,perm);
-    
-    dir=normalize(dir);
-    
-    return Vector(tv.pos,dir);
-}
-    
-
-
-
-float permutohedronSDF(Vector tv, Permutohedron perm, inout localData dat){
-    
-    
-    float d= permutohedronDist(tv.pos.coords,perm);
-    
-    //-----------------
-    
-    if(d<EPSILON){//set the material
-        dat.isSky=false;
-        dat.normal=permutohedronNormal(tv,perm);
-        dat.mat=perm.mat;
-    }
-    
-    return d;
-    
-}
-
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------
-// The ROUNDED CYLINDER sdf
-//-------------------------------------------------
-
-struct Cylinder{
-    vec3 center;
-    float radius;
-    float height;
-    float rounded;
-    Material mat;
-    Isometry isom;
-};
-
-float sdCylinder( vec3 p, float radius, float height, float rounded)
-{
-  vec2 d = vec2( length(p.xz)-2.0*radius+rounded, abs(p.y) - height );
-  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rounded;
-}
-
-
-float cylinderDist( vec3 p, Cylinder cyl )
-{
-    p=p-cyl.center;
-  vec2 d = vec2( length(p.xz)-2.0*cyl.radius+cyl.rounded, abs(p.y) - cyl.height );
-  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - cyl.rounded;
-}
-
-
-
-
-
-//probably a way to do this directly and not sample....
-Vector cylinderNormal(Vector tv, Cylinder cyl){
-    vec3 pos=tv.pos.coords;
-    
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-    
-    vec3 dir=  e.xyy*cylinderDist( pos + e.xyy*ep,cyl) + 
-					  e.yyx*cylinderDist( pos + e.yyx*ep,cyl) + 
-					  e.yxy*cylinderDist( pos + e.yxy*ep,cyl) + 
-					  e.xxx*cylinderDist( pos + e.xxx*ep,cyl);
-    
-    dir=normalize(dir);
-    
-    return Vector(tv.pos,dir);
-}
-    
-
-
-
-float cylinderSDF(Vector tv, Cylinder cyl, inout localData dat){
-    
-    
-    float d= cylinderDist(tv.pos.coords,cyl);
-    
-    //-----------------
-    
-    if(d<EPSILON){//set the material
-        dat.isSky=false;
-        dat.normal=cylinderNormal(tv,cyl);
-        dat.mat=cyl.mat;
-    }
-    
-    return d;
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------
-// The CAPPED CONE
-//-------------------------------------------------
-float dot2(vec2 p){
-    return dot(p,p);
-}
-
-//the thing to use in other implementations:
-
-float sdCappedCone( vec3 p, float h, float r1, float r2 )
-{
-  vec2 q = vec2( length(p.xz), p.y );
-  vec2 k1 = vec2(r2,h);
-  vec2 k2 = vec2(r2-r1,2.0*h);
-  vec2 ca = vec2(q.x-min(q.x,(q.y<0.0)?r1:r2), abs(q.y)-h);
-  vec2 cb = q - k1 + k2*clamp( dot(k1-q,k2)/dot2(k2), 0.0, 1.0 );
-  float s = (cb.x<0.0 && ca.y<0.0) ? -1.0 : 1.0;
-  return s*sqrt( min(dot2(ca),dot2(cb)) );
-}
-
-
-struct CappedCone{
-    float height;
-    float rBase;
-    float rTop;
-    vec3 center;
-    Material mat;
-    
-};
-
-
-float cappedConeDist(vec3 p, CappedCone cone){
-    
-    vec3 q=p-cone.center;
-    
-    return sdCappedCone(q,cone.height,cone.rTop,cone.rBase);
-    
-}
-
-
-
-Vector cappedConeNormal(Vector tv, CappedCone cone){
-    
-    vec3 pos=tv.pos.coords-cone.center;
-    cone.center=vec3(0.);
-    
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-    
-    vec3 dir=  e.xyy*cappedConeDist( pos + e.xyy*ep,cone) + 
-					  e.yyx*cappedConeDist( pos + e.yyx*ep,cone) + 
-					  e.yxy*cappedConeDist( pos + e.yxy*ep,cone) + 
-					  e.xxx*cappedConeDist( pos + e.xxx*ep,cone);
-    
-    dir=normalize(dir);
-    
-    return Vector(tv.pos,dir);
-}
-   
-
-
-void cappedConeData(inout Path path, inout localData dat, float dist,CappedCone cone){
-    
-    //set the material
-    dat.isSky=false;
-    dat.mat=cone.mat;
-
-    
-    if(dist<0.){
-        path.inside=true;
-        //normal is inwward pointing;
-        dat.normal=negate(cappedConeNormal(path.tv,cone));
-        //IOR is current/enteing
-        dat.IOR=cone.mat.IOR/1.;
-        
-        dat.reflectAbsorb=cone.mat.absorbColor;
-        dat.refractAbsorb=vec3(0.);
-    }
-    
-    else{
-        path.inside=false;
-        //normal is inwward pointing;
-        dat.normal=cappedConeNormal(path.tv,cone);
-        //IOR is current/enteing
-        dat.IOR=1./cone.mat.IOR;
-        
-        dat.reflectAbsorb=vec3(0.);
-        dat.refractAbsorb=cone.mat.absorbColor;
-        
-    }
-    
-    
-    
-}
-
-
-//------sdf
-float cappedConeSDF(inout Path path, CappedCone cone,inout localData dat){
-    
-    //float side=(path.inside)?-1.:1.;
-    
-    //distance to closest point:
-    float dist = cappedConeDist(path.tv.pos.coords,cone);
-    
-    if(abs(dist)<EPSILON){//set the material
-        cappedConeData(path,dat,dist,cone);
-    }
-
-    return dist;
-}
-
 

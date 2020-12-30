@@ -73,19 +73,22 @@
                     file: '../glsl/accShader/08distanceFields.glsl'
                 },
                 {
-                    file: '../glsl/accShader/09objects.glsl'
+                    file: '../glsl/accShader/09basicObjects.glsl'
+                },
+                           {
+                    file: '../glsl/accShader/10compoundObjects.glsl'
                 },
                 {
-                    file: '../glsl/accShader/10scene.glsl'
+                    file: '../glsl/accShader/11scene.glsl'
                 },
                 {
-                    file: '../glsl/accShader/11trace.glsl'
+                    file: '../glsl/accShader/12trace.glsl'
                 },
                 {
-                    file: '../glsl/accShader/12render.glsl'
+                    file: '../glsl/accShader/13render.glsl'
                 },
                 {
-                    file: '../glsl/accShader/13accumulate.glsl'
+                    file: '../glsl/accShader/14accumulate.glsl'
                 },
     ];
 
