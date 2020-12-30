@@ -43,6 +43,7 @@ ConeCup cone2;
 
 
 Bottle bottle;
+FullBottle fullBottle;
 
 //this function assigns all the objects their parameters
 void buildScene(){
@@ -397,17 +398,24 @@ void buildScene(){
     
     
         
-    //-------- BOTTLW ----------------
+    //-------- BOTTLE ----------------
     
     //these parameters are a bit fucked up: need to fix height vs thickness, and swap radii
-    bottle.mainHeight=2.;
+    bottle.mainHeight=2.5;
     bottle.mainRadius=1.;
-    bottle.neckHeight=1.;
-    bottle.neckRadius=0.25;
+    bottle.neckHeight=1.75;
+    bottle.neckRadius=0.3;
     bottle.thickness=0.2;
-    bottle.center=vec3(0,0,-5);
+    bottle.center=vec3(5,1.75,-8);
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 
+    
+    
+    
+    //----full bottle
+    //use the bottle above
+    fullBottle.bottle=bottle;
+    fullBottle.drink=makeGlass(2.*(vec3(1.)-vec3(204./255.,142./255.,105./255.)),1.3,0.99);
     
     
 }
@@ -494,7 +502,7 @@ float sceneSDF(Path path, inout localData dat){
     
     //-------DRINKS
     
-   //dist=min(dist,negroniSDF(path,negroni,dat));
+   dist=min(dist,negroniSDF(path,negroni,dat));
     
       //dist=min(dist,negroniSDF(path,negroni2,dat));
     
@@ -508,7 +516,9 @@ float sceneSDF(Path path, inout localData dat){
     //-------BOTTLES
     
     
-    dist=min(dist,bottleSDF(path,bottle,dat));
+    //dist=min(dist,bottleSDF(path,bottle,dat));
+    
+     dist=min(dist,fullBottleSDF(path,fullBottle,dat));
     
     return dist;
 }

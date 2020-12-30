@@ -617,17 +617,24 @@ float bottleDist(vec3 p, Bottle bottle){
     vec3 q=p-bottle.center;
     
     //main body
-    float body=sdCylinder(q,bottle.mainRadius,bottle.mainHeight,0.2);
+    float body=sdCylinder(q,bottle.mainRadius,bottle.mainHeight,0.5);
     
     //neck
     //first: adjust the height
-    q=q-vec3(0,bottle.mainHeight/2.,0);
+    q=q-vec3(0,bottle.mainHeight+bottle.neckHeight,0);
     
-    float neck=sdCylinder(q,bottle.neckRadius,bottle.neckHeight,0.2);
+    float neck=sdCylinder(q,bottle.neckRadius,bottle.neckHeight,0.5);
     
     
     //give the subtraction of these:
-    return min(body, neck);
+    float theBottle=smin(body, neck,1.);
+    
+    //chop off the top:
+    float top=q.y-bottle.neckHeight;
+    
+    theBottle=max(theBottle,top);
+    
+    return abs(theBottle)-bottle.thickness;
 }
 
 Vector bottleNormal(Vector tv, Bottle bottle){
@@ -650,14 +657,19 @@ Vector bottleNormal(Vector tv, Bottle bottle){
 }
    
 
-void bottleData(inout Path path, inout localData dat, float dist,Bottle bottle){
+void bottleData(inout Path path, inout localData dat, float bottleDistance, float capDistance,Bottle bottle){
     
     //set the material
     dat.isSky=false;
     dat.mat=bottle.mat;
 
     
-    if(dist<0.){
+    if(abs(capDistance)<EPSILON){
+    
+    }
+    
+    
+    else if(bottleDistance<0.){
         path.inside=true;
         //normal is inwward pointing;
         dat.normal=negate(bottleNormal(path.tv,bottle));
@@ -690,14 +702,180 @@ void bottleData(inout Path path, inout localData dat, float dist,Bottle bottle){
 //------sdf
 float bottleSDF(inout Path path,Bottle bottle,inout localData dat){
     
-    //float side=(path.inside)?-1.:1.;
     
     //distance to closest point:
-    float dist = bottleDist(path.tv.pos.coords,bottle);
+    float bottleDistance = bottleDist(path.tv.pos.coords,bottle);
+    
+    //distance to cap
+    float capDistance=100.;
+    
+    float dist=min(bottleDistance, capDistance);
     
     if(abs(dist)<EPSILON){//set the material
-        bottleData(path,dat,dist,bottle);
+        bottleData(path,dat,bottleDistance,capDistance,bottle);
     }
 
     return dist;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The FULL BOTTLE SDF
+//-------------------------------------------------
+
+
+struct FullBottle{
+    Bottle bottle;
+    Material drink;
+};
+
+
+
+void fullBottleData(inout Path path, inout localData dat, float bottle, float drink,FullBottle theBottle, Cylinder theDrink){
+    
+    
+    
+        
+    //first, if we are far from the drink
+    if(drink>EPSILON){
+        
+    //if we are inside the cup away from liquid
+    if(bottle<0.){
+        dat.mat=theBottle.bottle.mat;
+        path.inside=true;
+        dat.normal=negate(bottleNormal(path.tv,theBottle.bottle)); 
+        dat.IOR=theBottle.bottle.mat.IOR/1.;
+        dat.materialInterface=false;
+        dat.reflectAbsorb=theBottle.bottle.mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+        
+    }
+    
+    //if we are outside the cup away from liquid
+    else{
+        dat.mat=theBottle.bottle.mat;
+        path.inside=false;
+        dat.normal=bottleNormal(path.tv,theBottle.bottle); 
+        dat.IOR=1./theBottle.bottle.mat.IOR;
+        dat.materialInterface=false;
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=theBottle.bottle.mat.absorbColor;
+        
+    }
+}
+
+else if(bottle>EPSILON){
+    //automatically drink<epsilon here in this case, so this means we must be near the drink and not the cup:
+    
+
+    if(drink<0.){//inside drink
+        dat.mat=theBottle.drink;
+        path.inside=true;
+        dat.normal=negate(cylinderNormal(path.tv,theDrink)); 
+        dat.IOR=theBottle.drink.IOR/1.;
+        dat.materialInterface=false; 
+        dat.reflectAbsorb=theBottle.drink.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+    
+    else{//outside drink
+        dat.mat=theBottle.drink;
+        path.inside=false;
+        dat.normal=cylinderNormal(path.tv,theDrink); 
+        dat.IOR=1./theBottle.drink.IOR;
+        dat.materialInterface=false;
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=theBottle.drink.absorbColor;
+        
+    }
+    
+}
+
+
+else{
+    //drink< epsilon and cup<epsilon: so we are near both
+    
+    if(bottle<0.){
+        //inside cup near drink
+        dat.mat=theBottle.bottle.mat;
+        path.inside=true;
+        dat.normal=negate(bottleNormal(path.tv,theBottle.bottle)); 
+        dat.IOR=theBottle.bottle.mat.IOR/theBottle.drink.IOR;
+        dat.materialInterface=true;
+        dat.reflectAbsorb=theBottle.bottle.mat.absorbColor;
+        dat.refractAbsorb=theBottle.drink.absorbColor;
+        
+    }
+    
+    else{
+        //inside drink near cup
+        dat.mat=theBottle.drink;
+        path.inside=true;
+        dat.normal=negate(cylinderNormal(path.tv,theDrink)); 
+        dat.IOR=theBottle.drink.IOR/theBottle.bottle.mat.IOR;
+        dat.materialInterface=true;
+        dat.reflectAbsorb=theBottle.drink.absorbColor;
+        dat.refractAbsorb=theBottle.bottle.mat.absorbColor;
+    }
+    
+    
+    
+    
+    
+}
+
+}
+
+
+//------sdf
+float fullBottleSDF(inout Path path,FullBottle theBottle,inout localData dat){
+    
+    
+    //distance to glass bottle
+    float bottleDistance = bottleDist(path.tv.pos.coords,theBottle.bottle);
+    
+
+        
+    //make the cylinder for the drink:
+        
+    //half-width of the onioning used to make the bottle
+    float w=theBottle.bottle.thickness/2.;
+     Cylinder theDrink;
+    theDrink.center=theBottle.bottle.center;
+    theDrink.radius=theBottle.bottle.mainRadius-w;
+    theDrink.height=theBottle.bottle.mainHeight;
+    theDrink.rounded=0.5;
+    theDrink.mat=theBottle.drink;
+    
+    
+    float drinkDistance=cylinderDist(path.tv.pos.coords,theDrink);
+
+    
+    float dist=min(bottleDistance, drinkDistance);
+    
+    if(abs(dist)<EPSILON){//set the material
+        fullBottleData(path,dat,bottleDistance,drinkDistance,theBottle,theDrink);
+    }
+
+    return dist;
+}
+
