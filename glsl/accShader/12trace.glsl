@@ -33,11 +33,11 @@ void raymarch(inout Path path, inout localData dat){
     float marchDist;
     
     //set if you are inside or outside
-    float side=path.inside?-1.:1.;
+   // float side=path.inside?-1.:1.;
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-            distToScene  =side*sceneSDF(path,dat);
+            distToScene  =abs(sceneSDF(path,dat));
             marchDist=factor*distToScene;
             
             if (distToScene< EPSILON){

@@ -1,5 +1,66 @@
 
 //-------------------------------------------------
+//COMMON STUFF
+//-------------------------------------------------
+
+
+
+//if you hit an object which is not part of a compound, one side is the object (material) and the other side is air
+//set your local data appropriately
+void setObjectInAir(inout localData dat, float dist, Vector normal, Material mat){
+    
+    //set the material
+    dat.isSky=false;
+    dat.mat=mat;
+
+     if(dist<0.){
+        //normal is inwward pointing;
+        dat.normal=negate(normal);
+        //IOR is current/enteing
+        dat.IOR=mat.IOR/1.;
+        
+        dat.reflectAbsorb=mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+    
+    else{
+        //normal is inwward pointing;
+        dat.normal=normal;
+        //IOR is current/enteing
+        dat.IOR=1./mat.IOR;
+        
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=mat.absorbColor;
+        
+    }
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
 //The SPHERE sdf
 //-------------------------------------------------
 
@@ -24,54 +85,19 @@ Vector sphereNormal(Vector tv, Sphere sph){
 }
 
 
-
-//what to do when you hit a sphere:
-void sphereData(inout Path path, inout localData dat, float dist, Sphere obj){
-    
-    //set the material
-    dat.isSky=false;
-    dat.mat=obj.mat;
-
-    Vector normal=sphereNormal(path.tv,obj);
-    
-    if(dist<0.){
-        path.inside=true;
-        //normal is inwward pointing;
-        dat.normal=negate(normal);
-        //IOR is current/enteing
-        dat.IOR=obj.mat.IOR/1.;
-        
-        dat.reflectAbsorb=obj.mat.absorbColor;
-        dat.refractAbsorb=vec3(0.);
-    }
-    
-    else{
-        path.inside=false;
-        //normal is inwward pointing;
-        dat.normal=normal;
-        //IOR is current/enteing
-        dat.IOR=1./obj.mat.IOR;
-        
-        dat.reflectAbsorb=vec3(0.);
-        dat.refractAbsorb=obj.mat.absorbColor;
-        
-    }
-    
-}
-
-
-
-
 //------sdf
 float sphereSDF(inout Path path, Sphere sph,inout localData dat){
-    
-    //float side=(path.inside)?-1.:1.;
     
     //distance to closest point:
     float dist = sphereDistance(path.tv,sph);
     
-    if(abs(dist)<EPSILON){//set the material
-        sphereData(path,dat,dist,sph);
+    if(abs(dist)<EPSILON){
+        
+        //compute the normal
+        Vector normal=sphereNormal(path.tv,sph);
+        
+        //set the material
+        setObjectInAir(dat,dist,normal,sph.mat);
     }
 
     return dist;
@@ -119,16 +145,18 @@ Vector planeNormal(Vector tv,Plane plane){
 
 float planeSDF(Path path, Plane plane, inout localData dat){
 
-    float d=planeDistance(path.tv,plane);
+    float dist=planeDistance(path.tv,plane);
     
-    if(abs(d)<EPSILON){
-        dat.isSky=false;
-    
-        dat.normal=planeNormal(path.tv,plane);
-        dat.mat=plane.mat;
+    if(abs(dist)<EPSILON){
+        
+        //compute the normal
+        Vector normal=planeNormal(path.tv,plane);
+        
+        //set the material
+        setObjectInAir(dat,dist,normal,plane.mat);
     }
-
-    return d;
+    
+    return dist;
     
 }
 
@@ -176,53 +204,19 @@ Vector cylinderNormal(Vector tv, Cylinder cyl){
 
 
 
-//what to do when you hit a sphere:
-void cylinderData(inout Path path, inout localData dat, float dist,Cylinder obj){
-    
-    //set the material
-    dat.isSky=false;
-    dat.mat=obj.mat;
-    
-    //outward pointing normal vector
-    Vector normal=cylinderNormal(path.tv,obj);
-    
-    if(dist<0.){
-        path.inside=true;
-        //normal is inwward pointing;
-        dat.normal=negate(normal);
-        //IOR is current/enteing
-        dat.IOR=obj.mat.IOR/1.;
-        
-        dat.reflectAbsorb=obj.mat.absorbColor;
-        dat.refractAbsorb=vec3(0.);
-    }
-    
-    else{
-        path.inside=false;
-        //normal is inwward pointing;
-        dat.normal=normal;
-        //IOR is current/enteing
-        dat.IOR=1./obj.mat.IOR;
-        
-        dat.reflectAbsorb=vec3(0.);
-        dat.refractAbsorb=obj.mat.absorbColor;
-        
-    }  
-}
-
-
-
-
 //------sdf
 float cylinderSDF(inout Path path, Cylinder cyl,inout localData dat){
-    
-    //float side=(path.inside)?-1.:1.;
     
     //distance to closest point:
     float dist = cylinderDistance(path.tv,cyl);
     
-    if(abs(dist)<EPSILON){//set the material
-        cylinderData(path,dat,dist,cyl);
+    if(abs(dist)<EPSILON){
+        
+        //compute the normal
+        Vector normal=cylinderNormal(path.tv,cyl);
+        
+        //set the material
+        setObjectInAir(dat,dist,normal,cyl.mat);
     }
 
     return dist;
@@ -268,12 +262,10 @@ float bottleDistance(vec3 p, Bottle bottle){
     float neck=cylinderDist(q,bottle.neckRadius,bottle.neckHeight,0.5);
     
     //give the subtraction of these:
-    float theBottle=smin(base, neck,1.);
+    float theBottle=opMinDist(base, neck,1.);
     
-    //now make a thin layer
-    theBottle= abs(theBottle)-bottle.thickness;
+    return opOnionDist(theBottle,bottle.thickness);
     
-    return theBottle;
 }
 
 float bottleDistance(Vector tv, Bottle bottle){
@@ -283,15 +275,77 @@ float bottleDistance(Vector tv, Bottle bottle){
 
 
 
+Vector bottleNormal(Vector tv, Bottle bottle){
+    
+    //if this ever becomes more expensive than four calls of the sdf: stop!
+    
+    vec3 pos=tv.pos.coords-bottle.center.coords;
+    
+    //the base of the bottle
+    float base=cylinderDist(pos,bottle.baseRadius, bottle.baseHeight,0.5);
+    
+    vec3 baseVec=cylinderGrad(pos,bottle.baseRadius, bottle.baseHeight,0.5);
+    
+    //the neck of the bottle
+    //first: adjust the height
+    vec3 q=pos-vec3(0,bottle.baseHeight+bottle.neckHeight,0);
+    
+    float neck=cylinderDist(q,bottle.neckRadius,bottle.neckHeight,0.5);
+    
+    vec3 neckVec=cylinderGrad(q,bottle.neckRadius,bottle.neckHeight,0.5);
+    
+    float dist=opMinDist(base,neck,1.);
+    
+    vec3 dir=opMinVec(base,baseVec,neck,neckVec,1.);
+    
+    dir=opOnionVec(dist,dir);
+    
+    return Vector(tv.pos,normalize(dir));
+    
+}
+
+////the default option: 4 calls of SDF
 //Vector bottleNormal(Vector tv, Bottle bottle){
 //    
-//    vec3 pos=tv.pos.coords-bottle.center.coords;
+//    vec3 pos=tv.pos.coords;
 //    
+//    const float ep = 0.0001;
+//    vec2 e = vec2(1.0,-1.0)*0.5773;
 //    
+//    float vxyy=bottleDistance( pos + e.xyy*ep,bottle);
+//    float vyyx=bottleDistance( pos + e.yyx*ep,bottle);
+//    float vyxy=bottleDistance( pos + e.yxy*ep,bottle);
+//    float vxxx=bottleDistance( pos + e.xxx*ep,bottle);
 //    
+//    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+//    
+//    dir=normalize(dir);
+//    
+//    return Vector(tv.pos,dir);
 //    
 //}
-//
+
+
+
+
+//------sdf
+float bottleSDF(inout Path path, Bottle bottle,inout localData dat){
+
+    float dist = bottleDistance(path.tv,bottle);
+    
+    
+    if(abs(dist)<EPSILON){
+        
+        //compute the normal
+        Vector normal=bottleNormal(path.tv,bottle);
+        
+        //set the material
+        setObjectInAir(dat,dist,normal,bottle.mat);
+    }
+
+
+    return dist;
+}
 
 
 
@@ -299,17 +353,53 @@ float bottleDistance(Vector tv, Bottle bottle){
 
 
 
-Vector bottleNormal(Vector tv, Bottle bottle){
+//-------------------------------------------------
+//The COCKTAILGLASS sdf
+//-------------------------------------------------
+
+struct CocktailGlass{
+   Point center;
+    float radius;
+    float height;
+    float thickness;
+    float base;
+    Material mat;
+};
+
+
+float cocktailGlassDistance(vec3 p, CocktailGlass glass){
+    
+    vec3 pos=p-glass.center.coords;
+    
+    float outside=cylinderDist(pos,glass.radius,glass.height,0.2);
+    
+    vec3 q=pos-glass.base;
+    
+    float inside=cylinderDist(q,glass.radius-glass.thickness,glass.height,0.2);
+    
+    return max(outside,-inside);
+    
+}
+
+
+float cocktailGlassDistance(Vector tv,CocktailGlass glass){
+    return cocktailGlassDistance(tv.pos.coords,glass);
+}
+
+
+
+//the default option: 4 calls of SDF
+Vector cocktailGlassNormal(Vector tv, CocktailGlass glass){
     
     vec3 pos=tv.pos.coords;
     
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
     
-    float vxyy=bottleDistance( pos + e.xyy*ep,bottle);
-    float vyyx=bottleDistance( pos + e.yyx*ep,bottle);
-    float vyxy=bottleDistance( pos + e.yxy*ep,bottle);
-    float vxxx=bottleDistance( pos + e.xxx*ep,bottle);
+    float vxyy=cocktailGlassDistance( pos + e.xyy*ep,glass);
+    float vyyx=cocktailGlassDistance( pos + e.yyx*ep,glass);
+    float vyxy=cocktailGlassDistance( pos + e.yxy*ep,glass);
+    float vxxx=cocktailGlassDistance( pos + e.xxx*ep,glass);
     
     vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
     
@@ -321,59 +411,24 @@ Vector bottleNormal(Vector tv, Bottle bottle){
 
 
 
-//what to do when you hit a bottle:
-void bottleData(inout Path path, inout localData dat, float dist,Bottle obj){
-    
-    //set the material
-    dat.isSky=false;
-    dat.mat=obj.mat;
-    
-    //outward pointing normal vector
-    Vector normal=bottleNormal(path.tv,obj);
-    
-    if(dist<0.){
-        path.inside=true;
-        //normal is inwward pointing;
-        dat.normal=negate(normal);
-        //IOR is current/enteing
-        dat.IOR=obj.mat.IOR/1.;
-        
-        dat.reflectAbsorb=obj.mat.absorbColor;
-        dat.refractAbsorb=vec3(0.);
-    }
-    
-    else{
-        path.inside=false;
-        //normal is inwward pointing;
-        dat.normal=normal;
-        //IOR is current/enteing
-        dat.IOR=1./obj.mat.IOR;
-        
-        dat.reflectAbsorb=vec3(0.);
-        dat.refractAbsorb=obj.mat.absorbColor;
-        
-    }  
-}
-
-
-
 
 //------sdf
-float bottleSDF(inout Path path, Bottle bottle,inout localData dat){
+float cocktailGlassSDF(inout Path path, CocktailGlass glass,inout localData dat){
 
-    float dist = bottleDistance(path.tv,bottle);
+    float dist = cocktailGlassDistance(path.tv,glass);
     
-    if(abs(dist)<EPSILON){//set the material
-        bottleData(path,dat,dist,bottle);
+    
+    if(abs(dist)<EPSILON){
+        
+        //compute the normal
+        Vector normal=cocktailGlassNormal(path.tv,glass);
+        
+        //set the material
+        setObjectInAir(dat,dist,normal,glass.mat);
     }
 
     return dist;
 }
-
-
-
-
-
 
 
 

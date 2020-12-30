@@ -33,7 +33,7 @@ int maxBounces=50;
 //====camera constants:
 float fov=73.;
 float focalLength=9.3;
-float aperature=0.1;
+float aperature=0.;
 
 
 //======spectral constants:
@@ -119,32 +119,6 @@ float smin( float a, float b, float k )
     return mix( b, a, h ) - k*h*(1.0-h);
 }
 
-
-//smooth min of signed distance functions
-float sminDist(float distA, float distB, float k){
-    float h = max(k-abs(distA-distB),0.0);
-    float m = 0.25*h*h/k;
-    return min(distA,distB)-m;
-}
-
-
-//smooth min of two normal vectors
-vec3 sminVec(float distA, vec3 nvecA, float distB, vec3 nvecB, float k){
-    float h = max(k-abs(distA-distB),0.0);
-    float n=0.5*h/k;
-    float f=(distA<distB)?n:1.-n;
-    return mix(nvecA, nvecB, f);
-}
-
-
-
-
-
-
-float smaxDist( float a, float b, float k )
-{
-    return -sminDist(-a,-b,k);
-}
 
 
 float smax( float a, float b, float k )

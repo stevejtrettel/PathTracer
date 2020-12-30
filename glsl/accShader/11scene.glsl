@@ -20,7 +20,10 @@ Plane wall3;
 
 
 Cylinder cyl1;
-Cylinder cyl2;
+
+Bottle bottle;
+
+CocktailGlass cGlass;
 
 //
 //Ring ring1;
@@ -46,7 +49,7 @@ Cylinder cyl2;
 //ConeCup cone2;
 //
 //
-Bottle bottle;
+//Bottle bottle;
 //Bottle gin;
 //Bottle campari;
 //Bottle vermouth;
@@ -255,6 +258,30 @@ void buildScene(){
     
     
     
+    //-------- BOTTLE ----------------
+   
+    bottle.baseHeight=2.5;
+    bottle.baseRadius=1.;
+    bottle.neckHeight=1.75;
+    bottle.neckRadius=0.3;
+    bottle.thickness=0.2;
+    bottle.center=Point(vec3(5,1.5,-8));
+    bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+
+    
+    
+    //-------- COCKTAIL GLASD----------------
+    
+    cGlass.center=Point(vec3(0,0.3,-2));
+    cGlass.radius=0.75;
+    cGlass.height=1.5;
+    cGlass.thickness=0.2;
+    cGlass.base=0.5;
+    cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+
+    
+    
+    
 //    
 //    
 //    
@@ -427,17 +454,7 @@ void buildScene(){
 //    
 //    
 //        
-//    //-------- BOTTLE ----------------
-//    
-    bottle.baseHeight=2.5;
-    bottle.baseRadius=1.;
-    bottle.neckHeight=1.75;
-    bottle.neckRadius=0.3;
-    bottle.thickness=0.2;
-    bottle.center=Point(vec3(5,1.5,-8));
-    bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 
-    
     
 //    
 // 
@@ -597,6 +614,8 @@ float sceneSDF(Path path, inout localData dat){
     
     
     dist=min(dist,bottleSDF(path,bottle,dat));
+    
+    dist=min(dist,cocktailGlassSDF(path,cGlass,dat));
     
      //dist=min(dist,fullBottleSDF(path,fullBottle,dat));
     
