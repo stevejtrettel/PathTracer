@@ -18,6 +18,10 @@ Plane wall1;
 Plane wall2;
 Plane wall3;
 
+
+Cylinder cyl1;
+Cylinder cyl2;
+
 //
 //Ring ring1;
 //
@@ -42,7 +46,7 @@ Plane wall3;
 //ConeCup cone2;
 //
 //
-//Bottle bottle;
+Bottle bottle;
 //Bottle gin;
 //Bottle campari;
 //Bottle vermouth;
@@ -238,6 +242,18 @@ void buildScene(){
 
     
     
+      
+     //----------- CYLINDER 1 -------------------------
+    
+    cyl1.center=Point(vec3(0,0,-5));
+    cyl1.radius=1.;
+    cyl1.height=2.;
+    cyl1.rounded=0.2;
+    cyl1.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.3);
+    
+    
+    
+    
     
 //    
 //    
@@ -413,17 +429,16 @@ void buildScene(){
 //        
 //    //-------- BOTTLE ----------------
 //    
-//    //these parameters are a bit fucked up: need to fix height vs thickness, and swap radii
-//    bottle.mainHeight=2.5;
-//    bottle.mainRadius=1.;
-//    bottle.neckHeight=1.75;
-//    bottle.neckRadius=0.3;
-//    bottle.thickness=0.2;
-//    bottle.center=vec3(5,1.5,-8);
-//    bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-//
-//    
-//    
+    bottle.baseHeight=2.5;
+    bottle.baseRadius=1.;
+    bottle.neckHeight=1.75;
+    bottle.neckRadius=0.3;
+    bottle.thickness=0.2;
+    bottle.center=Point(vec3(5,1.5,-8));
+    bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+
+    
+    
 //    
 // 
 //    
@@ -508,11 +523,11 @@ float sceneSDF(Path path, inout localData dat){
     
     //------the balls
     
-    dist=min(dist,sphereSDF(path,ball1,dat));
+   // dist=min(dist,sphereSDF(path,ball1,dat));
     
     //dist=min(dist,sphereSDF(tv,ball2,dat));
     
-    dist=min(dist,sphereSDF(path,ball3,dat));
+    //dist=min(dist,sphereSDF(path,ball3,dat));
     
     
     
@@ -523,6 +538,12 @@ float sceneSDF(Path path, inout localData dat){
    
     //dist=min(dist,planeSDF(tv,wall3,dat));
    
+    
+    
+    
+    //------cylinders
+    
+   // dist=min(dist,cylinderSDF(path,cyl1,dat));
     
     //-------a ring
     
@@ -575,7 +596,7 @@ float sceneSDF(Path path, inout localData dat){
     //-------BOTTLES
     
     
-    //dist=min(dist,bottleSDF(path,bottle,dat));
+    dist=min(dist,bottleSDF(path,bottle,dat));
     
      //dist=min(dist,fullBottleSDF(path,fullBottle,dat));
     

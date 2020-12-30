@@ -629,6 +629,8 @@
 //    //give the subtraction of these:
 //    float theBottle=smin(body, neck,1.);
 //    
+//    
+//    
 //    //chop off the top:
 //    float top=q.y-bottle.neckHeight;
 //    
@@ -636,6 +638,9 @@
 //    
 //    return abs(theBottle)-bottle.thickness;
 //}
+//
+
+
 //
 //Vector bottleNormal(Vector tv, Bottle bottle){
 //    

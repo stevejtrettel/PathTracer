@@ -23,38 +23,39 @@ Vector sphereNormal(Vector tv, Sphere sph){
     return Vector(tv.pos,dir);
 }
 
+
+
 //what to do when you hit a sphere:
-void sphereData(inout Path path, inout localData dat, float dist,Sphere sph){
+void sphereData(inout Path path, inout localData dat, float dist, Sphere obj){
     
     //set the material
     dat.isSky=false;
-    dat.mat=sph.mat;
+    dat.mat=obj.mat;
 
+    Vector normal=sphereNormal(path.tv,obj);
     
     if(dist<0.){
         path.inside=true;
         //normal is inwward pointing;
-        dat.normal=negate(sphereNormal(path.tv,sph));
+        dat.normal=negate(normal);
         //IOR is current/enteing
-        dat.IOR=sph.mat.IOR/1.;
+        dat.IOR=obj.mat.IOR/1.;
         
-        dat.reflectAbsorb=sph.mat.absorbColor;
+        dat.reflectAbsorb=obj.mat.absorbColor;
         dat.refractAbsorb=vec3(0.);
     }
     
     else{
         path.inside=false;
         //normal is inwward pointing;
-        dat.normal=sphereNormal(path.tv,sph);
+        dat.normal=normal;
         //IOR is current/enteing
-        dat.IOR=1./sph.mat.IOR;
+        dat.IOR=1./obj.mat.IOR;
         
         dat.reflectAbsorb=vec3(0.);
-        dat.refractAbsorb=sph.mat.absorbColor;
+        dat.refractAbsorb=obj.mat.absorbColor;
         
     }
-    
-    
     
 }
 
@@ -130,6 +131,230 @@ float planeSDF(Path path, Plane plane, inout localData dat){
     return d;
     
 }
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//The CYLINDER sdf
+//-------------------------------------------------
+
+//the data of a sphere is its center and radius
+struct Cylinder{
+    Point center;
+    float radius;
+    float height;
+    float rounded;
+    Material mat;
+};
+
+//----distance and normal functions
+
+float cylinderDistance(Vector tv, Cylinder cyl){
+    
+    vec3 pos=tv.pos.coords-cyl.center.coords;
+    
+    return cylinderDist(pos,cyl.radius,cyl.height, cyl.rounded);
+}
+
+
+
+Vector cylinderNormal(Vector tv, Cylinder cyl){
+    
+    vec3 pos=tv.pos.coords-cyl.center.coords;
+    
+    vec3 dir=cylinderGrad(pos,cyl.radius,cyl.height,cyl.rounded);
+    
+    return Vector(Point(pos),dir);
+}
+
+
+
+//what to do when you hit a sphere:
+void cylinderData(inout Path path, inout localData dat, float dist,Cylinder obj){
+    
+    //set the material
+    dat.isSky=false;
+    dat.mat=obj.mat;
+    
+    //outward pointing normal vector
+    Vector normal=cylinderNormal(path.tv,obj);
+    
+    if(dist<0.){
+        path.inside=true;
+        //normal is inwward pointing;
+        dat.normal=negate(normal);
+        //IOR is current/enteing
+        dat.IOR=obj.mat.IOR/1.;
+        
+        dat.reflectAbsorb=obj.mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+    
+    else{
+        path.inside=false;
+        //normal is inwward pointing;
+        dat.normal=normal;
+        //IOR is current/enteing
+        dat.IOR=1./obj.mat.IOR;
+        
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=obj.mat.absorbColor;
+        
+    }  
+}
+
+
+
+
+//------sdf
+float cylinderSDF(inout Path path, Cylinder cyl,inout localData dat){
+    
+    //float side=(path.inside)?-1.:1.;
+    
+    //distance to closest point:
+    float dist = cylinderDistance(path.tv,cyl);
+    
+    if(abs(dist)<EPSILON){//set the material
+        cylinderData(path,dat,dist,cyl);
+    }
+
+    return dist;
+}
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//The BOTTLE sdf
+//-------------------------------------------------
+
+
+struct Bottle{
+    Point center;
+    float baseRadius;
+    float baseHeight;  
+    float neckRadius;
+    float neckHeight;
+    float thickness;
+    Material mat;
+};
+
+
+
+//----distance and normal functions
+
+float bottleDistance(vec3 p, Bottle bottle){
+    
+    vec3 pos=p-bottle.center.coords;
+    
+    //the base of the bottle
+    float base=cylinderDist(pos,bottle.baseRadius, bottle.baseHeight,0.5);
+    
+    //the neck of the bottle
+    //first: adjust the height
+    vec3 q=pos-vec3(0,bottle.baseHeight+bottle.neckHeight,0);
+    
+    float neck=cylinderDist(q,bottle.neckRadius,bottle.neckHeight,0.5);
+    
+    //give the subtraction of these:
+    float theBottle=smin(base, neck,1.);
+    
+    //now make a thin layer
+    theBottle= abs(theBottle)-bottle.thickness;
+    
+    return theBottle;
+}
+
+float bottleDistance(Vector tv, Bottle bottle){
+    return bottleDistance(tv.pos.coords,bottle);
+}
+
+
+Vector bottleNormal(Vector tv, Bottle bottle){
+    
+    vec3 pos=tv.pos.coords-bottle.center.coords;
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    float vxyy=bottleDistance( pos + e.xyy*ep,bottle);
+    float vyyx=bottleDistance( pos + e.yyx*ep,bottle);
+    float vyxy=bottleDistance( pos + e.yxy*ep,bottle);
+    float vxxx=bottleDistance( pos + e.xxx*ep,bottle);
+    
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+    
+}
+
+
+
+//what to do when you hit a bottle:
+void bottleData(inout Path path, inout localData dat, float dist,Bottle obj){
+    
+    //set the material
+    dat.isSky=false;
+    dat.mat=obj.mat;
+    
+    //outward pointing normal vector
+    Vector normal=bottleNormal(path.tv,obj);
+    
+    if(dist<0.){
+        path.inside=true;
+        //normal is inwward pointing;
+        dat.normal=negate(normal);
+        //IOR is current/enteing
+        dat.IOR=obj.mat.IOR/1.;
+        
+        dat.reflectAbsorb=obj.mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+    
+    else{
+        path.inside=false;
+        //normal is inwward pointing;
+        dat.normal=normal;
+        //IOR is current/enteing
+        dat.IOR=1./obj.mat.IOR;
+        
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=obj.mat.absorbColor;
+        
+    }  
+}
+
+
+
+
+//------sdf
+float bottleSDF(inout Path path, Bottle bottle,inout localData dat){
+
+    float dist = bottleDistance(path.tv,bottle);
+    
+    if(abs(dist)<EPSILON){//set the material
+        bottleData(path,dat,dist,bottle);
+    }
+
+    return dist;
+}
+
+
+
+
 
 
 

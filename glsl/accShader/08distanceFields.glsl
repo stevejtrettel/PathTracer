@@ -254,51 +254,32 @@ vec3 boxGrad(vec3 pos, vec3 sides, float rounded){
 //-------------------------------------------------
 //-------------------------------------------------
 
-//float cylinderDistance(vec3 pos, float radius, float height, float rounded){
-//    
-//    vec2 d = vec2( length(pos.xz)-2.0*radius+rounded, abs(pos.y) - height );
-//  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rounded;
-//    
-//}
+float cylinderDist(vec3 pos, float radius, float height, float rounded){
+    
+    vec2 d = vec2( length(pos.xz)-2.0*radius+rounded, abs(pos.y) - height );
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rounded;
+    
+}
 
 
-//float cylinderDistance(Vector tv, float radius, float height, float rounded){
-//    return cylinderDistance(tv.pos.coords, radius, height, rounded);
-//}
+vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    float vxyy=cylinderDist( pos + e.xyy*ep,radius, height,rounded);
+    float vyyx=cylinderDist( pos + e.yyx*ep,radius, height,rounded);
+    float vyxy=cylinderDist( pos + e.yxy*ep,radius, height,rounded);
+    float vxxx=cylinderDist( pos + e.xxx*ep,radius, height,rounded);
+    
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+    
+    dir=normalize(dir);
+    
+    return dir;
+    
+}
 
-
-
-//
-//
-//
-//
-//
-//Vector cylinderNormal(vec3 pos, float radius, float height,float rounded){
-//    
-//    const float ep = 0.0001;
-//    vec2 e = vec2(1.0,-1.0)*0.5773;
-//    
-//    float vxyy=cylinderDistance( pos + e.xyy*ep,radius, height,rounded);
-//    float vyyx=cylinderDistance( pos + e.yyx*ep,radius, height,rounded);
-//    float vyxy=cylinderDistance( pos + e.yxy*ep,radius, height,rounded);
-//    float vxxx=cylinderDistance( pos + e.xxx*ep,radius, height,rounded);
-//    
-//    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
-//    
-//    dir=normalize(dir);
-//    
-//    return Vector(Point(pos),dir);
-//    
-//}
-
-
-//Vector cylinderNormal(Vector tv, float radius, float height, float rounded){
-//    vec3 pos=tv.pos.coords;
-//    return cylinderNormal(pos,radius, height, rounded);
-//}
-//
-//
-//
 
 
 
@@ -329,35 +310,38 @@ vec3 sdgBox( in vec2 p, in vec2 b )
 }
 
 
+//
+//float cylinderDist(vec3 pos, float radius, float height, float rounded){
+//    
+//    vec2 p=opRevolution(pos,0.);
+//    vec2 b=vec2(2.*radius-rounded, height);
+//    
+//    vec2 w = abs(p)-b;
+//    float g = max(w.x,w.y);
+//    vec2  q = max(w,0.0);
+//    float l = length(q);
+//     
+//    float dist= (g>0.0) ?  l  :g;
+//    return dist-rounded;
+//}
+//
+//
+//
+//vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
+//    
+//    //roundedness plays no part in the calculation of the cylinder's gradient as it is just an offset.
+//    
+//    vec2 p=opRevolution(pos,0.);
+//    vec2 b=vec2(2.*radius-rounded, height);
+//    
+//    //this gives distance and normal information
+//    vec3 ret=sdgBox(p,b);
+//    //second two coordinates are the 2d normal
+//    vec2 n=ret.yz;
+//    
+//    vec3 dir=opRevolutionOutputNormal(pos, 0., n);
+//    return dir;
+//    //return normalize(dir);
+//}
 
-float cylinderDist(vec3 pos, float radius, float height, float rounded){
-    
-    vec2 p=opRevolution(pos,0.);
-    vec2 b=vec2(2.*radius, height);
-    
-    vec2 w = abs(p)-b;
-    float g = max(w.x,w.y);
-    vec2  q = max(w,0.0);
-    float l = length(q);
-     
-    float dist= (g>0.0) ?  l  :g;
-    return dist;
-}
-
-
-
-vec3 cylinderGrad(vec3 pos, float radius, float height, float rounded){
-    
-    vec2 p=opRevolution(pos,0.);
-    vec2 b=vec2(2.*radius, height);
-    
-    //this gives distance and normal information
-    vec3 ret=sdgBox(p,b);
-    //second two coordinates are the 2d normal
-    vec2 n=ret.yz;
-    
-    vec3 dir=opRevolutionOutputNormal(pos, 0., n);
-    
-    return normalize(dir);
-}
 
