@@ -281,9 +281,27 @@ float bottleDistance(Vector tv, Bottle bottle){
 }
 
 
+
+
+//Vector bottleNormal(Vector tv, Bottle bottle){
+//    
+//    vec3 pos=tv.pos.coords-bottle.center.coords;
+//    
+//    
+//    
+//    
+//}
+//
+
+
+
+
+
+
+
 Vector bottleNormal(Vector tv, Bottle bottle){
     
-    vec3 pos=tv.pos.coords-bottle.center.coords;
+    vec3 pos=tv.pos.coords;
     
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
