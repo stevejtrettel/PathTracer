@@ -502,7 +502,7 @@ float coneCupDist(vec3 p, ConeCup cup){
     float outside=sdCappedCone(q,cup.height,cup.rTop,cup.rBase);
     
     //move up to make base thickness;
-    q-=vec3(0,cup.thickness,0);
+    q+=vec3(0,cup.thickness,0);
     
     float inside=sdCappedCone(q,cup.height,cup.rTop,cup.rBase);
     

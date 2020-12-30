@@ -77,7 +77,7 @@ void buildScene(){
     light1.center=Point(vec3(15,3,-5));
     light1.radius=2.;
     
-    color= vec3(1.,.6,0.4);
+    color=  vec3(255./255., 197./255., 143./255.);
     intensity=50.;
     
     light1.mat=makeLight(color,intensity);
@@ -90,7 +90,7 @@ void buildScene(){
     light2.center=Point(vec3(0,15.5,-5));
     light2.radius=3.;
     
-    color= vec3(255./255., 197./255., 143./255.);
+    color= vec3(255./255., 147./255., 41./255.);
        // vec3(1.,0.6,0.4);
     intensity=3.;
     
@@ -366,11 +366,11 @@ void buildScene(){
     
     //-------- NEGRONI-----------------
     
-    negroni2.center=vec3(4,1.5,-12);
-    negroni2.radius=0.75;
-    negroni2.height=3.;
-    negroni2.thickness=0.2;
-    negroni2.base=0.5;
+    negroni2.center=vec3(-6,-0.,-8);
+    negroni2.radius=0.5;
+    negroni2.height=1.5;
+    negroni2.thickness=0.1;
+    negroni2.base=0.4;
     negroni2.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
     negroni2.drink=makeGlass(0.1*vec3(0.5,0.2,0.),1.3,0.99);
     
@@ -380,11 +380,11 @@ void buildScene(){
     //-------- CONE CUP ----------------
     
     //these parameters are a bit fucked up: need to fix height vs thickness, and swap radii
-    cone.height=1.5;
-    cone.rBase=1.5;
-    cone.rTop=1.;
-    cone.thickness=2.;
-    cone.center=vec3(5,0,-6);
+    cone.height=3.5;
+    cone.rBase=2.;
+    cone.rTop=1.5;
+    cone.thickness=5.;
+    cone.center=vec3(-5,0,-6);
     cone.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
     
     
@@ -430,7 +430,7 @@ void buildScene(){
     //---- gin bottle
     //start by copying the above
     gin=bottle;
-    gin.center+=vec3(0.5,0,1);
+    gin.center+=vec3(1,0.2,1.5);
     gin.mat=makeGlass(0.25*vec3(0.1,0.05,0.),1.3,0.99);
     ginBottle.bottle=gin;
     ginBottle.fill=1.4;
@@ -440,7 +440,7 @@ void buildScene(){
     //start by copying the above
     vermouth=bottle;
     //change some things
-    vermouth.center+=vec3(-5,0,0);
+    vermouth.center+=vec3(-5,0.3,0);
     vermouth.mainRadius=0.6;
     vermouth.neckRadius=0.2;
     vermouth.mat.absorbColor=0.05*brownAbsorb;
@@ -454,7 +454,7 @@ void buildScene(){
     //start by copying the above
     campari=bottle;
     //change some things
-    campari.center+=vec3(-2,2.,-3);
+    campari.center+=vec3(-2,2,-3);
     campari.mat.absorbColor*=0.2;
     campari.mainRadius=0.75;
     campari.mainHeight=4.5;
@@ -462,7 +462,7 @@ void buildScene(){
     
     campariBottle.bottle=campari;
     campariBottle.fill=1.;
- campariBottle.drink=makeGlass(2.*vec3(0.,1.,0.5),1.3,0.99);
+ campariBottle.drink=makeGlass(2.5*vec3(0.2,1.,0.6),1.3,0.99);
         
         
             
@@ -563,10 +563,10 @@ float sceneSDF(Path path, inout localData dat){
     
    dist=min(dist,negroniSDF(path,negroni,dat));
     
-      //dist=min(dist,negroniSDF(path,negroni2,dat));
+    dist=min(dist,negroniSDF(path,negroni2,dat));
     
     
-    //dist=min(dist,coneCupSDF(path,cone,dat));
+  //  dist=min(dist,coneCupSDF(path,cone,dat));
     
     //dist=min(dist,coneCupSDF(path,cone2,dat));
     
