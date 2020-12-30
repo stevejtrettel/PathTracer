@@ -746,6 +746,7 @@ float bottleSDF(inout Path path,Bottle bottle,inout localData dat){
 struct FullBottle{
     Bottle bottle;
     Material drink;
+    float fill;
 };
 
 
@@ -855,20 +856,21 @@ float fullBottleSDF(inout Path path,FullBottle theBottle,inout localData dat){
     
 
         
-    //make the cylinder for the drink:
         
     //half-width of the onioning used to make the bottle
     float w=theBottle.bottle.thickness/2.;
+    //theFill lets us move the drink portion of the cylinder down
+    
      Cylinder theDrink;
-    theDrink.center=theBottle.bottle.center;
+    theDrink.center=theBottle.bottle.center-vec3(0,theBottle.fill,0);
     theDrink.radius=theBottle.bottle.mainRadius-w;
-    theDrink.height=theBottle.bottle.mainHeight;
+    theDrink.height=theBottle.bottle.mainHeight-theBottle.fill;
     theDrink.rounded=0.5;
     theDrink.mat=theBottle.drink;
     
     
     float drinkDistance=cylinderDist(path.tv.pos.coords,theDrink);
-
+    
     
     float dist=min(bottleDistance, drinkDistance);
     

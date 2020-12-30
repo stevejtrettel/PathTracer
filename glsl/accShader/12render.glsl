@@ -142,7 +142,7 @@ vec3 newFrame(vec2 fragCoord){
     //now set up the camera:
     //all the entries are uniforms or constants in setup
     Camera cam;
-    vec3 camLoc=location+vec3(0.,3.,0.);
+    vec3 camLoc=location+vec3(7.,3.,6.);
     cam=Camera(camLoc,facing,fov,aperature,focalLength);
     
     //get the initial tangent vector, path data

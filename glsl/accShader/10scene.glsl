@@ -43,7 +43,14 @@ ConeCup cone2;
 
 
 Bottle bottle;
+Bottle gin;
+Bottle campari;
+Bottle vermouth;
+
 FullBottle fullBottle;
+FullBottle ginBottle;
+FullBottle campariBottle;
+FullBottle vermouthBottle;
 
 //this function assigns all the objects their parameters
 void buildScene(){
@@ -67,11 +74,11 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=Point(vec3(12,1.5,-5));
-    light1.radius=1.;
+    light1.center=Point(vec3(15,3,-5));
+    light1.radius=2.;
     
     color= vec3(1.,.6,0.4);
-    intensity=100.;
+    intensity=50.;
     
     light1.mat=makeLight(color,intensity);
 
@@ -80,11 +87,12 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=Point(vec3(0,0,-8));
-    light2.radius=0.5;
+    light2.center=Point(vec3(0,15.5,-5));
+    light2.radius=3.;
     
-    color= vec3(1.,0.6,0.4);
-    intensity=40.;
+    color= vec3(255./255., 197./255., 143./255.);
+       // vec3(1.,0.6,0.4);
+    intensity=3.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -336,20 +344,25 @@ void buildScene(){
     
     
     
+         //-------- DRINK COLORS -----------------
+    
+    vec3 brownAbsorb=(vec3(1.)-vec3(204./255.,142./255.,105./255.));
+    
+    vec3 redAbsorb=vec3(0.,1.,0.5);
     
     
     
     
     //-------- NEGRONI-----------------
     
-    negroni.center=vec3(0,0,-5);
+    negroni.center=vec3(1.5,0,-2.5);
     negroni.radius=0.75;
     negroni.height=1.5;
     negroni.thickness=0.1;
     negroni.base=0.3;
     negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
     //negroni.drink=makeGlass(0.75*vec3(0.,1.,0.5),1.3,0.99);
-    negroni.drink=makeGlass(2.*(vec3(1.)-vec3(204./255.,142./255.,105./255.)),1.3,0.99);
+    negroni.drink=makeGlass(2.*(brownAbsorb+0.25*redAbsorb),1.3,0.99);
     
     //-------- NEGRONI-----------------
     
@@ -406,10 +419,56 @@ void buildScene(){
     bottle.neckHeight=1.75;
     bottle.neckRadius=0.3;
     bottle.thickness=0.2;
-    bottle.center=vec3(5,1.75,-8);
+    bottle.center=vec3(5,1.5,-8);
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 
     
+    
+    
+ 
+    
+    //---- gin bottle
+    //start by copying the above
+    gin=bottle;
+    gin.center+=vec3(0.5,0,1);
+    gin.mat=makeGlass(0.25*vec3(0.1,0.05,0.),1.3,0.99);
+    ginBottle.bottle=gin;
+    ginBottle.fill=1.4;
+    ginBottle.drink=makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
+        
+        
+    //start by copying the above
+    vermouth=bottle;
+    //change some things
+    vermouth.center+=vec3(-5,0,0);
+    vermouth.mainRadius=0.6;
+    vermouth.neckRadius=0.2;
+    vermouth.mat.absorbColor=0.05*brownAbsorb;
+        
+    vermouthBottle.bottle=vermouth;
+    vermouthBottle.fill=0.2;
+    vermouthBottle.drink=makeGlass(2.*brownAbsorb,1.3,0.99);
+        
+        
+    
+    //start by copying the above
+    campari=bottle;
+    //change some things
+    campari.center+=vec3(-2,2.,-3);
+    campari.mat.absorbColor*=0.2;
+    campari.mainRadius=0.75;
+    campari.mainHeight=4.5;
+    campari.neckHeight=1.;
+    
+    campariBottle.bottle=campari;
+    campariBottle.fill=1.;
+ campariBottle.drink=makeGlass(2.*vec3(0.,1.,0.5),1.3,0.99);
+        
+        
+            
+        
+        
+        
     
     
     //----full bottle
@@ -440,9 +499,9 @@ float sceneSDF(Path path, inout localData dat){
     
     dist=min(dist,sphereSDF(path,light1,dat));
     
-// dist=min(dist,sphereSDF(tv,light2,dat));
+ dist=min(dist,sphereSDF(path,light2,dat));
     
-   // dist=min(dist,sphereSDF(tv,light3,dat));
+  //  dist=min(dist,sphereSDF(path,light3,dat));
     
    // dist=min(dist,sphereSDF(tv,light4,dat));
     
@@ -518,8 +577,11 @@ float sceneSDF(Path path, inout localData dat){
     
     //dist=min(dist,bottleSDF(path,bottle,dat));
     
-     dist=min(dist,fullBottleSDF(path,fullBottle,dat));
+     //dist=min(dist,fullBottleSDF(path,fullBottle,dat));
     
+      dist=min(dist,fullBottleSDF(path,ginBottle,dat));
+      dist=min(dist,fullBottleSDF(path,vermouthBottle,dat));
+          dist=min(dist,fullBottleSDF(path,campariBottle,dat));
     return dist;
 }
 
