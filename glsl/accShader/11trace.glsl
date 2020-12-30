@@ -29,29 +29,31 @@ void raymarch(inout Path path, inout localData dat){
     float distToScene=0.;
     float totalDist=0.;
 
+    float factor=0.9;
+    float marchDist;
+    
     //set if you are inside or outside
     float side=path.inside?-1.:1.;
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-            distToScene  = side*sceneSDF(path,dat);
-            totalDist += distToScene;
+            distToScene  =side*sceneSDF(path,dat);
+            marchDist=factor*distToScene;
             
             if (distToScene< EPSILON){
-                    //march forward by epsilon to get onto the other side:
-                 //   otherSideMat(path,dat);
-                   // dat.otherMat=dat.mat;
                     //local data is set by the sdf
                     path.distance=totalDist;
                     return;
                 }
+            
+            totalDist += marchDist;
             
             if(totalDist>maxDist){
                 break;
             }
             
             //otherwise keep going
-            flow(path.tv, distToScene);
+            flow(path.tv, marchDist);
         }
     
     //if you hit nothing
@@ -102,7 +104,9 @@ void roulette(inout Path path,inout uint rngState){
 
 
 void volumeColor(inout Path path,localData dat){
-        if(path.inside){path.light *= exp(-dat.mat.absorbColor * 2.);}
+     //   if(path.inside){
+            path.light *= exp(-path.absorb*path.distance);
+//}
 }
 
 
@@ -123,9 +127,9 @@ void surfaceColor(inout Path path,localData dat){
 
 
 void skyColor(inout Path path,inout localData dat){
-    vec3 skyColor=skyTex(path.tv.dir);
+    //vec3 skyColor=skyTex(path.tv.dir);
     //vec3 skyColor=0.1*checkerTex(path.tv.dir);
-    //vec3 skyColor=vec3(0.1);
+    vec3 skyColor=vec3(0.1);
     path.pixel += path.light*skyColor;
 }
 

@@ -36,6 +36,13 @@ Cylinder drink1;
 
 
 Negroni negroni;
+Negroni negroni2;
+
+ConeCup cone;
+ConeCup cone2;
+
+
+Bottle bottle;
 
 //this function assigns all the objects their parameters
 void buildScene(){
@@ -59,8 +66,8 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=Point(vec3(4,2,-4));
-    light1.radius=0.7;
+    light1.center=Point(vec3(12,1.5,-5));
+    light1.radius=1.;
     
     color= vec3(1.,.6,0.4);
     intensity=100.;
@@ -145,7 +152,7 @@ void buildScene(){
     
     
     //----------- BALL 3 -------------------------
-    ball3.center=Point(vec3(0.7,-0.,-1.5));
+    ball3.center=Point(vec3(0.,0.,-2));
     ball3.radius=0.6;
     
     color= 0.1*vec3(0.7,0.1,0.2);
@@ -167,12 +174,12 @@ void buildScene(){
     
     //----------- WALL 1 -------------------------
     normal=vec3(0,1,0);
-    offset=3.25;
+    offset=1.7;
     
     //color=vec3(0.5,0.9,0.5);
      color= vec3(.2);
     specularity=0.0;
-    roughness=0.5;
+    roughness=0.1;
     
     setPlane(wall1,normal,offset);
     wall1.mat=makeDielectric(color,specularity,roughness);
@@ -186,13 +193,13 @@ void buildScene(){
     
     //----------- WALL 2 -------------------------
     normal=vec3(0,0,1);
-    offset=10.;
+    offset=19.;
     
     //color=vec3(0.9,0.5,0.5);
      color= vec3(0.2);
     //color=vec3(0.7,0.7,0.8);
     specularity=0.0;
-    roughness=0.5;
+    roughness=0.;
     
     setPlane(wall2,normal,offset);
     wall2.mat=makeDielectric(color,specularity,roughness);
@@ -334,38 +341,77 @@ void buildScene(){
     
     //-------- NEGRONI-----------------
     
-    negroni.center=vec3(0,0,-4);
+    negroni.center=vec3(0,0,-5);
     negroni.radius=0.75;
     negroni.height=1.5;
     negroni.thickness=0.1;
     negroni.base=0.3;
     negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
-    negroni.drink=makeGlass(0.2*vec3(0.2,0.5,0.5),1.3,0.99);
+    //negroni.drink=makeGlass(0.75*vec3(0.,1.,0.5),1.3,0.99);
+    negroni.drink=makeGlass(2.*(vec3(1.)-vec3(204./255.,142./255.,105./255.)),1.3,0.99);
+    
+    //-------- NEGRONI-----------------
+    
+    negroni2.center=vec3(4,1.5,-12);
+    negroni2.radius=0.75;
+    negroni2.height=3.;
+    negroni2.thickness=0.2;
+    negroni2.base=0.5;
+    negroni2.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
+    negroni2.drink=makeGlass(0.1*vec3(0.5,0.2,0.),1.3,0.99);
     
     
+    
+    
+    //-------- CONE CUP ----------------
+    
+    //these parameters are a bit fucked up: need to fix height vs thickness, and swap radii
+    cone.height=1.5;
+    cone.rBase=1.5;
+    cone.rTop=1.;
+    cone.thickness=2.;
+    cone.center=vec3(5,0,-6);
+    cone.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    
+    
+    //these parameters are a bit fucked up: need to fix height vs thickness, and swap radii
+    cone2.height= 3.5;
+    cone2.rBase=2.;
+    cone2.rTop=1.5;
+    cone2.thickness=5.;
+    cone2.center=vec3(-3,0,-10);
+    
+    
+    color= vec3(0.1,0.1,0.1);
+    specularity=0.6;
+    roughness=0.2;
+    
+    //cone2.mat= makeMetal(color,specularity,roughness);
+    
+     cone2.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    
+    
+    
+    
+    
+    
+    
+        
+    //-------- BOTTLW ----------------
+    
+    //these parameters are a bit fucked up: need to fix height vs thickness, and swap radii
+    bottle.mainHeight=2.;
+    bottle.mainRadius=1.;
+    bottle.neckHeight=1.;
+    bottle.neckRadius=0.25;
+    bottle.thickness=0.2;
+    bottle.center=vec3(0,0,-5);
+    bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+
     
     
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-//decide if we are in the liquid or not:
-//bool inLiquid(Vector tv){
-//    if(cylinderSDF(tv,drink1,trashDat)<0.){
-//        return true;
-//    }
-//    return false;
-//}
 
 
 
@@ -399,7 +445,7 @@ float sceneSDF(Path path, inout localData dat){
     
     //dist=min(dist,sphereSDF(tv,ball2,dat));
     
-    //dist=min(dist,sphereSDF(path,ball3,dat));
+   // dist=min(dist,sphereSDF(path,ball3,dat));
     
     
     
@@ -446,16 +492,23 @@ float sceneSDF(Path path, inout localData dat){
   //  dist=min(dist,permutohedronSDF(tv,perm1,dat));
     
     
-    //if you are outside of everything
-//    if(dist>0.){
-//        zeroMat(dat.mat);
-//    }
-//    
+    //-------DRINKS
     
-    dist=min(dist,negroniSDF(path,negroni,dat));
+   //dist=min(dist,negroniSDF(path,negroni,dat));
+    
+      //dist=min(dist,negroniSDF(path,negroni2,dat));
     
     
+    //dist=min(dist,coneCupSDF(path,cone,dat));
     
+    //dist=min(dist,coneCupSDF(path,cone2,dat));
+    
+    
+    
+    //-------BOTTLES
+    
+    
+    dist=min(dist,bottleSDF(path,bottle,dat));
     
     return dist;
 }

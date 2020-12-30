@@ -71,6 +71,7 @@ struct Path{
 
     RayType type;
 
+    vec3 absorb;
     float side;
     bool inside;
     bool keepGoing;
@@ -122,7 +123,7 @@ Path initializePath(Vector tv,inout uint rngState){
     path.type=intializeRayType();
     
     path.debug=vec3(0.);
-    
+    path.absorb=vec3(0.);
     return path;
 }
 
@@ -148,9 +149,21 @@ Path initializePath(Vector tv,inout uint rngState){
 
 struct localData{
     bool isSky;
-    Vector normal;
-    bool interiorEdge;
+    bool materialInterface;//are we at the interface of two materials, or at an air/material interface
+    
+    Vector normal;//outward pointing (back at you) normal to surface just impacted
+    
     Material mat;//material used in coloring
+    
+    
+    
+    float IOR;//the ratio of index of refraction
+    //curernt material divided by entering material
+    
+    
+    vec3 reflectAbsorb;//absorbtion of material if we reflect
+    vec3 refractAbsorb;//absorbation of material if we refract
+
 };
 
 
@@ -158,7 +171,9 @@ localData trashDat;
 
 void initializeData(localData dat){
     dat.isSky=false;
-    dat.interiorEdge=false;
+    dat.materialInterface=false;
+    dat.reflectAbsorb=vec3(0.);
+    dat.refractAbsorb=vec3(0.);
 }
 
 

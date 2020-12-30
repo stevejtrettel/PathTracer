@@ -24,13 +24,13 @@ float sphDist(vec3 pos,Sphere sph){
     return length(pos-sph.center.coords)-sph.radius;
 }
 
-float sphDist(Point pos,Sphere sph){
-    return length(pos.coords-sph.center.coords)-sph.radius;
-}
+//float sphDist(Point pos,Sphere sph){
+//    return length(pos.coords-sph.center.coords)-sph.radius;
+//}
 
 float sphDist(Vector tv,Sphere sph){
     
-    float d = sphDist(tv.pos,sph);
+    float d = sphDist(tv.pos.coords,sph);
     
     //if you are looking away from the sphere, stop
     if(d>0.&&dot(tv.dir,tv.pos.coords-sph.center.coords)>0.){return maxDist;}
@@ -47,23 +47,56 @@ Vector sphereNormal(Vector tv, Sphere sph){
 }
 
 
+void sphereData(inout Path path, inout localData dat, float dist,Sphere sph){
+    
+    //set the material
+    dat.isSky=false;
+    dat.mat=sph.mat;
+
+    
+    if(dist<0.){
+        path.inside=true;
+        //normal is inwward pointing;
+        dat.normal=negate(sphereNormal(path.tv,sph));
+        //IOR is current/enteing
+        dat.IOR=sph.mat.IOR/1.;
+        
+        dat.reflectAbsorb=sph.mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+    
+    else{
+        path.inside=false;
+        //normal is inwward pointing;
+        dat.normal=sphereNormal(path.tv,sph);
+        //IOR is current/enteing
+        dat.IOR=1./sph.mat.IOR;
+        
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=sph.mat.absorbColor;
+        
+    }
+    
+    
+    
+}
+
+
+
 
 //------sdf
-float sphereSDF(Path path, Sphere sph,inout localData dat){
+float sphereSDF(inout Path path, Sphere sph,inout localData dat){
     
     //float side=(path.inside)?-1.:1.;
     
     //distance to closest point:
-    float d = sphDist(path.tv,sph);
+    float dist = sphDist(path.tv,sph);
     
-    if(abs(d)<EPSILON){//set the material
-        dat.isSky=false;
-        dat.normal=sphereNormal(path.tv,sph);
-        dat.mat=sph.mat;
+    if(abs(dist)<EPSILON){//set the material
+        sphereData(path,dat,dist,sph);
     }
 
-    
-    return d;
+    return dist;
 }
 
 
@@ -561,6 +594,11 @@ struct Cylinder{
     Isometry isom;
 };
 
+float sdCylinder( vec3 p, float radius, float height, float rounded)
+{
+  vec2 d = vec2( length(p.xz)-2.0*radius+rounded, abs(p.y) - height );
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rounded;
+}
 
 
 float cylinderDist( vec3 p, Cylinder cyl )
@@ -613,5 +651,127 @@ float cylinderSDF(Vector tv, Cylinder cyl, inout localData dat){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The CAPPED CONE
+//-------------------------------------------------
+float dot2(vec2 p){
+    return dot(p,p);
+}
+
+//the thing to use in other implementations:
+
+float sdCappedCone( vec3 p, float h, float r1, float r2 )
+{
+  vec2 q = vec2( length(p.xz), p.y );
+  vec2 k1 = vec2(r2,h);
+  vec2 k2 = vec2(r2-r1,2.0*h);
+  vec2 ca = vec2(q.x-min(q.x,(q.y<0.0)?r1:r2), abs(q.y)-h);
+  vec2 cb = q - k1 + k2*clamp( dot(k1-q,k2)/dot2(k2), 0.0, 1.0 );
+  float s = (cb.x<0.0 && ca.y<0.0) ? -1.0 : 1.0;
+  return s*sqrt( min(dot2(ca),dot2(cb)) );
+}
+
+
+struct CappedCone{
+    float height;
+    float rBase;
+    float rTop;
+    vec3 center;
+    Material mat;
+    
+};
+
+
+float cappedConeDist(vec3 p, CappedCone cone){
+    
+    vec3 q=p-cone.center;
+    
+    return sdCappedCone(q,cone.height,cone.rTop,cone.rBase);
+    
+}
+
+
+
+Vector cappedConeNormal(Vector tv, CappedCone cone){
+    
+    vec3 pos=tv.pos.coords-cone.center;
+    cone.center=vec3(0.);
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    vec3 dir=  e.xyy*cappedConeDist( pos + e.xyy*ep,cone) + 
+					  e.yyx*cappedConeDist( pos + e.yyx*ep,cone) + 
+					  e.yxy*cappedConeDist( pos + e.yxy*ep,cone) + 
+					  e.xxx*cappedConeDist( pos + e.xxx*ep,cone);
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+}
+   
+
+
+void cappedConeData(inout Path path, inout localData dat, float dist,CappedCone cone){
+    
+    //set the material
+    dat.isSky=false;
+    dat.mat=cone.mat;
+
+    
+    if(dist<0.){
+        path.inside=true;
+        //normal is inwward pointing;
+        dat.normal=negate(cappedConeNormal(path.tv,cone));
+        //IOR is current/enteing
+        dat.IOR=cone.mat.IOR/1.;
+        
+        dat.reflectAbsorb=cone.mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+    
+    else{
+        path.inside=false;
+        //normal is inwward pointing;
+        dat.normal=cappedConeNormal(path.tv,cone);
+        //IOR is current/enteing
+        dat.IOR=1./cone.mat.IOR;
+        
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=cone.mat.absorbColor;
+        
+    }
+    
+    
+    
+}
+
+
+//------sdf
+float cappedConeSDF(inout Path path, CappedCone cone,inout localData dat){
+    
+    //float side=(path.inside)?-1.:1.;
+    
+    //distance to closest point:
+    float dist = cappedConeDist(path.tv.pos.coords,cone);
+    
+    if(abs(dist)<EPSILON){//set the material
+        cappedConeData(path,dat,dist,cone);
+    }
+
+    return dist;
+}
 
 

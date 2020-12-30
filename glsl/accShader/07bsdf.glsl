@@ -1,14 +1,11 @@
 
 
-
-
-
-
-
 //-------------------------------------------------
 // Setting DIRECTIONS and PROBABILITIES
 //-------------------------------------------------
 
+
+    //temporary function: later this will use the material properties which will store wavelength-related refraction data
     void updateRefraction(inout Material mat,float wavelength){
         
        // mat.IOR=mat.IOR-0.6*wavelength/1000.;
@@ -18,6 +15,7 @@
 
 
 
+    //takes in data after a raymarch, and chooses the type of ray which is cast next: diffuse, specular or refract
     void updateProbabilities( inout Path path,inout localData dat, inout uint rngState){
         
 
@@ -44,8 +42,7 @@
     if (dat.mat.specularChance > 0.0)
     {
         specularChance = FresnelReflectAmount(
-            path.inside ? dat.mat.IOR : 1.,
-            !path.inside ? dat.mat.IOR :1.,
+            dat.IOR,
             path.tv, normal, dat.mat.specularChance, 1.0);
          
         
@@ -63,18 +60,19 @@
     if (specularChance > 0.0 && raySelectRoll < specularChance)
     {
         setSpecular(path.type,specularChance);
-        //do not change current mat: we stay in same material
+        path.absorb=dat.reflectAbsorb;
+        
     }
     else if (refractionChance > 0.0 && raySelectRoll < specularChance + refractionChance)
     {
          setRefract(path.type,refractionChance);
-        //current mat changes as we moved:
-       // dat.currentMat=dat.otherMat;
+        path.absorb=dat.refractAbsorb;
     }
     else
     {
         setDiffuse(path.type, diffuseChance);
-        //current mat does not change, as we reflect
+        path.absorb=dat.reflectAbsorb;
+        
     }
      
     // numerical problems can cause ray Probability to become small enough to cause a divide by zero.
@@ -119,13 +117,9 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     specularDir = normalize(mix(specularDir, diffuseDir, dat.mat.roughness * dat.mat.roughness));
 
     Vector refractionDir;
-    //if(inLiquid(path.tv)){
-   //refractionDir=path.tv;   
-   // }
-    //else{
+
     //get the refracted ray direction from IOR
-     refractionDir = refract(path.tv, normal, 1./dat.mat.IOR);
-   // }
+     refractionDir = refract(path.tv, normal, dat.IOR);
     
     //update refraction ray based on roughness
     refractionDir = normalize(mix(refractionDir, negate(diffuseDir), dat.mat.roughness * dat.mat.roughness));
@@ -142,12 +136,12 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     //----- update ray position ----------
     //which side to push the point: in or out rel the normal?
     float side=(path.type.refract == 1.0f)?-1.:1.;
-    nudge(path.tv,multiplyScalar(side,normal),0.003);
+    nudge(path.tv,multiplyScalar(side,normal),5.*EPSILON);
    
 
     //----- change path.inside if refract ----------
     //if you reflect or diffuse you stay on same side
-    if(path.type.refract==1.&&!dat.interiorEdge){
+    if(path.type.refract==1.&&!dat.materialInterface){
         //if you refract and you are not at an interior surface, you switch
         path.inside=!path.inside;
     }

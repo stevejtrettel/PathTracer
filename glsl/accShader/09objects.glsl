@@ -308,54 +308,145 @@ Vector drinkNormal(Vector tv,Negroni negroni){
 
 
 
-void setNegroniData(float cup, float drink, Negroni negroni,Path path, inout localData dat){
+void setNegroniData(float cup, float drink, Negroni negroni,inout Path path, inout localData dat){
     
-      
-    //near cup away from drink
-  if(abs(cup)<EPSILON &&abs(drink)>2.*EPSILON){
-        dat.isSky=false;
-        dat.normal=cupNormal(path.tv,negroni);
-        dat.mat=negroni.cup;
-        dat.interiorEdge=false;
-        //no change to IOR
-      dat.mat.IOR=(cup<0.)?1./dat.mat.IOR:dat.mat.IOR;
-  }
     
-  //near drink away from cup
- if(abs(drink)<EPSILON&&abs(cup)>2.*EPSILON){
-        dat.isSky=false;
-        dat.normal=drinkNormal(path.tv,negroni);
-        dat.mat=negroni.drink;
-        dat.interiorEdge=false;
-             //no change to IOR
-      dat.mat.IOR=(drink<0.)?1./dat.mat.IOR:dat.mat.IOR;
-    }
+
+        //for now, only deal with the cup
     
+    
+    //first, if we are far from the drink
+    if(drink>EPSILON){
         
-    //if we are inside the cup's glass and near the drink
- if(cup<0.&& abs(drink)<EPSILON){
-        dat.isSky=false;
-        //the drink's normal is inward pointing at glass
-        dat.normal=negate(cupNormal(path.tv,negroni));
+    //if we are inside the cup away from liquid
+    if(cup<0.){
         dat.mat=negroni.cup;
-        //change in IOR
-        dat.mat.IOR=1.;
-        // negroni.cup.IOR/negroni.drink.IOR;
-        dat.interiorEdge=true;
+        path.inside=true;
+        dat.normal=negate(cupNormal(path.tv,negroni)); 
+        dat.IOR=negroni.cup.IOR/1.;
+        dat.materialInterface=false;
+        dat.reflectAbsorb=negroni.cup.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+        
     }
     
+    //if we are outside the cup away from liquid
+    else{
+        dat.mat=negroni.cup;
+        path.inside=false;
+        dat.normal=cupNormal(path.tv,negroni); 
+        dat.IOR=1./negroni.cup.IOR;
+        dat.materialInterface=false;
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=negroni.cup.absorbColor;
         
-//if we are inside the drink near the glass
-if(drink<0.&& abs(cup)<EPSILON){
-        dat.isSky=false;
-        //the cups normal is inward pointing for drink
-        dat.normal=negate(drinkNormal(path.tv,negroni));
-        dat.mat=negroni.drink;
-        //change in IOR
-        dat.mat.IOR=1.;
-        //negroni.drink.IOR/negroni.cup.IOR;
-        dat.interiorEdge=true;
     }
+}
+
+else if(cup>EPSILON){
+    //automatically drink<epsilon here in this case, so this means we must be near the drink and not the cup:
+    
+
+    if(drink<0.){//inside drink
+        dat.mat=negroni.drink;
+        path.inside=true;
+        dat.normal=negate(drinkNormal(path.tv,negroni)); 
+        dat.IOR=negroni.drink.IOR/1.;
+        dat.materialInterface=false; 
+        dat.reflectAbsorb=negroni.drink.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+    
+    else{//outside drink
+        dat.mat=negroni.drink;
+        path.inside=false;
+        dat.normal=drinkNormal(path.tv,negroni); 
+        dat.IOR=1./negroni.drink.IOR;
+        dat.materialInterface=false;
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=negroni.drink.absorbColor;
+        
+    }
+    
+}
+
+
+else{
+    //drink< epsilon and cup<epsilon: so we are near both
+    
+    if(cup<0.){
+        //inside cup near drink
+        dat.mat=negroni.cup;
+        path.inside=true;
+        dat.normal=negate(cupNormal(path.tv,negroni)); 
+        dat.IOR=negroni.cup.IOR/negroni.drink.IOR;
+        dat.materialInterface=true;
+        dat.reflectAbsorb=negroni.cup.absorbColor;
+        dat.refractAbsorb=negroni.drink.absorbColor;
+        
+    }
+    
+    else{
+        //inside drink near cup
+        dat.mat=negroni.drink;
+        path.inside=true;
+        dat.normal=negate(drinkNormal(path.tv,negroni)); 
+        dat.IOR=negroni.drink.IOR/negroni.cup.IOR;
+        dat.materialInterface=true;
+        dat.reflectAbsorb=negroni.drink.absorbColor;
+        dat.refractAbsorb=negroni.cup.absorbColor;
+    }
+    
+}
+    
+    
+//    
+//    
+//    //near cup away from drink
+//  if(abs(cup)<EPSILON &&abs(drink)>2.*EPSILON){
+//        dat.isSky=false;
+//        dat.normal=cupNormal(path.tv,negroni);
+//        dat.mat=negroni.cup;
+//        dat.materialInterface=false;
+//        //no change to IOR
+//      dat.mat.IOR=(cup<0.)?1./dat.mat.IOR:dat.mat.IOR;
+//  }
+//    
+//  //near drink away from cup
+// if(abs(drink)<EPSILON&&abs(cup)>2.*EPSILON){
+//        dat.isSky=false;
+//        dat.normal=drinkNormal(path.tv,negroni);
+//        dat.mat=negroni.drink;
+//        dat.materialInterface=false;
+//             //no change to IOR
+//      dat.mat.IOR=(drink<0.)?1./dat.mat.IOR:dat.mat.IOR;
+//    }
+//    
+//        
+//    //if we are inside the cup's glass and near the drink
+// if(cup<0.&& abs(drink)<EPSILON){
+//        dat.isSky=false;
+//        //the drink's normal is inward pointing at glass
+//        dat.normal=negate(cupNormal(path.tv,negroni));
+//        dat.mat=negroni.cup;
+//        //change in IOR
+//        dat.mat.IOR=1.;
+//        // negroni.cup.IOR/negroni.drink.IOR;
+//        dat.materialInterface=true;
+//    }
+//    
+//        
+////if we are inside the drink near the glass
+//if(drink<0.&& abs(cup)<EPSILON){
+//        dat.isSky=false;
+//        //the cups normal is inward pointing for drink
+//        dat.normal=negate(drinkNormal(path.tv,negroni));
+//        dat.mat=negroni.drink;
+//        //change in IOR
+//        dat.mat.IOR=1.;
+//        //negroni.drink.IOR/negroni.cup.IOR;
+//        dat.materialInterface=true;
+//    }
     
 }
 
@@ -366,7 +457,7 @@ if(drink<0.&& abs(cup)<EPSILON){
 
 
 
-float negroniSDF(Path path,Negroni negroni, inout localData dat){
+float negroniSDF(inout Path path,Negroni negroni, inout localData dat){
     
     float cup=cupDist(path.tv.pos.coords,negroni);
     float drink=drinkDist(path.tv.pos.coords, negroni);
@@ -379,9 +470,234 @@ float negroniSDF(Path path,Negroni negroni, inout localData dat){
         setNegroniData(cup,drink,negroni,path,dat);
     }
     
+   // return cup;
     return min(cup,drink);     
+    
 }
 
 
 
 
+
+//-------------------------------------------------
+// The CONECUP sdf
+//-------------------------------------------------
+
+
+struct ConeCup{
+    float height;
+    float rBase;
+    float rTop;
+    vec3 center;
+    float thickness;
+    Material mat;
+};
+
+
+float coneCupDist(vec3 p, ConeCup cup){
+    
+    
+    vec3 q=p-cup.center;
+    
+    float outside=sdCappedCone(q,cup.height,cup.rTop,cup.rBase);
+    
+    //move up to make base thickness;
+    q-=vec3(0,cup.thickness,0);
+    
+    float inside=sdCappedCone(q,cup.height,cup.rTop,cup.rBase);
+    
+    //give the subtraction of these:
+    return max(outside,-inside)+0.1;
+}
+
+Vector coneCupNormal(Vector tv, ConeCup cup){
+    
+    vec3 pos=tv.pos.coords;
+    //-cup.center;
+   // cup.center=vec3(0.);
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    vec3 dir=  e.xyy*coneCupDist( pos + e.xyy*ep,cup) + 
+					  e.yyx*coneCupDist( pos + e.yyx*ep,cup) + 
+					  e.yxy*coneCupDist( pos + e.yxy*ep,cup) + 
+					  e.xxx*coneCupDist( pos + e.xxx*ep,cup);
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+}
+   
+
+void coneCupData(inout Path path, inout localData dat, float dist,ConeCup cup){
+    
+    //set the material
+    dat.isSky=false;
+    dat.mat=cup.mat;
+
+    
+    if(dist<0.){
+        path.inside=true;
+        //normal is inwward pointing;
+        dat.normal=negate(coneCupNormal(path.tv,cup));
+        //IOR is current/enteing
+        dat.IOR=cup.mat.IOR/1.;
+        
+        dat.reflectAbsorb=cup.mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+    
+
+  else{
+        path.inside=false;
+        //normal is inwward pointing;
+        dat.normal=coneCupNormal(path.tv,cup);
+        //IOR is current/enteing
+        dat.IOR=1./cup.mat.IOR;
+        
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=cup.mat.absorbColor;
+        
+    }
+    
+}
+
+
+
+
+
+//------sdf
+float coneCupSDF(inout Path path, ConeCup cup,inout localData dat){
+    
+    //float side=(path.inside)?-1.:1.;
+    
+    //distance to closest point:
+    float dist = coneCupDist(path.tv.pos.coords,cup);
+    
+    if(abs(dist)<EPSILON){//set the material
+        coneCupData(path,dat,dist,cup);
+    }
+
+    return dist;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The BOTTLE sdf
+//-------------------------------------------------
+
+
+struct Bottle{
+    float mainHeight;
+    float mainRadius;
+    float neckHeight;
+    float neckRadius;
+    float thickness;
+    vec3 center;
+    Material mat;
+};
+
+
+float bottleDist(vec3 p, Bottle bottle){
+    
+    
+    vec3 q=p-bottle.center;
+    
+    //main body
+    float body=sdCylinder(q,bottle.mainRadius,bottle.mainHeight,0.2);
+    
+    //neck
+    //first: adjust the height
+    q=q-vec3(0,bottle.mainHeight/2.,0);
+    
+    float neck=sdCylinder(q,bottle.neckRadius,bottle.neckHeight,0.2);
+    
+    
+    //give the subtraction of these:
+    return min(body, neck);
+}
+
+Vector bottleNormal(Vector tv, Bottle bottle){
+    
+    vec3 pos=tv.pos.coords;
+    //-cup.center;
+   // cup.center=vec3(0.);
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    vec3 dir=  e.xyy*bottleDist( pos + e.xyy*ep,bottle) + 
+					  e.yyx*bottleDist( pos + e.yyx*ep,bottle) + 
+					  e.yxy*bottleDist( pos + e.yxy*ep,bottle) + 
+					  e.xxx*bottleDist( pos + e.xxx*ep,bottle);
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+}
+   
+
+void bottleData(inout Path path, inout localData dat, float dist,Bottle bottle){
+    
+    //set the material
+    dat.isSky=false;
+    dat.mat=bottle.mat;
+
+    
+    if(dist<0.){
+        path.inside=true;
+        //normal is inwward pointing;
+        dat.normal=negate(bottleNormal(path.tv,bottle));
+        //IOR is current/enteing
+        dat.IOR=bottle.mat.IOR/1.;
+        
+        dat.reflectAbsorb=bottle.mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+    
+
+  else{
+        path.inside=false;
+        //normal is inwward pointing;
+        dat.normal=bottleNormal(path.tv,bottle);
+        //IOR is current/enteing
+        dat.IOR=1./bottle.mat.IOR;
+        
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=bottle.mat.absorbColor;
+        
+    }
+    
+}
+
+
+
+
+
+//------sdf
+float bottleSDF(inout Path path,Bottle bottle,inout localData dat){
+    
+    //float side=(path.inside)?-1.:1.;
+    
+    //distance to closest point:
+    float dist = bottleDist(path.tv.pos.coords,bottle);
+    
+    if(abs(dist)<EPSILON){//set the material
+        bottleData(path,dat,dist,bottle);
+    }
+
+    return dist;
+}

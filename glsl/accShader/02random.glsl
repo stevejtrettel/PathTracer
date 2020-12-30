@@ -24,6 +24,17 @@ float RandomFloat01(inout uint state)
     return float(wang_hash(state)) / 4294967296.0;
 }
  
+
+
+
+
+
+
+
+
+//this is thanks to archimedes sphere and the cylinder
+//uniform distribution on a sphere is the horizontal projection of uniform distribution on a cylinder
+//which unrolls to uniform on a rectangle
 vec3 RandomUnitVector(inout uint state)
 {
     float z = RandomFloat01(state) * 2.0f - 1.0f;
@@ -35,6 +46,12 @@ vec3 RandomUnitVector(inout uint state)
 }
 
 
+
+
+
+
+
+//==== this is an idea for sampling a normal distribution from wikipedia by getting two independent normally distributed values out of two uniform distributed values
 vec2 RandomNormal2D(inout uint state){
     float u=RandomFloat01(state);
     float v=RandomFloat01(state);
@@ -47,7 +64,7 @@ vec2 RandomNormal2D(inout uint state){
     
 }
 
-
+//get a single one by just projecting off one of them 
 float RandomNormal(float mean, float stdev,inout uint state){
     
     //get 1d normal sample:
