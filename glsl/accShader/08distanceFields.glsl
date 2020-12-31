@@ -128,7 +128,7 @@ vec3 opMinVec(float distA, vec3 nvecA, float distB, vec3 nvecB, float k){
     float h = max(k-abs(distA-distB),0.0);
     float n=0.5*h/k;
     float f=(distA<distB)?n:1.-n;
-    return mix(nvecA, nvecB, f);
+    return normalize(mix(nvecA, nvecB, f));
 }
 
 
@@ -312,7 +312,8 @@ vec3 sdgBox( in vec2 p, in vec2 b )
 float cylinderDist(vec3 pos, float radius, float height, float rounded){
     
     vec2 p=opRevolution(pos,0.);
-    vec2 b=vec2(2.*radius-rounded, height);
+    //the box we rotate about its central axis has width 2rad and height =height.
+    vec2 b=vec2(radius-rounded, height);
     
     vec2 w = abs(p)-b;
     float g = max(w.x,w.y);
@@ -329,7 +330,7 @@ vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
     //roundedness plays no part in the calculation of the cylinder's gradient as it is just an offset.
     
     vec2 p=opRevolution(pos,0.);
-    vec2 b=vec2(2.*radius-rounded, height);
+    vec2 b=vec2(radius-rounded, height);
     
     //this gives distance and normal information
     vec3 ret=sdgBox(p,b);
@@ -342,8 +343,8 @@ vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
 }
 
 
-
-
+//
+//
 //vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
 //    
 //    const float ep = 0.0001;
@@ -361,5 +362,5 @@ vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
 //    return dir;
 //    
 //}
-
-
+//
+//

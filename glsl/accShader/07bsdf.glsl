@@ -143,7 +143,7 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     //if you reflect or diffuse you stay on same side
     if(path.type.refract==1.&&!dat.materialInterface){
         //if you refract and you are not at an interior surface, you switch
-        path.inside=!path.inside;
+       // path.inside=!path.inside;
     }
     
 }

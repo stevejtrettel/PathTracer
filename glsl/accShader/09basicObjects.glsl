@@ -265,7 +265,7 @@ float bottleDistance(vec3 p, Bottle bottle){
     float theBottle=opMinDist(base, neck,1.);
     
     return opOnionDist(theBottle,bottle.thickness);
-    
+
 }
 
 float bottleDistance(Vector tv, Bottle bottle){
@@ -373,12 +373,19 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass){
     
     float outside=cylinderDist(pos,glass.radius,glass.height,0.2);
     
-    vec3 q=pos-glass.base;
-    
+    //the height is the "half height" of the glass....
+    vec3 q=pos-vec3(0,2.*glass.base,0);
+
     float inside=cylinderDist(q,glass.radius-glass.thickness,glass.height,0.2);
     
-    return max(outside,-inside);
+    //the glass
+   float dist= max(outside,-inside);
     
+    //now subgract ball from bottom
+    q-p-vec3(0,glass.height/2.,0);
+    float ball=length(q)-0.2;
+    
+    return max(dist,-ball);
 }
 
 
@@ -387,8 +394,32 @@ float cocktailGlassDistance(Vector tv,CocktailGlass glass){
 }
 
 
+//
+////NEED TO FIX
+//Vector cocktailGlassNormal(Vector tv, CocktailGlass glass){
+//    
+//     vec3 pos=tv.pos.coords-glass.center.coords;
+//    
+//    float outside=cylinderDist(pos,glass.radius,glass.height,0.2);
+//    
+//    vec3 q=pos-glass.base;
+//    
+//    float inside=cylinderDist(q,glass.radius-glass.thickness,glass.height,0.2);
+//    
+//    vec3 normal;
+//    if(outside>-inside){
+//        //give normal vector for outside
+//        normal=cylinderGrad(pos,glass.radius,glass.height,0.2);
+//    }
+//    else{
+//        //give normal vector for -inside
+//        normal=-cylinderGrad(q,glass.radius-glass.thickness,glass.height,0.2);
+//    }
+//
+//    return Vector(tv.pos,normal);
+//}
 
-//the default option: 4 calls of SDF
+
 Vector cocktailGlassNormal(Vector tv, CocktailGlass glass){
     
     vec3 pos=tv.pos.coords;
@@ -408,6 +439,7 @@ Vector cocktailGlassNormal(Vector tv, CocktailGlass glass){
     return Vector(tv.pos,dir);
     
 }
+
 
 
 
@@ -686,88 +718,6 @@ float cocktailGlassSDF(inout Path path, CocktailGlass glass,inout localData dat)
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-////-------------------------------------------------
-//// The BOX sdf
-////-------------------------------------------------
-//
-//struct Box{
-//vec3 center;
-//vec3 sides;
-//float rounded;
-//Material mat;
-//};
-//
-//
-//float boxDist( vec3 p, Box box)
-//{
-//  vec3 q = abs(p-box.center) - box.sides;
-//  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - box.rounded;
-//}
-//
-//
-//
-////probably a way to do this directly and not sample....
-//Vector boxNormal(Vector tv, Box box){
-//    
-//    //translate everything
-//    vec3 pos=tv.pos.coords-box.center;
-//    
-//    //reset prism's center to zero:
-//    box.center=vec3(0.);
-//    
-//    const float ep = 0.0001;
-//    vec2 e = vec2(1.0,-1.0)*0.5773;
-//    
-//    vec3 dir=  e.xyy*boxDist( pos + e.xyy*ep,box) + 
-//					  e.yyx*boxDist( pos + e.yyx*ep,box) + 
-//					  e.yxy*boxDist( pos + e.yxy*ep,box) + 
-//					  e.xxx*boxDist( pos + e.xxx*ep,box);
-//    
-//    dir=normalize(dir);
-//    
-//    return Vector(tv.pos,dir);
-//}
-//    
-//
-//
-//
-//float boxSDF(Vector tv, Box box, inout localData dat){
-//    
-//    
-//    float d= boxDist(tv.pos.coords,box);
-//    
-//    //-----------------
-//    
-//    if(d<EPSILON){//set the material
-//        dat.isSky=false;
-//        dat.normal=boxNormal(tv,box);
-//        dat.mat=box.mat;
-//    }
-//    
-//    return d;
-//    
-//}
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 ////-------------------------------------------------
 //// The PERMUTOHEDRON sdf
 ////-------------------------------------------------
@@ -846,77 +796,89 @@ float cocktailGlassSDF(inout Path path, CocktailGlass glass,inout localData dat)
 //
 //
 //
-//
-//
-//
-//
 ////-------------------------------------------------
-//// The ROUNDED CYLINDER sdf
+//// The LENS sdf
 ////-------------------------------------------------
 //
-//struct Cylinder{
-//    vec3 center;
+////the data of a lens is determined by its radius, thickness
+////position/orientation by its center, axis
+////from these we compute auxilary quantities: sphere rad and 2 centers
+//
+//struct Lens{
 //    float radius;
-//    float height;
-//    float rounded;
+//    float thickness;
+//    vec3 center;
+//    vec3 axis;
 //    Material mat;
-//    Isometry isom;
+//    float R;
+//    Point c1;
+//    Point c2;
 //};
 //
-//float sdCylinder( vec3 p, float radius, float height, float rounded)
-//{
-//  vec2 d = vec2( length(p.xz)-2.0*radius+rounded, abs(p.y) - height );
-//  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - rounded;
+//
+//
+//void setLens(inout Lens lens, float r,float d, vec3 center, vec3 axis){
+//    //compute sphere radius:
+//    
+//    lens.radius=r;
+//    lens.thickness=d;
+//    lens.center=center;
+//    lens.axis=normalize(axis);
+//    
+//    //compute auxillary quantities
+//    float R=(r*r+d*d)/(2.*d);
+//    vec3 c1=center+(R-d)*axis;
+//    vec3 c2=center-(R-d)*axis;
+//    
+//    lens.R=R;
+//    lens.c1=Point(c1);
+//    lens.c2=Point(c2);
 //}
 //
 //
-//float cylinderDist( vec3 p, Cylinder cyl )
-//{
+//
+//
+//float lensDist(vec3 pos,Lens lens){
 //    
-//   return  cylinderDistance(p,cyl.radius,cyl.height,cyl.rounded);
-////    
-////    p=p-cyl.center;
-////  vec2 d = vec2( length(p.xz)-2.0*cyl.radius+cyl.rounded, abs(p.y) - cyl.height );
-////  return min(max(d.x,d.y),0.0) + length(max(d,0.0)) - cyl.rounded;
+//
+//    float dist1=sphDist(pos,Sphere(lens.c1,lens.R,lens.mat));
+//    float dist2=sphDist(pos,Sphere(lens.c2,lens.R,lens.mat));
+//    
+//    return max(dist1,dist2);
+//}
+//
+//
+//
+//Vector lensNormal(Vector tv,Lens lens){
+//    
+//    Sphere sph1=Sphere(lens.c1,lens.R,lens.mat);
+//    Sphere sph2=Sphere(lens.c2,lens.R,lens.mat);
+//    
+//    float s1=abs(sphDist(tv.pos.coords,sph1));
+//    float s2=abs(sphDist(tv.pos.coords,sph2));
+//    
+//    if(s1<s2){//closer to surface of s1 than s2
+//        return sphereNormal(tv,sph1);
+//    }
+//    return sphereNormal(tv,sph2);
+//
 //}
 //
 //
 //
 //
 //
-////probably a way to do this directly and not sample....
-//Vector cylinderNormal(Vector tv, Cylinder cyl){
-//    //vec3 pos=tv.pos.coords;
-//    
-//    return cylinderNormal(tv,cyl.radius,cyl.height,cyl.rounded);
-//    
-////    const float ep = 0.0001;
-////    vec2 e = vec2(1.0,-1.0)*0.5773;
-////    
-////    vec3 dir=  e.xyy*cylinderDist( pos + e.xyy*ep,cyl) + 
-////					  e.yyx*cylinderDist( pos + e.yyx*ep,cyl) + 
-////					  e.yxy*cylinderDist( pos + e.yxy*ep,cyl) + 
-////					  e.xxx*cylinderDist( pos + e.xxx*ep,cyl);
-////    
-////    dir=normalize(dir);
-////    
-////    return Vector(tv.pos,dir);
-//}
-//    
-//
-//
-//
-//float cylinderSDF(Vector tv, Cylinder cyl, inout localData dat){
+//float lensSDF(Vector tv, Lens lens, inout localData dat){
 //    
 //    
-//    float d= cylinderDistance(tv.pos.coords,cyl.radius,cyl.height,cyl.rounded);
+//    float d= lensDist(tv.pos.coords,lens);
 //    
 //    //-----------------
 //    
 //    if(d<EPSILON){//set the material
 //        dat.isSky=false;
-//        dat.normal=cylinderNormal(tv,cyl.radius,cyl.height,cyl.rounded);
-//        dat.mat=cyl.mat;
+//        dat.normal=lensNormal(tv,lens);
+//        dat.mat=lens.mat;
 //    }
 //    
 //    return d;
@@ -935,117 +897,5 @@ float cocktailGlassSDF(inout Path path, CocktailGlass glass,inout localData dat)
 //
 //
 //
-//
-//
-////-------------------------------------------------
-//// The CAPPED CONE
-////-------------------------------------------------
-//float dot2(vec2 p){
-//    return dot(p,p);
-//}
-//
-////the thing to use in other implementations:
-//
-//float sdCappedCone( vec3 p, float h, float r1, float r2 )
-//{
-//  vec2 q = vec2( length(p.xz), p.y );
-//  vec2 k1 = vec2(r2,h);
-//  vec2 k2 = vec2(r2-r1,2.0*h);
-//  vec2 ca = vec2(q.x-min(q.x,(q.y<0.0)?r1:r2), abs(q.y)-h);
-//  vec2 cb = q - k1 + k2*clamp( dot(k1-q,k2)/dot2(k2), 0.0, 1.0 );
-//  float s = (cb.x<0.0 && ca.y<0.0) ? -1.0 : 1.0;
-//  return s*sqrt( min(dot2(ca),dot2(cb)) );
-//}
-//
-//
-//struct CappedCone{
-//    float height;
-//    float rBase;
-//    float rTop;
-//    vec3 center;
-//    Material mat;
-//    
-//};
-//
-//
-//float cappedConeDist(vec3 p, CappedCone cone){
-//    
-//    vec3 q=p-cone.center;
-//    
-//    return sdCappedCone(q,cone.height,cone.rTop,cone.rBase);
-//    
-//}
-//
-//
-//
-//Vector cappedConeNormal(Vector tv, CappedCone cone){
-//    
-//    vec3 pos=tv.pos.coords-cone.center;
-//    cone.center=vec3(0.);
-//    
-//    const float ep = 0.0001;
-//    vec2 e = vec2(1.0,-1.0)*0.5773;
-//    
-//    vec3 dir=  e.xyy*cappedConeDist( pos + e.xyy*ep,cone) + 
-//					  e.yyx*cappedConeDist( pos + e.yyx*ep,cone) + 
-//					  e.yxy*cappedConeDist( pos + e.yxy*ep,cone) + 
-//					  e.xxx*cappedConeDist( pos + e.xxx*ep,cone);
-//    
-//    dir=normalize(dir);
-//    
-//    return Vector(tv.pos,dir);
-//}
-//   
-//
-//
-//void cappedConeData(inout Path path, inout localData dat, float dist,CappedCone cone){
-//    
-//    //set the material
-//    dat.isSky=false;
-//    dat.mat=cone.mat;
-//
-//    
-//    if(dist<0.){
-//        path.inside=true;
-//        //normal is inwward pointing;
-//        dat.normal=negate(cappedConeNormal(path.tv,cone));
-//        //IOR is current/enteing
-//        dat.IOR=cone.mat.IOR/1.;
-//        
-//        dat.reflectAbsorb=cone.mat.absorbColor;
-//        dat.refractAbsorb=vec3(0.);
-//    }
-//    
-//    else{
-//        path.inside=false;
-//        //normal is inwward pointing;
-//        dat.normal=cappedConeNormal(path.tv,cone);
-//        //IOR is current/enteing
-//        dat.IOR=1./cone.mat.IOR;
-//        
-//        dat.reflectAbsorb=vec3(0.);
-//        dat.refractAbsorb=cone.mat.absorbColor;
-//        
-//    }
-//    
-//    
-//    
-//}
-//
-//
-////------sdf
-//float cappedConeSDF(inout Path path, CappedCone cone,inout localData dat){
-//    
-//    //float side=(path.inside)?-1.:1.;
-//    
-//    //distance to closest point:
-//    float dist = cappedConeDist(path.tv.pos.coords,cone);
-//    
-//    if(abs(dist)<EPSILON){//set the material
-//        cappedConeData(path,dat,dist,cone);
-//    }
-//
-//    return dist;
-//}
 //
 //
