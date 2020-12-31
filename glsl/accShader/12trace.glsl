@@ -1,30 +1,10 @@
-//-------------------------------------------------
-// Sample Other Material
-//-------------------------------------------------
-
-//this is kind of a hacky way to get the material on the other side.....
-
-//void otherSideMat(Path path,inout localData dat){
-//    //reverse the normal vector so its pointing inwards
-//    Vector normal=negate(dat.normal);
-//    
-//    //nudge tv in the direction of the normal
-//    nudge(path.tv,normal,EPSILON);
-//    
-//    float d=sceneSDF(path,trashDat);
-//    
-//    dat.otherSide=trashDat.mat;
-//}
-
-
-
 
 //-------------------------------------------------
 // The RAYMARCHING LOOP
 //-------------------------------------------------
 
 
-void raymarch(inout Path path, inout localData dat){
+float raymarch(Vector tv, inout localData dat){
 
     float distToScene=0.;
     float totalDist=0.;
@@ -32,25 +12,14 @@ void raymarch(inout Path path, inout localData dat){
     float factor=0.9;
     float marchDist;
     
-    //set if you are inside or outside
-   // float side=path.inside?-1.:1.;
 
         for (int i = 0; i < maxMarchSteps; i++){
             
-            distToScene  =abs(sceneSDF(path,dat));
+            distToScene =abs(sceneSDF(tv,dat));
             marchDist=factor*distToScene;
             
-            if (distToScene< EPSILON){
-                    //local data is set by the sdf
-                    path.distance=totalDist;
-                
-                
-//                //CHECKING FOCUS
-//                if(abs(totalDist-focalLength)<0.5){
-//                    path.pixel+=vec3(1.,0.,0.);
-//                }
-//                
-                    return;
+            if (distToScene< EPSILON){               
+                    return totalDist;
                 }
             
             totalDist += marchDist;
@@ -60,14 +29,104 @@ void raymarch(inout Path path, inout localData dat){
             }
             
             //otherwise keep going
-            flow(path.tv, marchDist);
+            flow(tv, marchDist);
         }
     
     //if you hit nothing
     dat.isSky=true;
-    path.keepGoing=false;
-    path.distance=maxDist;
+    return maxDist;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The IMPORTANCE SAMPLE
+//-------------------------------------------------
+
+
+//start off easy: just go after a fixed light in the scene
+//update tangent vector to 
+float importanceDir(inout Vector tv, Sphere sph,inout uint rngState){
+    
+    vec3 q=tv.pos.coords;
+    vec3 p=sph.center.coords;
+    
+    vec3 rand=sph.radius*RandomUnitVector(rngState);
+    
+    
+    //get the new direction
+    vec3 dir=p-q+rand;
+    float length=length(dir);
+    dir=normalize(dir);
+    
+    tv.dir=dir;
+    return length;
+    
+}
+
+
+float lightArea(float distance, Sphere sph){
+    float rad=atan(sph.radius,distance);
+    return rad*rad;
+}
+
+
+
+void Sample(inout Path path, localData dat, Sphere sph, inout uint rngState){
+    
+    Vector sampleLight=path.tv;
+    //starting where our tangent vector hit the surface, find the right direction
+    float distToLight=importanceDir(sampleLight,sph,rngState);
+    
+    
+    float cosFactor=clamp(dot(sampleLight,dat.normal),0.,1.);
+    
+    
+    //move towards the light
+    nudge(sampleLight,dat.normal,0.01);
+    
+    float distToObj=raymarch(sampleLight,trashDat);
+    
+    if(distToObj<distToLight-sph.radius-0.5){
+        return;
+    }
+    
+    //otherwise, add the light color
+    vec3 lightAmt=trashDat.mat.emitColor;
+    
+    lightAmt*=lightArea(distToLight,sph)/(4.*PI);
+    lightAmt*=cosFactor;
+
+    // add in emissive lighting
+    path.pixel += path.light*lightAmt ;
+}
+
+
+
+
+
+//-------------------------------------------------
+// The FOCUS CHECK
+//-------------------------------------------------
+
+void focusCheck(inout Path path){
+
+    if(abs(path.distance-focalLength)<0.5){
+        path.pixel+=vec3(1.,0.,0.);
+    }
+    
+}
+
+
 
 
 
@@ -105,15 +164,13 @@ void roulette(inout Path path,inout uint rngState){
 
 
 //-------------------------------------------------
-// The PATH TRACING LOOP
+// The LIGHTING FUNCTIONS
 //-------------------------------------------------
 
 
 
 void volumeColor(inout Path path,localData dat){
-     //   if(path.inside){
             path.light *= exp(-path.absorb*path.distance);
-//}
 }
 
 
@@ -136,14 +193,29 @@ void surfaceColor(inout Path path,localData dat){
 void skyColor(inout Path path,inout localData dat){
     //vec3 skyColor=skyTex(path.tv.dir);
     //vec3 skyColor=0.1*checkerTex(path.tv.dir);
-    vec3 skyColor=vec3(0.5);
+    vec3 skyColor=vec3(0.05);
     path.pixel += path.light*skyColor;
 }
 
 
 
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The PATH TRACING LOOP
+//-------------------------------------------------
+
+
+
 vec3 pathTrace(inout Path path, inout uint rngState){
     
+    Vector importanceSample;
     localData dat;
     initializeData(dat);
     maxBounces=50;
@@ -153,14 +225,17 @@ vec3 pathTrace(inout Path path, inout uint rngState){
 
             // shoot a ray out into the world
             //when you hit a material, update dat accordingly
-            raymarch(path,dat);
+            path.distance=raymarch(path.tv,dat);
             
             //if you hit the sky: stop
             if(dat.isSky){
+                path.keepGoing=false;
                 skyColor(path,dat);
                 break;
             }
             
+            //focusCheck(path);
+           
            // pick up any colors absorbed
            // while traveling inside an object:
             volumeColor(path,dat);
@@ -171,6 +246,11 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             //use these probabilities to set the new ray
             updateRay(path, dat,rngState);    
                   
+            
+            if(path.type.refract==0.){          
+           Sample(path,dat,light1,rngState);
+           Sample(path,dat,light2,rngState); 
+            }
             //update the color from interacting with the surface
             surfaceColor(path,dat);
             

@@ -48,8 +48,8 @@ void buildScene(){
     
     
     //----------- LIGHT 1 -------------------------
-    light1.center=Point(vec3(15,3,-5));
-    light1.radius=2.;
+    light1.center=Point(vec3(5,1,-5));
+    light1.radius=0.75;
     
     color=  vec3(255./255., 197./255., 143./255.);
     intensity=50.;
@@ -66,7 +66,7 @@ void buildScene(){
     
     color= vec3(255./255., 147./255., 41./255.);
        // vec3(1.,0.6,0.4);
-    intensity=3.;
+    intensity=5.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -239,11 +239,11 @@ void buildScene(){
     
     //-------- COCKTAIL GLASS----------------
     
-    cGlass.center=Point(vec3(0,1.,-2));
+    cGlass.center=Point(vec3(0,-0.5,-5));
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.2;
-    cGlass.base=0.2;
+    cGlass.base=0.3;
     cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 
   
@@ -265,7 +265,7 @@ void buildScene(){
 
 
 
-float sceneSDF(Path path, inout localData dat){
+float sceneSDF(Vector tv, inout localData dat){
 
     float dist=maxDist;
     
@@ -273,9 +273,9 @@ float sceneSDF(Path path, inout localData dat){
     
     //------LIGHTS
     
-    dist=min(dist,sphereSDF(path,light1,dat));
+    dist=min(dist,sphereSDF(tv,light1,dat));
     
-    dist=min(dist,sphereSDF(path,light2,dat));
+    dist=min(dist,sphereSDF(tv,light2,dat));
     
     // dist=min(dist,sphereSDF(path,light3,dat));
     
@@ -286,7 +286,7 @@ float sceneSDF(Path path, inout localData dat){
     
     //------BALLS
     
-    dist=min(dist,sphereSDF(path,ball1,dat));
+    //dist=min(dist,sphereSDF(path,ball1,dat));
     
     // dist=min(dist,sphereSDF(tv,ball2,dat));
     
@@ -298,9 +298,9 @@ float sceneSDF(Path path, inout localData dat){
     
     //------WALLS
     
-    dist=min(dist,planeSDF(path,wall1,dat));
+    dist=min(dist,planeSDF(tv,wall1,dat));
     
-    dist=min(dist,planeSDF(path,wall2,dat));
+    dist=min(dist,planeSDF(tv,wall2,dat));
    
     // dist=min(dist,planeSDF(tv,wall3,dat));
    
@@ -310,7 +310,7 @@ float sceneSDF(Path path, inout localData dat){
     
     //------CYLINDERS
     
-    dist=min(dist,cylinderSDF(path,cyl1,dat));
+    //dist=min(dist,cylinderSDF(path,cyl1,dat));
     
   
     
@@ -325,7 +325,7 @@ float sceneSDF(Path path, inout localData dat){
         
     //-------COCKTAILS
     
-    dist=min(dist,cocktailGlassSDF(path,cGlass,dat));
+    dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
     
     
     

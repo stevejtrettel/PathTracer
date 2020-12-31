@@ -138,6 +138,10 @@ float opMaxDist( float a, float b, float k )
     return -opMinDist(-a,-b,k);
 }
 
+vec3 opMaxVec(float distA, vec3 nvecA, float distB, vec3 nvecB, float k){
+    return opMinVec(-distA, nvecA,-distB, nvecB,k);
+}
+
 
 float opOnionDist(float dist, float thickness){
     return abs(dist)-thickness;
@@ -312,7 +316,7 @@ vec3 sdgBox( in vec2 p, in vec2 b )
 float cylinderDist(vec3 pos, float radius, float height, float rounded){
     
     vec2 p=opRevolution(pos,0.);
-    //the box we rotate about its central axis has width 2rad and height =height.
+    //the box we rotate about its central axis has width 2rad and height = 2height.
     vec2 b=vec2(radius-rounded, height);
     
     vec2 w = abs(p)-b;

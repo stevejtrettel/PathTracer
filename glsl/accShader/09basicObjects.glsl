@@ -86,15 +86,15 @@ Vector sphereNormal(Vector tv, Sphere sph){
 
 
 //------sdf
-float sphereSDF(inout Path path, Sphere sph,inout localData dat){
+float sphereSDF(Vector tv, Sphere sph,inout localData dat){
     
     //distance to closest point:
-    float dist = sphereDistance(path.tv,sph);
+    float dist = sphereDistance(tv,sph);
     
     if(abs(dist)<EPSILON){
         
         //compute the normal
-        Vector normal=sphereNormal(path.tv,sph);
+        Vector normal=sphereNormal(tv,sph);
         
         //set the material
         setObjectInAir(dat,dist,normal,sph.mat);
@@ -143,14 +143,14 @@ Vector planeNormal(Vector tv,Plane plane){
 }
 
 
-float planeSDF(Path path, Plane plane, inout localData dat){
+float planeSDF(Vector tv, Plane plane, inout localData dat){
 
-    float dist=planeDistance(path.tv,plane);
+    float dist=planeDistance(tv,plane);
     
     if(abs(dist)<EPSILON){
         
         //compute the normal
-        Vector normal=planeNormal(path.tv,plane);
+        Vector normal=planeNormal(tv,plane);
         
         //set the material
         setObjectInAir(dat,dist,normal,plane.mat);
@@ -205,15 +205,15 @@ Vector cylinderNormal(Vector tv, Cylinder cyl){
 
 
 //------sdf
-float cylinderSDF(inout Path path, Cylinder cyl,inout localData dat){
+float cylinderSDF(Vector tv, Cylinder cyl,inout localData dat){
     
     //distance to closest point:
-    float dist = cylinderDistance(path.tv,cyl);
+    float dist = cylinderDistance(tv,cyl);
     
     if(abs(dist)<EPSILON){
         
         //compute the normal
-        Vector normal=cylinderNormal(path.tv,cyl);
+        Vector normal=cylinderNormal(tv,cyl);
         
         //set the material
         setObjectInAir(dat,dist,normal,cyl.mat);
@@ -329,15 +329,15 @@ Vector bottleNormal(Vector tv, Bottle bottle){
 
 
 //------sdf
-float bottleSDF(inout Path path, Bottle bottle,inout localData dat){
+float bottleSDF(Vector tv, Bottle bottle,inout localData dat){
 
-    float dist = bottleDistance(path.tv,bottle);
+    float dist = bottleDistance(tv,bottle);
     
     
     if(abs(dist)<EPSILON){
         
         //compute the normal
-        Vector normal=bottleNormal(path.tv,bottle);
+        Vector normal=bottleNormal(tv,bottle);
         
         //set the material
         setObjectInAir(dat,dist,normal,bottle.mat);
@@ -379,13 +379,13 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass){
     float inside=cylinderDist(q,glass.radius-glass.thickness,glass.height,0.2);
     
     //the glass
-   float dist= max(outside,-inside);
+    float dist= max(outside,-inside);
     
-    //now subgract ball from bottom
-    q-p-vec3(0,glass.height/2.,0);
-    float ball=length(q)-0.2;
+    //now subtract ball from bottom
+    q=pos+vec3(0,glass.height-glass.base/2.5,0.);
+    float ball=length(q)-2.*glass.base/2.5;
     
-    return max(dist,-ball);
+    return smax(dist,-ball,0.2);
 }
 
 
@@ -445,15 +445,15 @@ Vector cocktailGlassNormal(Vector tv, CocktailGlass glass){
 
 
 //------sdf
-float cocktailGlassSDF(inout Path path, CocktailGlass glass,inout localData dat){
+float cocktailGlassSDF(Vector tv, CocktailGlass glass,inout localData dat){
 
-    float dist = cocktailGlassDistance(path.tv,glass);
+    float dist = cocktailGlassDistance(tv,glass);
     
     
     if(abs(dist)<EPSILON){
         
         //compute the normal
-        Vector normal=cocktailGlassNormal(path.tv,glass);
+        Vector normal=cocktailGlassNormal(tv,glass);
         
         //set the material
         setObjectInAir(dat,dist,normal,glass.mat);
