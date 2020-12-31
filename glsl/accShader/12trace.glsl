@@ -245,12 +245,11 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             
             //use these probabilities to set the new ray
             updateRay(path, dat,rngState);    
-                  
-            
-            if(path.type.refract==0.){          
-           Sample(path,dat,light1,rngState);
-           Sample(path,dat,light2,rngState); 
-            }
+                      
+//            if(path.type.refract==0.){          
+//           Sample(path,dat,light1,rngState);
+//           Sample(path,dat,light2,rngState); 
+//            }
             //update the color from interacting with the surface
             surfaceColor(path,dat);
             

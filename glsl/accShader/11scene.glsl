@@ -24,6 +24,7 @@ Bottle bottle;
 
 CocktailGlass cGlass;
 
+Cocktail negroni;
 
 
 //this function assigns all the objects their parameters
@@ -242,7 +243,7 @@ void buildScene(){
     cGlass.center=Point(vec3(0,-0.5,-5));
     cGlass.radius=1.;
     cGlass.height=1.;
-    cGlass.thickness=0.2;
+    cGlass.thickness=0.05;
     cGlass.base=0.3;
     cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 
@@ -250,8 +251,12 @@ void buildScene(){
     
     
     
+    //-------- NEGRONI ----------------
+   
     
-    
+    negroni.glass=cGlass;
+    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    negroni.drink=makeGlass(vec3(0.,0.5,0.5),1.2,0.99);
     
     
 }
@@ -325,7 +330,9 @@ float sceneSDF(Vector tv, inout localData dat){
         
     //-------COCKTAILS
     
-    dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
+    //dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
+    
+    dist=min(dist,cocktailSDF(tv,negroni,dat));
     
     
     

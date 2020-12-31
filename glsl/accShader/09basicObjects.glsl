@@ -354,8 +354,12 @@ float bottleSDF(Vector tv, Bottle bottle,inout localData dat){
 
 
 //-------------------------------------------------
-//The COCKTAILGLASS sdf
+//The COCKTAIL GLASS sdf
 //-------------------------------------------------
+
+
+//the distance function here will be used again in future functions, where knowing "inside" will be helpful.
+//thus the first distance function has an inout telling you if you are inside the glass
 
 struct CocktailGlass{
    Point center;
@@ -367,7 +371,7 @@ struct CocktailGlass{
 };
 
 
-float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout bool insideTheGlass){
+float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
     
     vec3 pos=p-glass.center.coords;
     
@@ -387,13 +391,14 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout bool insideTheGlas
     q=pos+vec3(0,glass.height-glass.base/2.5,0.);
     float ball=length(q)-2.*glass.base/2.5;
     
+    insideDist=inside;
     return smax(dist,-ball,0.2);
 }
 
 
 //overload not worrying about if we are inside the glass
 float cocktailGlassDistance(vec3 p, CocktailGlass glass){
-    return cocktailGlassDistance(p,glass,trashBool);
+    return cocktailGlassDistance(p,glass,trashFloat);
 }
 
 
