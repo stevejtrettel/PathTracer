@@ -367,7 +367,7 @@ struct CocktailGlass{
 };
 
 
-float cocktailGlassDistance(vec3 p, CocktailGlass glass){
+float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout bool insideTheGlass){
     
     vec3 pos=p-glass.center.coords;
     
@@ -378,6 +378,8 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass){
 
     float inside=cylinderDist(q,glass.radius-glass.thickness,glass.height,0.2);
     
+    //insideTheGlass=(inside<0.)?true:false;
+    
     //the glass
     float dist= max(outside,-inside);
     
@@ -386,6 +388,12 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass){
     float ball=length(q)-2.*glass.base/2.5;
     
     return smax(dist,-ball,0.2);
+}
+
+
+//overload not worrying about if we are inside the glass
+float cocktailGlassDistance(vec3 p, CocktailGlass glass){
+    return cocktailGlassDistance(p,glass,trashBool);
 }
 
 

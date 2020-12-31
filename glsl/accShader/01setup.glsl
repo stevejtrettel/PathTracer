@@ -39,7 +39,7 @@ float aperature=0.;
 //======spectral constants:
 bool doSpectral=false;
 
-
+bool trashBool;
 
 
 
