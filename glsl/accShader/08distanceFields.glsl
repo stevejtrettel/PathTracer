@@ -346,7 +346,7 @@ vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
     //return normalize(dir);
 }
 
-
+//
 //
 //
 //vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
@@ -366,5 +366,3 @@ vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
 //    return dir;
 //    
 //}
-//
-//

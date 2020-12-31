@@ -375,12 +375,12 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
     
     vec3 pos=p-glass.center.coords;
     
-    float outside=cylinderDist(pos,glass.radius,glass.height,0.2);
+    float outside=cylinderDist(pos,glass.radius,glass.height,0.1);
     
     //the height is the "half height" of the glass....
     vec3 q=pos-vec3(0,2.*glass.base,0);
 
-    float inside=cylinderDist(q,glass.radius-glass.thickness,glass.height,0.2);
+    float inside=cylinderDist(q,glass.radius-glass.thickness,glass.height,0.05);
     
     //insideTheGlass=(inside<0.)?true:false;
     
@@ -388,7 +388,7 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
     float dist= max(outside,-inside);
     
     //now subtract ball from bottom
-    q=pos+vec3(0,glass.height-glass.base/2.5,0.);
+    q=pos+vec3(0,glass.height-1.75*glass.base/2.5,0.);
     float ball=length(q)-2.*glass.base/2.5;
     
     insideDist=inside;

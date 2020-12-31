@@ -9,7 +9,7 @@ float raymarch(Vector tv, inout localData dat){
     float distToScene=0.;
     float totalDist=0.;
 
-    float factor=0.9;
+    float factor=1.;
     float marchDist;
     
 

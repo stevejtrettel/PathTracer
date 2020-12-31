@@ -228,10 +228,10 @@ void buildScene(){
     
     //-------- BOTTLE ----------------
    
-    bottle.baseHeight=2.5;
-    bottle.baseRadius=1.;
-    bottle.neckHeight=1.75;
-    bottle.neckRadius=0.3;
+    bottle.baseHeight=2.;
+    bottle.baseRadius=2.;
+    bottle.neckHeight=1.;
+    bottle.neckRadius=0.5;
     bottle.thickness=0.2;
     bottle.center=Point(vec3(5,1.5,-8));
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
@@ -243,7 +243,7 @@ void buildScene(){
     cGlass.center=Point(vec3(0,-0.5,-5));
     cGlass.radius=1.;
     cGlass.height=1.;
-    cGlass.thickness=0.05;
+    cGlass.thickness=0.1;
     cGlass.base=0.3;
     cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 
@@ -282,7 +282,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light2,dat));
     
-    // dist=min(dist,sphereSDF(path,light3,dat));
+    // dist=min(dist,sphereSDF(tv,light3,dat));
     
     // dist=min(dist,sphereSDF(tv,light4,dat));
 
@@ -291,11 +291,11 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------BALLS
     
-    //dist=min(dist,sphereSDF(path,ball1,dat));
+    //dist=min(dist,sphereSDF(tv,ball1,dat));
     
     // dist=min(dist,sphereSDF(tv,ball2,dat));
     
-    // dist=min(dist,sphereSDF(path,ball3,dat));
+    // dist=min(dist,sphereSDF(tv,ball3,dat));
     
     
     
@@ -315,14 +315,14 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------CYLINDERS
     
-    //dist=min(dist,cylinderSDF(path,cyl1,dat));
+    //dist=min(dist,cylinderSDF(tv,cyl1,dat));
     
   
     
     
     //-------BOTTLES
     
-    //dist=min(dist,bottleSDF(path,bottle,dat));
+    //dist=min(dist,bottleSDF(tv,bottle,dat));
     
     
     
@@ -330,7 +330,7 @@ float sceneSDF(Vector tv, inout localData dat){
         
     //-------COCKTAILS
     
-    //dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
+   // dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
     
     dist=min(dist,cocktailSDF(tv,negroni,dat));
     
