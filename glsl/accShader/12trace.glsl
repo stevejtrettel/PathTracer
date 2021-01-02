@@ -90,6 +90,7 @@ void Sample(inout Path path, localData dat, Sphere sph, inout uint rngState){
     
     float cosFactor=clamp(dot(sampleLight,dat.normal),0.,1.);
     
+    if(cosFactor>0.){
     
     //move towards the light
     nudge(sampleLight,dat.normal,0.01);
@@ -108,6 +109,7 @@ void Sample(inout Path path, localData dat, Sphere sph, inout uint rngState){
 
     // add in emissive lighting
     path.pixel += path.light*lightAmt ;
+    }
 }
 
 
@@ -235,6 +237,12 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             }
             
             //focusCheck(path);
+            
+                //================================
+                //--- IMPORTANCE SAMPLING--------
+//                Sample(path,dat,light1,rngState);
+//                Sample(path,dat,light2,rngState); 
+                //===============================
            
            // pick up any colors absorbed
            // while traveling inside an object:
@@ -255,11 +263,6 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             
             //if killed ray, sample the light
             if(!path.keepGoing){
-                //================================
-                //--- IMPORTANCE SAMPLING--------
-//                Sample(path,dat,light1,rngState);
-//                Sample(path,dat,light2,rngState); 
-                //===============================
                 break;
             }
             

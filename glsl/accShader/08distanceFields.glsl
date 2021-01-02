@@ -185,6 +185,11 @@ float sphereDist(Vector tv, float radius){
 
 
 //----normal vector
+vec3 sphereGrad(vec3 pos,  float radius){
+    return normalize(pos);
+}
+
+//----normal vector
 vec3 sphereGrad(Vector tv,  float radius){
     return normalize(tv.pos.coords);
 }

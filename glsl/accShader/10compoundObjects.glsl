@@ -287,6 +287,128 @@ float liquorBottleSDF(Vector tv, LiquorBottle gin,inout localData dat){
 
 
 
+//-------------------------------------------------
+// The LIGHTBULB sdf
+//-------------------------------------------------
+
+//this is composed of multiple materials and pieces
+//but no two touch each other
+
+struct LightBulb{
+    Point center;
+    float bulbRadius;
+    float neckRadius;
+    float neckLength;
+    float smoothJoin;
+    Material glass;
+    Material base;
+    Material filament;
+};
+
+
+
+float bulbDistance(Vector tv, LightBulb bulb){
+    
+    vec3 pos=tv.pos.coords;
+    
+    float bulbPart=sphereDist(tv,bulb.bulbRadius);
+    bulbPart=abs(bulbPart)-0.2;
+    
+   // slide for neck
+    pos-=0.8*vec3(0,bulb.bulbRadius,0);
+    
+    float neckPart=cylinderDist(pos,bulb.neckRadius,bulb.neckLength,0.1);
+    
+    //join them with a smooth union
+    float totalBulb=opMinDist(bulbPart, neckPart, bulb.smoothJoin);
+    
+    //make a shell:
+    return opOnionDist(totalBulb,0.01);
+ 
+    
+}
+
+Vector bulbNormal(Vector tv, LightBulb bulb){
+    
+    vec3 pos=tv.pos.coords;
+    
+    float bulbDist=sphereDist(tv,bulb.bulbRadius);
+    vec3 bulbNormal=sphereGrad(pos,bulb.bulbRadius);
+    
+    //slide for neck
+    pos-=0.8*vec3(0,bulb.bulbRadius,0);
+    
+    float neckDist=cylinderDist(pos,bulb.neckRadius,bulb.neckLength,0.1);
+    
+    vec3 neckNormal=cylinderGrad(pos,bulb.neckRadius,bulb.neckLength,0.1);
+    
+    
+        //join them with a smooth union
+    float totalBulb=opMinDist(bulbDist, neckDist, bulb.smoothJoin);
+    
+    vec3 totalNormal=opMinVec(bulbDist, bulbNormal,neckDist,neckNormal,bulb.smoothJoin);
+    
+    
+    //do the onioning
+    totalNormal=opOnionVec(totalBulb,totalNormal);
+    
+    Vector normal;
+    
+    normal.pos=tv.pos;
+    normal.dir=normalize(totalNormal);
+    
+    return normal;
+}
+
+
+float lightBulbSDF(Vector tv, LightBulb bulb,inout localData dat){
+    
+    //center the bulb
+    tv.pos.coords-=bulb.center.coords;
+    
+    float dist=bulbDistance(tv, bulb);
+    
+    if(abs(dist)<EPSILON){
+        
+        Vector normal=bulbNormal(tv,bulb);
+        
+        setObjectInAir(dat, dist, normal, bulb.glass);
+    }
+    
+    return dist;
+    
+}
+
+//
+//float baseDistance(){
+//    
+//}
+//
+//
+//Vector baseNormal(){
+//    
+//}
+//
+//void setBaseData(){
+//    
+//}
+//
+//float filamentDistance(){
+//    
+//}
+//
+//Vector filamentNormal(){
+//    
+//}
+//
+//void setFilamentData(){
+//    
+//}
+//
+
+
+
+
 
 
 
