@@ -262,8 +262,11 @@ float liquorBottleSDF(Vector tv, LiquorBottle gin,inout localData dat){
     
     
     //distance to the top of the drink
-    //right now direcly in the center of the cup
+    //right now no fill=exactly bottom of the glass
+    
     float drinkTop=tv.pos.coords.y-gin.glass.center.coords.y;
+    
+    drinkTop-=gin.glass.baseHeight*gin.fill;
     
     //distance to drink is intersection of inside dist and this top
     float drink=max(drinkSide,drinkTop);
