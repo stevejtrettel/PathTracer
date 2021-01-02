@@ -264,67 +264,72 @@ float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
     //give the subtraction of these:
     float theBottle=opMinDist(base, neck,1.);
     
+        //chop off the top:
+    float top=q.y-bottle.neckHeight;
+    
+    theBottle=opMaxDist(theBottle,top,0.1);
+    
     insideBottle=theBottle+bottle.thickness;
     return opOnionDist(theBottle,bottle.thickness);
 
 }
 
-float bottleDistance(Vector tv, Bottle bottle){
-    return bottleDistance(tv.pos.coords,bottle,trashFloat);
+float bottleDistance(vec3 pos, Bottle bottle){
+    return bottleDistance(pos,bottle,trashFloat);
 }
 
 
-
-
-Vector bottleNormal(Vector tv, Bottle bottle){
-    
-    //if this ever becomes more expensive than four calls of the sdf: stop!
-    
-    vec3 pos=tv.pos.coords-bottle.center.coords;
-    
-    //the base of the bottle
-    float base=cylinderDist(pos,bottle.baseRadius, bottle.baseHeight,0.5);
-    
-    vec3 baseVec=cylinderGrad(pos,bottle.baseRadius, bottle.baseHeight,0.5);
-    
-    //the neck of the bottle
-    //first: adjust the height
-    vec3 q=pos-vec3(0,bottle.baseHeight+bottle.neckHeight,0);
-    
-    float neck=cylinderDist(q,bottle.neckRadius,bottle.neckHeight,0.5);
-    
-    vec3 neckVec=cylinderGrad(q,bottle.neckRadius,bottle.neckHeight,0.5);
-    
-    float dist=opMinDist(base,neck,1.);
-    
-    vec3 dir=opMinVec(base,baseVec,neck,neckVec,1.);
-    
-    dir=opOnionVec(dist,dir);
-    
-    return Vector(tv.pos,normalize(dir));
-    
-}
-
-////the default option: 4 calls of SDF
+//
+//
 //Vector bottleNormal(Vector tv, Bottle bottle){
 //    
-//    vec3 pos=tv.pos.coords;
+//    //if this ever becomes more expensive than four calls of the sdf: stop!
 //    
-//    const float ep = 0.0001;
-//    vec2 e = vec2(1.0,-1.0)*0.5773;
+//    vec3 pos=tv.pos.coords-bottle.center.coords;
 //    
-//    float vxyy=bottleDistance( pos + e.xyy*ep,bottle);
-//    float vyyx=bottleDistance( pos + e.yyx*ep,bottle);
-//    float vyxy=bottleDistance( pos + e.yxy*ep,bottle);
-//    float vxxx=bottleDistance( pos + e.xxx*ep,bottle);
+//    //the base of the bottle
+//    float base=cylinderDist(pos,bottle.baseRadius, bottle.baseHeight,0.5);
 //    
-//    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+//    vec3 baseVec=cylinderGrad(pos,bottle.baseRadius, bottle.baseHeight,0.5);
 //    
-//    dir=normalize(dir);
+//    //the neck of the bottle
+//    //first: adjust the height
+//    vec3 q=pos-vec3(0,bottle.baseHeight+bottle.neckHeight,0);
 //    
-//    return Vector(tv.pos,dir);
+//    float neck=cylinderDist(q,bottle.neckRadius,bottle.neckHeight,0.5);
+//    
+//    vec3 neckVec=cylinderGrad(q,bottle.neckRadius,bottle.neckHeight,0.5);
+//    
+//    float dist=opMinDist(base,neck,1.);
+//    
+//    vec3 dir=opMinVec(base,baseVec,neck,neckVec,1.);
+//    
+//    dir=opOnionVec(dist,dir);
+//    
+//    return Vector(tv.pos,normalize(dir));
 //    
 //}
+
+//the default option: 4 calls of SDF
+Vector bottleNormal(Vector tv, Bottle bottle){
+    
+    vec3 pos=tv.pos.coords;
+    
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    float vxyy=bottleDistance( pos + e.xyy*ep,bottle);
+    float vyyx=bottleDistance( pos + e.yyx*ep,bottle);
+    float vyxy=bottleDistance( pos + e.yxy*ep,bottle);
+    float vxxx=bottleDistance( pos + e.xxx*ep,bottle);
+    
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+    
+    dir=normalize(dir);
+    
+    return Vector(tv.pos,dir);
+    
+}
 
 
 
@@ -332,7 +337,7 @@ Vector bottleNormal(Vector tv, Bottle bottle){
 //------sdf
 float bottleSDF(Vector tv, Bottle bottle,inout localData dat){
 
-    float dist = bottleDistance(tv,bottle);
+    float dist = bottleDistance(tv.pos.coords,bottle);
     
     
     if(abs(dist)<EPSILON){
