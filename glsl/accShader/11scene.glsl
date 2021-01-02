@@ -21,10 +21,17 @@ Plane wall3;
 Cylinder cyl1;
 
 Bottle bottle;
+
 LiquorBottle gin;
+LiquorBottle campari;
+LiquorBottle vermouth;
+
 
 CocktailGlass cGlass;
+
+
 Cocktail negroni;
+Cocktail shotglass;
 
 
 //this function assigns all the objects their parameters
@@ -48,9 +55,9 @@ void buildScene(){
     float width;
     
     
-    //----------- LIGHT 1 -------------------------
-    light1.center=Point(vec3(5,1,-5));
-    light1.radius=0.75;
+        //----------- LIGHT 1 -------------------------
+    light1.center=Point(vec3(15,3,-5));
+    light1.radius=2.;
     
     color=  vec3(255./255., 197./255., 143./255.);
     intensity=50.;
@@ -67,12 +74,11 @@ void buildScene(){
     
     color= vec3(255./255., 147./255., 41./255.);
        // vec3(1.,0.6,0.4);
-    intensity=5.;
+    intensity=3.;
     
     light2.mat=makeLight(color,intensity);
 
-    
-    
+
             
     //----------- LIGHT 3 -------------------------
     light3.center=Point(1.25*vec3(0,2,-4));
@@ -228,29 +234,59 @@ void buildScene(){
     
     //-------- BOTTLE ----------------
    
-    bottle.baseHeight=1.;
+    bottle.baseHeight=2.5;
     bottle.baseRadius=1.;
-    bottle.neckHeight=1.;
-    bottle.neckRadius=0.5;
-    bottle.thickness=0.1;
-    bottle.center=Point(vec3(0,0.,-6));
+    bottle.neckHeight=1.75;
+    bottle.neckRadius=0.3;
+    bottle.thickness=0.2;
+    bottle.center=Point(vec3(5,1.5,-8));
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 
+
+    
+    
+    
+    
+    //-------- DRINK COLORS -----------------
+    
+        vec3 brownAbsorb=(vec3(1.)-vec3(204./255.,142./255.,105./255.));
+
+        vec3 redAbsorb=vec3(0.2,1.,0.6);
+    
+    
+    
+    
+    
     
     //-------- GIN BOTTLE ----------------
    
-    
     gin.glass=bottle;
+    gin.glass.center.coords+=vec3(1,0.2,1.5);
     gin.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-    gin.drink=makeGlass(vec3(0.,0.5,0.5),1.2,0.99);
-    
-    
-    
-    
-    
-    
-    
-    
+    gin.drink=makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
+        
+    //-------- CAMPARI BOTTLE ----------------
+   
+    campari.glass=bottle;
+    campari.glass.center.coords+=vec3(-2,2,-3);
+    campari.glass.baseRadius=0.75;
+    campari.glass.baseHeight=4.5;
+    campari.glass.neckHeight=1.;
+    campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    campari.cup.absorbColor*0.2;
+    campari.drink=makeGlass(2.5*redAbsorb,1.3,0.99);
+        
+
+    //-------- VERMOUTH BOTTLE ----------------
+   
+    vermouth.glass=bottle;
+    vermouth.glass.center.coords+=vec3(-5,0.3,0);
+    vermouth.glass.baseRadius=0.6;
+    vermouth.glass.neckRadius=0.2;
+    vermouth.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    vermouth.cup.absorbColor*0.2;
+    vermouth.drink=makeGlass(2.*brownAbsorb,1.3,0.99);
+        
     
     
     //-------- COCKTAIL GLASS----------------
@@ -262,26 +298,25 @@ void buildScene(){
     cGlass.base=0.3;
     cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 
-  
-    
-    
+
     
     //-------- NEGRONI ----------------
    
-    
     negroni.glass=cGlass;
-    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-    negroni.drink=makeGlass(vec3(0.,0.5,0.5),1.2,0.99);
+    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
+    negroni.drink=makeGlass(2.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     
     
-    
-    
-    
-    
-    
-    
-    
-    
+     //-------- NEGRONI ----------------
+   
+    shotglass.glass=cGlass;
+    shotglass.glass.center.coords=vec3(-6,-0.,-8);
+    shotglass.glass.radius=0.5;
+    shotglass.glass.height=1.5;
+    shotglass.glass.thickness=0.1;
+    shotglass.glass.base=0.4;
+    shotglass.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
+    shotglass.drink=makeGlass(0.1*vec3(0.5,0.2,0.),1.3,0.99);
     
 }
 
@@ -350,14 +385,19 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,liquorBottleSDF(tv,gin,dat));
     
+    dist=min(dist,liquorBottleSDF(tv,campari,dat));
+    
+    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
+    
+    
     
         
     //-------COCKTAILS
     
    // dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
     
-   // dist=min(dist,cocktailSDF(tv,negroni,dat));
-    
+    dist=min(dist,cocktailSDF(tv,negroni,dat));
+    dist=min(dist,cocktailSDF(tv,shotglass,dat));    
     
     
     return dist;

@@ -31,9 +31,10 @@ int maxBounces=50;
 
 
 //====camera constants:
-float fov=60.;
+float fov=73.;
 float focalLength=9.3;
-float aperature=0.;
+float aperature=0.1;
+
 
 
 //======spectral constants:
