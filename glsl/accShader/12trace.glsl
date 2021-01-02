@@ -246,10 +246,79 @@ vec3 pathTrace(inout Path path, inout uint rngState){
             //use these probabilities to set the new ray
             updateRay(path, dat,rngState);    
                       
-//            if(path.type.refract==0.){          
-//           Sample(path,dat,light1,rngState);
-//           Sample(path,dat,light2,rngState); 
-//            }
+
+            //update the color from interacting with the surface
+            surfaceColor(path,dat);
+            
+            //probabilistically kill rays
+            roulette(path,rngState);
+            
+            //if killed ray, sample the light
+            if(!path.keepGoing){
+                //================================
+                //--- IMPORTANCE SAMPLING--------
+//                Sample(path,dat,light1,rngState);
+//                Sample(path,dat,light2,rngState); 
+                //===============================
+                break;
+            }
+            
+        }
+
+   return path.pixel;
+
+}
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+// The BI-DIRECTIONAL PATH TRACING LOOP
+//-------------------------------------------------
+
+
+
+vec3 BiDirPathTrace(inout Path path, inout uint rngState){
+    
+    localData dat;
+    initializeData(dat);
+    
+    
+    
+    
+    maxBounces=50;
+    
+        for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
+    {
+
+            // shoot a ray out into the world
+            //when you hit a material, update dat accordingly
+            path.distance=raymarch(path.tv,dat);
+            
+            //if you hit the sky: stop
+            if(dat.isSky){
+                path.keepGoing=false;
+                skyColor(path,dat);
+                break;
+            }
+            
+            //focusCheck(path);
+           
+           // pick up any colors absorbed
+           // while traveling inside an object:
+            volumeColor(path,dat);
+
+            //set probabilities for spec, refract, diffuse
+            updateProbabilities(path, dat, rngState);
+            
+            //use these probabilities to set the new ray
+            updateRay(path, dat,rngState);    
+                      
             //update the color from interacting with the surface
             surfaceColor(path,dat);
             

@@ -248,7 +248,7 @@ struct Bottle{
 
 //----distance and normal functions
 
-float bottleDistance(vec3 p, Bottle bottle){
+float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
     
     vec3 pos=p-bottle.center.coords;
     
@@ -264,12 +264,13 @@ float bottleDistance(vec3 p, Bottle bottle){
     //give the subtraction of these:
     float theBottle=opMinDist(base, neck,1.);
     
+    insideBottle=theBottle+bottle.thickness;
     return opOnionDist(theBottle,bottle.thickness);
 
 }
 
 float bottleDistance(Vector tv, Bottle bottle){
-    return bottleDistance(tv.pos.coords,bottle);
+    return bottleDistance(tv.pos.coords,bottle,trashFloat);
 }
 
 

@@ -21,9 +21,9 @@ Plane wall3;
 Cylinder cyl1;
 
 Bottle bottle;
+LiquorBottle gin;
 
 CocktailGlass cGlass;
-
 Cocktail negroni;
 
 
@@ -228,14 +228,29 @@ void buildScene(){
     
     //-------- BOTTLE ----------------
    
-    bottle.baseHeight=2.;
-    bottle.baseRadius=2.;
+    bottle.baseHeight=1.;
+    bottle.baseRadius=1.;
     bottle.neckHeight=1.;
     bottle.neckRadius=0.5;
-    bottle.thickness=0.2;
-    bottle.center=Point(vec3(5,1.5,-8));
+    bottle.thickness=0.1;
+    bottle.center=Point(vec3(0,0.,-6));
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 
+    
+    //-------- GIN BOTTLE ----------------
+   
+    
+    gin.glass=bottle;
+    gin.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    gin.drink=makeGlass(vec3(0.,0.5,0.5),1.2,0.99);
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     //-------- COCKTAIL GLASS----------------
@@ -257,6 +272,15 @@ void buildScene(){
     negroni.glass=cGlass;
     negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
     negroni.drink=makeGlass(vec3(0.,0.5,0.5),1.2,0.99);
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
 }
@@ -324,7 +348,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //dist=min(dist,bottleSDF(tv,bottle,dat));
     
-    
+    dist=min(dist,liquorBottleSDF(tv,gin,dat));
     
     
         
@@ -332,7 +356,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
    // dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
     
-    dist=min(dist,cocktailSDF(tv,negroni,dat));
+   // dist=min(dist,cocktailSDF(tv,negroni,dat));
     
     
     
