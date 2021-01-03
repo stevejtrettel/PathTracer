@@ -224,6 +224,30 @@ float cylinderSDF(Vector tv, Cylinder cyl,inout localData dat){
 
 
 
+//
+////------sdf
+//float twistySDF(Vector tv, Cylinder cyl,inout localData dat){
+//    
+//    //distance to closest point:
+//    float dist = twistyDist(tv,cyl);
+//    
+//    if(abs(dist)<EPSILON){
+//        
+//        //compute the normal
+//        vec3 dir=twistyNormal(tv,cyl);
+//        
+//        //set the material
+//        setObjectInAir(dat,dist,normal,cyl.mat);
+//    }
+//
+//    return dist;
+//}
+//
+//
+
+
+
+
 
 
 
@@ -266,13 +290,17 @@ float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
     //give the subtraction of these:
     float theBottle=opMinDist(base, neck,bottle.smoothJoin);
     
-        //chop off the top:
-    float top=q.y-bottle.neckHeight;
-    
-    theBottle=opMaxDist(theBottle,top,0.1);
-    
     insideBottle=theBottle+bottle.thickness;
-    return opOnionDist(theBottle,bottle.thickness);
+
+    //make the shell
+    theBottle=opOnionDist(theBottle,bottle.thickness);
+    
+    //chop off the top:
+    float top=q.y-bottle.neckHeight/1.5;
+    
+    theBottle=opMaxDist(theBottle,top,bottle.thickness);
+    
+    return theBottle;
 
 }
 
@@ -306,12 +334,13 @@ Vector bottleNormal(Vector tv, Bottle bottle){
     
     vec3 dir=opMinVec(base,baseVec,neck,neckVec,bottle.smoothJoin);
     
+    //hollow out the shell
+    dir=opOnionVec(dist,dir);
+    
     //chop off the top:
-    float top=q.y-bottle.neckHeight;
+    float top=q.y-bottle.neckHeight/1.5;
     
     dir=opMaxVec(dist,dir,top,vec3(0,1,0),bottle.smoothJoin);
-    
-    dir=opOnionVec(dist,dir);
     
     return Vector(tv.pos,normalize(dir));
     

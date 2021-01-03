@@ -153,6 +153,24 @@ vec3 opOnionVec(float dist,vec3 nVec){
 }
 
 
+
+
+vec3 opTwist( vec3 p )
+{
+   float k =50.0; // or some other amount
+    float c = cos(k*p.y);
+    float s = sin(k*p.y);
+    mat2  m = mat2(c,-s,s,c);
+    vec2 rot=m*p.xz;
+    vec3  q = vec3(rot.x,p.y,rot.y);
+   return q;
+}
+
+
+
+
+
+
 //-------------------------------------------------
 //-------------------------------------------------
 //=====distance to a 
@@ -363,6 +381,72 @@ vec3 cylinderGrad(vec3 pos, float radius, float height,float rounded){
 //    float vyyx=cylinderDist( pos + e.yyx*ep,radius, height,rounded);
 //    float vyxy=cylinderDist( pos + e.yxy*ep,radius, height,rounded);
 //    float vxxx=cylinderDist( pos + e.xxx*ep,radius, height,rounded);
+//    
+//    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+//    
+//    dir=normalize(dir);
+//    
+//    return dir;
+//    
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+//=====distance to an
+//=======TWISTY CYLINDER
+//-------------------------------------------------
+//-------------------------------------------------
+//
+//
+//
+//float twistyDist(vec3 pos, float radius, float height, float rounded){
+//    
+//  //  vec3 p=pos-vec3(1,0,0);
+//    const float k = 7.0; // or some other amount
+//    float c = cos(k*pos.y);
+//    float s = sin(k*pos.y);
+//    float x=c*pos.x-s*pos.z;
+//    float z=s*pos.x+c*pos.z;
+//    //mat2  m = mat2(c,-s,s,c);
+//    //vec2 rot=m*p.xz;
+//    
+//    vec3 p = vec3(x,pos.y,z);
+//    
+//    float le=1.5;
+//    float r1=0.4;
+//    float r2=0.1;
+// 
+//  vec3 q = vec3( p.x, max(abs(p.y)-le,0.0), p.z );
+//  return length(vec2(length(q.xy)-r1,q.z)) - r2;
+//
+//    
+//   // return cylinderDist(q,radius,height,0.);
+//}
+//
+//
+//vec3 twistyGrad(vec3 pos, float radius, float height,float rounded){
+//    
+//    const float ep = 0.0001;
+//    vec2 e = vec2(1.0,-1.0)*0.5773;
+//    
+//    float vxyy=twistyDist( pos + e.xyy*ep,radius, height,rounded);
+//    float vyyx=twistyDist( pos + e.yyx*ep,radius, height,rounded);
+//    float vyxy=twistyDist( pos + e.yxy*ep,radius, height,rounded);
+//    float vxxx=twistyDist( pos + e.xxx*ep,radius, height,rounded);
 //    
 //    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
 //    

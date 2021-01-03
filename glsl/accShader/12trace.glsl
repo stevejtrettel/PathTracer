@@ -9,7 +9,7 @@ float raymarch(Vector tv, inout localData dat){
     float distToScene=0.;
     float totalDist=0.;
 
-    float factor=1.;
+    float factor=0.8;
     float marchDist;
     
 
@@ -195,7 +195,7 @@ void surfaceColor(inout Path path,localData dat){
 void skyColor(inout Path path,inout localData dat){
     //vec3 skyColor=skyTex(path.tv.dir);
     //vec3 skyColor=0.1*checkerTex(path.tv.dir);
-    vec3 skyColor=vec3(0.05);
+    vec3 skyColor=vec3(0.5);
     path.pixel += path.light*skyColor;
 }
 
@@ -271,7 +271,6 @@ vec3 pathTrace(inout Path path, inout uint rngState){
    return path.pixel;
 
 }
-
 
 
 

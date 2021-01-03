@@ -149,6 +149,7 @@ Path initializePath(Vector tv,inout uint rngState){
 
 struct localData{
     bool isSky;
+    bool isLight;
     bool materialInterface;//are we at the interface of two materials, or at an air/material interface
     
     Vector normal;//outward pointing (back at you) normal to surface just impacted
@@ -171,6 +172,7 @@ localData trashDat;
 
 void initializeData(localData dat){
     dat.isSky=false;
+    dat.isLight=false;
     dat.materialInterface=false;
     dat.reflectAbsorb=vec3(0.);
     dat.refractAbsorb=vec3(0.);

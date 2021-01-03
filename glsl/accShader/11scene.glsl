@@ -9,6 +9,8 @@ Sphere light1;
 Sphere light2;
 Sphere light3;
 Sphere light4;
+Cylinder light5;
+Cylinder light6;
 
 Sphere ball1;
 Sphere ball2;
@@ -37,7 +39,9 @@ Cocktail negroni;
 Cocktail shotglass;
 
 
-LightBulb incandescent;
+LightBulb bulb1;
+LightBulb bulb2;
+LightBulb bulb3;
 
 
 //this function assigns all the objects their parameters
@@ -110,9 +114,50 @@ void buildScene(){
     light4.mat=makeLight(color,intensity);
 
     
+     //----------- FILAMENT LIGHT-------------------------
+    
+    light5.center=Point(vec3(6,1,6));
+    light5.radius=0.1;
+    light5.height=1.;
+    light5.rounded=0.1;
+    
+     color= vec3(255./255., 147./255., 41./255.);
+    //color=vec3(0.7,0.7,0.8);
+    specularity=0.5;
+    roughness=0.5;
+    
+    
+    light5.mat=makeDielectric(color,specularity,roughness);
+
+    color= (vec3(1.)+vec3(255./255., 147./255., 41./255.))/2.;
+       // vec3(1.,0.6,0.4);
+    intensity=50.;
+    
+    light5.mat.emitColor=color*intensity;
     
     
     
+              
+     //----------- FILAMENT LIGHT-------------------------
+    
+    light6.center=Point(vec3(10,2,-2));
+    light6.radius=0.1;
+    light6.height=1.;
+    light6.rounded=0.1;
+    
+     color= vec3(255./255., 147./255., 41./255.);
+    //color=vec3(0.7,0.7,0.8);
+    specularity=0.5;
+    roughness=0.5;
+    
+    
+    light6.mat=makeDielectric(color,specularity,roughness);
+
+    color= (vec3(1.)+vec3(255./255., 147./255., 41./255.))/2.;
+       // vec3(1.,0.6,0.4);
+    intensity=100.;
+    
+    light6.mat.emitColor=color*intensity;
     
     
     
@@ -244,7 +289,7 @@ void buildScene(){
     bottle.baseRadius=1.;
     bottle.neckHeight=1.;
     bottle.neckRadius=0.3;
-    bottle.thickness=0.2;
+    bottle.thickness=0.1;
     bottle.rounded=0.2;
     bottle.smoothJoin=0.3;
     bottle.center=Point(vec3(5,1.5,-8));
@@ -272,6 +317,7 @@ void buildScene(){
     gin.glass.center.coords=vec3(6,0.2,-4.5);
     gin.glass.baseRadius=1.25;
     gin.glass.baseHeight=1.5;
+    gin.glass.thickness=0.1;
     gin.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
     gin.drink=makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
     gin.fill=0.;
@@ -289,7 +335,7 @@ void buildScene(){
     campari.glass.center.coords=vec3(3,2.25,-9);
     campari.glass.baseRadius=1.;
     campari.glass.baseHeight=3.5;
-    campari.glass.neckHeight=0.5;
+    campari.glass.neckHeight=0.75;
     campari.glass.smoothJoin=0.5;
     campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
     campari.drink=makeGlass(2.5*redAbsorb,1.3,0.99);
@@ -312,13 +358,14 @@ void buildScene(){
     //-------- VERMOUTH BOTTLE ----------------
    
     vermouth.glass=bottle;
-    vermouth.glass.center.coords+=vec3(0,1.15,-8);
+    vermouth.glass.center.coords=vec3(8,1.15,-8);
     vermouth.glass.baseRadius=0.6;
     vermouth.glass.baseHeight=2.5;
     vermouth.glass.neckRadius=0.2;
-    vermouth.glass.smoothJoin=0.01;
+    vermouth.glass.neckHeight=2.;
+    vermouth.glass.smoothJoin=1.5;
     vermouth.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-    vermouth.drink=makeGlass(2.*brownAbsorb,1.3,0.99);
+    vermouth.drink=makeGlass(3.*brownAbsorb,1.3,0.99);
     vermouth.fill=0.6;
     
     
@@ -337,32 +384,103 @@ void buildScene(){
    
     negroni.glass=cGlass;
     negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
-    negroni.drink=makeGlass(2.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+    negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     
     
      //--------SHOTGLASS ----------------
-   
     shotglass.glass=cGlass;
-    shotglass.glass.center.coords=vec3(-6,-1.5,-8);
+    shotglass.glass.center.coords=vec3(10,-0.5,-3);
     shotglass.glass.radius=0.5;
     shotglass.glass.height=1.;
     shotglass.glass.thickness=0.1;
     shotglass.glass.base=0.4;
     shotglass.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
-    shotglass.drink=makeGlass(0.1*vec3(0.5,0.2,0.),1.3,0.99);
+    shotglass.drink=makeGlass(3.*redAbsorb+5.*brownAbsorb,1.3,0.99);
     
     
     
     //--------LIGHT BULB ----------------
     
-    incandescent.center.coords=vec3(10,2,-2);
-    incandescent.bulbRadius=1.;
-    incandescent.neckRadius=0.5;
-    incandescent.neckLength=1.25;
-    incandescent.smoothJoin=0.01;
-    incandescent.glass=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
+    bulb1.center.coords=vec3(9,4.5,-2);
+    bulb1.bulbRadius=1.;
+    bulb1.neckRadius=0.5;
+    bulb1.neckLength=1.25;
+    bulb1.smoothJoin=0.5;
     
-  //  incandescent.glass.emitColor=vec3(0.02,0.01,0.);
+    bulb1.filHeight=0.5;
+    bulb1.filWidth=0.1;
+    bulb1.filRadius=0.05;
+    bulb1.filTwisty=20.;
+    bulb1.glass=makeGlass(0.1*vec3(0.3,0.025,0.2),1.5,0.99);
+    
+    bulb1.filament=makeDielectric(color,specularity,roughness);
+
+    color= vec3(255./255., 147./255., 41./255.);
+       // vec3(1.,0.6,0.4);
+    intensity=300.;
+    
+    bulb1.filament.emitColor=color*intensity;
+    
+    
+    
+        //--------LIGHT BULB ----------------
+    
+    bulb2.center.coords=vec3(-1,3.5,-6);
+    bulb2.bulbRadius=1.75;
+    bulb2.neckRadius=0.5;
+    bulb2.neckLength=1.25;
+    bulb2.smoothJoin=0.5;
+    
+    bulb2.filHeight=1.2;
+    bulb2.filWidth=0.2;
+    bulb2.filRadius=0.05;
+    bulb2.filTwisty=5.;
+    bulb2.glass=makeGlass(0.1*vec3(0.3,0.025,0.2),1.5,0.99);
+    
+    bulb2.filament=makeDielectric(color,specularity,roughness);
+
+    color= (vec3(1.)+vec3(255./255., 147./255., 41./255.))/2.;
+       // vec3(1.,0.6,0.4);
+    intensity=500.;
+    
+    bulb2.filament.emitColor=color*intensity;
+    
+    
+    
+    
+    //--------LIGHT BULB FILAMENT ----------------
+    
+    bulb3.center.coords=vec3(6,1,6);
+    bulb3.bulbRadius=1.75;
+    bulb3.neckRadius=0.5;
+    bulb3.neckLength=1.25;
+    bulb3.smoothJoin=0.5;
+    
+    bulb3.filHeight=1.5;
+    bulb3.filWidth=0.5;
+    bulb3.filRadius=0.1;
+    bulb3.filTwisty=7.;
+    bulb3.glass=makeGlass(0.1*vec3(0.3,0.025,0.2),1.5,0.99);
+    
+    bulb3.filament=makeDielectric(color,specularity,roughness);
+
+    color= (vec3(1.)+vec3(255./255., 147./255., 41./255.))/2.;
+       // vec3(1.,0.6,0.4);
+    intensity=400.;
+    
+    bulb3.filament.emitColor=color*intensity;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  
 }
 
 
@@ -382,7 +500,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------LIGHTS
     
-    dist=min(dist,sphereSDF(tv,light1,dat));
+   // dist=min(dist,sphereSDF(tv,light1,dat));
     
     dist=min(dist,sphereSDF(tv,light2,dat));
     
@@ -430,15 +548,14 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,liquorBottleSDF(tv,gin,dat));
 //    
-//    dist=min(dist,liquorBottleSDF(tv,campari,dat));
+    dist=min(dist,liquorBottleSDF(tv,campari,dat));
 //    
 //    dist=min(dist,liquorBottleSDF(tv,violet,dat));
 //    
 //    dist=min(dist,liquorBottleSDF(tv,limoncello,dat));
 //    
     //sprinkle in vermouth bottles
-//    vermouth.glass.center.coords=vec3(1,1.15,-8);
-//    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
+   dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
 //    
 //    
 //    vermouth.glass.center.coords=vec3(9,1.15,-12);
@@ -459,21 +576,23 @@ float sceneSDF(Vector tv, inout localData dat){
     negroni.glass.center.coords=vec3(-1,-0.5,-5);
    // dist=min(dist,cocktailSDF(tv,negroni,dat));
     
-   negroni.glass.center.coords+=vec3(3,0,2);
+    negroni.glass.center.coords+=vec3(3,0,2);
     dist=min(dist,cocktailSDF(tv,negroni,dat));
-// 
-//    shotglass.glass.center.coords=vec3(10,-0.5,-3);
-//    shotglass.drink.absorbColor=vec3(0.1,0.8,0.1);
-//    dist=min(dist,cocktailSDF(tv,shotglass,dat));   
-//    
-//    shotglass.glass.center.coords=vec3(11,-.5,-5);
-//    shotglass.drink.absorbColor=0.8*vec3(0.1,0.05,0.);
-//    dist=min(dist,cocktailSDF(tv,shotglass,dat));   
-//    
+
     
+    shotglass.drink.absorbColor=vec3(0.1,0.8,0.1);
+    dist=min(dist,cocktailSDF(tv,shotglass,dat));   
+
     
-        dist=min(dist,lightBulbSDF(tv,incandescent,dat));
+    dist=min(dist,lightBulbSDF(tv,bulb1,dat));
+        
+    dist=min(dist,lightBulbSDF(tv,bulb2,dat));
     
+      dist=min(dist,filamentSDF(tv,bulb3,dat));
+    
+       
+   // dist=min(dist,twistySDF(tv,light5,dat));
+   // dist=min(dist,twistySDF(tv,light6,dat));
     
     
     return dist;

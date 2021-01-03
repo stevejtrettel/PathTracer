@@ -300,6 +300,12 @@ struct LightBulb{
     float neckRadius;
     float neckLength;
     float smoothJoin;
+    
+    float filHeight;
+    float filWidth;
+    float filRadius;
+    float filTwisty;
+    
     Material glass;
     Material base;
     Material filament;
@@ -307,77 +313,93 @@ struct LightBulb{
 
 
 
-float bulbDistance(Vector tv, LightBulb bulb){
+float bulbDistance(vec3 p, LightBulb bulb,inout float insideDist){
+        
+     vec3 pos=p-bulb.center.coords;
     
-    vec3 pos=tv.pos.coords;
+    //the base of the bottle
+    float base=sphereDist(pos,bulb.bulbRadius);
+    //float base=cylinderDist(pos,bulb.bulbRadius, bulb.bulbRadius,0.1);
     
-    float bulbPart=sphereDist(tv,bulb.bulbRadius);
-    bulbPart=abs(bulbPart)-0.2;
+    //the neck of the bottle
+    //first: adjust the height
+    vec3 q=pos-vec3(0,0.8*bulb.bulbRadius,0);
     
-   // slide for neck
-    pos-=0.8*vec3(0,bulb.bulbRadius,0);
+    float neck=cylinderDist(q,bulb.neckRadius,bulb.neckLength,0.1);
     
-    float neckPart=cylinderDist(pos,bulb.neckRadius,bulb.neckLength,0.1);
+    //give the subtraction of these:
+    float theBottle=opMinDist(base, neck,bulb.smoothJoin);
     
-    //join them with a smooth union
-    float totalBulb=opMinDist(bulbPart, neckPart, bulb.smoothJoin);
+    insideDist=theBottle-0.025;
     
-    //make a shell:
-    return opOnionDist(totalBulb,0.01);
- 
-    
+    return opOnionDist(theBottle,0.05);
+
 }
 
+
+float bulbDistance(vec3 p, LightBulb bulb){
+    return bulbDistance(p,bulb,trashFloat);
+}
+
+
+
+
+//the default option: 4 calls of SDF
 Vector bulbNormal(Vector tv, LightBulb bulb){
     
     vec3 pos=tv.pos.coords;
     
-    float bulbDist=sphereDist(tv,bulb.bulbRadius);
-    vec3 bulbNormal=sphereGrad(pos,bulb.bulbRadius);
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
     
-    //slide for neck
-    pos-=0.8*vec3(0,bulb.bulbRadius,0);
+    float vxyy=bulbDistance( pos + e.xyy*ep,bulb);
+    float vyyx=bulbDistance( pos + e.yyx*ep,bulb);
+    float vyxy=bulbDistance( pos + e.yxy*ep,bulb);
+    float vxxx=bulbDistance( pos + e.xxx*ep,bulb);
     
-    float neckDist=cylinderDist(pos,bulb.neckRadius,bulb.neckLength,0.1);
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
     
-    vec3 neckNormal=cylinderGrad(pos,bulb.neckRadius,bulb.neckLength,0.1);
+    dir=normalize(dir);
     
-    
-        //join them with a smooth union
-    float totalBulb=opMinDist(bulbDist, neckDist, bulb.smoothJoin);
-    
-    vec3 totalNormal=opMinVec(bulbDist, bulbNormal,neckDist,neckNormal,bulb.smoothJoin);
-    
-    
-    //do the onioning
-    totalNormal=opOnionVec(totalBulb,totalNormal);
-    
-    Vector normal;
-    
-    normal.pos=tv.pos;
-    normal.dir=normalize(totalNormal);
-    
-    return normal;
-}
-
-
-float lightBulbSDF(Vector tv, LightBulb bulb,inout localData dat){
-    
-    //center the bulb
-    tv.pos.coords-=bulb.center.coords;
-    
-    float dist=bulbDistance(tv, bulb);
-    
-    if(abs(dist)<EPSILON){
-        
-        Vector normal=bulbNormal(tv,bulb);
-        
-        setObjectInAir(dat, dist, normal, bulb.glass);
-    }
-    
-    return dist;
+    return Vector(tv.pos,dir);
     
 }
+////
+//
+//Vector bulbNormal(Vector tv, LightBulb bulb){
+//    
+//    vec3 pos=tv.pos.coords;
+//    
+//    float bulbDist=sphereDist(tv,bulb.bulbRadius);
+//    vec3 bulbNormal=sphereGrad(pos,bulb.bulbRadius);
+//    
+//    //slide for neck
+//    pos-=0.8*vec3(0,bulb.bulbRadius,0);
+//    
+//    float neckDist=cylinderDist(pos,bulb.neckRadius,bulb.neckLength,0.1);
+//    
+//    vec3 neckNormal=cylinderGrad(pos,bulb.neckRadius,bulb.neckLength,0.1);
+//    
+//    
+//        //join them with a smooth union
+//    float totalBulb=opMinDist(bulbDist, neckDist, bulb.smoothJoin);
+//    
+//    vec3 totalNormal=opMinVec(bulbDist, bulbNormal,neckDist,neckNormal,bulb.smoothJoin);
+//    
+//    
+//    //do the onioning
+//    totalNormal=opOnionVec(totalBulb,totalNormal);
+//    
+//    Vector normal;
+//    
+//    normal.pos=tv.pos;
+//    normal.dir=normalize(totalNormal);
+//    
+//    return normal;
+//}
+//
+
+
 
 //
 //float baseDistance(){
@@ -393,26 +415,157 @@ float lightBulbSDF(Vector tv, LightBulb bulb,inout localData dat){
 //    
 //}
 //
-//float filamentDistance(){
+
+
+
+
+
+//----distance and normal functions
+
+
+
+float linkDist(vec3 p, float le,float r1, float r2){
+     //evaluate the link sdf
+    vec3 q = vec3( p.x, max(abs(p.y)-le,0.0), p.z );
+    float dist=length(vec2(length(q.xy)-r1,q.z)) - r2;
+    
+    return dist;
+}
+
+float filamentDistance(vec3 pos, LightBulb bulb){
+    
+    pos=pos-bulb.center.coords;
+    
+    float k = bulb.filTwisty;
+
+    //do the twist
+    float c = cos(k*pos.y);
+    float s = sin(k*pos.y);
+    float x=c*pos.x-s*pos.z;
+    float z=s*pos.x+c*pos.z;
+
+    vec3 p = vec3(x,pos.y,z);
+    
+    return linkDist(p,bulb.filHeight,bulb.filWidth,bulb.filRadius);
+
+}
+
+
+//Vector filamentNormal(vec3 pos, LightBulb bulb){
+//    
+//    const float ep = 0.0001;
+//    vec2 e = vec2(1.0,-1.0)*0.5773;
+//    
+//    float vxyy=filamentDistance( pos + e.xyy*ep,bulb);
+//    float vyyx=filamentDistance( pos + e.yyx*ep,bulb);
+//    float vyxy=filamentDistance( pos + e.yxy*ep,bulb);
+//    float vxxx=filamentDistance( pos + e.xxx*ep,bulb);
+//    
+//    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+//    
+//    dir=normalize(dir);
+//    
+//    return Vector(Point(pos),dir);
 //    
 //}
-//
-//Vector filamentNormal(){
-//    
-//}
-//
-//void setFilamentData(){
-//    
-//}
-//
+//   
+
+
+Vector filamentNormal(vec3 pos,LightBulb bulb){
+    
+    pos=pos-bulb.center.coords;
+    
+    float k = bulb.filTwisty;
+    float height=bulb.filHeight;
+    float width=bulb.filWidth;
+    float rad=bulb.filRadius;
+
+    //do the twist
+    float c = cos(k*pos.y);
+    float s = sin(k*pos.y);
+    float x=c*pos.x-s*pos.z;
+    float z=s*pos.x+c*pos.z;
+    
+    vec3 p = vec3(x,pos.y,z);
+    
+    float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+    
+    float vxyy=linkDist( pos + e.xyy*ep,height, width, rad);
+    float vyyx=linkDist( pos + e.yyx*ep,height, width, rad);
+    float vyxy=linkDist( pos + e.yxy*ep,height, width, rad);
+    float vxxx=linkDist( pos + e.xxx*ep,height, width, rad);
+    
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+    
+    dir=normalize(dir);
+    
+    Vector normal;
+    normal.pos.coords=pos;
+    normal.dir=dir;
+    return  normal;
+
+}
 
 
 
 
 
 
+float lightBulbSDF(Vector tv, LightBulb bulb,inout localData dat){
+    
+    float dist;
+    float insideDistance;
+    Vector normal;
+    
+    vec3 pos=tv.pos.coords;
+    
+    dist=bulbDistance(pos, bulb,insideDistance);
+    
+    if(abs(dist)<EPSILON){
+        
+        normal=bulbNormal(tv,bulb);
+        
+        setObjectInAir(dat, dist, normal, bulb.glass);
+
+    
+    }
+    
+    else if(insideDistance<0.){
+        //now bother with the filament stuff
+        
+        float filDist=filamentDistance(pos,bulb);
+        dist=min(dist, filDist);
+        
+        if(filDist<EPSILON){
+        
+            normal=filamentNormal(pos,bulb);
+            
+            setObjectInAir(dat, filDist, normal, bulb.filament);
+        } 
+        
+   }
+    
+        return dist;
+}
 
 
+
+
+float filamentSDF(Vector tv, LightBulb bulb, inout localData dat){
+    vec3 pos=tv.pos.coords;
+      float filDist=filamentDistance(pos,bulb);
+        
+        if(filDist<EPSILON){
+        
+           Vector  normal=filamentNormal(pos,bulb);
+            
+            setObjectInAir(dat, filDist, normal, bulb.filament);
+        } 
+    
+        return filDist;
+    
+}
 
 //
 //
