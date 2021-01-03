@@ -19,6 +19,10 @@ Sphere ball3;
 Plane wall1;
 Plane wall2;
 Plane wall3;
+Plane wall4;
+Plane wall5;
+
+
 
 Cylinder cyl1;
 
@@ -43,6 +47,8 @@ LightBulb bulb1;
 LightBulb bulb2;
 LightBulb bulb3;
 
+Cylinder cord;
+Cylinder cord2;
 
 //this function assigns all the objects their parameters
 void buildScene(){
@@ -215,7 +221,7 @@ void buildScene(){
     
     //----------- WALL 1 -------------------------
     normal=vec3(0,1,0);
-    offset=1.7;
+    offset=1.6;
     
     //color=vec3(0.5,0.9,0.5);
      color= vec3(.2);
@@ -292,9 +298,9 @@ void buildScene(){
     bottle.thickness=0.1;
     bottle.rounded=0.2;
     bottle.smoothJoin=0.3;
-    bottle.center=Point(vec3(5,1.5,-8));
+    bottle.center=Point(vec3(6,0.2,-4.5));
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-
+    bottle.bump=1.;
 
     
     
@@ -321,13 +327,14 @@ void buildScene(){
     gin.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
     gin.drink=makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
     gin.fill=0.;
+    gin.glass.bump=1.;
     
-    
-    gin2=gin;
-    gin2.glass.center.coords=vec3(7,0.2,-8);
-    
-    
-    
+//    
+//    gin2=gin;
+//    gin2.glass.center.coords=vec3(7,0.2,-8);
+//    
+//    
+//    
         
     //-------- CAMPARI BOTTLE ----------------
    
@@ -340,38 +347,38 @@ void buildScene(){
     campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
     campari.drink=makeGlass(2.5*redAbsorb,1.3,0.99);
     campari.fill=0.5;
+    campari.glass.bump=0.;
     
-    
-    //-------- CREME DE VIOLET BOTTLE ----------------
-    violet=campari;
-    violet.glass.center.coords+=vec3(7,0.,2);
-    violet.drink=makeGlass(2.*vec3(0.1,0.8,0.1),1.3,0.99);
-    
-    //-------- LIMONCELLO BOTTLE ----------------
-    limoncello=campari;
-    limoncello.glass.baseHeight-=1.;
-    limoncello.glass.center.coords+=vec3(4,-1,0);
-    limoncello.drink=makeGlass(vec3(0.1,0.1,0.8),1.3,0.99);
-    
-    
+//    //-------- CREME DE VIOLET BOTTLE ----------------
+//    violet=campari;
+//    violet.glass.center.coords+=vec3(7,0.,2);
+//    violet.drink=makeGlass(2.*vec3(0.1,0.8,0.1),1.3,0.99);
+//    
+//    //-------- LIMONCELLO BOTTLE ----------------
+//    limoncello=campari;
+//    limoncello.glass.baseHeight-=1.;
+//    limoncello.glass.center.coords+=vec3(4,-1,0);
+//    limoncello.drink=makeGlass(vec3(0.1,0.1,0.8),1.3,0.99);
+//    
+//    
 
     //-------- VERMOUTH BOTTLE ----------------
    
     vermouth.glass=bottle;
-    vermouth.glass.center.coords=vec3(8,1.15,-8);
+    vermouth.glass.center.coords=vec3(8,1.18,-8);
     vermouth.glass.baseRadius=0.6;
     vermouth.glass.baseHeight=2.5;
     vermouth.glass.neckRadius=0.2;
     vermouth.glass.neckHeight=2.;
-    vermouth.glass.smoothJoin=1.5;
+    vermouth.glass.smoothJoin=1.25;
     vermouth.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
     vermouth.drink=makeGlass(3.*brownAbsorb,1.3,0.99);
     vermouth.fill=0.6;
-    
+    vermouth.glass.bump=0.;
     
     //-------- COCKTAIL GLASS----------------
     
-    cGlass.center=Point(vec3(0,-0.5,-5));
+    cGlass.center=Point(vec3(2,-0.5,-3));
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;
@@ -395,7 +402,7 @@ void buildScene(){
     shotglass.glass.thickness=0.1;
     shotglass.glass.base=0.4;
     shotglass.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
-    shotglass.drink=makeGlass(3.*redAbsorb+5.*brownAbsorb,1.3,0.99);
+    shotglass.drink=makeGlass(0.3*vec3(0.15,0.05,0.),1.3,0.99);
     
     
     
@@ -450,7 +457,7 @@ void buildScene(){
     
     //--------LIGHT BULB FILAMENT ----------------
     
-    bulb3.center.coords=vec3(6,1,6);
+    bulb3.center.coords=vec3(6,2,7);
     bulb3.bulbRadius=1.75;
     bulb3.neckRadius=0.5;
     bulb3.neckLength=1.25;
@@ -458,7 +465,7 @@ void buildScene(){
     
     bulb3.filHeight=1.5;
     bulb3.filWidth=0.5;
-    bulb3.filRadius=0.1;
+    bulb3.filRadius=0.2;
     bulb3.filTwisty=7.;
     bulb3.glass=makeGlass(0.1*vec3(0.3,0.025,0.2),1.5,0.99);
     
@@ -473,6 +480,21 @@ void buildScene(){
     
     
     
+    //=====CORD===============
+    
+    cord.center=Point(vec3(9,6.5,-2));
+    
+    cord.radius=0.05;
+    cord.height=2.5;
+    cord.rounded=0.01;
+    
+    
+    color= vec3(0.05);
+    specularity=0.05;
+    roughness=0.5;
+
+    cord.mat==makeGlass(vec3(0.5),1.5,0.5);
+
     
     
     
@@ -480,7 +502,19 @@ void buildScene(){
     
     
     
-  
+    cord2.center=Point(vec3(-1,6.25,-6));
+    
+    cord2.radius=0.1;
+    cord2.height=4.;
+    cord2.rounded=0.01;
+    
+    
+    color= vec3(0.05);
+    specularity=0.05;
+    roughness=0.5;
+
+    cord2.mat==makeGlass(vec3(0.5),1.5,0.5);
+
 }
 
 
@@ -547,15 +581,10 @@ float sceneSDF(Vector tv, inout localData dat){
     //dist=min(dist,bottleSDF(tv,bottle,dat));
     
     dist=min(dist,liquorBottleSDF(tv,gin,dat));
-//    
+    
     dist=min(dist,liquorBottleSDF(tv,campari,dat));
-//    
-//    dist=min(dist,liquorBottleSDF(tv,violet,dat));
-//    
-//    dist=min(dist,liquorBottleSDF(tv,limoncello,dat));
-//    
-    //sprinkle in vermouth bottles
-   dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
+
+    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
 //    
 //    
 //    vermouth.glass.center.coords=vec3(9,1.15,-12);
@@ -573,27 +602,26 @@ float sceneSDF(Vector tv, inout localData dat){
     
    // dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
     
-    negroni.glass.center.coords=vec3(-1,-0.5,-5);
-   // dist=min(dist,cocktailSDF(tv,negroni,dat));
-    
-    negroni.glass.center.coords+=vec3(3,0,2);
+    //negroni.glass.center.coords+=vec3(2,-0.5,-3);
     dist=min(dist,cocktailSDF(tv,negroni,dat));
 
+    dist=min(dist,cocktailSDF(tv,shotglass,dat)); 
     
-    shotglass.drink.absorbColor=vec3(0.1,0.8,0.1);
-    dist=min(dist,cocktailSDF(tv,shotglass,dat));   
+    
+    
+    //-------LIGHT BULBS
+    
+    dist=min(dist,cylinderSDF(tv,cord,dat));
+    
+    dist=min(dist,cylinderSDF(tv,cord2,dat));
 
-    
     dist=min(dist,lightBulbSDF(tv,bulb1,dat));
         
     dist=min(dist,lightBulbSDF(tv,bulb2,dat));
     
-      dist=min(dist,filamentSDF(tv,bulb3,dat));
+    dist=min(dist,filamentSDF(tv,bulb3,dat));
     
-       
-   // dist=min(dist,twistySDF(tv,light5,dat));
-   // dist=min(dist,twistySDF(tv,light6,dat));
-    
+
     
     return dist;
 }
