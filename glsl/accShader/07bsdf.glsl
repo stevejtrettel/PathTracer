@@ -81,7 +81,7 @@
     //increase brightness of path chosen
     //to account for the energy not taken
     //IS THIS RIGHT?!?!
-    path.light /= path.type.probability;
+   path.light /= path.type.probability;
         
         
     }
@@ -123,15 +123,34 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     
     //update refraction ray based on roughness
     refractionDir = normalize(mix(refractionDir, negate(diffuseDir), dat.mat.roughness * dat.mat.roughness));
-    
+
+
+
+
+
+
+
     //choose which one of these we will actually be doing
     //this is a weird way of doing it to avoid a 3-way if statement, unsure if this is necessary
     Vector rayDir = mix(diffuseDir, specularDir, path.type.specular);
     rayDir = mix(rayDir, refractionDir, path.type.refract);
-    
+
     //use this direction
     path.tv=rayDir;
-   
+
+//THIS CODE BELOW SHOULD BE EQUIVALENT TO THE ABOVE, BUT ITS NOT...
+//    //default is the path.tv is diffuse:
+//    if(path.type.diffuse==1.){
+//         path.tv=diffuseDir;
+//    }
+//    else if(path.type.specular==1.){
+//        path.tv=specularDir;
+//    }
+//    else if(path.type.refract==1.){
+//        path.tv=refractionDir;
+//    }
+
+
     
     //----- update ray position ----------
     //which side to push the point: in or out rel the normal?
@@ -141,10 +160,10 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
 
     //----- change path.inside if refract ----------
     //if you reflect or diffuse you stay on same side
-    if(path.type.refract==1.&&!dat.materialInterface){
-        //if you refract and you are not at an interior surface, you switch
-       // path.inside=!path.inside;
-    }
+//    if(path.type.refract==1.&&!dat.materialInterface){
+//     //   if you refract and you are not at an interior surface, you switch
+//       path.inside=!path.inside;
+//    }
     
 }
 
