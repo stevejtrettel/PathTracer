@@ -37,6 +37,7 @@ Vector initializeRay(vec2 fragCoord,float FOV, inout uint rngState){
     
     
     //rotate by facing (a uniform)
+    //not done here because we are going to simulate an aperature first
     //tv=rotateByFacing(tv,cam.facing);
     
     

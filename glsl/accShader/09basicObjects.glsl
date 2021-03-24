@@ -24,7 +24,7 @@ void setObjectInAir(inout localData dat, float dist, Vector normal, Material mat
     }
     
     else{
-        //normal is inwward pointing;
+        //normal is outward pointing;
         dat.normal=normal;
         //IOR is current/enteing
         dat.IOR=1./mat.IOR;
@@ -551,242 +551,294 @@ float cocktailGlassSDF(Vector tv, CocktailGlass glass,inout localData dat){
 //
 //
 ////the data of a ring is its center, its radius, its tubeRadius, and the height elongation
-//
-//struct Ring{
-//    Isometry isom;
-//    vec3 center;
-//    float radius;
-//    float tubeRad;
-//    float stretch;
-//    Material mat;
-//};
-//
-//
-//float ringDist(vec3 pos, Ring ring){
-//    
-//     //recenter things
-//    vec3 q = pos-ring.center;
-//    //choose the direction of elongation
-//    vec3 H=vec3(0,ring.stretch,0);
-//    //stretch out the sdf
-//    vec4 w=vec4(q-clamp(q,-H,H),0.);
-//    //standard torus SDF
-//    vec2 Q=vec2(length(w.xz)-ring.radius,w.y);
-//    float d=length(Q)-ring.tubeRad;
-//
-//    return d;
-//}
-//
-//
-//
-////probably a way to do this directly and not sample....
-////should come back to this
-//Vector ringNormal(Vector tv, Ring ring){
-//    
-//    //translate everything
-//    vec3 pos=tv.pos.coords-ring.center;
-//    
-//    //reset ring's center to zero:
-//    ring.center=vec3(0.);
-//    
-//    const float ep = 0.0001;
-//    vec2 e = vec2(1.0,-1.0)*0.5773;
-//    
-//    vec3 dir=  e.xyy*ringDist( pos + e.xyy*ep,ring ) + 
-//					  e.yyx*ringDist( pos + e.yyx*ep,ring) + 
-//					  e.yxy*ringDist( pos + e.yxy*ep,ring) + 
-//					  e.xxx*ringDist( pos + e.xxx*ep,ring);
-//    
-//    dir=normalize(dir);
-//    
-//    return Vector(tv.pos,dir);
-//}
-//    
-//
-//
-//
-//
-//
-//float ringSDF(Vector tv, Ring ring,inout localData dat){
-//
-//
-//    float d= ringDist(tv.pos.coords,ring);
-//    
-//    //-----------------
-//    
-//    if(d<EPSILON){//set the material
-//        dat.isSky=false;
-//        dat.normal=ringNormal(tv,ring);
-//        dat.mat=ring.mat;
-//    }
-//    
-//    return d;
-//}
-//
-//
-//
-//
-//    
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+
+struct Ring{
+    Isometry isom;
+    Point center;
+    float radius;
+    float tubeRad;
+    float stretch;
+    Material mat;
+};
+
+//----distance and normal functions
+
+float ringDistance(Vector tv, Ring ring){
+    tv.pos.coords-=ring.center.coords;
+    return ringDist(tv.pos.coords,ring.radius,ring.tubeRad,ring.stretch);
+}
+
+Vector ringNormal(Vector tv, Ring ring){
+    tv.pos.coords-=ring.center.coords;
+    vec3 dir=ringGrad(tv.pos.coords,ring.radius,ring.tubeRad,ring.stretch);
+    return Vector(tv.pos,dir);
+}
+
+
+//------sdf
+float ringSDF(Vector tv, Ring ring,inout localData dat){
+
+    //distance to closest point:
+    float dist = ringDistance(tv,ring);
+
+    if(abs(dist)<EPSILON){
+
+        //compute the normal
+        Vector normal=ringNormal(tv,ring);
+
+        //set the material
+        setObjectInAir(dat,dist,normal,ring.mat);
+    }
+
+    return dist;
+}
+
+
+
+
+
+
+
 ////-------------------------------------------------
 //// The PRISM sdf
 ////-------------------------------------------------
 //
-//struct Prism{
-//vec3 center;
-//float length;
-//float width;
-//Material mat;
-//};
 //
-//
-//
-//float prismDist( vec3 p, Prism prism)
-//{
-//  vec3 q = abs(p-prism.center);
-//  return max(q.z-prism.length,max(q.x*0.866025+p.y*0.5,-p.y)-prism.width*0.5);
-//}
-//
-//
-//
-//
-////probably a way to do this directly and not sample....
-//Vector prismNormal(Vector tv, Prism prism){
-//    
-//    //translate everything
-//    vec3 pos=tv.pos.coords-prism.center;
-//    
-//    //reset prism's center to zero:
-//    prism.center=vec3(0.);
-//    
-//    const float ep = 0.0001;
-//    vec2 e = vec2(1.0,-1.0)*0.5773;
-//    
-//    vec3 dir=  e.xyy*prismDist( pos + e.xyy*ep,prism ) + 
-//					  e.yyx*prismDist( pos + e.yyx*ep,prism) + 
-//					  e.yxy*prismDist( pos + e.yxy*ep,prism) + 
-//					  e.xxx*prismDist( pos + e.xxx*ep,prism);
-//    
-//    dir=normalize(dir);
-//    
-//    return Vector(tv.pos,dir);
-//}
-//    
-//
-//
-//
-//float prismSDF(Vector tv, Prism prism, inout localData dat){
-//    
-//    
-//    float d= prismDist(tv.pos.coords,prism);
-//    
-//    //-----------------
-//    
-//    if(d<EPSILON){//set the material
-//        dat.isSky=false;
-//        dat.normal=prismNormal(tv,prism);
-//        dat.mat=prism.mat;
-//    }
-//    
-//    return d;
-//    
-//}
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+////the data of a prism with eqilateral triangle cross section is given by its center, its length and width
+struct Prism{
+    Isometry isom;
+    Point center;
+    float length;
+    float width;
+    Material mat;
+};
+
+//----distance and normal functions
+
+float prismDistance(Vector tv, Prism prism){
+    tv.pos.coords-=prism.center.coords;
+    return prismDist(tv.pos.coords,prism.length,prism.width);
+}
+
+Vector prismNormal(Vector tv, Prism prism){
+    tv.pos.coords-=prism.center.coords;
+    vec3 dir=prismGrad(tv.pos.coords,prism.length, prism.width);
+    return Vector(tv.pos,dir);
+}
+
+
+//------sdf
+float prismSDF(Vector tv, Prism prism,inout localData dat){
+
+    //distance to closest point:
+    float dist = prismDistance(tv,prism);
+
+    if(abs(dist)<EPSILON){
+
+        //compute the normal
+        Vector normal=prismNormal(tv,prism);
+
+        //set the material
+        setObjectInAir(dat,dist,normal,prism.mat);
+    }
+
+    return dist;
+}
+
+
+
+
+
+
+
+
+
+
 ////-------------------------------------------------
 //// The OCTAHEDRON sdf
 ////-------------------------------------------------
 //
-//struct Octahedron{
-//vec3 center;
-//float side;
-//Material mat;
-//};
+//
+////the data of a prism with eqilateral triangle cross section is given by its center, its length and width
+struct Octahedron{
+    Isometry isom;
+    Point center;
+    float side;
+    Material mat;
+};
+
+//----distance and normal functions
+
+float octahedronDistance(Vector tv, Octahedron oct){
+    tv.pos.coords-=oct.center.coords;
+    return octahedronDist(tv.pos.coords,oct.side);
+}
+
+Vector octahedronNormal(Vector tv, Octahedron oct){
+    tv.pos.coords-=oct.center.coords;
+    vec3 dir=octahedronGrad(tv.pos.coords,oct.side);
+    return Vector(tv.pos,dir);
+}
+
+
+//------sdf
+float octahedronSDF(Vector tv, Octahedron oct,inout localData dat){
+
+    //distance to closest point:
+    float dist = octahedronDistance(tv,oct);
+
+    if(abs(dist)<EPSILON){
+
+        //compute the normal
+        Vector normal=octahedronNormal(tv,oct);
+
+        //set the material
+        setObjectInAir(dat,dist,normal,oct.mat);
+    }
+
+    return dist;
+}
+
+
+
+
+
+////-------------------------------------------------
+//// The LENS sdf
+////-------------------------------------------------
 //
 //
-//
-//
-//float octahedronDist( vec3 p, Octahedron oct)
-//{
-// p = abs(p-oct.center);
-// float dist= (p.x+p.y+p.z-oct.side)*0.57735027;
-//    return dist;
-//}
-//
-//
-//
-//
-////probably a way to do this directly and not sample....
-//Vector octahedronNormal(Vector tv, Octahedron oct){
-//    
-//    //translate everything
-//    vec3 pos=tv.pos.coords-oct.center;
-//    
-//    //reset prism's center to zero:
-//    oct.center=vec3(0.);
-//    
-//    const float ep = 0.0001;
-//    vec2 e = vec2(1.0,-1.0)*0.5773;
-//    
-//    vec3 dir=  e.xyy*octahedronDist( pos + e.xyy*ep,oct) + 
-//					  e.yyx*octahedronDist( pos + e.yyx*ep,oct) + 
-//					  e.yxy*octahedronDist( pos + e.yxy*ep,oct) + 
-//					  e.xxx*octahedronDist( pos + e.xxx*ep,oct);
-//    
-//    dir=normalize(dir);
-//    
-//    return Vector(tv.pos,dir);
-//}
-//    
-//
-//
-//
-//float octahedronSDF(Path path, Octahedron oct, inout localData dat){
-//    
-//    
-//    float d= octahedronDist(path.tv.pos.coords,oct);
-//    
-//    //-----------------
-//    
-//    if(d<EPSILON){//set the material
-//        dat.isSky=false;
-//        dat.normal=octahedronNormal(path.tv,oct);
-//        dat.mat=oct.mat;
-//    }
-//    
-//    return d;
-//    
-//}
-//
-//
-//
-//
-//
+struct Lens{
+    Isometry isom;
+    float radius;
+    float thickness;
+    Point center;
+    vec3 axis;
+    Material mat;
+    float R;
+    Point c1;
+    Point c2;
+};
+
+
+
+void setLens(inout Lens lens, float r,float d, vec3 center, vec3 axis){
+    //compute sphere radius:
+
+    lens.radius=r;
+    lens.thickness=d;
+    lens.center.coords=center;
+    lens.axis=normalize(axis);
+
+    //compute auxillary quantities
+    float R=(r*r+d*d)/(2.*d);
+    vec3 c1=center+(R-d)*axis;
+    vec3 c2=center-(R-d)*axis;
+
+    lens.R=R;
+    lens.c1=Point(c1);
+    lens.c2=Point(c2);
+}
+
+
+
+
+//----distance and normal functions
+
+float lensDistance(Vector tv, Lens lens){
+    tv.pos.coords-=lens.center.coords;
+    return lensDist(tv.pos.coords,lens.c1.coords,lens.c2.coords,lens.R);
+}
+
+Vector lensNormal(Vector tv, Lens lens){
+    tv.pos.coords-=lens.center.coords;
+    vec3 dir=lensGrad(tv.pos.coords,lens.c1.coords,lens.c2.coords,lens.R);
+    return Vector(tv.pos,dir);
+}
+
+
+//------sdf
+float lensSDF(Vector tv, Lens lens,inout localData dat){
+
+    //distance to closest point:
+    float dist = lensDistance(tv,lens);
+
+    if(abs(dist)<EPSILON){
+
+        //compute the normal
+        Vector normal=lensNormal(tv,lens);
+
+        //set the material
+        setObjectInAir(dat,dist,normal,lens.mat);
+    }
+
+    return dist;
+}
+
+
+
+
+//-------------------------------------------------
+//The STANFORD BUNNY sdf
+//-------------------------------------------------
+
+//the data of a sphere is its center and radius
+struct Bunny{
+    Point center;
+    float size;
+    Material mat;
+};
+
+//----distance and normal functions
+
+float bunnyDistance(Vector tv, Bunny bunny){
+    tv.pos.coords-=bunny.center.coords;
+    return bunnyDist(tv.pos.coords,bunny.size);
+}
+
+Vector bunnyNormal(Vector tv, Bunny bunny){
+    tv.pos.coords-=bunny.center.coords;
+    vec3 dir=bunnyGrad(tv.pos.coords,bunny.size);
+    return Vector(tv.pos,dir);
+}
+
+
+//------sdf
+float bunnySDF(Vector tv, Bunny bunny,inout localData dat){
+
+    //distance to closest point:
+    float dist = bunnyDistance(tv,bunny);
+
+    if(abs(dist)<EPSILON){
+
+        //compute the normal
+        Vector normal=bunnyNormal(tv,bunny);
+
+        //set the material
+        setObjectInAir(dat,dist,normal,bunny.mat);
+    }
+
+    return dist;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 ////-------------------------------------------------
 //// The PERMUTOHEDRON sdf
@@ -860,112 +912,5 @@ float cocktailGlassSDF(Vector tv, CocktailGlass glass,inout localData dat){
 //    return d;
 //    
 //}
-//
-//
-//
-//
-//
-//
-////-------------------------------------------------
-//// The LENS sdf
-////-------------------------------------------------
-//
-////the data of a lens is determined by its radius, thickness
-////position/orientation by its center, axis
-////from these we compute auxilary quantities: sphere rad and 2 centers
-//
-//struct Lens{
-//    float radius;
-//    float thickness;
-//    vec3 center;
-//    vec3 axis;
-//    Material mat;
-//    float R;
-//    Point c1;
-//    Point c2;
-//};
-//
-//
-//
-//void setLens(inout Lens lens, float r,float d, vec3 center, vec3 axis){
-//    //compute sphere radius:
-//    
-//    lens.radius=r;
-//    lens.thickness=d;
-//    lens.center=center;
-//    lens.axis=normalize(axis);
-//    
-//    //compute auxillary quantities
-//    float R=(r*r+d*d)/(2.*d);
-//    vec3 c1=center+(R-d)*axis;
-//    vec3 c2=center-(R-d)*axis;
-//    
-//    lens.R=R;
-//    lens.c1=Point(c1);
-//    lens.c2=Point(c2);
-//}
-//
-//
-//
-//
-//float lensDist(vec3 pos,Lens lens){
-//    
-//
-//    float dist1=sphDist(pos,Sphere(lens.c1,lens.R,lens.mat));
-//    float dist2=sphDist(pos,Sphere(lens.c2,lens.R,lens.mat));
-//    
-//    return max(dist1,dist2);
-//}
-//
-//
-//
-//Vector lensNormal(Vector tv,Lens lens){
-//    
-//    Sphere sph1=Sphere(lens.c1,lens.R,lens.mat);
-//    Sphere sph2=Sphere(lens.c2,lens.R,lens.mat);
-//    
-//    float s1=abs(sphDist(tv.pos.coords,sph1));
-//    float s2=abs(sphDist(tv.pos.coords,sph2));
-//    
-//    if(s1<s2){//closer to surface of s1 than s2
-//        return sphereNormal(tv,sph1);
-//    }
-//    return sphereNormal(tv,sph2);
-//
-//}
-//
-//
-//
-//
-//
-//float lensSDF(Vector tv, Lens lens, inout localData dat){
-//    
-//    
-//    float d= lensDist(tv.pos.coords,lens);
-//    
-//    //-----------------
-//    
-//    if(d<EPSILON){//set the material
-//        dat.isSky=false;
-//        dat.normal=lensNormal(tv,lens);
-//        dat.mat=lens.mat;
-//    }
-//    
-//    return d;
-//    
-//}
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //

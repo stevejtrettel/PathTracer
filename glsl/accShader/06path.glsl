@@ -15,6 +15,7 @@ struct RayType{
 
 
 RayType intializeRayType(){
+    //default behavior for a ray is diffuse
     RayType type;
     type.diffuse=1.;
     type.specular=0.;
@@ -72,8 +73,8 @@ struct Path{
     RayType type;
 
     vec3 absorb;
-    float side;
-    bool inside;
+   // float side;
+ //   bool inside;
     bool keepGoing;
     float distance; //distance traveled on a bounce
     
@@ -119,7 +120,7 @@ Path initializePath(Vector tv,inout uint rngState){
     
     path.distance=0.;
     path.keepGoing=true;
-    path.inside=false;
+   // path.inside=false;
     path.type=intializeRayType();
     
     path.debug=vec3(0.);

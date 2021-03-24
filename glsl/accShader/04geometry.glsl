@@ -136,12 +136,17 @@ Vector reflect(Vector v, Vector n){
 
 //refract the vector v through the surface with normal vector n, and ratio of indices IOR=current/entering
 Vector refract(Vector incident, Vector normal, float n){
-    
-    float cosX=-dot(normal,incident);
+
+    float cosX=-dot(normal, incident);
     float sinT2=n*n* (1.0 - cosX * cosX);
-    
-    if(sinT2>1.){return Vector(incident.pos,vec3(0.,0.,0.));}//TIR  
-    //if we are not in this case, then refraction actually occurs
+
+    if (sinT2>1.){
+        //just returning a nonsense value here as we should never have refraction when TIR
+        return incident; }//TIR
+
+   // reflect(incident,normal);}
+    //Vector(incident.pos,vec3(0.,0.,0.));}//TIR
+    //if we are not in this case, then there is no refraction, but instead total internal reflection
     
     float cosT=sqrt(1.0 - sinT2);
     vec3 dir=n*incident.dir+(n * cosX - cosT) * normal.dir;

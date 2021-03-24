@@ -35,13 +35,11 @@ LiquorBottle vermouth;
 LiquorBottle violet;
 LiquorBottle limoncello;
 
-
 CocktailGlass cGlass;
 
 
 Cocktail negroni;
 Cocktail shotglass;
-
 
 LightBulb bulb1;
 LightBulb bulb2;
@@ -49,6 +47,23 @@ LightBulb bulb3;
 
 Cylinder cord;
 Cylinder cord2;
+
+
+
+
+Lens lens1;
+Octahedron oct1;
+Ring ring1;
+Prism prism1;
+Bunny bunny;
+
+
+
+
+
+
+
+
 
 //this function assigns all the objects their parameters
 void buildScene(){
@@ -85,12 +100,12 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=Point(vec3(0,15.5,-5));
+    light2.center=Point(vec3(-10,15.5,-5));
     light2.radius=3.;
     
     color= vec3(255./255., 147./255., 41./255.);
        // vec3(1.,0.6,0.4);
-    intensity=3.;
+    intensity=35.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -324,7 +339,7 @@ void buildScene(){
     gin.glass.baseRadius=1.25;
     gin.glass.baseHeight=1.5;
     gin.glass.thickness=0.1;
-    gin.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    gin.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.95);
     gin.drink=makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
     gin.fill=0.;
     gin.glass.bump=1.;
@@ -390,7 +405,7 @@ void buildScene(){
     //-------- NEGRONI ----------------
    
     negroni.glass=cGlass;
-    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.99);
+    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
     negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     
     
@@ -424,7 +439,8 @@ void buildScene(){
 
     color= vec3(255./255., 147./255., 41./255.);
        // vec3(1.,0.6,0.4);
-    intensity=300.;
+    intensity=70.;
+    //300.;
     
     bulb1.filament.emitColor=color*intensity;
     
@@ -448,7 +464,8 @@ void buildScene(){
 
     color= (vec3(1.)+vec3(255./255., 147./255., 41./255.))/2.;
        // vec3(1.,0.6,0.4);
-    intensity=500.;
+    intensity=70.;
+  //  500.;
     
     bulb2.filament.emitColor=color*intensity;
     
@@ -515,6 +532,48 @@ void buildScene(){
 
     cord2.mat==makeGlass(vec3(0.5),1.5,0.5);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //=====NEW STUFF===============
+
+    prism1.center.coords=vec3(0,5,0);
+    prism1.length=3.;
+    prism1.width=1.;
+    prism1.mat=makeGlass(0.1*vec3(0.3,0.025,0.2),1.5,0.99);
+
+
+    oct1.center.coords=vec3(0,4,0);
+    oct1.side=2.;
+    oct1.mat=makeGlass(0.1*vec3(0.3,0.025,0.2),1.5,0.99);
+
+
+    setLens(lens1,5.,0.5,vec3(0,3,-1),vec3(0.2,1,0));
+    lens1.mat=makeGlass(0.1*vec3(0.3,0.025,0.2),1.5,0.99);
+
+
+
+    bunny.center.coords=vec3(0,0.,0);
+    bunny.size=1.;
+    bunny.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5,0.99);
+
+//    color= 0.7*vec3(0.3,0.2,0.6);
+//    specularity=0.2;
+//    roughness=0.01;
+//
+//    bunny.mat=makeDielectric(color,specularity,roughness);
+
 }
 
 
@@ -535,7 +594,10 @@ float sceneSDF(Vector tv, inout localData dat){
     //------LIGHTS
     
    // dist=min(dist,sphereSDF(tv,light1,dat));
-    
+
+
+
+    //top orange light
     dist=min(dist,sphereSDF(tv,light2,dat));
     
     // dist=min(dist,sphereSDF(tv,light3,dat));
@@ -561,9 +623,9 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,planeSDF(tv,wall1,dat));
     
-    dist=min(dist,planeSDF(tv,wall2,dat));
+    //dist=min(dist,planeSDF(tv,wall2,dat));
    
-     dist=min(dist,planeSDF(tv,wall3,dat));
+   // dist=min(dist,planeSDF(tv,wall3,dat));
    
 
     
@@ -579,12 +641,11 @@ float sceneSDF(Vector tv, inout localData dat){
     //-------BOTTLES
     
     //dist=min(dist,bottleSDF(tv,bottle,dat));
-    
-    dist=min(dist,liquorBottleSDF(tv,gin,dat));
-    
-    dist=min(dist,liquorBottleSDF(tv,campari,dat));
 
-    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
+    //THESE THREE BOTTLES WERE ON
+    //dist=min(dist,liquorBottleSDF(tv,gin,dat));
+    //dist=min(dist,liquorBottleSDF(tv,campari,dat));
+   // dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
 //    
 //    
 //    vermouth.glass.center.coords=vec3(9,1.15,-12);
@@ -603,26 +664,38 @@ float sceneSDF(Vector tv, inout localData dat){
    // dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
     
     //negroni.glass.center.coords+=vec3(2,-0.5,-3);
-    dist=min(dist,cocktailSDF(tv,negroni,dat));
 
-    dist=min(dist,cocktailSDF(tv,shotglass,dat)); 
+    //THIS WAS TURNED ON THE NEGRONI
+    //dist=min(dist,cocktailSDF(tv,negroni,dat));
+
+  //  dist=min(dist,cocktailSDF(tv,shotglass,dat));
     
     
     
     //-------LIGHT BULBS
     
-    dist=min(dist,cylinderSDF(tv,cord,dat));
+   // dist=min(dist,cylinderSDF(tv,cord,dat));
     
-    dist=min(dist,cylinderSDF(tv,cord2,dat));
+   // dist=min(dist,cylinderSDF(tv,cord2,dat));
 
-    dist=min(dist,lightBulbSDF(tv,bulb1,dat));
+   //dist=min(dist,lightBulbSDF(tv,bulb1,dat));
         
-    dist=min(dist,lightBulbSDF(tv,bulb2,dat));
+   // dist=min(dist,lightBulbSDF(tv,bulb2,dat));
     
-    dist=min(dist,filamentSDF(tv,bulb3,dat));
-    
+  //  dist=min(dist,filamentSDF(tv,bulb3,dat));
 
-    
+
+
+    //dist=min(dist,prismSDF(tv,prism1,dat));
+
+   // dist=min(dist,octahedronSDF(tv,oct1,dat));
+
+
+    //LENS NOT WORKING YET
+  //  dist=min(dist,lensSDF(tv,lens1,dat));
+
+      dist=min(dist,bunnySDF(tv,bunny,dat));
+
     return dist;
 }
 

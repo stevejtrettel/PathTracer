@@ -77,9 +77,6 @@ float RandomNormal(float mean, float stdev,inout uint state){
 
 
 
-
-
-
 //--- the function we call in main() which sets rngState
 //--- based on the frag coord and the frame number
 
@@ -90,10 +87,6 @@ uint rngState = uint(uint(fCoord.x) * uint(1973) + uint(fCoord.y) * uint(925277)
 return rngState;
 
 }
-
-
-
-
 
 
 
