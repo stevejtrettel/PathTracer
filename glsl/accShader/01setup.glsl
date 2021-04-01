@@ -128,6 +128,25 @@ float smax( float a, float b, float k )
 }
 
 
+float smin(float a, float b){
+    return smin(a,b,0.1);
+}
+
+float smax(float a, float b){
+    return smax(a,b,0.1);
+}
+
+float sq(float x){return x*x;}
+
+
+
+
+
+
+
+
+
+
 
 
 

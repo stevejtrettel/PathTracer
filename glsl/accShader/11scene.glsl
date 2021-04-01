@@ -56,7 +56,8 @@ Octahedron oct1;
 Ring ring1;
 Prism prism1;
 Bunny bunny;
-
+Plate plate;
+Teapot teapot;
 
 
 
@@ -574,6 +575,12 @@ void buildScene(){
 //
 //    bunny.mat=makeDielectric(color,specularity,roughness);
 
+
+    teapot.center.coords=vec3(0,0,0);
+    teapot.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+
+    plate.center.coords=vec3(6,-0.5,-1);
+    plate.mat==makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
 }
 
 
@@ -598,7 +605,7 @@ float sceneSDF(Vector tv, inout localData dat){
 
 
     //top orange light
-    dist=min(dist,sphereSDF(tv,light2,dat));
+    //dist=min(dist,sphereSDF(tv,light2,dat));
     
     // dist=min(dist,sphereSDF(tv,light3,dat));
     
@@ -694,8 +701,10 @@ float sceneSDF(Vector tv, inout localData dat){
     //LENS NOT WORKING YET
   //  dist=min(dist,lensSDF(tv,lens1,dat));
 
-      dist=min(dist,bunnySDF(tv,bunny,dat));
+      //dist=min(dist,bunnySDF(tv,bunny,dat));
 
+   dist=min(dist,plateSDF(tv,plate,dat));
+    dist=min(dist,teapotSDF(tv,teapot,dat));
     return dist;
 }
 

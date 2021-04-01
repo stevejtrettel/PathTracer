@@ -827,6 +827,212 @@ float bunnySDF(Vector tv, Bunny bunny,inout localData dat){
 
 
 
+//-------------------------------------------------
+//The PLATE  sdf
+//-------------------------------------------------
+
+
+float plate0(vec3 p)
+{
+    float v=(length(p.xz)*.8-p.y)/sqrt(1.64);
+    v=smin(v,(length(p.xz)*.3-p.y+.7)/sqrt(1.09));
+    v=smax(v,-p.y+.8,.1);
+    return v;
+}
+
+float plateDist(vec3 p)
+{
+    float v;
+    float vi=plate0(p);
+    float vo=plate0(p+vec3(0,-.1,0));
+    v=smax(vi,-vo);
+    v=smax(v,(length(p.xz)*2.+p.y)/sqrt(3.)-3.);
+    v=smin(v,Torus(p.x,p.y-.7,p.z,0.8,.025),0.2);
+    return v;
+}
+
+
+
+//the data of a sphere is its center and radius
+struct Plate{
+    Point center;
+    Material mat;
+};
+
+//----distance and normal functions
+
+float plateDistance(Vector tv, Plate plate){
+    tv.pos.coords-=plate.center.coords;
+    return plateDist(tv.pos.coords);
+}
+
+Vector plateNormal(Vector tv, Plate plate){
+
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+
+
+    vec3 pos=tv.pos.coords;
+    pos-=plate.center.coords;
+
+    float vxyy=plateDist( pos + e.xyy*ep);
+    float vyyx=plateDist( pos + e.yyx*ep);
+    float vyxy=plateDist( pos + e.yxy*ep);
+    float vxxx=plateDist( pos + e.xxx*ep);
+
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+
+    return Vector(tv.pos,normalize(dir));
+
+}
+
+
+//------sdf
+float plateSDF(Vector tv, Plate plate,inout localData dat){
+
+    //distance to closest point:
+    float dist = plateDistance(tv,plate);
+
+    if(abs(dist)<EPSILON){
+
+        //compute the normal
+        Vector normal=plateNormal(tv,plate);
+
+        //set the material
+        setObjectInAir(dat,dist,normal,plate.mat);
+    }
+
+    return dist;
+}
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//The TEAPOT  sdf
+//-------------------------------------------------
+
+//the data of a sphere is its center and radius
+struct Teapot{
+    Point center;
+    Material mat;
+};
+
+
+float Lid(float x, float y, float z)
+{
+    float v=sqrt(sq(x)+sq(y-0.55)+sq(z))-1.4;
+    v=smin(v,Torus(y-2.,x,z,.2,.08),.1);
+    v=smax(v,-sqrt(sq(x)+sq(y-0.55)+sq(z))+1.3);
+    v=smax(v,sqrt(sq(x)+sq(y-2.5)+sq(z))-1.3);
+
+    v=smax(v,-sqrt(sq(x-.25)+sq(z-.35))+0.05,.05);
+    v=smin(v,Torus(x,(y-1.45)*.75,z,.72,.065),.2);
+    return v;
+}
+
+float Nose(float x, float y, float z)
+{
+    z-=sin((y+0.8)*3.6)*.15;
+
+    float v=sqrt(sq(x)+sq(z));
+
+    v=abs(v-.3+sin(y*1.6+.5)*0.18)-.05;
+    v=smax(v,-y-1.);
+    v=smax(v,y-0.85,.075);
+
+    return v;
+}
+
+float teapotDist(vec3 p)
+{
+    float x=p.x;
+    float y=p.y;
+    float z=p.z;
+
+    float v=0.0;
+    v=sqrt(x*x+z*z)-1.2-sin(y*1.5+2.0)*.4;
+    v=smax(v,abs(y)-1.,0.3);
+
+
+
+    float v1=sqrt(x*x*4.+sq(y+z*.1)*1.6+sq(z+1.2))-1.0;
+    v1=smax(v1,-sqrt(sq(z+1.2)+sq(y+z*.12+.015)*1.8)+.8,.3);
+
+    v=smin(v,Torus(y*1.2+.2+z*.3,x*.75,z+1.25+y*.2,.8,.1),.25);
+    v=smin(v,sqrt(sq(x)+sq(y-1.1)+sq(z+1.8))-.05,.32);
+
+    float v3=Nose(x,(y+z)*sqrt(.5)-1.6,(z-y)*sqrt(.5)-1.1);
+
+    v=smin(v,v3,0.2);
+
+    v=smax(v,smin(sin(y*1.4+2.0)*0.5+.95-sqrt(x*x+z*z),y+.8, .2));
+    v=smax(v,-sqrt(sq(x)+sq(y+.15)+sq(z-1.5))+.12);
+
+    v=smin(v,Torus(x,y-0.95,z,0.9,.075));
+    v=smin(v,Torus(x,y+1.05,z,1.15,.05),0.15);
+
+
+    float v2=Lid(x,y+.5,z);
+    v=min(v,v2);
+
+    return v;
+}
+
+float teapotDistance(Vector tv,Teapot teapot){
+    vec3 pos=tv.pos.coords-teapot.center.coords;
+    return teapotDist(pos);
+
+}
+
+
+Vector teapotNormal(Vector tv,Teapot teapot){
+
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+
+    vec3 pos=tv.pos.coords;
+    pos-=teapot.center.coords;
+
+    float vxyy=teapotDist( pos + e.xyy*ep);
+    float vyyx=teapotDist( pos + e.yyx*ep);
+    float vyxy=teapotDist( pos + e.yxy*ep);
+    float vxxx=teapotDist( pos + e.xxx*ep);
+
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+
+    return Vector(tv.pos,normalize(dir));
+
+}
+
+
+
+//------sdf
+float teapotSDF(Vector tv, Teapot teapot,inout localData dat){
+
+    //distance to closest point:
+    float dist = teapotDistance(tv,teapot);
+
+    if(abs(dist)<EPSILON){
+
+        //compute the normal
+        Vector normal=teapotNormal(tv,teapot);
+
+        //set the material
+        setObjectInAir(dat,dist,normal,teapot.mat);
+    }
+
+    return dist;
+}
+
+
+
+
 
 
 

@@ -644,6 +644,39 @@ vec3 bunnyGrad(vec3 pos, float size){
 
 
 
+
+
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+//=====distance to an
+//=======TORUS (should probably be done before ring)
+//-------------------------------------------------
+//-------------------------------------------------
+//
+
+
+float Torus(float x, float y, float z, float R, float r)
+{
+    return sqrt(sq(sqrt(sq(x)+sq(z))-R)+sq(y))-r;
+}
+
+float Torus(vec3 p, float R, float r)
+{
+    return sqrt(sq(sqrt(sq(p.x)+sq(p.z))-R)+sq(p.y))-r;
+}
+
+
+
+
+
+
+
+
+
+
+
 //-------------------------------------------------
 //-------------------------------------------------
 //=====distance to an
@@ -695,3 +728,7 @@ vec3 bunnyGrad(vec3 pos, float size){
 //    return dir;
 //    
 //}
+
+
+
+
