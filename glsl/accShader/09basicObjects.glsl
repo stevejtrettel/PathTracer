@@ -41,6 +41,42 @@ void setObjectInAir(inout localData dat, float dist, Vector normal, Material mat
 
 
 
+//if you hit an object which is supposed to be a 2-dimensional surface in the air
+void setSurfaceInAir(inout localData dat, float dist, Vector normal, Material mat){
+
+    //set the material
+    dat.isSky=false;
+    dat.mat=mat;
+
+    if(dist<0.){
+        //normal is inwward pointing;
+        dat.normal=negate(normal);
+        //IOR is current/enteing
+        dat.IOR=mat.IOR/1.;
+
+        //both sides end in air
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=vec3(0.);
+    }
+
+    else{
+        //normal is inwward pointing;
+        dat.normal=normal;
+        //IOR is current/enteing
+        dat.IOR=1./mat.IOR;
+
+        //both sides end in air
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=vec3(0.);
+
+    }
+
+}
+
+
+
+
+
 
 
 

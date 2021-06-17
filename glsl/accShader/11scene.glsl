@@ -534,27 +534,27 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------LIGHTS
     
-   // dist=min(dist,sphereSDF(tv,light1,dat));
+    dist=min(dist,sphereSDF(tv,light1,dat));
     
     dist=min(dist,sphereSDF(tv,light2,dat));
     
-    // dist=min(dist,sphereSDF(tv,light3,dat));
+     dist=min(dist,sphereSDF(tv,light3,dat));
     
-    // dist=min(dist,sphereSDF(tv,light4,dat));
+     dist=min(dist,sphereSDF(tv,light4,dat));
 
     
     
     
     //------BALLS
     
-    //dist=min(dist,sphereSDF(tv,ball1,dat));
-    
-    // dist=min(dist,sphereSDF(tv,ball2,dat));
-    
-    // dist=min(dist,sphereSDF(tv,ball3,dat));
-    
-    
-    
+//    dist=min(dist,sphereSDF(tv,ball1,dat));
+//
+//     dist=min(dist,sphereSDF(tv,ball2,dat));
+//
+//     dist=min(dist,sphereSDF(tv,ball3,dat));
+//
+//
+//
     
     
     //------WALLS
@@ -568,59 +568,37 @@ float sceneSDF(Vector tv, inout localData dat){
 
     
     
-    
-    //------CYLINDERS
-    
-    //dist=min(dist,cylinderSDF(tv,cyl1,dat));
-    
-  
-    
+
     
     //-------BOTTLES
-    
-    //dist=min(dist,bottleSDF(tv,bottle,dat));
-    
-    dist=min(dist,liquorBottleSDF(tv,gin,dat));
-    
-    dist=min(dist,liquorBottleSDF(tv,campari,dat));
+//
+//    dist=min(dist,liquorBottleSDF(tv,gin,dat));
+//
+//    dist=min(dist,liquorBottleSDF(tv,campari,dat));
+//
+//    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
 
-    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
-//    
-//    
-//    vermouth.glass.center.coords=vec3(9,1.15,-12);
-//    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
-//    
-//     vermouth.glass.center.coords=vec3(-2,1.15,-9);
-//    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
-//    
-//         vermouth.glass.center.coords=vec3(-4,1.15,-6);
-//    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
-//    
-//    
         
     //-------COCKTAILS
-    
-   // dist=min(dist,cocktailGlassSDF(tv,cGlass,dat));
-    
-    //negroni.glass.center.coords+=vec3(2,-0.5,-3);
-    dist=min(dist,cocktailSDF(tv,negroni,dat));
 
-    dist=min(dist,cocktailSDF(tv,shotglass,dat)); 
-    
+//    dist=min(dist,cocktailSDF(tv,negroni,dat));
+//
+//    dist=min(dist,cocktailSDF(tv,shotglass,dat));
+//
     
     
     //-------LIGHT BULBS
     
-    dist=min(dist,cylinderSDF(tv,cord,dat));
-    
-    dist=min(dist,cylinderSDF(tv,cord2,dat));
-
-    dist=min(dist,lightBulbSDF(tv,bulb1,dat));
-        
-    dist=min(dist,lightBulbSDF(tv,bulb2,dat));
-    
-    dist=min(dist,filamentSDF(tv,bulb3,dat));
-    
+//    dist=min(dist,cylinderSDF(tv,cord,dat));
+//
+//    dist=min(dist,cylinderSDF(tv,cord2,dat));
+//
+//    dist=min(dist,lightBulbSDF(tv,bulb1,dat));
+//
+//    dist=min(dist,lightBulbSDF(tv,bulb2,dat));
+//
+//    dist=min(dist,filamentSDF(tv,bulb3,dat));
+//
 
     
     return dist;
