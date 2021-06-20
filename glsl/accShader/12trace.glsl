@@ -126,6 +126,7 @@ float gyroid(vec3 pos){
 
 
 float kummer(vec3 pos,float mu){
+
     float scale=2.;
     vec3 center=vec3(0,0,-2);
 
@@ -134,18 +135,29 @@ float kummer(vec3 pos,float mu){
     float z=scale*(pos.z-center.z);
     float w=1.;
 
-    float lambda=(3.*mu*mu-1.)/(3.-mu*mu);
+    float x2=x*x;
+    float y2=y*y;
+    float z2=z*z;
+    float w2=w*w;
 
-    float sqrt2=sqrt(2.);
-    float p=w-z-sqrt2*x;
-    float q=w-z+sqrt2*x;
-    float r=w+z+sqrt2*y;
-    float s=w+z-sqrt2*y;
+    float x4=x2*x2;
+    float y4=y2*y2;
+    float z4=z2*z2;
+    float w4=w2*w2;
 
-    float term=x*x+y*y+z*z-mu*mu*w*w;
+    float a=1.;
+    float b=1.;
+    float c=1.;
+    float d=1.;
 
+    float term1=x4+y4+z4+w4;
+    float term2=2.*x*y*z*w;
+    float term3=x2*y2+z2*w2;
+    float term4=x2*z2+y2*w2;
+    float term5=x2*w2+y2*z2;
 
-    return term*term*term*term-lambda*p*q*r*s;
+    return term1+d*term2-a*term3-b*term4-c*term5;
+
 }
 
 

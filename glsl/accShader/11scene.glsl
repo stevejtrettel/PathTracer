@@ -186,7 +186,7 @@ void buildScene(){
     ball2.center=Point(vec3(0,0,4));
     ball2.radius=0.55;
     
-    color= vec3(255./255.,86./255.,47./255.);
+    color= 0.5*vec3(255./255.,86./255.,47./255.);
     //0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;
