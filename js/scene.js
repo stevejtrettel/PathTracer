@@ -75,11 +75,23 @@
                 {
                     file: '../glsl/accShader/raymarch/09basicObjects.glsl'
                 },
-                           {
+                {
                     file: '../glsl/accShader/raymarch/10compoundObjects.glsl'
                 },
                 {
                     file: '../glsl/accShader/raymarch/11scene.glsl'
+                },
+                {
+                    file: '../glsl/accShader/raymarch/raymarch.glsl'
+                },
+                {
+                    file: '../glsl/accShader/algVar/objects.glsl'
+                },
+                {
+                    file: '../glsl/accShader/algVar/scene.glsl'
+                },
+                {
+                    file: '../glsl/accShader/algVar/findRoot.glsl'
                 },
                 {
                     file: '../glsl/accShader/trace/12trace.glsl'
