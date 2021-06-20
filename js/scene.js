@@ -49,43 +49,43 @@
 
             const shaders = [] = [
                 {
-                    file: '../glsl/accShader/01setup.glsl'
+                    file: '../glsl/accShader/setup/01setup.glsl'
                 },
                 {
-                    file: '../glsl/accShader/02random.glsl'
+                    file: '../glsl/accShader/setup/02random.glsl'
                 },
                 {
-                    file: '../glsl/accShader/03spectral.glsl'
+                    file: '../glsl/accShader/setup/03spectral.glsl'
                 },
                 {
-                    file: '../glsl/accShader/04geometry.glsl'
+                    file: '../glsl/accShader/setup/04geometry.glsl'
                 },
                 {
-                    file: '../glsl/accShader/05materials.glsl'
+                    file: '../glsl/accShader/materials/05materials.glsl'
                 },
                 {
-                    file: '../glsl/accShader/06path.glsl'
+                    file: '../glsl/accShader/materials/06path.glsl'
                 },
                 {
-                    file: '../glsl/accShader/07BSDF.glsl'
+                    file: '../glsl/accShader/materials/07BSDF.glsl'
                 },
                 {
-                    file: '../glsl/accShader/08distanceFields.glsl'
+                    file: '../glsl/accShader/raymarch/08distanceFields.glsl'
                 },
                 {
-                    file: '../glsl/accShader/09basicObjects.glsl'
+                    file: '../glsl/accShader/raymarch/09basicObjects.glsl'
                 },
                            {
-                    file: '../glsl/accShader/10compoundObjects.glsl'
+                    file: '../glsl/accShader/raymarch/10compoundObjects.glsl'
                 },
                 {
-                    file: '../glsl/accShader/11scene.glsl'
+                    file: '../glsl/accShader/raymarch/11scene.glsl'
                 },
                 {
-                    file: '../glsl/accShader/12trace.glsl'
+                    file: '../glsl/accShader/trace/12trace.glsl'
                 },
                 {
-                    file: '../glsl/accShader/13render.glsl'
+                    file: '../glsl/accShader/trace/13render.glsl'
                 },
                 {
                     file: '../glsl/accShader/14accumulate.glsl'
