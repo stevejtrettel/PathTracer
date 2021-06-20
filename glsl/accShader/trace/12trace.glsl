@@ -6,7 +6,6 @@
 //-------------------------------------------------
 
 float trace(inout Vector tv, inout localData dat){
-
     //copy the initial data
 
     Vector rayTV=tv;
