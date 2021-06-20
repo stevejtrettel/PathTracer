@@ -125,51 +125,79 @@ float gyroid(vec3 pos){
 
 
 
+//float kummer(vec3 pos,float mu){
+//
+//    float scale=2.;
+//    vec3 center=vec3(0,0,-2);
+//
+//    float x=scale*(pos.x-center.x);
+//    float y=scale*(pos.y-center.y);
+//    float z=scale*(pos.z-center.z);
+//    float w=1.;
+//
+//    float x2=x*x;
+//    float y2=y*y;
+//    float z2=z*z;
+//    float w2=w*w;
+//
+//    float x4=x2*x2;
+//    float y4=y2*y2;
+//    float z4=z2*z2;
+//    float w4=w2*w2;
+//
+//    float a=1.;
+//    float b=1.;
+//    float c=1.;
+//    float d=-0.0;
+//
+//    float term1=x4+y4+z4+w4;
+//    float term2=2.*x*y*z*w;
+//    float term3=x2*y2+z2*w2;
+//    float term4=x2*z2+y2*w2;
+//    float term5=x2*w2+y2*z2;
+//
+//    return term1+d*term2-a*term3-b*term4-c*term5;
+//
+//}
+
+
+
+
+
 float kummer(vec3 pos,float mu){
 
-    float scale=2.;
-    vec3 center=vec3(0,0,-2);
+    float scale=1.;
+    vec3 center=vec3(0,0,-2.);
 
     float x=scale*(pos.x-center.x);
     float y=scale*(pos.y-center.y);
     float z=scale*(pos.z-center.z);
-    float w=1.;
 
     float x2=x*x;
     float y2=y*y;
     float z2=z*z;
-    float w2=w*w;
 
-    float x4=x2*x2;
-    float y4=y2*y2;
-    float z4=z2*z2;
-    float w4=w2*w2;
+    float mu2=mu*mu;
+    float lambda=(3.*mu*mu-1.)/(3.-mu*mu);
+    float sqrt2=sqrt(2.);
 
-    float a=1.;
-    float b=1.;
-    float c=1.;
-    float d=1.;
+    float p=1.-z-sqrt2*x;
+    float q=1.-z+sqrt2*x;
+    float r=1.+z+sqrt2*y;
+    float s=1.+z-sqrt2*y;
 
-    float term1=x4+y4+z4+w4;
-    float term2=2.*x*y*z*w;
-    float term3=x2*y2+z2*w2;
-    float term4=x2*z2+y2*w2;
-    float term5=x2*w2+y2*z2;
+    float quad=x2+y2+z2-mu2;
 
-    return term1+d*term2-a*term3-b*term4-c*term5;
-
+    return quad*quad-lambda*p*q*r*s;
 }
-
-
-
-
 
 float variety(vec3 pos){
    // return fermat(pos,4.);
     //return chmutov(pos,-1.);
-   // return  sexticEqn(pos);
+    //return  sexticEqn(pos);
 
-    return kummer(pos,2.);
+    return kummer(pos,1.3);
+
 }
 
 
@@ -213,6 +241,70 @@ vec3 gradient(Vector tv){
     return normalize(dir);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+float bBox(Vector tv){
+    vec3 center=vec3(0,0,-2.);
+    vec3 pos=tv.pos.coords.xyz-center;
+    return length(pos)-5.;
+}
+
+
+float marchBBox(inout Vector tv){
+
+    float distToScene=0.;
+    float totalDist=0.;
+
+    float marchDist;
+
+    Vector temp=tv;
+
+    for (int i = 0; i < maxMarchSteps; i++){
+
+        distToScene =bBox(temp);
+        marchDist=distToScene;
+
+        if (distToScene< EPSILON){
+            flow(tv,totalDist);
+            return totalDist;
+    }
+
+    totalDist += marchDist;
+
+        if(totalDist>maxDist){
+            break;
+        }
+
+        //otherwise keep going
+        flow(temp, marchDist);
+    }
+
+    //if you hit nothing
+    flow(tv,maxDist);
+    return maxDist;
+}
 
 
 float setStepSize(Vector tv){
@@ -283,7 +375,12 @@ float findRoot(inout Vector tv, inout localData dat){
     float side;
     float boundingBox=20.;
 
-    for (int i = 0; i < 900; i++){
+    //before beginning the root find, first march tv forward until we hit the bounding box:
+    depth=marchBBox(tv);
+    flow(tv,2.*EPSILON);
+
+    //now look for a zero inside the bounding box
+    for (int i = 0; i <2500; i++){
 
         //determine how far to test flow from current location
         dt=setStepSize(tv);
@@ -303,7 +400,7 @@ float findRoot(inout Vector tv, inout localData dat){
             //set all the data:
             dir=gradient(tv);
             normal=Vector(tv.pos,dir);
-            //setObjectInAir(dat,side,normal,ball3.mat);
+           // setObjectInAir(dat,side,normal,ball3.mat);
             setSurfaceInAir(dat,side,normal,ball2.mat);
             return depth+dt;
         }
@@ -312,9 +409,13 @@ float findRoot(inout Vector tv, inout localData dat){
         tv=temp;
         //increase the total distance marched
         depth+=dt;
-//        if(length(tv.pos.coords.xyz)>10.){
-//            break;
-//        }
+
+
+        //check if we escaped the bounding box
+        if(bBox(tv)>EPSILON){
+            //if so, raymarch the scene to see where we get:
+            return depth+raymarch(tv,dat);
+        }
     }
 
     //hit nothing

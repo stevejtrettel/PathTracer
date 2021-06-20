@@ -21,6 +21,7 @@ Plane wall2;
 Plane wall3;
 Plane wall4;
 Plane wall5;
+Plane wall6;
 
 
 
@@ -97,7 +98,7 @@ void buildScene(){
 
             
     //----------- LIGHT 3 -------------------------
-    light3.center=Point(1.25*vec3(0,2,-4));
+    light3.center=Point(1.25*vec3(0,1,-4));
     light3.radius=0.6;
     
     color= vec3(1.,0.6,0.4);
@@ -111,8 +112,8 @@ void buildScene(){
     
             
     //----------- LIGHT 4 -------------------------
-    light4.center=Point(vec3(3,0,-2));
-    light4.radius=0.2;
+    light4.center=Point(vec3(1,0,6));
+    light4.radius=0.4;
     
     color= vec3(1.,0.6,0.4);
     intensity=10.;
@@ -186,7 +187,10 @@ void buildScene(){
     ball2.center=Point(vec3(0,0,4));
     ball2.radius=0.55;
     
-    color= 0.5*vec3(255./255.,86./255.,47./255.);
+    color= 0.8*vec3(194,40,12)/255.;
+    //0.8*vec3(89./255.,100./255.,255./255.);
+    //0.5*vec3(250./255.,97./255.,21./255.);
+    //0.5*vec3(255./255.,86./255.,47./255.);
     //0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;
@@ -222,10 +226,10 @@ void buildScene(){
     
     //----------- WALL 1 -------------------------
     normal=vec3(0,1,0);
-    offset=1.6;
+    offset=1.5;
     
     //color=vec3(0.5,0.9,0.5);
-     color= vec3(.2);
+     color= vec3(0.2);
     specularity=0.0;
     roughness=0.1;
     
@@ -259,7 +263,7 @@ void buildScene(){
     
     
      //----------- WALL 3 -------------------------
-    normal=vec3(1,0,0.2);
+    normal=vec3(1,0,0.);
     //normal=vec3(1,0,0);
     offset=15.;
     //offset=5.;
@@ -273,12 +277,67 @@ void buildScene(){
     setPlane(wall3,normal,offset);
     wall3.mat=makeDielectric(color,specularity,roughness);
 
-    
 
-    
-    
-      
-     //----------- CYLINDER 1 -------------------------
+
+
+    //----------- WALL 4 -------------------------
+    normal=vec3(0,-1,0);
+    offset=18.;
+
+    //color=vec3(0.5,0.9,0.5);
+    color= vec3(0.8);
+    specularity=0.0;
+    roughness=0.1;
+
+    setPlane(wall4,normal,offset);
+    wall4.mat=makeDielectric(color,specularity,roughness);
+
+
+
+    // wall1.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.3,0.6);
+
+
+
+
+    //----------- WALL 5 -------------------------
+    normal=vec3(0,0,-1);
+    offset=19.;
+
+    //color=vec3(0.9,0.5,0.5);
+    color= vec3(0.8);
+    //color=vec3(0.7,0.7,0.8);
+    specularity=0.0;
+    roughness=0.;
+
+    setPlane(wall5,normal,offset);
+    wall5.mat=makeDielectric(color,specularity,roughness);
+
+
+
+
+
+
+
+    //----------- WALL 6 -------------------------
+    normal=vec3(-1,0,0);
+    //normal=vec3(1,0,0);
+    offset=20.;
+    //offset=5.;
+
+    // color=vec3(0.7,0.7,0.8);
+    color= vec3(0.8);
+    //color=vec3(0.5,0.9,0.5);
+    specularity=0.0;
+    roughness=0.5;
+
+    setPlane(wall6,normal,offset);
+    wall6.mat=makeDielectric(color,specularity,roughness);
+
+
+
+
+
+    //----------- CYLINDER 1 -------------------------
     
     cyl1.center=Point(vec3(1,0,-4));
     cyl1.radius=1.;
@@ -539,7 +598,7 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light2,dat));
     
-   // dist=min(dist,sphereSDF(tv,light3,dat));
+    //dist=min(dist,sphereSDF(tv,light3,dat));
     
    //  dist=min(dist,sphereSDF(tv,light4,dat));
 
@@ -560,13 +619,17 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------WALLS
     
-   // dist=min(dist,planeSDF(tv,wall1,dat));
+    dist=min(dist,planeSDF(tv,wall1,dat));
     
     dist=min(dist,planeSDF(tv,wall2,dat));
    
    dist=min(dist,planeSDF(tv,wall3,dat));
-   
 
+    dist=min(dist,planeSDF(tv,wall4,dat));
+
+    dist=min(dist,planeSDF(tv,wall5,dat));
+
+    dist=min(dist,planeSDF(tv,wall6,dat));
     
     
 
