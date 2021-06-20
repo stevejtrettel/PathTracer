@@ -88,9 +88,9 @@ void buildScene(){
     light2.center=Point(vec3(0,15.5,-5));
     light2.radius=3.;
     
-    color= vec3(255./255., 147./255., 41./255.);
+    color=vec3(255./255., 147./255., 41./255.);
        // vec3(1.,0.6,0.4);
-    intensity=3.;
+    intensity=5.;
     
     light2.mat=makeLight(color,intensity);
 
@@ -186,7 +186,8 @@ void buildScene(){
     ball2.center=Point(vec3(0,0,4));
     ball2.radius=0.55;
     
-    color= 0.7*vec3(0.3,0.2,0.6);
+    color= vec3(255./255.,86./255.,47./255.);
+    //0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;
     
@@ -208,7 +209,7 @@ void buildScene(){
     
     //ball3.mat=makeMetal(color,specularity,roughness);
 
-    ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.3);
+    ball3.mat=makeGlass(1.*vec3(0.3,0.05,0.2),1.3);
     
     
     
@@ -538,9 +539,9 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,sphereSDF(tv,light2,dat));
     
-     dist=min(dist,sphereSDF(tv,light3,dat));
+   // dist=min(dist,sphereSDF(tv,light3,dat));
     
-     dist=min(dist,sphereSDF(tv,light4,dat));
+   //  dist=min(dist,sphereSDF(tv,light4,dat));
 
     
     
@@ -559,11 +560,11 @@ float sceneSDF(Vector tv, inout localData dat){
     
     //------WALLS
     
-    dist=min(dist,planeSDF(tv,wall1,dat));
+   // dist=min(dist,planeSDF(tv,wall1,dat));
     
     dist=min(dist,planeSDF(tv,wall2,dat));
    
-     dist=min(dist,planeSDF(tv,wall3,dat));
+   dist=min(dist,planeSDF(tv,wall3,dat));
    
 
     

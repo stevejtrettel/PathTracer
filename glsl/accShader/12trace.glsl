@@ -62,8 +62,125 @@ float sexticEqn(vec3 pos){
     - ( 1. + 2.*t) *(x*x + y*y + z*z- 1.)*(x*x + y*y + z*z- 1.);
 }
 
+float fermat(vec3 pos,float n){
+
+    float scale=1.;
+    vec3 center=vec3(0,0,0);
+
+    float x=scale*(pos.x-center.x);
+    float y=scale*(pos.y-center.y);
+    float z=scale*(pos.z-center.z);
+
+
+    return pow(x,abs(n))+pow(y,abs(n))+pow(z,abs(n))-1.;
+
+}
+
+float roman(vec3 pos){
+
+    float scale=2.;
+    vec3 center=vec3(0,0,-2);
+
+    float x=scale*(pos.x-center.x);
+    float y=scale*(pos.y-center.y);
+    float z=scale*(pos.z-center.z);
+
+    float x2=x*x;
+    float y2=y*y;
+    float z2=z*z;
+
+    return x2*y2+y2*z2+z2*x2-2.*x*y*z;
+
+}
+
+float chmutov(vec3 pos,float c){
+
+    float scale=2.;
+    vec3 center=vec3(0,0,-2);
+
+    float x=scale*(pos.x-center.x);
+    float y=scale*(pos.y-center.y);
+    float z=scale*(pos.z-center.z);
+
+    float x2=x*x;
+    float y2=y*y;
+    float z2=z*z;
+
+    return 8.*(x2*x2 + y2*y2 + z2*z2) - 8.*(x2 + y2 + z2) + 3.-c;
+
+}
+
+
+
+float gyroid(vec3 pos){
+    float scale=2.;
+    vec3 center=vec3(0,0,-2);
+
+    float x=scale*(pos.x-center.x);
+    float y=scale*(pos.y-center.y);
+    float z=scale*(pos.z-center.z);
+
+    return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
+}
+
+
+
+float kummer(vec3 pos,float mu){
+    float scale=2.;
+    vec3 center=vec3(0,0,-2);
+
+    float x=scale*(pos.x-center.x);
+    float y=scale*(pos.y-center.y);
+    float z=scale*(pos.z-center.z);
+    float w=1.;
+
+    float lambda=(3.*mu*mu-1.)/(3.-mu*mu);
+
+    float sqrt2=sqrt(2.);
+    float p=w-z-sqrt2*x;
+    float q=w-z+sqrt2*x;
+    float r=w+z+sqrt2*y;
+    float s=w+z-sqrt2*y;
+
+    float term=x*x+y*y+z*z-mu*mu*w*w;
+
+
+    return term*term*term*term-lambda*p*q*r*s;
+}
+
+
+
+
+
+float variety(vec3 pos){
+   // return fermat(pos,4.);
+    //return chmutov(pos,-1.);
+   // return  sexticEqn(pos);
+
+    return kummer(pos,2.);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 float variety(Vector tv){
-    return sexticEqn(tv.pos.coords.xyz);
+    return variety(tv.pos.coords.xyz);
 }
 
 
@@ -74,10 +191,10 @@ vec3 gradient(Vector tv){
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
 
-    float vxyy=sexticEqn( pos + e.xyy*ep);
-    float vyyx=sexticEqn( pos + e.yyx*ep);
-    float vyxy=sexticEqn( pos + e.yxy*ep);
-    float vxxx=sexticEqn( pos + e.xxx*ep);
+    float vxyy=variety( pos + e.xyy*ep);
+    float vyyx=variety( pos + e.yyx*ep);
+    float vyxy=variety( pos + e.yxy*ep);
+    float vxxx=variety( pos + e.xxx*ep);
 
     vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
 
@@ -93,8 +210,11 @@ float setStepSize(Vector tv){
     if(dist>10.){
         return 0.1;
     }
-    else{
+    else if(dist>0.2){
         return 0.01;
+    }
+    else{
+        return 0.001;
     }
 }
 
@@ -151,7 +271,7 @@ float findRoot(inout Vector tv, inout localData dat){
     float side;
     float boundingBox=20.;
 
-    for (int i = 0; i < 300; i++){
+    for (int i = 0; i < 900; i++){
 
         //determine how far to test flow from current location
         dt=setStepSize(tv);
@@ -171,7 +291,7 @@ float findRoot(inout Vector tv, inout localData dat){
             //set all the data:
             dir=gradient(tv);
             normal=Vector(tv.pos,dir);
-
+            //setObjectInAir(dat,side,normal,ball3.mat);
             setSurfaceInAir(dat,side,normal,ball2.mat);
             return depth+dt;
         }
@@ -180,15 +300,15 @@ float findRoot(inout Vector tv, inout localData dat){
         tv=temp;
         //increase the total distance marched
         depth+=dt;
-        if(length(tv.pos.coords.xyz)>10.){
-            break;
-        }
+//        if(length(tv.pos.coords.xyz)>10.){
+//            break;
+//        }
     }
 
     //hit nothing
-    dat.isSky=true;
-    flow(tv,maxDist);
-    return maxDist;
+//    dat.isSky=true;
+    flow(tv,depth);
+    return depth;
 }
 
 
@@ -320,7 +440,7 @@ void surfaceColor(inout Path path,localData dat){
 
 
 void skyColor(inout Path path,inout localData dat){
-    //vec3 skyColor=skyTex(path.tv.dir);
+   //vec3 skyColor=skyTex(path.tv.dir);
     //vec3 skyColor=0.1*checkerTex(path.tv.dir);
     vec3 skyColor=vec3(0.05);
     path.pixel += path.light*skyColor;
@@ -346,7 +466,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
 
     localData dat;
     initializeData(dat);
-    maxBounces=50;
+    maxBounces=100;
     
         for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
     {
