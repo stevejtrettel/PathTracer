@@ -1,9 +1,9 @@
 
 
 float bBox(Vector tv){
-    vec3 center=vec3(0,0,-2.);
+    vec3 center=vec3(0,0,0.);
     vec3 pos=tv.pos.coords.xyz-center;
-    return length(pos)-5.;
+    return length(pos)-20.;
 }
 
 
@@ -47,13 +47,13 @@ float setStepSize(Vector tv){
     float dist=abs(variety(tv));
 
     if(dist>10.){
-        return 0.1;
+        return 0.05;
     }
     else if(dist>0.2){
-        return 0.01;
+        return 0.005;
     }
     else{
-        return 0.001;
+        return 0.0005;
     }
 }
 
@@ -74,7 +74,7 @@ void binarySearch(inout Vector tv,inout float dt){
     //flowing dist from tv doesnt hit the plane, dist+dt does:
     float testDist=dt;
     Vector temp;
-    for(int i=0;i<10;i++){
+    for(int i=0;i<20;i++){
 
         //divide the step size in half
         testDist=testDist/2.;
@@ -115,7 +115,7 @@ float findRoot(inout Vector tv, inout localData dat){
     flow(tv,2.*EPSILON);
 
     //now look for a zero inside the bounding box
-    for (int i = 0; i <500; i++){
+    for (int i = 0; i <1000; i++){
 
         //determine how far to test flow from current location
         dt=setStepSize(tv);

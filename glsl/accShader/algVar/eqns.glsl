@@ -151,7 +151,35 @@ float kummer(vec3 pos,float mu){
 
 
 
+float endrass(vec3 pos){
 
+    float scale=1.;
+    vec3 center=vec3(0,0,0);
+
+    float x=scale*(pos.x-center.x);
+    float y=scale*(pos.y-center.z);
+    float z=scale*(pos.z-center.y);
+    float w=1.;
+
+    float x2=x*x;
+    float y2=y*y;
+    float z2=z*z;
+    float w2=w*w;
+
+    float sqrt2=sqrt(2.);
+
+    float term1=64.*(x2-w2)*(y2-w2)*((x+y)*(x+y)-2.*w2)*((x-y)*(x-y)-2.*w2);
+
+    float term21=-4.*(1.+sqrt2)*(x2+y2)*(x2+y2);
+    float term22=(8.*(2.+sqrt2)*z2+2.*(2.+7.*sqrt2)*w2)*(x2+y2);
+    float term23=-16.*z2*z2+8.*(1.-2.*sqrt2)*z2*w2-(1.+12.*sqrt2)*w2*w2;
+
+    float term2=term21+term22+term23;
+
+    return term1-term2*term2;
+
+
+}
 
 
 
