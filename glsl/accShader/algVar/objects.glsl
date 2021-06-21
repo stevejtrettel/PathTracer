@@ -12,6 +12,10 @@ float variety(vec3 pos){
     //return kummer(pos,1.3);
     return togliatti(pos);
 
+    //return kummer(pos,1.3);
+   // return endrass(pos);
+
+
 }
 
 

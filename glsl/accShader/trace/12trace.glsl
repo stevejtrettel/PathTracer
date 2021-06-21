@@ -160,7 +160,7 @@ vec3 pathTrace(inout Path path, inout uint rngState){
                 break;
             }
             
-            //focusCheck(path);
+          //  focusCheck(path);
            
            // pick up any colors absorbed
            // while traveling inside an object:

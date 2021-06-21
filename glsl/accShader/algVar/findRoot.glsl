@@ -1,7 +1,7 @@
 
 
 float bBox(Vector tv){
-    vec3 center=vec3(0,0,-2.);
+    vec3 center=vec3(0,0,0.);
     vec3 pos=tv.pos.coords.xyz-center;
     return length(pos)-1.5;
 }
@@ -51,13 +51,13 @@ float setStepSize(Vector tv){
     float dist=abs(variety(tv));
 
     if(dist>10.){
-        return 0.1;
+        return 0.05;
     }
     else if(dist>1.){
         return 0.01;
     }
     else{
-        return 0.001;
+        return 0.0005;
     }
 }
 
@@ -78,7 +78,7 @@ void binarySearch(inout Vector tv,inout float dt){
     //flowing dist from tv doesnt hit the plane, dist+dt does:
     float testDist=dt;
     Vector temp;
-    for(int i=0;i<10;i++){
+    for(int i=0;i<20;i++){
 
         //divide the step size in half
         testDist=testDist/2.;
