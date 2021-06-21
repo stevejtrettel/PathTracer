@@ -69,7 +69,7 @@ float chmutov(vec3 pos,float c){
 
 
 float gyroid(vec3 pos){
-    float scale=2.;
+    float scale=5.;
     vec3 center=vec3(0,0,-2);
 
     float x=scale*(pos.x-center.x);
@@ -155,3 +155,35 @@ float kummer(vec3 pos,float mu){
 
 
 
+float togliatti(vec3 pos){
+
+    float scale=5.;
+    vec3 center=vec3(0,0,-2.);
+
+    float x=scale*(pos.x-center.x);
+    float z=scale*(pos.y-center.y);
+    float y=scale*(pos.z-center.z);
+    float w=1.;
+
+//    float rt2=sqrt(2.);
+//    float z=(u+v)/rt2;
+//    float w=(u-v)/rt2;
+//
+
+
+    float x2=x*x;
+    float y2=y*y;
+    float z2=z*z;
+    float w2=w*w;
+
+
+    float term1 = 64.* (x - w) * (x2*x2 - 4.* x2*x* w - 10. *x2 *y2 - 4.*x2* w2 + 16.* x *w2*w -
+    20.* x* y2 *w + 5.* y2*y2 + 16. *w2*w2 - 20. *y2 *w2);
+
+    float term2 = -5.*sqrt(5. - sqrt(5.)) * (2.*z -sqrt(5. - sqrt(5.)* w));
+
+    float term3=(4.*(x2 + y2 - z2) + (1. + 3.*sqrt(5.)) *w2);
+
+    return term1+term2*term3*term3;
+
+}

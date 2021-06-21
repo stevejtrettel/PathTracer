@@ -8,8 +8,9 @@ float variety(vec3 pos){
     // return fermat(pos,4.);
     //return chmutov(pos,-1.);
     //return  sexticEqn(pos);
-
-    return kummer(pos,1.3);
+    //return gyroid(pos);
+    //return kummer(pos,1.3);
+    return togliatti(pos);
 
 }
 

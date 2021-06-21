@@ -8,6 +8,7 @@ struct Material{
     vec3 emitColor;
     vec3 diffuseColor;
     vec3 specularColor;
+    vec3 backsideColor;
     vec3 absorbColor;
     float roughness;
     float IOR;
@@ -21,6 +22,7 @@ void zeroMat(inout Material mat){
     //initializes material:
     mat.emitColor=vec3(0.);
     mat.diffuseColor=vec3(0.);
+    mat.backsideColor=vec3(0.);
     mat.specularColor=vec3(0.);
     mat.absorbColor=vec3(0.);
     mat.roughness=0.;
@@ -39,6 +41,7 @@ void zeroMat(inout Material mat){
 void setMetal(inout Material mat, vec3 color, float specularity,float roughness){
     zeroMat(mat);//initialize
     mat.diffuseColor=color;
+    mat.backsideColor=color;
     mat.specularColor=vec3(2.)+0.8*color;
     mat.roughness=roughness;
     mat.specularChance=specularity;
@@ -68,6 +71,7 @@ void setDielectric(inout Material mat, vec3 color, float specularity, float roug
     zeroMat(mat);//initialize
     
     mat.diffuseColor=color;
+    mat.backsideColor=color;
     mat.specularColor=vec3(0.9);
     mat.roughness=roughness;
     mat.specularChance=specularity;
@@ -101,6 +105,7 @@ void setGlass(inout Material mat, vec3 color, float IOR,float refractivity){
     
     mat.specularColor=vec3(1.);
     mat.diffuseColor=vec3(1.);
+    mat.backsideColor=vec3(1.);
     mat.absorbColor=vec3(color);
     
     mat.IOR=IOR;

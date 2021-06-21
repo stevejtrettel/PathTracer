@@ -4,6 +4,8 @@
 //-------------------------------------------------
 
 
+Material varMat;
+
 //global variables which are the names of the possible objects in the scene
 Sphere light1;
 Sphere light2;
@@ -70,9 +72,26 @@ void buildScene(){
     float radius;
     float length;
     float width;
-    
-    
-        //----------- LIGHT 1 -------------------------
+    vec3 backColor;
+
+    //----------- VARIETY -------------------------
+
+
+    color= 0.8*vec3(194,40,12)/255.;
+    backColor=0.8*vec3(89./255.,100./255.,255./255.);
+    //0.8*vec3(89./255.,100./255.,255./255.);
+    //0.5*vec3(250./255.,97./255.,21./255.);
+    //0.5*vec3(255./255.,86./255.,47./255.);
+    //0.7*vec3(0.3,0.2,0.6);
+    specularity=0.2;
+    roughness=0.01;
+
+    varMat=makeDielectric(color,specularity,roughness);
+    varMat.backsideColor=backColor;
+
+
+
+    //----------- LIGHT 1 -------------------------
     light1.center=Point(vec3(15,3,-5));
     light1.radius=2.;
     

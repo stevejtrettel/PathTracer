@@ -3,7 +3,7 @@
 float bBox(Vector tv){
     vec3 center=vec3(0,0,-2.);
     vec3 pos=tv.pos.coords.xyz-center;
-    return length(pos)-5.;
+    return length(pos)-1.5;
 }
 
 
@@ -15,30 +15,34 @@ float marchBBox(inout Vector tv){
     float marchDist;
 
     Vector temp=tv;
+    if(bBox(tv)>0.){
+        for (int i = 0; i < maxMarchSteps; i++){
 
-    for (int i = 0; i < maxMarchSteps; i++){
+            distToScene =bBox(temp);
+            marchDist=distToScene;
 
-        distToScene =bBox(temp);
-        marchDist=distToScene;
+            if (distToScene< EPSILON){
+                flow(tv, totalDist);
+                return totalDist;
+            }
 
-        if (distToScene< EPSILON){
-            flow(tv,totalDist);
-            return totalDist;
+            totalDist += marchDist;
+
+            if (totalDist>maxDist){
+                break;
+            }
+
+            //otherwise keep going
+            flow(temp, marchDist);
         }
 
-        totalDist += marchDist;
-
-        if(totalDist>maxDist){
-            break;
-        }
-
-        //otherwise keep going
-        flow(temp, marchDist);
+        //if you hit nothing
+        flow(tv, maxDist);
+        return maxDist;
     }
-
-    //if you hit nothing
-    flow(tv,maxDist);
-    return maxDist;
+    else{
+        return 0.;
+    }
 }
 
 
@@ -49,7 +53,7 @@ float setStepSize(Vector tv){
     if(dist>10.){
         return 0.1;
     }
-    else if(dist>0.2){
+    else if(dist>1.){
         return 0.01;
     }
     else{
@@ -112,13 +116,14 @@ float findRoot(inout Vector tv, inout localData dat){
 
     //before beginning the root find, first march tv forward until we hit the bounding box:
     depth=marchBBox(tv);
-    flow(tv,2.*EPSILON);
+    //flow(tv,1.5*EPSILON);
 
     //now look for a zero inside the bounding box
-    for (int i = 0; i <500; i++){
+    for (int i = 0; i <2000; i++){
 
         //determine how far to test flow from current location
-        dt=setStepSize(tv);
+        dt=0.01;
+        //setStepSize(tv);
 
         //temporarily step forward that distance along the ray
         temp=tv;
@@ -136,7 +141,7 @@ float findRoot(inout Vector tv, inout localData dat){
             dir=gradient(tv);
             normal=Vector(tv.pos,dir);
             // setObjectInAir(dat,side,normal,ball3.mat);
-            setSurfaceInAir(dat,side,normal,ball2.mat);
+            setSurfaceInAir(dat,side,normal,varMat);
             return depth+dt;
         }
 

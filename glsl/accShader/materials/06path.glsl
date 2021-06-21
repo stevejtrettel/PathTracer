@@ -155,7 +155,7 @@ struct localData{
     Vector normal;//outward pointing (back at you) normal to surface just impacted
     
     Material mat;//material used in coloring
-    
+    vec3 surfColor;//choose between the two colors a surface can have
     
     
     float IOR;//the ratio of index of refraction
@@ -177,6 +177,95 @@ void initializeData(localData dat){
     dat.reflectAbsorb=vec3(0.);
     dat.refractAbsorb=vec3(0.);
 }
+
+
+
+
+
+
+
+
+
+
+//-------------------------------------------------
+//COMMON STUFF
+//-------------------------------------------------
+
+
+
+//if you hit an object which is not part of a compound, one side is the object (material) and the other side is air
+//set your local data appropriately
+void setObjectInAir(inout localData dat, float dist, Vector normal, Material mat){
+
+    //set the material
+    dat.isSky=false;
+    dat.mat=mat;
+
+    if(dist<0.){
+        //normal is inwward pointing;
+        dat.normal=negate(normal);
+        //IOR is current/enteing
+        dat.IOR=mat.IOR/1.;
+        dat.surfColor=mat.backsideColor;
+        dat.reflectAbsorb=mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+
+    else{
+        //normal is outward pointing;
+        dat.normal=normal;
+        //IOR is current/enteing
+        dat.IOR=1./mat.IOR;
+        dat.surfColor=mat.diffuseColor;
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=mat.absorbColor;
+
+    }
+
+}
+
+
+
+
+
+
+//if you hit an object which is supposed to be a 2-dimensional surface in the air
+void setSurfaceInAir(inout localData dat, float dist, Vector normal, Material mat){
+
+    //set the material
+    dat.isSky=false;
+    dat.mat=mat;
+
+    if(dist<0.){
+        //normal is inward pointing;
+        dat.normal=negate(normal);
+        //IOR is current/enteing
+        dat.IOR=mat.IOR/1.;
+        dat.surfColor=mat.backsideColor;
+        //both sides end in air
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=vec3(0.);
+    }
+
+    else{
+        //normal is inwward pointing;
+        dat.normal=normal;
+        //IOR is current/enteing
+        dat.IOR=1./mat.IOR;
+        dat.surfColor=mat.diffuseColor;
+        //both sides end in air
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=vec3(0.);
+
+    }
+
+}
+
+
+
+
+
+
 
 
 

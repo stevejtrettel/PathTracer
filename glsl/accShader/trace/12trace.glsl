@@ -106,7 +106,12 @@ void surfaceColor(inout Path path,localData dat){
         //only do if not refractive (those taken care of with volume)
         if(path.type.refract==0.){
             //color choice depends on specular or diffuse
-            path.light *= (path.type.specular==1.)?dat.mat.specularColor:dat.mat.diffuseColor;
+            vec3 color=dat.mat.diffuseColor;
+            if(length(dat.surfColor)!=0.){
+                color=dat.surfColor;
+            }
+
+            path.light *= (path.type.specular==1.)?dat.mat.specularColor:color;
         }
    
 }
