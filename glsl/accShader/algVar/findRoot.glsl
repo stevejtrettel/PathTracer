@@ -1,7 +1,7 @@
 
 
 float bBox(Vector tv){
-    vec3 center=vec3(0,0,0.);
+    vec3 center=vec3(0,0,-2.);
     vec3 pos=tv.pos.coords.xyz-center;
     return length(pos)-1.5;
 }

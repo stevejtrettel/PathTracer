@@ -77,13 +77,14 @@ void buildScene(){
     //----------- VARIETY -------------------------
 
 
-    color= 0.8*vec3(194,40,12)/255.;
+    color= 0.8*vec3(91,189,130)/255.;
     backColor=0.8*vec3(89./255.,100./255.,255./255.);
+    //0.8*vec3(89./255.,100./255.,255./255.);
     //0.8*vec3(89./255.,100./255.,255./255.);
     //0.5*vec3(250./255.,97./255.,21./255.);
     //0.5*vec3(255./255.,86./255.,47./255.);
     //0.7*vec3(0.3,0.2,0.6);
-    specularity=0.2;
+    specularity=0.4;
     roughness=0.01;
 
     varMat=makeDielectric(color,specularity,roughness);
@@ -92,7 +93,7 @@ void buildScene(){
 
 
     //----------- LIGHT 1 -------------------------
-    light1.center=Point(vec3(15,3,-5));
+    light1.center=Point(vec3(15,3,-3));
     light1.radius=2.;
     
     color=  vec3(255./255., 197./255., 143./255.);
@@ -105,8 +106,8 @@ void buildScene(){
     
         
     //----------- LIGHT 2 -------------------------
-    light2.center=Point(vec3(0,15.5,-5));
-    light2.radius=3.;
+    light2.center=Point(vec3(0,10,-3));
+    light2.radius=2.;
     
     color=vec3(255./255., 147./255., 41./255.);
        // vec3(1.,0.6,0.4);
@@ -249,7 +250,7 @@ void buildScene(){
     offset=2.5;
     
     //color=vec3(0.5,0.9,0.5);
-     color= vec3(0.2);
+     color= vec3(0.1);
     specularity=0.0;
     roughness=0.1;
     
@@ -265,10 +266,10 @@ void buildScene(){
     
     //----------- WALL 2 -------------------------
     normal=vec3(0,0,1);
-    offset=19.;
+    offset=6.;
     
     //color=vec3(0.9,0.5,0.5);
-     color= vec3(0.2);
+     color= vec3(0.1);
     //color=vec3(0.7,0.7,0.8);
     specularity=0.0;
     roughness=0.;
@@ -285,11 +286,11 @@ void buildScene(){
      //----------- WALL 3 -------------------------
     normal=vec3(1,0,0.);
     //normal=vec3(1,0,0);
-    offset=15.;
+    offset=4.;
     //offset=5.;
     
    // color=vec3(0.7,0.7,0.8);
-    color= vec3(0.2);
+    color= vec3(0.1);
     //color=vec3(0.5,0.9,0.5);
     specularity=0.0;
     roughness=0.5;
