@@ -12,13 +12,13 @@
 // roulette kills dim rays
 //-------------------------------------------------
 
-void roulette(inout Path path,inout uint rngState){
+void roulette(inout Path path){
 
     // As the light left gets smaller, the ray is more likely to get terminated early.
     // Survivors have their value boosted to make up for fewer samples being in the average.
 
     float p = max(path.light.r, max(path.light.g, path.light.b));
-    if (RandomFloat01(rngState) > p){
+    if (randomFloat() > p){
         path.keepGoing=false;
     }
     // Add the energy we 'lose' by randomly terminating paths
@@ -41,7 +41,7 @@ void roulette(inout Path path,inout uint rngState){
 
 
 
-vec3 pathTrace(inout Path path, inout uint rngState){
+vec3 pathTrace(inout Path path){
 
     Vector importanceSample;
     localData dat;
@@ -70,17 +70,17 @@ vec3 pathTrace(inout Path path, inout uint rngState){
         volumeColor(path,dat);
 
         //set probabilities for spec, refract, diffuse
-        updateProbabilities(path, dat, rngState);
+        updateProbabilities(path, dat);
 
         //use these probabilities to set the new ray
-        updateRay(path, dat,rngState);
+        updateRay(path, dat);
 
 
         //update the color from interacting with the surface
         surfaceColor(path,dat);
 
         //probabilistically kill rays
-        roulette(path,rngState);
+        roulette(path);
 
         //if killed ray, sample the light
         if(!path.keepGoing){

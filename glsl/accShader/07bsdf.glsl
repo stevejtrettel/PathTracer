@@ -16,7 +16,7 @@
 
 
     //takes in data after a raymarch, and chooses the type of ray which is cast next: diffuse, specular or refract
-    void updateProbabilities( inout Path path,inout localData dat, inout uint rngState){
+    void updateProbabilities( inout Path path,inout localData dat){
 
     //always assume the normal is outward facing for the surface we are at
     Vector normal=dat.normal;
@@ -51,7 +51,7 @@
     //}
 //     
     // calculate whether we are going to do a diffuse, specular, or refractive ray
-    float raySelectRoll = RandomFloat01(rngState);
+    float raySelectRoll = randomFloat();
     if (raySelectRoll < specularChance)
     {
         setSpecular(path.type,specularChance);
@@ -88,7 +88,7 @@
 
 
 
-void updateRay(inout Path path, localData dat, inout uint rngState){
+void updateRay(inout Path path, localData dat){
     
 
     //update the normal to be the correct direction:
@@ -98,7 +98,7 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     Vector normal=dat.normal;
     
     //----- get a uniformly distributed vector on the sphere ----------
-    Vector randomSph=Vector(path.tv.pos,RandomUnitVector(rngState));
+    Vector randomSph=Vector(path.tv.pos,randomUnitVector());
     
     
     //----- update the ray direction ----------

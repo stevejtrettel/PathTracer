@@ -42,7 +42,7 @@ let newFrameUniforms={
     location: {
         value: new THREE.Vector3(0, 0, 0)
     },
-    seed: {
+    frameSeed: {
         value: 0
     },
     aperture: {
@@ -67,7 +67,7 @@ let newFrameUniforms={
 
 
 let combineUniforms={
-    iFrame: {
+    frameNumber: {
         value: 0
     },
     iResolution: {
@@ -102,7 +102,7 @@ let displayUniforms={
 
 function updateNewFrameUniforms(){
 
-    accMaterial.uniforms.seed.value += 1.;
+    accMaterial.uniforms.frameSeed.value += 1.;
 
     let rotData = rotControls();
     let mat = rotData[0];
@@ -118,16 +118,14 @@ function updateNewFrameUniforms(){
 
         accMaterial.uniforms.location.value.add(vec);
 
-        //stop updating the random seed:
-        accMaterial.uniforms.seed.value=0;
-
-        //reset the combination of frames
-        combineMaterial.uniforms.iFrame.value = 0.;
+        //reset the frame number to start again
+        accMaterial.uniforms.frameSeed.value=0;
+        combineMaterial.uniforms.frameNumber.value = 0.;
     }
 }
 
 function updateCombineUniforms() {
-    combineMaterial.uniforms.iFrame.value += 1.;
+    combineMaterial.uniforms.frameNumber.value += 1.;
 }
 
 

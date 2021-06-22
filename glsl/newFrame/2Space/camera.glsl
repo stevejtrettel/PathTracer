@@ -26,13 +26,13 @@ struct Camera{
 //-------------------------------------------------
 
 //pinhole camera setup
-Vector initializeRay(vec2 fragCoord,float FOV, inout uint rngState){
+Vector initializeRay(vec2 fragCoord,float FOV){
 
     // The ray starts at the camera position (a uniform)
     Point rayPosition = ORIGIN;
 
     // calculate subpixel camera jitter for anti aliasing
-    vec2 jitter = vec2(RandomFloat01(rngState), RandomFloat01(rngState)) - 0.5f;
+    vec2 jitter = vec2(randomFloat(), randomFloat()) - 0.5f;
 
     // calculate coordinates of the ray target on the imaginary pixel plane.
     vec2 planeCoords=((fragCoord+jitter)/iResolution.xy) * 2.0f - 1.0f;
@@ -61,10 +61,10 @@ Vector initializeRay(vec2 fragCoord,float FOV, inout uint rngState){
 
 
 
-vec2 sampleAperture(Camera cam,inout uint rngState){
+vec2 sampleAperture(Camera cam){
 
-    float theta=6.28*RandomFloat01(rngState);
-    float radius=cam.aperture*sqrt(RandomFloat01(rngState));
+    float theta=2.*PI*randomFloat();
+    float radius=cam.aperture*sqrt(randomFloat());
 
     vec2 offset=radius*vec2(cos(theta),sin(theta));
     return offset;
@@ -96,13 +96,13 @@ vec2 sampleAperture(Camera cam,inout uint rngState){
 //  this sets up the initial ray in main.glsl
 //-------------------------------------------------
 
-Vector cameraRay(Vector tv, Camera cam, inout uint rngState){
+Vector cameraRay(Vector tv, Camera cam){
 
     //find the focal point for the ray tv:
     vec3 focalPt=tv.pos.coords+cam.focalLength*tv.dir;
 
     //reset the position by jittering inside the aperture
-    vec2 offset=sampleAperture(cam,rngState);
+    vec2 offset=sampleAperture(cam);
     vec3 pos=tv.pos.coords;
     pos.xy+=offset;
 

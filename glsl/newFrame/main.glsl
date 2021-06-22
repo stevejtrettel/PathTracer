@@ -10,8 +10,7 @@
 vec3 newFrame(vec2 fragCoord ){
 
     // initialize a random number state based on frag coord and frame number
-    //(stored as "seed" instead of iFrame so it doean't get reset when flying)
-    uint rngState = randomSeed(fragCoord,seed);
+    seed = randomSeed(fragCoord,frameSeed);
 
     //now set up the camera:
     //all the entries are uniforms or constants in setup
@@ -20,17 +19,17 @@ vec3 newFrame(vec2 fragCoord ){
     cam=Camera(camLoc,facing,fov,aperture,focalLength);
 
     //get the initial tangent vector, path data
-    Vector tv=initializeRay(fragCoord,cam.fov,rngState);
+    Vector tv=initializeRay(fragCoord,cam.fov);
 
-    tv=cameraRay(tv,cam,rngState);
+    tv=cameraRay(tv,cam);
 
-    Path path=initializePath(tv,rngState);
+    Path path=initializePath(tv);
 
     //build the scene
     buildScene();
 
     //do one trace out into the scene
-    vec3 pixelColor= pathTrace(path,rngState);
+    vec3 pixelColor= pathTrace(path);
 
     return pixelColor;
 }

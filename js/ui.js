@@ -56,27 +56,27 @@ function createUI() {
 
     brightnessController.onChange(function(value){
         accMaterial.uniforms.brightness.value=value;
-        combineMaterial.uniforms.iFrame.value=0;
+        combineMaterial.uniforms.frameNumber.value=0;
     });
 
     apertureController.onChange(function(value){
         accMaterial.uniforms.aperture.value=value;
-        combineMaterial.uniforms.iFrame.value=0;
+        combineMaterial.uniforms.frameNumber.value=0;
     });
 
     focalLengthController.onChange(function(value){
         accMaterial.uniforms.focalLength.value=value;
-        combineMaterial.uniforms.iFrame.value=0;
+        combineMaterial.uniforms.frameNumber.value=0;
     });
 
     focusHelpController.onChange(function(value){
         accMaterial.uniforms.focusHelp.value=value;
-        combineMaterial.uniforms.iFrame.value=0;
+        combineMaterial.uniforms.frameNumber.value=0;
     });
 
     fovController.onChange(function(value){
         accMaterial.uniforms.fov.value=value;
-        combineMaterial.uniforms.iFrame.value=0;
+        combineMaterial.uniforms.frameNumber.value=0;
     });
 }
 

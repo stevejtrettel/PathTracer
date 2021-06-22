@@ -86,7 +86,7 @@ struct Path{
 
 
 
-Path initializePath(Vector tv,inout uint rngState){
+Path initializePath(Vector tv){
     Path path;
     
     

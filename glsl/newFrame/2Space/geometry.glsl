@@ -255,6 +255,7 @@ Vector translate(Isometry isom, Vector v) {
 //---- making Isometries --------------
 
 
+
 //make isometry taking origin to p
 Isometry makeTranslation(vec3 p){
     //remember matrices are entered BACKWARDS
@@ -301,9 +302,4 @@ Isometry makeIsometry(vec3 pos, vec3 axis, float angle){
 Isometry makeIsometry(Point pos,vec3 axis, float angle){
     return makeIsometry(pos.coords, axis, angle);
 }
-
-
-
-
-
 

@@ -41,11 +41,16 @@
                     file: '../glsl/newFrame/1Setup/utilities.glsl'
                 },
                 {
-                    file: '../glsl/accShader/04geometry.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/2Space/geometry.glsl'
                 },
                 {
                     //NEW
-                    file: '../glsl/newFrame/2Geometry/camera.glsl'
+                    file: '../glsl/newFrame/2Space/physics.glsl'
+                },
+                {
+                    //NEW
+                    file: '../glsl/newFrame/2Space/camera.glsl'
                 },
                 {
                     file: '../glsl/accShader/05materials.glsl'
