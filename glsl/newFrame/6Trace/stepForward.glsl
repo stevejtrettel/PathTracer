@@ -5,5 +5,8 @@
 // and update the data appropriately
 //-------------------------------------------------
 
-
-
+//
+//
+//void stepForward(inout Path path){
+//    path.distance=raymarch(path);
+//}

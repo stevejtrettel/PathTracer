@@ -15,7 +15,15 @@ struct Camera{
 
 
 
-
+Camera buildCamFromUniforms(){
+    Camera cam;
+    cam.pos=location;
+    cam.facing=facing;
+    cam.fov=fov;
+    cam.aperture=aperture;
+    cam.focalLength=focalLength;
+    return cam;
+}
 
 
 
@@ -75,28 +83,15 @@ vec2 sampleAperture(Camera cam){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //-------------------------------------------------
 // USED OUTSIDE THIS FILE
 //  this sets up the initial ray in main.glsl
 //-------------------------------------------------
 
-Vector cameraRay(Vector tv, Camera cam){
+Vector cameraRay(vec2 fragCoord, Camera cam){
+
+    //set up pinhole camera at origin
+    Vector tv=initializeRay(fragCoord,cam.fov);
 
     //find the focal point for the ray tv:
     vec3 focalPt=tv.pos.coords+cam.focalLength*tv.dir;

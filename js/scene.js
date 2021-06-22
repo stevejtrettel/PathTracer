@@ -34,6 +34,10 @@
                 },
                 {
                     //NEW
+                    file: '../glsl/newFrame/1Setup/math.glsl'
+                },
+                {
+                    //NEW
                     file: '../glsl/newFrame/1Setup/random.glsl'
                 },
                 {
@@ -53,7 +57,8 @@
                     file: '../glsl/newFrame/2Space/camera.glsl'
                 },
                 {
-                    file: '../glsl/accShader/05materials.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/3Renderer/Basic/material.glsl'
                 },
                 {
                     file: '../glsl/accShader/06path.glsl'
@@ -66,16 +71,20 @@
                     file: '../glsl/newFrame/3Renderer/Basic/update.glsl'
                 },
                 {
-                    file: '../glsl/accShader/08distanceFields.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/4Objects/computations.glsl'
                 },
                 {
-                    file: '../glsl/accShader/09basicObjects.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/4Objects/basicObjects.glsl'
                 },
                 {
-                    file: '../glsl/accShader/10compoundObjects.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/5Scene/initialize.glsl'
                 },
                 {
-                    file: '../glsl/accShader/11scene.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/5Scene/scene.glsl'
                 },
                 {
                     //NEW

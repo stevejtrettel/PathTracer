@@ -40,3 +40,38 @@ float raymarch(Vector tv, inout localData dat){
 }
 
 
+
+//float raymarch(Path path, float stopDist){
+//
+//    float distToScene=0.;
+//    float totalDist=0.;
+//
+//    float marchDist;
+//
+//    for (int i = 0; i < maxMarchSteps; i++){
+//
+//        distToScene =abs(sceneSDF(path));
+//
+//        if (distToScene< EPSILON){
+//            return totalDist;
+//        }
+//
+//        totalDist += distToScene;
+//
+//        if(totalDist>stopDist){
+//            //break out of loop
+//            return maxDist;
+//        }
+//
+//        //otherwise keep going
+//        flow(path.tv, marchDist);
+//    }
+//
+//    //if you hit nothing
+//    path.dat.isSky=true;
+//    path.keepGoing=false;
+//    return maxDist;
+//}
+//
+
+

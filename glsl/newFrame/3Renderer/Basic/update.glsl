@@ -1,4 +1,60 @@
 
+
+
+//if you hit an object which is not part of a compound, one side is the object (material) and the other side is air
+//set your local data appropriately
+void setObjectInAir(inout localData dat, float dist, Vector normal, Material mat){
+
+    //set the material
+    dat.isSky=false;
+    dat.mat=mat;
+
+    if(dist<0.){
+        //normal is inwward pointing;
+        dat.normal=negate(normal);
+        //IOR is current/enteing
+        dat.IOR=mat.IOR/1.;
+
+        dat.reflectAbsorb=mat.absorbColor;
+        dat.refractAbsorb=vec3(0.);
+    }
+
+    else{
+        //normal is outward pointing;
+        dat.normal=normal;
+        //IOR is current/enteing
+        dat.IOR=1./mat.IOR;
+
+        dat.reflectAbsorb=vec3(0.);
+        dat.refractAbsorb=mat.absorbColor;
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //-------------------------------------------------
 // The LIGHTING FUNCTIONS
 //-------------------------------------------------
@@ -28,7 +84,7 @@ void surfaceColor(inout Path path,localData dat){
 void skyColor(inout Path path,inout localData dat){
     vec3 skyColor=skyTex(path.tv.dir);
     //vec3 skyColor=0.1*checkerTex(path.tv.dir);
-    //  vec3 skyColor=vec3(0.05);
+    //vec3 skyColor=vec3(0.05);
     path.pixel +=path.light*skyColor;
 }
 
