@@ -17,9 +17,11 @@
             combineScene,
             dispScene,
             buildScenes,
-            updateUniforms
         } from './scene.js';
 
+        import{
+            updateUniforms
+        } from "./uniforms.js";
 
         import {
             keyDownHandler,
@@ -43,6 +45,7 @@
 
         //textures for accumulating frames
         let readTex, writeTex, tempTex;
+        let texA,texB;
 
 
 
@@ -127,6 +130,18 @@
                 format: THREE.RGBAFormat,
             });
 
+            texA = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
+
+            texB = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
+
             // writeTex.texture.encoding = THREE.LinearEncoding;
             // readTex.texture.encoding = THREE.LinearEncoding;
 
@@ -180,22 +195,20 @@
             //read off the new frame from readTex
             combineMaterial.uniforms.new.value = readTex.texture;
 
-
             //run the accumulation shader
-            //renderer.setRenderTarget(writeTex);
+            renderer.setRenderTarget(texA);
             renderer.render(combineScene, camera);
 
             // //swap read and write
-            tempTex = readTex;
-            readTex = writeTex;
-            writeTex = tempTex;
-
+            tempTex = texB;
+            texB = texA;
+            texA = tempTex;
 
             //set the accumulated frame to acc
-            combineMaterial.uniforms.acc.value=readTex.texture;
+            combineMaterial.uniforms.acc.value=texB.texture;
 
             //also send this off to the display
-            dispMaterial.uniforms.acc.value = readTex.texture;
+            dispMaterial.uniforms.acc.value = texB.texture;
 
             //make the next move render to canvas
             renderer.setRenderTarget(null);
