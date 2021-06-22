@@ -188,7 +188,7 @@
             let mat = rotData[0];
             let detectRot = rotData[1];
 
-            let translData = translControls();
+            let translData = translControls(mat);
             let vec = translData[0];
             let detectTransl = translData[1];
 
