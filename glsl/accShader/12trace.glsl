@@ -235,8 +235,9 @@ vec3 pathTrace(inout Path path, inout uint rngState){
                 skyColor(path,dat);
                 break;
             }
-            
-            //focusCheck(path);
+            if(focusHelp){
+                focusCheck(path);
+            }
             
                 //================================
                 //--- IMPORTANCE SAMPLING--------

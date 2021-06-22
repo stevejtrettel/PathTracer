@@ -605,11 +605,11 @@ float sceneSDF(Vector tv, inout localData dat){
 
 
     //top orange light
-    //dist=min(dist,sphereSDF(tv,light2,dat));
+    dist=min(dist,sphereSDF(tv,light2,dat));
     
     // dist=min(dist,sphereSDF(tv,light3,dat));
     
-    // dist=min(dist,sphereSDF(tv,light4,dat));
+     dist=min(dist,sphereSDF(tv,light4,dat));
 
     
     
@@ -630,9 +630,9 @@ float sceneSDF(Vector tv, inout localData dat){
     
     dist=min(dist,planeSDF(tv,wall1,dat));
     
-    //dist=min(dist,planeSDF(tv,wall2,dat));
+    dist=min(dist,planeSDF(tv,wall2,dat));
    
-   // dist=min(dist,planeSDF(tv,wall3,dat));
+    dist=min(dist,planeSDF(tv,wall3,dat));
    
 
     
@@ -650,9 +650,9 @@ float sceneSDF(Vector tv, inout localData dat){
     //dist=min(dist,bottleSDF(tv,bottle,dat));
 
     //THESE THREE BOTTLES WERE ON
-    //dist=min(dist,liquorBottleSDF(tv,gin,dat));
-    //dist=min(dist,liquorBottleSDF(tv,campari,dat));
-   // dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
+    dist=min(dist,liquorBottleSDF(tv,gin,dat));
+    dist=min(dist,liquorBottleSDF(tv,campari,dat));
+    dist=min(dist,liquorBottleSDF(tv,vermouth,dat));
 //    
 //    
 //    vermouth.glass.center.coords=vec3(9,1.15,-12);
@@ -673,7 +673,7 @@ float sceneSDF(Vector tv, inout localData dat){
     //negroni.glass.center.coords+=vec3(2,-0.5,-3);
 
     //THIS WAS TURNED ON THE NEGRONI
-    //dist=min(dist,cocktailSDF(tv,negroni,dat));
+    dist=min(dist,cocktailSDF(tv,negroni,dat));
 
   //  dist=min(dist,cocktailSDF(tv,shotglass,dat));
     
@@ -703,8 +703,8 @@ float sceneSDF(Vector tv, inout localData dat){
 
       //dist=min(dist,bunnySDF(tv,bunny,dat));
 
-   dist=min(dist,plateSDF(tv,plate,dat));
-    dist=min(dist,teapotSDF(tv,teapot,dat));
+//   dist=min(dist,plateSDF(tv,plate,dat));
+//    dist=min(dist,teapotSDF(tv,teapot,dat));
     return dist;
 }
 

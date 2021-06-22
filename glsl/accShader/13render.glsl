@@ -37,7 +37,7 @@ Vector initializeRay(vec2 fragCoord,float FOV, inout uint rngState){
     
     
     //rotate by facing (a uniform)
-    //not done here because we are going to simulate an aperature first
+    //not done here because we are going to simulate an aperture first
     //tv=rotateByFacing(tv,cam.facing);
     
     
@@ -61,7 +61,7 @@ struct Camera{
     vec3 pos;
     mat3 facing;
     float fov;
-    float aperature;
+    float aperture;
     float focalLength;
 };
 
@@ -78,10 +78,10 @@ struct Camera{
 //-------------------------------------------------
 
 
-vec2 sampleAperature(Camera cam,inout uint rngState){
+vec2 sampleAperture(Camera cam,inout uint rngState){
     
     float theta=6.28*RandomFloat01(rngState);
-    float radius=cam.aperature*sqrt(RandomFloat01(rngState));
+    float radius=cam.aperture*sqrt(RandomFloat01(rngState));
     
     vec2 offset=radius*vec2(cos(theta),sin(theta));
     return offset;
@@ -94,8 +94,8 @@ Vector cameraRay(Vector tv, Camera cam, inout uint rngState){
     //find the focal point for the ray tv:
     vec3 focalPt=tv.pos.coords+cam.focalLength*tv.dir;
     
-    //reset the position by jittering inside the aperature
-    vec2 offset=sampleAperature(cam,rngState);
+    //reset the position by jittering inside the aperture
+    vec2 offset=sampleAperture(cam,rngState);
     vec3 pos=tv.pos.coords;
     pos.xy+=offset;
     
@@ -145,7 +145,7 @@ vec3 newFrame(vec2 fragCoord){
     Camera cam;
     vec3 camLoc=location+vec3(7.,3.,6.);
         //+vec3(7.,3.,6.);
-    cam=Camera(camLoc,facing,fov,aperature,focalLength);
+    cam=Camera(camLoc,facing,fov,aperture,focalLength);
     
     //get the initial tangent vector, path data
     Vector tv=initializeRay(fragCoord,cam.fov,rngState);

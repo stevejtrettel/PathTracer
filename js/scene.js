@@ -8,6 +8,8 @@
         } from './controls.js';
 
 
+        import{ui} from "./ui.js";
+
         //Scene Variables
         //=============================================
 
@@ -22,10 +24,10 @@
 
 
         // things for building display and accumulation scenes
-        let accScene, dispScene;
-        let accMaterial, dispMaterial;
-        let accUniforms, dispUniforms;
-        let accShader, dispShader;
+        let accScene, dispScene,combineScene;
+        let accMaterial, dispMaterial,combineMaterial;
+        let accUniforms, dispUniforms,combineUniforms;
+        let accShader, dispShader,combineShader;
 
 
 
@@ -147,7 +149,22 @@
                 },
                 seed: {
                     value: 0
-                }
+                },
+               aperture: {
+                    value: ui.aperture.value
+                },
+                focalLength: {
+                    value: ui.focalLength.value
+                },
+                brightness: {
+                    value: ui.brightness.value
+                },
+                focusHelp: {
+                    value: ui.focusHelp.value
+                },
+                fov: {
+                    value: ui.fov.value
+                },
             };
 
         }
@@ -204,6 +221,66 @@
 
         }
 
+
+
+        //Build Combine Scene
+        //=============================================
+
+
+        async function createCombineShaderMat() {
+
+            const combineText = await fetch('../glsl/combine/combine.glsl');
+            combineShader = await combineText.text();
+
+
+            combineUniforms = {
+                iFrame: {
+                    value: 0
+                    },
+                iResolution: {
+                    value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
+                },
+                acc: {
+                    value: null
+                },
+                new: {
+                    value: null
+                }
+            };
+        }
+
+
+
+        function createCombineScene(combineShader, combineUniforms) {
+
+
+            //make the actual scene, and the buffer Scene
+            combineScene = new THREE.Scene();
+
+
+            //make the plane we will add to both scenes
+            const combinePlane = new THREE.PlaneBufferGeometry(2, 2);
+
+
+            combineMaterial = new THREE.ShaderMaterial({
+                fragmentShader: combineShader,
+                uniforms: combineUniforms,
+            });
+
+
+            combineScene.add(new THREE.Mesh(combinePlane, combineMaterial));
+
+
+        }
+
+
+
+        function updateCombineUniforms() {
+
+            combineMaterial.uniforms.iFrame.value += 1.;
+
+
+        }
 
 
 
@@ -293,12 +370,17 @@
 
             createDispScene(dispShader, dispUniforms);
 
+            await createCombineShaderMat();
+
+            createCombineScene(combineShader, combineUniforms);
+
         }
 
 
         //updates materials each time a frame runs: resizing canvas if necessary
         function updateUniforms() {
             updateAccUniforms();
+            updateCombineUniforms();
             updateDispUniforms();
         }
 
@@ -306,8 +388,10 @@
 
         export {
             accMaterial,
+            combineMaterial,
             dispMaterial,
             accScene,
+            combineScene,
             dispScene,
             buildScenes,
             updateUniforms

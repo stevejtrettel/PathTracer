@@ -11,8 +11,10 @@
         //=============================================
         import {
             accMaterial,
+            combineMaterial,
             dispMaterial,
             accScene,
+            combineScene,
             dispScene,
             buildScenes,
             updateUniforms
@@ -166,8 +168,7 @@
 
         function render() {
 
-
-            //render to the texture B
+            //render to the texture
             renderer.setRenderTarget(writeTex);
             renderer.render(accScene, camera);
 
@@ -177,8 +178,23 @@
             writeTex = tempTex;
 
             //read off the new frame from readTex
-            //set this as the acc uniform for the displayMaterial
-            accMaterial.uniforms.acc.value = readTex.texture;
+            combineMaterial.uniforms.new.value = readTex.texture;
+
+
+            //run the accumulation shader
+            //renderer.setRenderTarget(writeTex);
+            renderer.render(combineScene, camera);
+
+            // //swap read and write
+            tempTex = readTex;
+            readTex = writeTex;
+            writeTex = tempTex;
+
+
+            //set the accumulated frame to acc
+            combineMaterial.uniforms.acc.value=readTex.texture;
+
+            //also send this off to the display
             dispMaterial.uniforms.acc.value = readTex.texture;
 
             //make the next move render to canvas
