@@ -16,13 +16,18 @@
             dispScene,
             buildScenes,
             updateUniforms
-        } from './scene.js'
+        } from './scene.js';
 
 
         import {
             keyDownHandler,
             keyUpHandler
-        } from './controls.js'
+        } from './controls.js';
+
+        import {
+            ui,
+            createUI
+        } from './ui.js';
 
 
 
@@ -216,6 +221,8 @@
             canvas = document.querySelector('#c');
 
             stats = createStats();
+
+            createUI();
 
             createRenderer();
 
