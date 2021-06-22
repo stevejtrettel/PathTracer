@@ -1,21 +1,48 @@
-  <html lang="en">
+﻿<!DOCTYPE html>
+<html lang="en">
 
-  <head>
-    <title>Path Tracer</title>
+<head>
+    <!-- Basic Page Needs –––––––––––––––––––––––––––––––––––––––––––––––––– -->
     <meta charset="utf-8">
-    <link type="text/css" rel="stylesheet" href="./style.css">
+    <title>Raymarching</title>
+    <!-- Metas –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <!-- Style –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            margin: 0px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+    </style>
+    <!-- Favicon –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 
-<canvas id="c"></canvas>
 
-<body>
+<!-- Vertex Shader
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
 
-    <!-- THIS IS WHERE THE SCENE IS DRAWN -->
-    <div id="scene-container">
-    </div>
+<script type="x-shader/x-vertex" id="vertexShader">
+    #version 300 es
 
+  void main()
+  {
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+</script>
 
-    <script type='module' src='./js/main.js'>
-    </script>
+<!-- Libraries ––––––––––––––––––––––––––––––––––––––––––––––– -->
 
-</body></html>
+<script src="js/lib/dat.gui.min.js"></script>
+<!--<script src="js/lib/math.min.js"></script>-->
+<!--<script src="js/lib/WebGL.js"></script>-->
+<script src="js/lib/stats.min.js"></script>
+<script src="js/lib/CCapture.all.min.js"></script>
+
+<script src="js/Main.js" type="module" id="mainCode"></script>
+
+</html>

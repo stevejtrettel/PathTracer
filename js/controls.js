@@ -1,224 +1,149 @@
-//Import Stuff
-//=============================================
-import * as THREE from './libs/three.module.js';
 
-var rightPressed = false;
-var leftPressed = false;
-var upPressed = false;
-var downPressed = false;
-var fwdPressed = false;
-var bkPressed = false;
+import {
+    Quaternion,
+    Matrix4
+} from "./lib/three.module.js";
+import {
+    Vector
+} from "./Geometry.js";
 
-
-var rotRightPressed = false;
-var rotLeftPressed = false;
-var rotUpPressed = false;
-var rotDownPressed = false;
-var CWPressed = false;
-var CCWPressed = false;
+import {
+    globals
+} from "./Main.js";
 
 
-var KeyboardHelper = {
-    right: 39,
-    left: 37,
-    up: 222,
-    down: 191,
-    fwd: 38,
-    bk: 40,
-    rotLeft: 65,
-    rotUp: 87,
-    rotRight: 68,
-    rotDown: 83,
-    CW: 69,
-    CCW: 81,
+
+
+let Controls = function () {
+    let translationSpeed = 0.5;
+    let rotationSpeed = 0.2;
+
+    this.manualRotateRate = new Float32Array([0.0, 0.0, 0.0]);
+    this.manualMoveRate = new Float32Array([0.0, 0.0, 0.0]);
+    this.updateTime = 0;
+
+    let keyboardUS = {
+        65: {
+            index: 1,
+            sign: 1,
+            active: 0
+        }, // a
+        68: {
+            index: 1,
+            sign: -1,
+            active: 0
+        }, // d
+        87: {
+            index: 0,
+            sign: 1,
+            active: 0
+        }, // w
+        83: {
+            index: 0,
+            sign: -1,
+            active: 0
+        }, // s
+        81: {
+            index: 2,
+            sign: -1,
+            active: 0
+        }, // q
+        69: {
+            index: 2,
+            sign: 1,
+            active: 0
+        }, // e
+        38: {
+            index: 3,
+            sign: 1,
+            active: 0
+        }, // up
+        40: {
+            index: 3,
+            sign: -1,
+            active: 0
+        }, // down
+        37: {
+            index: 4,
+            sign: -1,
+            active: 0
+        }, // left
+        39: {
+            index: 4,
+            sign: 1,
+            active: 0
+        }, // right
+        222: {
+            index: 5,
+            sign: 1,
+            active: 0
+        }, // single quote
+        191: {
+            index: 5,
+            sign: -1,
+            active: 0
+        }, // fwd slash
+    };
+
+
+    this.manualControls = keyboardUS;
+
+
+    this.update = function () {
+
+        let oldTime = this.updateTime;
+        let newTime = Date.now();
+        this.updateTime = newTime;
+
+        //--------------------------------------------------------------------
+        // Translation
+        //--------------------------------------------------------------------
+        let deltaTime = (newTime - oldTime) * 0.001;
+        let deltaPosition = new Vector().set(0, 0, 0);
+        let deltaPositionNonZero = false;
+
+
+        if (this.manualMoveRate[0] !== 0 || this.manualMoveRate[1] !== 0 || this.manualMoveRate[2] !== 0) {
+            deltaPosition = deltaPosition.add(globals.position.getFwdVector().multiplyScalar(translationSpeed * deltaTime * this.manualMoveRate[0]));
+            deltaPosition = deltaPosition.add(globals.position.getRightVector().multiplyScalar(translationSpeed * deltaTime * this.manualMoveRate[1]));
+            deltaPosition = deltaPosition.add(globals.position.getUpVector().multiplyScalar(translationSpeed * deltaTime * this.manualMoveRate[2]));
+            deltaPositionNonZero = true;
+        }
+
+        // do not flow if this is not needed !
+        if (deltaPositionNonZero) {
+            console.log('move');
+            globals.position.flow(deltaPosition);
+        }
+
+        //--------------------------------------------------------------------
+        // Rotation
+        //--------------------------------------------------------------------
+
+        let deltaRotation = new Quaternion();
+        let deltaRotationNonZero = false;
+
+        if (this.manualRotateRate[0] !== 0 || this.manualRotateRate[1] !== 0 || this.manualRotateRate[2] !== 0) {
+            deltaRotation.set(
+                this.manualRotateRate[0] * rotationSpeed * deltaTime,
+                this.manualRotateRate[1] * rotationSpeed * deltaTime,
+                this.manualRotateRate[2] * rotationSpeed * deltaTime,
+                1.0
+            );
+            deltaRotationNonZero = true;
+        }
+
+        if (deltaRotationNonZero) {
+            deltaRotation.normalize();
+            let m = new Matrix4().makeRotationFromQuaternion(deltaRotation);
+            globals.position.rotateFacingBy(m);
+        }
+
+    };
+
 
 };
 
-function keyDownHandler(event) {
-    if (event.keyCode == KeyboardHelper.right) {
-        rightPressed = true;
-    } else if (event.keyCode == KeyboardHelper.left) {
-        leftPressed = true;
-    }
-    if (event.keyCode == KeyboardHelper.down) {
-        downPressed = true;
-    } else if (event.keyCode == KeyboardHelper.up) {
-        upPressed = true;
-    }
-    if (event.keyCode == KeyboardHelper.bk) {
-        bkPressed = true;
-    } else if (event.keyCode == KeyboardHelper.fwd) {
-        fwdPressed = true;
-    }
-    if (event.keyCode == KeyboardHelper.rotRight) {
-        rotRightPressed = true;
-    } else if (event.keyCode == KeyboardHelper.rotLeft) {
-        rotLeftPressed = true;
-    }
-    if (event.keyCode == KeyboardHelper.rotDown) {
-        rotDownPressed = true;
-    } else if (event.keyCode == KeyboardHelper.rotUp) {
-        rotUpPressed = true;
-    }
-    if (event.keyCode == KeyboardHelper.CW) {
-        CWPressed = true;
-    } else if (event.keyCode == KeyboardHelper.CCW) {
-        CCWPressed = true;
-    }
-}
-
-
-
-function keyUpHandler(event) {
-    if (event.keyCode == KeyboardHelper.right) {
-        rightPressed = false;
-    } else if (event.keyCode == KeyboardHelper.left) {
-        leftPressed = false;
-    }
-    if (event.keyCode == KeyboardHelper.down) {
-        downPressed = false;
-    } else if (event.keyCode == KeyboardHelper.up) {
-        upPressed = false;
-    }
-
-    if (event.keyCode == KeyboardHelper.bk) {
-        bkPressed = false;
-    } else if (event.keyCode == KeyboardHelper.fwd) {
-        fwdPressed = false;
-    }
-
-    if (event.keyCode == KeyboardHelper.rotRight) {
-        rotRightPressed = false;
-    } else if (event.keyCode == KeyboardHelper.rotLeft) {
-        rotLeftPressed = false;
-    }
-    if (event.keyCode == KeyboardHelper.rotDown) {
-        rotDownPressed = false;
-    } else if (event.keyCode == KeyboardHelper.rotUp) {
-        rotUpPressed = false;
-    }
-
-    if (event.keyCode == KeyboardHelper.CW) {
-        CWPressed = false;
-    } else if (event.keyCode == KeyboardHelper.CCW) {
-        CCWPressed = false;
-    }
-}
-
-
-
-let vLR = new THREE.Vector3(0, 1, 0); //left right
-let vUD = new THREE.Vector3(1, 0, 0); //updown
-let vRot = new THREE.Vector3(0, 0, 1); //rotate
-
-let rotAmt = 0.01;
-
-function rotControls() {
-
-    let rot = new THREE.Matrix4().identity();
-    let mat = new THREE.Matrix4().identity();
-
-    // KEYBOARD
-    if (rotRightPressed) {
-        rot = new THREE.Matrix4().makeRotationAxis(vLR, -rotAmt);
-        mat.multiply(rot);
-
-    }
-
-    if (rotLeftPressed) {
-        rot = new THREE.Matrix4().makeRotationAxis(vLR, rotAmt);
-        mat.multiply(rot);
-    }
-
-    if (rotDownPressed) {
-        rot.makeRotationAxis(vUD, -rotAmt);
-        mat.multiply(rot);
-
-    }
-
-    if (rotUpPressed) {
-        rot.makeRotationAxis(vUD, rotAmt);
-        mat.multiply(rot);
-    }
-
-    if (CWPressed) {
-        rot.makeRotationAxis(vRot, rotAmt);
-        mat.multiply(rot);
-    }
-
-    if (CCWPressed) {
-        rot.makeRotationAxis(vRot, -rotAmt);
-        mat.multiply(rot);
-    }
-
-
-    let reportChange = rotRightPressed || rotLeftPressed || rotDownPressed || rotUpPressed || CWPressed || CCWPressed;
-
-    let totalRot = new THREE.Matrix3().setFromMatrix4(mat);
-    return [totalRot, reportChange];
-}
-
-
-
-
-
-let transAmt = 0.03;
-let transFwd = new THREE.Vector3(0, 0, -1);
-let transSide = new THREE.Vector3(1, 0, 0);
-let transUp = new THREE.Vector3(0, 1, 0);
-
-
-function translControls() {
-
-    let totalTrans = new THREE.Vector3(0, 0, 0);
-    let newTrans = new THREE.Vector3(0, 0, 0);
-
-    // KEYBOARD
-    if (rightPressed) {
-        newTrans = transSide.clone().multiplyScalar(transAmt);
-        totalTrans.add(newTrans);
-
-    }
-
-    if (leftPressed) {
-        newTrans = transSide.clone().multiplyScalar(-transAmt);
-        totalTrans.add(newTrans);
-    }
-
-    if (downPressed) {
-        newTrans = transUp.clone().multiplyScalar(-transAmt);
-        totalTrans.add(newTrans);
-
-    }
-
-    if (upPressed) {
-        newTrans = transUp.clone().multiplyScalar(transAmt);
-        totalTrans.add(newTrans);
-    }
-
-    if (fwdPressed) {
-        newTrans = transFwd.clone().multiplyScalar(transAmt);
-        totalTrans.add(newTrans);
-
-    }
-
-    if (bkPressed) {
-        newTrans = transFwd.clone().multiplyScalar(-transAmt);
-        totalTrans.add(newTrans);
-    }
-
-
-    let reportChange = rightPressed || leftPressed || downPressed || upPressed || bkPressed || fwdPressed;
-
-    return [totalTrans, reportChange];
-
-}
-
-
-
 export {
-    keyDownHandler,
-    keyUpHandler,
-    rotControls,
-    translControls
-}
+    Controls
+};
