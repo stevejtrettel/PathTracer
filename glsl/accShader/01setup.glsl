@@ -4,11 +4,8 @@
 //-------------------------------------------------
 
 uniform vec3 iResolution;
-uniform float iTime;
 uniform sampler2D sky;
 uniform sampler2D skySM;
-uniform sampler2D acc;
-uniform float iFrame;
 uniform mat3 facing;
 uniform vec3 location;
 uniform float seed;

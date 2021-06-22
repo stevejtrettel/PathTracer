@@ -8,12 +8,6 @@
             displayUniforms,
         } from "./uniforms.js";
 
-        import{ui} from "./ui.js";
-
-
-
-
-
 
         //Scene Variables
         //=============================================
@@ -22,22 +16,11 @@
         // things for building display and accumulation scenes
         let accScene, dispScene,combineScene;
         let accMaterial, dispMaterial,combineMaterial;
-        let accShader, dispShader,combineShader;
-
-
-
-
-
-
 
 
 
         //Build Accumulation Scene
         //=============================================
-
-
-
-
 
         async function buildAccShader() {
 
@@ -58,6 +41,10 @@
                     file: '../glsl/accShader/04geometry.glsl'
                 },
                 {
+                    //NEW
+                    file: '../glsl/newFrame/2Geometry/camera.glsl'
+                },
+                {
                     file: '../glsl/accShader/05materials.glsl'
                 },
                 {
@@ -67,25 +54,32 @@
                     file: '../glsl/accShader/07BSDF.glsl'
                 },
                 {
+                    //NEW
+                    file: '../glsl/newFrame/3Renderer/Basic/update.glsl'
+                },
+                {
                     file: '../glsl/accShader/08distanceFields.glsl'
                 },
                 {
                     file: '../glsl/accShader/09basicObjects.glsl'
                 },
-                           {
+                {
                     file: '../glsl/accShader/10compoundObjects.glsl'
                 },
                 {
                     file: '../glsl/accShader/11scene.glsl'
                 },
                 {
-                    file: '../glsl/accShader/12trace.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/6Trace/raymarch.glsl'
                 },
                 {
-                    file: '../glsl/accShader/13render.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/6Trace/pathTrace.glsl'
                 },
                 {
-                    file: '../glsl/accShader/14accumulate.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/main.glsl'
                 },
     ];
 
@@ -105,19 +99,7 @@
 
 
 
-        async function createAccShaderMat() {
-
-            //OLD WAY: LOAD SINGLE SHADER
-            //            const accText = await fetch('../glsl/accShader.glsl');
-            //            accShader = await accText.text();
-            //build the shader out of files
-
-            //build the shader text
-            accShader = await buildAccShader();
-        }
-
-
-        function createAccScene(accShader) {
+        async function createAccScene() {
 
             //make the actual scene, and the buffer Scene
             accScene = new THREE.Scene();
@@ -126,7 +108,7 @@
             const accPlane = new THREE.PlaneBufferGeometry(2, 2);
 
             accMaterial = new THREE.ShaderMaterial({
-                fragmentShader: accShader,
+                fragmentShader: await buildAccShader(),
                 uniforms: newFrameUniforms,
             });
 
@@ -140,16 +122,10 @@
         //Build Combine Scene
         //=============================================
 
+        async function createCombineScene() {
 
-        async function createCombineShaderMat() {
+            //build the shader
             const combineText = await fetch('../glsl/combine/combine.glsl');
-            combineShader = await combineText.text();
-        }
-
-
-
-        function createCombineScene(combineShader) {
-
 
             //make the actual scene, and the buffer Scene
             combineScene = new THREE.Scene();
@@ -160,14 +136,11 @@
 
 
             combineMaterial = new THREE.ShaderMaterial({
-                fragmentShader: combineShader,
+                fragmentShader: await combineText.text(),
                 uniforms: combineUniforms,
             });
 
-
             combineScene.add(new THREE.Mesh(combinePlane, combineMaterial));
-
-
         }
 
 
@@ -175,14 +148,10 @@
         //Build Display Scene
         //=============================================
 
+        async function createDispScene() {
 
-        async function createDispShaderMat() {
-            const dispText = await fetch('../glsl/dispShader.glsl');
-            dispShader = await dispText.text();
-        }
-
-
-        function createDispScene(dispShader) {
+            //build the shader
+            const dispText = await fetch('../glsl/display/display.glsl');
 
             //make the actual scene, and the buffer Scene
             dispScene = new THREE.Scene();
@@ -193,7 +162,7 @@
 
 
             dispMaterial = new THREE.ShaderMaterial({
-                fragmentShader: dispShader,
+                fragmentShader: await dispText.text(),
                 uniforms: displayUniforms,
             });
 
@@ -210,17 +179,11 @@
         //run one time to set things up
         async function buildScenes() {
 
-            await createAccShaderMat();
+            await createAccScene();
 
-            createAccScene(accShader);
+            await createCombineScene();
 
-            await createCombineShaderMat();
-
-            createCombineScene(combineShader);
-
-            await createDispShaderMat();
-
-            createDispScene(dispShader);
+            await createDispScene();
 
 
         }

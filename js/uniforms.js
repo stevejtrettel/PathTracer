@@ -27,25 +27,14 @@ const skyTexSmall = new THREE.TextureLoader().load('/js/tex/bk_sm.jpg');
 
 
 let newFrameUniforms={
-    iTime: {
-        value: 0
-    },
     iResolution: {
         value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
-    },
-    //frame number we are on
-    iFrame: {
-        value: 0
     },
     sky: {
         value: skyTex
     },
     skySM: {
         value: skyTexSmall
-    },
-    //accumulated texture
-    acc: {
-        value: null
     },
     facing: {
         value: new THREE.Matrix3().identity()
@@ -112,7 +101,7 @@ let displayUniforms={
 //=============================================
 
 function updateNewFrameUniforms(){
-    accMaterial.uniforms.iFrame.value += 1.;
+
     accMaterial.uniforms.seed.value += 1.;
 
     let rotData = rotControls();
