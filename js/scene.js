@@ -188,7 +188,7 @@
             let mat = rotData[0];
             let detectRot = rotData[1];
 
-            let translData = translControls(mat);
+            let translData = translControls(accMaterial.uniforms.facing.value);
             let vec = translData[0];
             let detectTransl = translData[1];
 

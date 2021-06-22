@@ -175,7 +175,7 @@ function translControls(facing) {
 
     // KEYBOARD
     if (rightPressed) {
-        newTrans = transSide.clone().multiplyScalar(transAmt);
+        newTrans = transSide.clone().applyMatrix3(facing).multiplyScalar(transAmt);
         totalTrans.add(newTrans);
 
     }
