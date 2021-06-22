@@ -29,13 +29,16 @@
 
             const shaders = [] = [
                 {
-                    file: '../glsl/accShader/01setup.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/1Setup/uniforms.glsl'
                 },
                 {
-                    file: '../glsl/accShader/02random.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/1Setup/random.glsl'
                 },
                 {
-                    file: '../glsl/accShader/03spectral.glsl'
+                    //NEW
+                    file: '../glsl/newFrame/1Setup/utilities.glsl'
                 },
                 {
                     file: '../glsl/accShader/04geometry.glsl'

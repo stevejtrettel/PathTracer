@@ -86,37 +86,15 @@ struct Path{
 
 
 
-void setLightColor(inout Path path, inout uint rngState){
-    
-    //if we dont want to run a spectral tracer
-    if(!doSpectral){
-        path.light=vec3(1.);
-        path.wavelength=550.;
-        return;
-    }
-      
-    
-  path.light=sampleSpectrum(path.wavelength,rngState);
-    
-
-}
-
-
-
-
-
-
-
-
-
 Path initializePath(Vector tv,inout uint rngState){
     Path path;
     
     
     path.tv=tv;//set the initial direction
     path.pixel=vec3(0.);//set the pixel black
-    
-    setLightColor(path,rngState);//set the initial light color
+
+    path.light=vec3(1.);
+    path.wavelength=550.;
     
     path.distance=0.;
     path.keepGoing=true;
@@ -131,22 +109,9 @@ Path initializePath(Vector tv,inout uint rngState){
 
 
 
-
-
-
-
-
-
-
-
-
-//-------------------------------------------------
+//------------------------------------------------
 //The LOCAL DATA Struct
 //-------------------------------------------------
-
-
-
-
 
 struct localData{
     bool isSky;
