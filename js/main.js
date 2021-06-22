@@ -1,225 +1,149 @@
-import {
-    Scene,
-    WebGLRenderer,
-    Vector2,
-    OrthographicCamera,
-    Mesh,
-    PlaneBufferGeometry,
-    ShaderMaterial
-} from './lib/three.module.js';
-
-import {
-    setOrigin,
-    createShaderUniforms,
-    updateShaderUniforms
-} from "./Uniforms.js";
-
-import {
-    createGui,
-    guiInfo,
-    capturer
-} from "./UI.js";
-import {
-    initEvents,
-} from './Events.js';
-import {
-    Controls
-} from './Controls.js';
-
-//----------------------------------------------------------------------------------------------------------------------
-// Global Variables
-//----------------------------------------------------------------------------------------------------------------------
+        //Import Stuff
+        //=============================================
+        import * as THREE from './libs/three.module.js';
 
 
-let globals = {
-    effect: undefined,
-    material: undefined,
-    controls: undefined,
-    position: undefined,
-    renderer: undefined,
-    screenResolution: undefined,
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-// Scene variables
-//----------------------------------------------------------------------------------------------------------------------
-
-let scene;
-let camera;
-let stats;
-let canvas;
+        import Stats from './libs/stats.module.js';
 
 
-//----------------------------------------------------------------------------------------------------------------------
-// Basic Components
-//----------------------------------------------------------------------------------------------------------------------
 
-function createStats(type) {
+        //Import My Own Stuff
+        //=============================================
+        import {
+            accMaterial,
+            dispMaterial,
+            accScene,
+            dispScene,
+            buildScenes,
+            updateUniforms
+        } from './scene.js'
 
-    var panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;
-    stats = new Stats();
 
-    stats.showPanel(panelType); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(stats.dom);
-}
+        import {
+            keyDownHandler,
+            keyUpHandler
+        } from './controls.js'
 
 
 
 
-function createCamera() {
+        //Global Variables
+        //=============================================
 
-    //make the one camera we will use for both renders
-    camera = new OrthographicCamera(
-        -1, // left
-        1, // right
-        1, // top
-        -1, // bottom
-        -1, // near,
-        1, // far
-    );
+        let camera, renderer, controls;
+        let container, canvas;
+        let stats;
 
-}
+        //textures for accumulating frames
+        let readTex, writeTex, tempTex;
 
 
 
-function createControls(){
-    globals.controls = new Controls();
-    setOrigin();//sets the origin
-}
 
 
 
-function setup(){
-    canvas = document.createElement('canvas');
-    let context = canvas.getContext('webgl2');
-
-    globals.renderer = new WebGLRenderer({
-        canvas: canvas,
-        context: context
-    });
-    document.body.appendChild(globals.renderer.domElement);
-
-    globals.screenResolution = new Vector2(window.innerWidth, window.innerHeight);
-    globals.effect = new renderEffect(globals.renderer);
-
-}
+        //Keyboard Controls
+        //=============================================
 
 
-//----------------------------------------------------------------------------------------------------------------------
-//EFFECT
-//----------------------------------------------------------------------------------------------------------------------
 
-//this controls the effect part of the animate loop
-let renderEffect = function (renderer, done) {
 
-    this._renderer = renderer;
 
-    this.render = function (scene, camera, animate) {
-        let renderer = this._renderer;
 
-        requestAnimationFrame(animate);
 
-        renderer.render.apply(this._renderer, [scene, camera]);
-        if (guiInfo.recording === true) {
-            capturer.capture(canvas);
+        //Creating Basic Components
+        //=============================================
+
+
+        function createStats(type) {
+
+            var panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;
+            var stats = new Stats();
+
+            stats.showPanel(panelType); // 0: fps, 1: ms, 2: mb, 3+: custom
+            document.body.appendChild(stats.dom);
+
+            return stats;
         }
-    };
-    this.setSize = function (width, height) {
-        renderer.setSize(width, height);
-    };
-};
 
 
 
 
 
-//----------------------------------------------------------------------------------------------------------------------
-// Building the Shader out of the GLSL files
-//----------------------------------------------------------------------------------------------------------------------
+        function createRenderer() {
+            renderer = new THREE.WebGLRenderer({
+                canvas,
+                alpha: true,
+                //  premultipliedAlpha: true,
+                //  preserveDrawingBuffer: true,
+                depth: false,
+                stencil: false
+            });
 
-async function buildShader() {
-
-    let newShader = '';
-
-    const shaders = [] = [
-        {
-            file: './shaders/setup/uniforms.glsl'
-        },
-        {
-            file: './shaders/setup/process.glsl'
-        },
-        {
-            file: './shaders/trace/geometry.glsl'
-        },
-        {
-            file: './shaders/render/physBased/Light.glsl'
-        },
-        {
-            file: './shaders/render/physBased/Material.glsl'
-        },
-        {
-            file: './shaders/render/physBased/Path.glsl'
-        },
-        {
-            file: './shaders/trace/raymarch/objects.glsl'
-        },
-        {
-            file: './shaders/trace/raymarch/sceneSDF.glsl'
-        },
-        {
-            file: './shaders/trace/raymarch/stepForward.glsl'
-        },
-        {
-            file: './shaders/render/physBased/getSurfaceColor.glsl'
-        },
-        {
-            file: './shaders/render/physBased/getPixelColor.glsl'
-        },
-        {
-            file: './shaders/main.glsl'
-        },
-    ];
+            // set the gamma correction so that output colors look
+            // correct on our screens
+            //renderer.gammaFactor = 1.;
+            renderer.outputEncoding = THREE.LinearEncoding;
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
 
 
-    //loop over the list of files
-    let response, text;
-    for (const shader of shaders) {
-        response = await fetch(shader.file);
-        text = await response.text();
-        newShader = newShader + text;
-    }
+        function createCamera() {
 
-    return newShader;
+            //make the one camera we will use for both renders
+            camera = new THREE.OrthographicCamera(
+                -1, // left
+                1, // right
+                1, // top
+                -1, // bottom
+                -1, // near,
+                1, // far
+            );
 
-}
+        }
 
 
 
 
+        function createFrameBuffers() {
+            //make the two textures we will render to\
+            //make it canvas sized
+            readTex = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
+
+            writeTex = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
+
+            // writeTex.texture.encoding = THREE.LinearEncoding;
+            // readTex.texture.encoding = THREE.LinearEncoding;
+
+        }
 
 
-async function createScene() {
 
-    let shaderCode=await buildShader();
-
-    //make the actual scene, and the buffer Scene
-    scene = new Scene();
-
-    //make the plane we draw on
-    const geom = new PlaneBufferGeometry(2, 2);
-
-    const mat = new ShaderMaterial({
-        fragmentShader: shaderCode,
-        vertexShader: document.getElementById('vertexShader').textContent,
-        uniforms: createShaderUniforms(),
-    });
-
-    globals.effect.setSize(globals.screenResolution.x, globals.screenResolution.y);
-
-    const screen=new Mesh(geom, mat);
-
-    scene.add(screen);
-}
+        function resizeToDisplay() {
+            //            canvas = renderer.domElement;
+            //            const width = canvas.clientWidth;
+            //            const height = canvas.clientHeight;
+            //            const needResize = canvas.width !== width || canvas.height !== height;
+            //            if (needResize) {
+            //                // renderer.setPixelRatio(window.devicePixelRatio);
+            //                renderer.setSize(window.innerWidth, window.innerHeight);
+            //
+            //                //make rendrr targets same size as screen
+            //                readTex.setSize(window.innerWidth, window.innerHeight);
+            //                writeTex.setSize(window.innerWidth, window.innerHeight);
+            //                //reset the count so that the new size begins new render
+            //                accMaterial.uniforms.iFrame.value = 0.;
+            //            }
+            // return needResize;
+        }
 
 
 
@@ -228,42 +152,95 @@ async function createScene() {
 
 
 
-//----------------------------------------------------------------------------------------------------------------------
-// Main Functions
-//----------------------------------------------------------------------------------------------------------------------
 
-function main() {
-
-    setup();
-
-    createCamera();
-    createControls();
-    createGui();
-    createStats();
-    createScene();
-
-    initEvents();
-
-    animate();
-}
+        //The Main Functions
+        //=============================================
 
 
 
-function animate() {
-    stats.begin();
-    globals.controls.update();
-    updateShaderUniforms();
-    globals.effect.render(scene, camera, animate);
-    stats.end();
-}
 
-//----------------------------------------------------------------------------------------------------------------------
-// Where the magic happens
-//----------------------------------------------------------------------------------------------------------------------
-
-main();
+        function render() {
 
 
-export {
-    globals
-};
+            //render to the texture B
+            renderer.setRenderTarget(writeTex);
+            renderer.render(accScene, camera);
+
+            // swap the read and write buffers
+            tempTex = readTex;
+            readTex = writeTex;
+            writeTex = tempTex;
+
+            //read off the new frame from readTex
+            //set this as the acc uniform for the displayMaterial
+            accMaterial.uniforms.acc.value = readTex.texture;
+            dispMaterial.uniforms.acc.value = readTex.texture;
+
+            //make the next move render to canvas
+            renderer.setRenderTarget(null);
+
+            //render the actual scene to the camera using this
+            renderer.render(dispScene, camera);
+
+        }
+
+
+
+
+        function animate() {
+
+            requestAnimationFrame(animate);
+
+            stats.begin();
+
+            //resizeToDisplay();
+
+            updateUniforms();
+
+            render();
+
+            stats.end();
+
+        }
+
+
+
+
+
+        async function main() {
+
+
+
+
+            //set the canvas
+            canvas = document.querySelector('#c');
+
+            stats = createStats();
+
+            createRenderer();
+
+            createCamera();
+
+            await buildScenes();
+
+            createFrameBuffers();
+
+            animate();
+
+        }
+
+
+
+
+
+
+        //Actually Running Things
+        //=============================================
+
+        document.addEventListener('keydown', keyDownHandler);
+
+        document.addEventListener('keyup', keyUpHandler);
+
+
+        // run the main function
+        main();

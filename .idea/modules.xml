@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/PhysicallyBasedRaymarch.iml" filepath="$PROJECT_DIR$/.idea/PhysicallyBasedRaymarch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/PathTracer.iml" filepath="$PROJECT_DIR$/.idea/PathTracer.iml" />
     </modules>
   </component>
 </project>
