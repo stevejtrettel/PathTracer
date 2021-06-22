@@ -138,7 +138,7 @@ Vector cameraRay(Vector tv, Camera cam, inout uint rngState){
 vec3 newFrame(vec2 fragCoord){
     
      // initialize a random number state based on frag coord and frame number (stored as "seed" instead of iFrame so it doean't get reset when flying)
-    uint rngState = randomSeed(fragCoord,iFrame);
+    uint rngState = randomSeed(fragCoord,seed);
     
     //now set up the camera:
     //all the entries are uniforms or constants in setup

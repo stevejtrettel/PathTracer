@@ -129,7 +129,10 @@ function updateNewFrameUniforms(){
 
         accMaterial.uniforms.location.value.add(vec);
 
-        //reset the combination
+        //stop updating the random seed:
+        accMaterial.uniforms.seed.value=0;
+
+        //reset the combination of frames
         combineMaterial.uniforms.iFrame.value = 0.;
     }
 }
