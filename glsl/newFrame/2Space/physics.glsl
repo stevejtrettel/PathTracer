@@ -1,4 +1,19 @@
 
+
+
+
+
+
+
+
+//reflect the unit tangent vector u off the surface with unit normal n
+Vector reflect(Vector v, Vector n){
+    return add(multiplyScalar(-2.0 * dot(v, n), n), v);
+}
+
+
+
+
 //refract the vector v through the surface with normal vector n, and ratio of indices IOR=current/entering
 Vector refract(Vector incident, Vector normal, float n){
 
@@ -7,7 +22,8 @@ Vector refract(Vector incident, Vector normal, float n){
 
     if (sinT2>1.){
         //just returning a nonsense value here as we should never have refraction when TIR
-        return incident; }//TIR
+        return incident;
+    }//TIR
 
     // reflect(incident,normal);}
     //Vector(incident.pos,vec3(0.,0.,0.));}//TIR

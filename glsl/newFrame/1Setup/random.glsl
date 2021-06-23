@@ -12,9 +12,16 @@
 uint seed;
 
 
+//--- the function we call in main() which sets seed
+uint randomSeed(vec2 fCoord,float frame){
+
+    uint seed = uint(uint(fCoord.x) * uint(1973) + uint(fCoord.y) * uint(925277) + uint(frame) * uint(26699)) | uint(1);
+    return seed;
+
+}
 
 
-
+//hash function that gets us our random numbers
 uint wang_hash()
 {
     seed = uint(seed ^ uint(61)) ^ uint(seed >> uint(16));
@@ -41,10 +48,8 @@ float randomFloat(float a,float b){
 
 
 
-
+//random unit vector at origin
 //this is thanks to archimedes sphere and the cylinder
-//uniform distribution on a sphere is the horizontal projection of uniform distribution on a cylinder
-//which unrolls to uniform on a rectangle
 vec3 randomUnitVector()
 {
     float z = randomFloat() * 2.0f - 1.0f;
@@ -58,7 +63,8 @@ vec3 randomUnitVector()
 
 
 
-//==== this is an idea for sampling a normal distribution from wikipedia by getting two independent normally distributed values out of two uniform distributed values
+//this is an idea for sampling a normal distribution from wikipedia
+//by getting two independent normally distributed values out of two uniform distributed values
 vec2 randomGaussian2D(){
     float u=randomFloat();
     float v=randomFloat();
@@ -70,6 +76,8 @@ vec2 randomGaussian2D(){
     return vec2(x,y);
 
 }
+
+
 
 //get a single one by just projecting off one of them
 float randomGaussian(float mean, float stdev){
@@ -84,15 +92,6 @@ float randomGaussian(float mean, float stdev){
 
 
 
-//--- the function we call in main() which sets seed
-//--- based on the frag coord and the frame number
-
-uint randomSeed(vec2 fCoord,float frame){
-
-    uint seed = uint(uint(fCoord.x) * uint(1973) + uint(fCoord.y) * uint(925277) + uint(frame) * uint(26699)) | uint(1);
-    return seed;
-
-}
 
 
 

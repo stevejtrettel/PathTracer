@@ -5,8 +5,7 @@
 
 
 struct Point {
-    vec3 coords;// the point in R4
-//last coordinate is 1.
+    vec3 coords;
 };
 
 // origin of the space
@@ -77,6 +76,7 @@ Vector select(Vector v, Vector w,float x){
 
 
 //overload of the usual mix command for vector directions
+//assumes same starting point, interpolates directions
 Vector mix(Vector v, Vector w, float x){
     vec3 dir=mix(v.dir,w.dir,x);
     return Vector(v.pos,dir);
@@ -100,10 +100,13 @@ void nudge(inout Vector v, Vector offset,float amt){
 
 
 
-//--------the local geometry----------------
+
+//-------------------------------------------------
+//THE LOCAL GEOMETRY OF THE SPACE
+//-------------------------------------------------
 
 
-
+//riemannian metric
 float dot(Vector v, Vector w){
     return dot(v.dir,w.dir);
 }
@@ -123,11 +126,6 @@ float cosAng(Vector v, Vector w){
     return dot(normalize(v),normalize(w));
 }
 
-
-//reflect the unit tangent vector u off the surface with unit normal n
-Vector reflect(Vector v, Vector n){
-    return add(multiplyScalar(-2.0 * dot(v, n), n), v);
-}
 
 
 

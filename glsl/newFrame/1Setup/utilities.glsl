@@ -42,48 +42,6 @@ vec3 SRGBToLinear(vec3 rgb)
 
 
 
-//-------------------------------------------------
-//Utilities
-//-------------------------------------------------
-
-
-// polynomial smooth min (k = 0.1);
-float smin( float a, float b, float k )
-{
-    float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
-    return mix( b, a, h ) - k*h*(1.0-h);
-}
-
-
-
-float smax( float a, float b, float k )
-{
-    return -smin(-a,-b,k);
-}
-
-
-float smin(float a, float b){
-    return smin(a,b,0.1);
-}
-
-float smax(float a, float b){
-    return smax(a,b,0.1);
-}
-
-float sq(float x){return x*x;}
-
-
-
-
-
-
-
-
-
-
-
-
-
 vec3 checkerboard(vec2 v){
     float x=mod(20.*v.x/6.28,2.);
     float y=mod(20.*v.y/3.14,2.);
