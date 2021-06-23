@@ -46,9 +46,9 @@ vec3 pathTrace(inout Path path){
     Vector importanceSample;
     localData dat;
     initializeData(dat);
-    maxBounces=50;
+    maxBounces=100;
 
-    for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
+    for (int bounceIndex = 0; bounceIndex <maxBounces; bounceIndex++)
     {
 
         // shoot a ray out into the world
@@ -57,14 +57,13 @@ vec3 pathTrace(inout Path path){
 
         //if you hit the sky: stop
         if(dat.isSky){
-            path.keepGoing=false;
             skyColor(path,dat);
             break;
         }
         if(focusHelp){
             focusCheck(path);
         }
-
+    path.pixel+=debug;
         // pick up any colors absorbed
         // while traveling inside an object:
         volumeColor(path,dat);

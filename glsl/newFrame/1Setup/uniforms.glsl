@@ -36,3 +36,4 @@ bool doSpectral=false;
 bool trashBool;
 float trashFloat;
 
+vec3 debug;

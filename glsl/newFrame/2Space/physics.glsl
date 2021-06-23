@@ -32,6 +32,7 @@ Vector refract(Vector incident, Vector normal, float n){
     float cosT=sqrt(1.0 - sinT2);
     vec3 dir=n*incident.dir+(n * cosX - cosT) * normal.dir;
     return Vector(incident.pos, dir);
+
 }
 
 
