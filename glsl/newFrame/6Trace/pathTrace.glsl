@@ -53,9 +53,9 @@ vec3 pathTrace(Path path){
         stepForward(path);
 
         //if you hit the sky: stop
-        if(path.dat.isSky){
-            return vec3(1,0,0);
-        }
+//        if(path.dat.isSky){
+//            updateFromSky(path);
+//        }
 
       return path.pixel;
 

@@ -4,7 +4,47 @@
 // and updates if a material is intersected within a specified threshhold
 //-------------------------------------------------
 
-float raymarch(inout Path path, float stopDist){
+
+
+
+float raymarchWalls(inout Path path, float stopDist){
+
+    float totalDist=0.;
+    float distToScene=0.;
+
+    for (int i = 0; i < maxMarchSteps; i++){
+
+        distToScene =abs(wallsSDF(path));
+
+        if (distToScene< EPSILON){
+            return totalDist;
+        }
+
+        totalDist += distToScene;
+
+        if(totalDist>stopDist){
+            //break out of loop
+            return stopDist;
+        }
+
+        //otherwise keep going
+        flow(path.tv, distToScene);
+    }
+
+    //if you hit nothing
+    path.keepGoing=false;
+    return stopDist;
+}
+
+
+
+
+
+
+
+
+
+float raymarchScene(inout Path path, float stopDist){
 
     float totalDist=0.;
     float distToScene=0.;
@@ -14,7 +54,6 @@ float raymarch(inout Path path, float stopDist){
         distToScene =abs(sceneSDF(path));
 
         if (distToScene< EPSILON){
-            path.pixel+=vec3(0,0,1);
             return totalDist;
         }
 
@@ -22,8 +61,7 @@ float raymarch(inout Path path, float stopDist){
 
         if(totalDist>stopDist){
             //break out of loop
-            path.pixel+=vec3(1,0,0);
-            return maxDist;
+            return stopDist;
         }
 
         //otherwise keep going
@@ -31,9 +69,8 @@ float raymarch(inout Path path, float stopDist){
     }
 
     //if you hit nothing
-    path.dat.isSky=true;
     path.keepGoing=false;
-    return maxDist;
+    return stopDist;
 }
 
 

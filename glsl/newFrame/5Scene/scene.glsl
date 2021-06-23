@@ -3,6 +3,28 @@
 
 
 //-------------------------------------------------
+//The WALLS
+//-------------------------------------------------
+
+
+
+float wallsSDF(Path path){
+
+    float dist=maxDist;
+
+        dist=min(dist,planeSDF(path,wall1));
+
+//        dist=min(dist,planeSDF(path,wall2));
+//
+//        dist=min(dist,planeSDF(path,wall3));
+
+        return dist;
+
+}
+
+
+
+//-------------------------------------------------
 //The SCENE
 //-------------------------------------------------
 
@@ -22,21 +44,11 @@ float sceneSDF(Path path){
 
     //------BALLS
 
-    dist=min(dist,sphereSDF(path,ball1));
+     dist=min(dist,sphereSDF(path,ball1));
 
      dist=min(dist,sphereSDF(path,ball2));
 
      dist=min(dist,sphereSDF(path, ball3));
-
-
-
-    //------WALLS
-
-   // dist=min(dist,planeSDF(path,wall1));
-
-  //  dist=min(dist,planeSDF(path,wall2));
-
-   // dist=min(dist,planeSDF(path,wall3));
 
 
     return dist;
