@@ -60,5 +60,3 @@ vec3 pathTrace(Path path){
       return path.pixel;
 
 }
-
-

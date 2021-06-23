@@ -13,7 +13,8 @@ void stepForward(inout Path path){
 
     //march the walls
     //start with threshhold=maxDist
-    distance=raymarchWalls(path,distance);
+    //distance=raymarchWalls(path,distance);
+    distance=raytraceWalls(path,distance);
     path.tv=origTV;//reset to orig loc
 
     //march the scene, use wallDist as threshhold

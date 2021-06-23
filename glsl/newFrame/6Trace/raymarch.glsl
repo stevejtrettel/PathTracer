@@ -12,7 +12,7 @@ float raymarchWalls(inout Path path, float stopDist){
 
     for (int i = 0; i < maxMarchSteps; i++){
 
-        distToScene =abs(wallsSDF(path));
+        distToScene = abs(wallsSDF(path));
 
         if (distToScene< EPSILON){
             return totalDist;
