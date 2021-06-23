@@ -99,11 +99,11 @@ float traceWalls(inout Path path,float stopDist){
 
     dist=planeTrace(path,wall3,dist);
 
-//    dist=planeTrace(path,wall4,dist);
-//
-//    dist=planeTrace(path,wall5,dist);
-//
-//    dist=planeTrace(path,wall6,dist);
+    dist=planeTrace(path,wall4,dist);
+
+    dist=planeTrace(path,wall5,dist);
+
+    dist=planeTrace(path,wall6,dist);
 
     return dist;
 
@@ -126,10 +126,10 @@ void setDataWalls(inout Path path){
 
     setPlaneData(path,wall3);
 
-//    setPlaneData(path,wall4);
-//
-//    setPlaneData(path,wall5);
-//
-//    setPlaneData(path,wall6);
+    setPlaneData(path,wall4);
+
+    setPlaneData(path,wall5);
+
+    setPlaneData(path,wall6);
 
 }
