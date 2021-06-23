@@ -5,7 +5,7 @@
 //-------------------------------------------------
 
 //takes in data after a raymarch, and chooses the type of ray which is cast next: diffuse, specular or refract
-void updateProbabilities( inout Path path ){
+//void updateProbabilities( inout Path path ){
 ////
 ////    //always assume the normal is outward facing for the surface we are at
 ////    Vector normal=dat.normal;
@@ -66,18 +66,34 @@ void updateProbabilities( inout Path path ){
 //    path.light /= path.type.probability;
 //
 
-}
+//}
 
+
+
+void updateProbabilities( inout Path path ){
+        //update using Fresnel
+}
 
 void scatter( inout Path path ){
 
-        Vector normal=path.dat.normal;
+        updateProbabilities(path);
 
-        //----- get a uniformly distributed vector on the sphere ----------
+        float random=randomFloat();
+
+        //----- useful vectors in the following computation ----------
+        Vector normal=path.dat.normal;
         Vector randomSph=Vector(path.tv.pos,randomUnitVector());
 
-        //-----make diffuse direction-------------------
-        path.tv=normalize(add(normal,randomSph));
+        if(random<path.dat.probSpecular){
+           //its a specular ray
+           path.tv=reflect(path.tv,normal);
+           setSpecular(path.type, path.dat.probSpecular);
+        }
+        else{
+          //its a diffuse ray
+          path.tv=normalize(add(normal,randomSph));
+          setDiffuse(path.type, path.dat.probDiffuse);
+        }
 
         //----flow in this direction a bit to get off surface
         flow(path.tv,20.*EPSILON);

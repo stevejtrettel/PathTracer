@@ -19,13 +19,9 @@ void stepForward(inout Path path){
     //move to this point of intersection
     path.distance=distance;
     flow(path.tv,distance);
-    path.dat.isSky=(path.distance==maxDist);
+    path.dat.isSky=(path.distance>maxDist-0.1);
 
-    //if we hit the sky, quit:
-    if(path.dat.isSky){
-        return;
+    if(!path.dat.isSky){
+        setDataScene(path);
     }
-
-    //otherwise set the local data
-    setDataScene(path);
 }

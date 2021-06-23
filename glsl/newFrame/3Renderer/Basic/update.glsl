@@ -9,6 +9,8 @@ void setObjectInAir(inout localData dat, float side, Vector normal, Material mat
     dat.isSky=false;
     dat.surfDiffuse=mat.diffuseColor;
     dat.surfEmit=mat.emitColor;
+    dat.probDiffuse=1.-mat.specularChance;
+    dat.probSpecular=mat.specularChance;
 
     if(side<0.){
         //we are inside
@@ -44,27 +46,24 @@ void updateFromVolume(inout Path path){
 
 void updateFromSurface(inout Path path){
 
-    path.pixel+=path.light*path.dat.surfEmit;
-    path.light*=path.dat.surfDiffuse;
+    //add in emissive lighting
+    path.pixel += path.light * path.dat.surfEmit;
 
-//    // add in emissive lighting
-//    path.pixel += path.light*path.dat.mat.emitColor ;
-//
-//    // update the colorMultiplier
-//    //only do if not refractive (those taken care of with volume)
-//    if(!path.type.refract){
-//        //color choice depends on specular or diffuse
-//        path.light *= (path.type.specular)?path.dat.mat.specularColor:path.dat.mat.diffuseColor;
-//    }
+    //only do if not a refracive path
+    path.light *= path.dat.surfDiffuse;
+    //path.light *= (path.type.specular)?path.dat.mat.specularColor:path.dat.mat.diffuseColor;
+
 }
 
 
 
 void updateFromSky(inout Path path){
-//    vec3 skyColor=skyTex(path.tv.dir);
-//    //vec3 skyColor=vec3(0.5);
-//    path.pixel +=path.light*skyColor;
-//    path.keepGoing=false;
+    if(path.dat.isSky){
+        vec3 skyColor = skyTex(path.tv.dir);
+        //vec3 skyColor=vec3(0.5);
+        path.pixel += path.light*skyColor;
+        path.keepGoing = false;
+    }
 }
 
 
