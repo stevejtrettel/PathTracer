@@ -63,22 +63,19 @@ void setRefract(inout RayType type,float prob){
 
 struct localData{
     bool isSky;
+    bool isLight;
     bool materialInterface;//are we at the interface of two materials, or at an air/material interface
 
     Vector normal;//outward pointing (back at you) normal to surface just impacted
 
-    float distanceTraveled;
-    vec3 surfaceDiffuse;
-    vec3 surfaceSpecular;
-    vec3 surfaceEmit;
-    vec3 currentAbsorb;
-    vec3 currentEmit;
-    vec3 neighborAbsorb;
-    vec3 neighborEmit;
-    float IOR;
-    float reflectionChance;
-    float refractionChance;
-    float diffuseChance;
+    Material mat;//material used in coloring
+
+    float IOR;//the ratio of index of refraction
+//curernt material divided by entering material
+
+    vec3 reflectAbsorb;//absorbtion of material if we reflect
+    vec3 refractAbsorb;//absorbation of material if we refract
+
 };
 
 
@@ -86,21 +83,32 @@ localData trashDat;
 
 void initializeData(localData dat){
     dat.isSky=false;
+    dat.isLight=false;
     dat.materialInterface=false;
-
-    dat.distanceTraveled=0.;
-    dat.surfaceDiffuse=vec3(0.);
-    dat.surfaceSpecular=vec3(0.);
-    dat.surfaceEmit=vec3(0.);
-    dat.currentAbsorb=vec3(0.);
-    dat.currentEmit=vec3(0.);
-    dat.neighborAbsorb=vec3(0.);
-    dat.neighborEmit=vec3(0.);
-    dat.IOR=1.;
-    dat.reflectionChance=0.;
-    dat.refractionChance=1.;
-    dat.diffuseChance=0.;
+    dat.reflectAbsorb=vec3(0.);
+    dat.refractAbsorb=vec3(0.);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -114,13 +122,19 @@ void initializeData(localData dat){
 
 
 struct Path{
+
     Vector tv; //direction of tracing
     vec3 pixel;//pixel color
     vec3 light;//light along path
 
-    RayType type;
-    localData dat;
     bool keepGoing;
+    float distance; //distance traveled on a bounce
+    RayType type;
+
+    localData dat;
+
+    vec3 absorb;
+    vec3 debug;
 };
 
 
@@ -134,10 +148,15 @@ Path initializePath(Vector tv){
     path.pixel=vec3(0.);//set the pixel black
     path.light=vec3(1.);
 
+    path.distance=0.;
     path.keepGoing=true;
+    // path.inside=false;
     path.type=intializeRayType();
+
     initializeData(path.dat);
 
+    path.debug=vec3(0.);
+    path.absorb=vec3(0.);
     return path;
 }
 
