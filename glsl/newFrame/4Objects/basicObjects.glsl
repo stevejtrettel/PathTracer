@@ -45,7 +45,7 @@ float sphereSDF(inout Path path, Sphere sph){
     if(abs(dist)<EPSILON){
 
         //TEMPORARY
-        path.pixel+=sph.mat.diffuseColor;
+        path.pixel=sph.mat.diffuseColor;
 
         //compute the normal
         Vector normal=sphereNormal(path.tv,sph);
@@ -104,7 +104,7 @@ float planeSDF(inout Path path,  Plane plane){
     if(abs(dist)<EPSILON){
 
         //TEMPORARY
-        path.pixel+=plane.mat.diffuseColor;
+        path.pixel=plane.mat.diffuseColor;
 
         //compute the normal
         Vector normal=planeNormal(path.tv,plane);
