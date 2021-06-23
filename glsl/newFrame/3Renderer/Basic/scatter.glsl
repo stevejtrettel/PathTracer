@@ -5,7 +5,7 @@
 //-------------------------------------------------
 
 //takes in data after a raymarch, and chooses the type of ray which is cast next: diffuse, specular or refract
-void updateProbabilities( inout Path path,inout localData dat){
+void updateProbabilities( inout Path path ){
 //
 //    //always assume the normal is outward facing for the surface we are at
 //    Vector normal=dat.normal;
@@ -14,8 +14,8 @@ void updateProbabilities( inout Path path,inout localData dat){
 //    // specular takes priority.
 //    // chanceMultiplier makes sure we keep diffuse / refraction ratio the same.
 
-    float specularChance=dat.mat.specularChance;
-    float refractionChance=dat.mat.refractionChance;
+    float specularChance=path.dat.mat.specularChance;
+    float refractionChance=path.dat.mat.refractionChance;
     float diffuseChance=1.0-specularChance-refractionChance;
 
 //    //if there's a chance of specular
@@ -41,19 +41,19 @@ void updateProbabilities( inout Path path,inout localData dat){
     if (raySelectRoll < specularChance)
     {
         setSpecular(path.type,specularChance);
-        path.absorb=dat.reflectAbsorb;
+        path.absorb=path.dat.reflectAbsorb;
 
     }
     else if (raySelectRoll < specularChance + refractionChance)
     {
         //this only runs if reflection is not 100%, which means we are not in the TIR situation
         setRefract(path.type,1.);
-        path.absorb=dat.refractAbsorb;
+        path.absorb=path.dat.refractAbsorb;
     }
     else
     {
         setDiffuse(path.type, diffuseChance);
-        path.absorb=dat.reflectAbsorb;
+        path.absorb=path.dat.reflectAbsorb;
 
     }
 
@@ -74,9 +74,13 @@ void updateProbabilities( inout Path path,inout localData dat){
 
 
 
-void updateRay(inout Path path, localData dat){
+void scatter( inout Path path ){
 
-    Vector normal=dat.normal;
+
+    //update reflectivity,refractivity based on IOR and normal
+    updateProbabilities(path);
+
+    Vector normal=path.dat.normal;
 
     //----- get a uniformly distributed vector on the sphere ----------
     Vector randomSph=Vector(path.tv.pos,randomUnitVector());
@@ -98,7 +102,7 @@ void updateRay(inout Path path, localData dat){
     Vector refractionDir;
 
     //get the refracted ray direction from IOR
-    refractionDir = refract(path.tv, normal, dat.IOR);
+    refractionDir = refract(path.tv, normal, path.dat.IOR);
 
     //update refraction ray based on roughness
     //refractionDir = normalize(mix(refractionDir, negate(diffuseDir), rough2));

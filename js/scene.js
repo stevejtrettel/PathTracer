@@ -44,6 +44,7 @@
                 {file: '../glsl/newFrame/5Scene/initialize.glsl'},
                 {file: '../glsl/newFrame/5Scene/scene.glsl'},
                 {file: '../glsl/newFrame/6Trace/raymarch.glsl'},
+                {file: '../glsl/newFrame/6Trace/stepForward.glsl'},
                 {file: '../glsl/newFrame/6Trace/pathTrace.glsl'},
                 {file: '../glsl/newFrame/main.glsl'},
     ];

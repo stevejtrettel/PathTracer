@@ -38,66 +38,59 @@ void setObjectInAir(inout localData dat, float dist, Vector normal, Material mat
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //-------------------------------------------------
-// The LIGHTING FUNCTIONS
+// The NEW FUNCTIONS
 //-------------------------------------------------
 
-void volumeColor(inout Path path,localData dat){
+
+void updateFromVolume(inout Path path){
     path.light *= exp(-path.absorb*path.distance);
 }
 
 
-
-
-void surfaceColor(inout Path path,localData dat){
-
+void updateFromSurface(inout Path path){
     // add in emissive lighting
-    path.pixel += path.light*dat.mat.emitColor ;
+    path.pixel += path.light*path.dat.mat.emitColor ;
 
     // update the colorMultiplier
     //only do if not refractive (those taken care of with volume)
     if(path.type.refract==0.){
         //color choice depends on specular or diffuse
-        path.light *= (path.type.specular==1.)?dat.mat.specularColor:dat.mat.diffuseColor;
+        path.light *= (path.type.specular==1.)?path.dat.mat.specularColor:path.dat.mat.diffuseColor;
     }
-
 }
 
 
-void skyColor(inout Path path,inout localData dat){
-    vec3 skyColor=skyTex(path.tv.dir);
-    //vec3 skyColor=0.1*checkerTex(path.tv.dir);
-    //vec3 skyColor=vec3(0.05);
+
+void updateFromSky(inout Path path){
+    //vec3 skyColor=skyTex(path.tv.dir);
+    vec3 skyColor=vec3(0.5);
     path.pixel +=path.light*skyColor;
+    path.keepGoing=false;
 }
 
 
-//-------------------------------------------------
-// The FOCUS CHECK
-//-------------------------------------------------
 
 void focusCheck(inout Path path){
-
-    if(abs(path.distance-focalLength)<0.5){
+    if(abs(path.distance-focalLength)<0.5&&focusHelp){
         path.pixel+=vec3(1.,0.,0.);
     }
-
 }
+
+
+
+void roulette(inout Path path){
+
+    // As the light left gets smaller, the ray is more likely to get terminated early.
+    // Survivors have their value boosted to make up for fewer samples being in the average.
+
+    float p = L1_Norm(path.light);
+    if (randomFloat() > p){
+        path.keepGoing=false;
+    }
+    // Add the energy we 'lose' by randomly terminating paths
+    path.light *= 1.0f / p;
+}
+
+
 

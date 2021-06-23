@@ -8,7 +8,7 @@
 
 
 
-float sceneSDF(Vector tv, inout localData dat){
+float sceneSDF(Path path){
 
     float dist=maxDist;
 
@@ -22,22 +22,21 @@ float sceneSDF(Vector tv, inout localData dat){
 
     //------BALLS
 
-    //dist=min(dist,sphereSDF(tv,ball1,dat));
+    dist=min(dist,sphereSDF(path,ball1));
 
-     //dist=min(dist,sphereSDF(tv,ball2,dat));
+     dist=min(dist,sphereSDF(path,ball2));
 
-     dist=min(dist,sphereSDF(tv,ball3,dat));
+     dist=min(dist,sphereSDF(path, ball3));
 
 
 
     //------WALLS
 
-    //dist=min(dist,planeSDF(tv,wall1,dat));
+   // dist=min(dist,planeSDF(path,wall1));
 
-   // dist=min(dist,planeSDF(tv,wall2,dat));
+  //  dist=min(dist,planeSDF(path,wall2));
 
-    //dist=min(dist,planeSDF(tv,wall3,dat));
-
+   // dist=min(dist,planeSDF(path,wall3));
 
 
     return dist;

@@ -56,59 +56,6 @@ void setRefract(inout RayType type,float prob){
 
 
 
-
-
-//-------------------------------------------------
-//The Path Struct
-//-------------------------------------------------
-
-
-struct Path{
-
-    Vector tv;
-    vec3 pixel;//pixel color
-    vec3 light;//light along path
-    float wavelength;//wavelength of starting ray
-
-    RayType type;
-
-    vec3 absorb;
-// float side;
-//   bool inside;
-    bool keepGoing;
-    float distance; //distance traveled on a bounce
-
-    vec3 debug;
-
-};
-
-
-
-
-
-Path initializePath(Vector tv){
-    Path path;
-
-
-    path.tv=tv;//set the initial direction
-    path.pixel=vec3(0.);//set the pixel black
-
-    path.light=vec3(1.);
-    path.wavelength=550.;
-
-    path.distance=0.;
-    path.keepGoing=true;
-    // path.inside=false;
-    path.type=intializeRayType();
-
-    path.debug=vec3(0.);
-    path.absorb=vec3(0.);
-    return path;
-}
-
-
-
-
 //------------------------------------------------
 //The LOCAL DATA Struct
 //-------------------------------------------------
@@ -142,6 +89,61 @@ void initializeData(localData dat){
     dat.materialInterface=false;
     dat.reflectAbsorb=vec3(0.);
     dat.refractAbsorb=vec3(0.);
+}
+
+
+
+
+
+
+//-------------------------------------------------
+//The Path Struct
+//-------------------------------------------------
+
+
+struct Path{
+
+    Vector tv;
+    vec3 pixel;//pixel color
+    vec3 light;//light along path
+    float wavelength;//wavelength of starting ray
+
+    RayType type;
+    localData dat;
+
+    vec3 absorb;
+// float side;
+//   bool inside;
+    bool keepGoing;
+    float distance; //distance traveled on a bounce
+
+    vec3 debug;
+
+};
+
+
+
+
+
+Path initializePath(Vector tv){
+    Path path;
+
+
+    path.tv=tv;//set the initial direction
+    path.pixel=vec3(0.);//set the pixel black
+
+    path.light=vec3(1.);
+    path.wavelength=550.;
+
+    path.distance=0.;
+    path.keepGoing=true;
+    // path.inside=false;
+    path.type=intializeRayType();
+    initializeData(path.dat);
+
+    path.debug=vec3(0.);
+    path.absorb=vec3(0.);
+    return path;
 }
 
 

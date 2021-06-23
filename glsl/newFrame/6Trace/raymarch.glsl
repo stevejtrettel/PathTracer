@@ -4,74 +4,37 @@
 // and updates if a material is intersected within a specified threshhold
 //-------------------------------------------------
 
+float raymarch(inout Path path, float stopDist){
 
-
-float raymarch(Vector tv, inout localData dat){
-
-    float distToScene=0.;
     float totalDist=0.;
-
-    float factor=0.8;
-    float marchDist;
-
+    float distToScene=0.;
 
     for (int i = 0; i < maxMarchSteps; i++){
 
-        distToScene =abs(sceneSDF(tv,dat));
-        marchDist=factor*distToScene;
+        distToScene =abs(sceneSDF(path));
 
         if (distToScene< EPSILON){
+            path.pixel+=vec3(0,0,1);
             return totalDist;
         }
 
-        totalDist += marchDist;
+        totalDist += distToScene;
 
-        if(totalDist>maxDist){
-            break;
+        if(totalDist>stopDist){
+            //break out of loop
+            path.pixel+=vec3(1,0,0);
+            return maxDist;
         }
 
         //otherwise keep going
-        flow(tv, marchDist);
+        flow(path.tv, distToScene);
     }
 
     //if you hit nothing
-    dat.isSky=true;
+    path.dat.isSky=true;
+    path.keepGoing=false;
     return maxDist;
 }
 
-
-
-//float raymarch(Path path, float stopDist){
-//
-//    float distToScene=0.;
-//    float totalDist=0.;
-//
-//    float marchDist;
-//
-//    for (int i = 0; i < maxMarchSteps; i++){
-//
-//        distToScene =abs(sceneSDF(path));
-//
-//        if (distToScene< EPSILON){
-//            return totalDist;
-//        }
-//
-//        totalDist += distToScene;
-//
-//        if(totalDist>stopDist){
-//            //break out of loop
-//            return maxDist;
-//        }
-//
-//        //otherwise keep going
-//        flow(path.tv, marchDist);
-//    }
-//
-//    //if you hit nothing
-//    path.dat.isSky=true;
-//    path.keepGoing=false;
-//    return maxDist;
-//}
-//
 
 
