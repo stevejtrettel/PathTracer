@@ -14,15 +14,15 @@
 
 
         // things for building display and accumulation scenes
-        let accScene, dispScene,combineScene;
-        let accMaterial, dispMaterial,combineMaterial;
+        let newFrameScene, dispScene,combineScene;
+        let newFrameMaterial, dispMaterial,combineMaterial;
 
 
 
         //Build Accumulation Scene
         //=============================================
 
-        async function buildAccShader() {
+        async function buildNewFrameShader() {
 
             let newShader = '';
 
@@ -64,20 +64,20 @@
 
 
 
-        async function createAccScene() {
+        async function createNewFrameScene() {
 
             //make the actual scene, and the buffer Scene
-            accScene = new THREE.Scene();
+            newFrameScene = new THREE.Scene();
 
             //make the plane we will add to both scenes
-            const accPlane = new THREE.PlaneBufferGeometry(2, 2);
+            const newFramePlane = new THREE.PlaneBufferGeometry(2, 2);
 
-            accMaterial = new THREE.ShaderMaterial({
-                fragmentShader: await buildAccShader(),
+            newFrameMaterial = new THREE.ShaderMaterial({
+                fragmentShader: await buildNewFrameShader(),
                 uniforms: newFrameUniforms,
             });
 
-            accScene.add(new THREE.Mesh(accPlane, accMaterial));
+            newFrameScene.add(new THREE.Mesh(newFramePlane, newFrameMaterial));
 
         }
 
@@ -144,7 +144,7 @@
         //run one time to set things up
         async function buildScenes() {
 
-            await createAccScene();
+            await createNewFrameScene();
 
             await createCombineScene();
 
@@ -157,10 +157,10 @@
 
 
         export {
-            accMaterial,
+            newFrameMaterial,
             combineMaterial,
             dispMaterial,
-            accScene,
+            newFrameScene,
             combineScene,
             dispScene,
             buildScenes,

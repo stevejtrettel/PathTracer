@@ -10,10 +10,10 @@
         //Import My Own Stuff
         //=============================================
         import {
-            accMaterial,
+            newFrameMaterial,
             combineMaterial,
             dispMaterial,
-            accScene,
+            newFrameScene,
             combineScene,
             dispScene,
             buildScenes,
@@ -185,7 +185,7 @@
 
             //render to the texture
             renderer.setRenderTarget(writeTex);
-            renderer.render(accScene, camera);
+            renderer.render(newFrameScene, camera);
 
             // swap the read and write buffers
             tempTex = readTex;

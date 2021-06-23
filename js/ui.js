@@ -12,7 +12,7 @@ import {
 
 //NONE HERE
 import{
-    accMaterial,
+    newFrameMaterial,
     combineMaterial
 } from "./scene.js";
 
@@ -55,27 +55,27 @@ function createUI() {
 
 
     brightnessController.onChange(function(value){
-        accMaterial.uniforms.brightness.value=value;
+        newFrameMaterial.uniforms.brightness.value=value;
         combineMaterial.uniforms.frameNumber.value=0;
     });
 
     apertureController.onChange(function(value){
-        accMaterial.uniforms.aperture.value=value;
+        newFrameMaterial.uniforms.aperture.value=value;
         combineMaterial.uniforms.frameNumber.value=0;
     });
 
     focalLengthController.onChange(function(value){
-        accMaterial.uniforms.focalLength.value=value;
+        newFrameMaterial.uniforms.focalLength.value=value;
         combineMaterial.uniforms.frameNumber.value=0;
     });
 
     focusHelpController.onChange(function(value){
-        accMaterial.uniforms.focusHelp.value=value;
+        newFrameMaterial.uniforms.focusHelp.value=value;
         combineMaterial.uniforms.frameNumber.value=0;
     });
 
     fovController.onChange(function(value){
-        accMaterial.uniforms.fov.value=value;
+        newFrameMaterial.uniforms.fov.value=value;
         combineMaterial.uniforms.frameNumber.value=0;
     });
 }

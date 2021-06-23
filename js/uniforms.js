@@ -9,7 +9,7 @@ import {
 
 
 import{ui} from "./ui.js";
-import {accMaterial, combineMaterial} from "./scene.js";
+import {newFrameMaterial, combineMaterial} from "./scene.js";
 
 
 //Scene Variables
@@ -102,24 +102,24 @@ let displayUniforms={
 
 function updateNewFrameUniforms(){
 
-    accMaterial.uniforms.frameSeed.value += 1.;
+    newFrameMaterial.uniforms.frameSeed.value += 1.;
 
     let rotData = rotControls();
     let mat = rotData[0];
     let detectRot = rotData[1];
 
-    let translData = translControls(accMaterial.uniforms.facing.value);
+    let translData = translControls(newFrameMaterial.uniforms.facing.value);
     let vec = translData[0];
     let detectTransl = translData[1];
 
     if (detectRot || detectTransl) {
 
-        accMaterial.uniforms.facing.value.multiply(mat);
+        newFrameMaterial.uniforms.facing.value.multiply(mat);
 
-        accMaterial.uniforms.location.value.add(vec);
+        newFrameMaterial.uniforms.location.value.add(vec);
 
         //reset the frame number to start again
-        accMaterial.uniforms.frameSeed.value=0;
+        newFrameMaterial.uniforms.frameSeed.value=0;
         combineMaterial.uniforms.frameNumber.value = 0.;
     }
 }
