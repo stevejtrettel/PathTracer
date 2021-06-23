@@ -3,7 +3,7 @@
 // this is the main path tracing loop
 //  used in main.glsl
 //-------------------------------------------------
-//
+
 //vec3 pathTrace(inout Path path){
 //
 //    maxBounces=50;
@@ -16,7 +16,7 @@
 //        stepForward(path);
 //
 //        //pick up the colors you accrued along the way
-//        updateFromVolume(path);
+//        //updateFromVolume(path);
 //
 //        //if you hit the sky: stop
 //        if(path.dat.isSky){
@@ -25,7 +25,7 @@
 //        }
 //
 //        //run the focus helper (if turned on)
-//        focusCheck(path);
+//        //focusCheck(path);
 //
 //        //set probabilities for spec, refract, diffuse
 //        //use these probabilities to set the new ray
@@ -35,7 +35,7 @@
 //        updateFromSurface(path);
 //
 //        //probabilistically kill rays
-//        roulette(path);
+//        //roulette(path);
 //
 //        //if killed ray, sample the light
 //        if(!path.keepGoing){
@@ -52,10 +52,10 @@ vec3 pathTrace(Path path){
 
         stepForward(path);
 
-        //if you hit the sky: stop
-//        if(path.dat.isSky){
-//            updateFromSky(path);
-//        }
+       // if you hit the sky: stop
+        if(path.dat.isSky){
+            updateFromSky(path);
+        }
 
       return path.pixel;
 

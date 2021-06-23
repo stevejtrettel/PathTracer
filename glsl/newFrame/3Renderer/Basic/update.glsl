@@ -63,8 +63,8 @@ void updateFromSurface(inout Path path){
 
 
 void updateFromSky(inout Path path){
-    //vec3 skyColor=skyTex(path.tv.dir);
-    vec3 skyColor=vec3(0.5);
+    vec3 skyColor=skyTex(path.tv.dir);
+    //vec3 skyColor=vec3(0.5);
     path.pixel +=path.light*skyColor;
     path.keepGoing=false;
 }

@@ -37,12 +37,15 @@ Vector sphereNormal(Vector tv, Sphere sph){
 
 
 //------sdf
-float sphereSDF(Path path, Sphere sph){
+float sphereSDF(inout Path path, Sphere sph){
 
     //distance to closest point:
     float dist = sphereDistance(path.tv,sph);
 
     if(abs(dist)<EPSILON){
+
+        //TEMPORARY
+        path.pixel+=sph.mat.diffuseColor;
 
         //compute the normal
         Vector normal=sphereNormal(path.tv,sph);
@@ -99,6 +102,9 @@ float planeSDF(inout Path path,  Plane plane){
     float dist=planeDistance(path.tv,plane);
 
     if(abs(dist)<EPSILON){
+
+        //TEMPORARY
+        path.pixel+=plane.mat.diffuseColor;
 
         //compute the normal
         Vector normal=planeNormal(path.tv,plane);

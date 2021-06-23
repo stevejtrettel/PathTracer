@@ -23,7 +23,6 @@ void stepForward(inout Path path){
     if(min(wallsDist,sceneDist)==maxDist){
         path.distance=maxDist;
         path.dat.isSky=true;
-        path.pixel+=vec3(0.1,0,0);
         return;
     }
 
@@ -31,14 +30,13 @@ void stepForward(inout Path path){
     if(sceneDist<wallsDist){
         path.distance=sceneDist;
         path=scenePath;
-        path.pixel+=vec3(0,0.1,0);
         return;
     }
 
     else{
         path.distance=wallsDist;
         path=wallsPath;
-        path.pixel+=vec3(0,0,0.1);
+
         return;
     }
 

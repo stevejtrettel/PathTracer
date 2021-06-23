@@ -8,7 +8,7 @@
 
 
 
-float wallsSDF(Path path){
+float wallsSDF(inout Path path){
 
     float dist=maxDist;
 
@@ -30,16 +30,15 @@ float wallsSDF(Path path){
 
 
 
-float sceneSDF(Path path){
+float sceneSDF(inout Path path){
 
     float dist=maxDist;
 
-    //top orange light
-    //dist=min(dist,sphereSDF(tv,light2,dat));
+    dist=min(dist,sphereSDF(path,light2));
 
-    // dist=min(dist,sphereSDF(tv,light3,dat));
+    dist=min(dist,sphereSDF(path,light3));
 
-    //dist=min(dist,sphereSDF(tv,light4,dat));
+    dist=min(dist,sphereSDF(path,light4));
 
 
     //------BALLS
