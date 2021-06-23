@@ -28,76 +28,24 @@
 
 
             const shaders = [] = [
-                {
-                    //NEW
-                    file: '../glsl/newFrame/1Setup/uniforms.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/1Setup/math.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/1Setup/random.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/1Setup/utilities.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/2Space/geometry.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/2Space/physics.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/2Space/camera.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/3Renderer/Basic/material.glsl'
-                },
-                {
-                    file: '../glsl/accShader/06path.glsl'
-                },
-                {
-                    file: '../glsl/accShader/07BSDF.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/3Renderer/Basic/update.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/4Objects/computations.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/4Objects/basicObjects.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/5Scene/initialize.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/5Scene/scene.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/6Trace/raymarch.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/6Trace/pathTrace.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/main.glsl'
-                },
+                {file: '../glsl/newFrame/1Setup/uniforms.glsl'},
+                {file: '../glsl/newFrame/1Setup/math.glsl'},
+                {file: '../glsl/newFrame/1Setup/random.glsl'},
+                {file: '../glsl/newFrame/1Setup/utilities.glsl'},
+                {file: '../glsl/newFrame/2Space/geometry.glsl'},
+                {file: '../glsl/newFrame/2Space/physics.glsl'},
+                {file: '../glsl/newFrame/2Space/camera.glsl'},
+                {file: '../glsl/newFrame/3Renderer/Basic/material.glsl'},
+                {file: '../glsl/newFrame/3Renderer/Basic/path.glsl'},
+                {file: '../glsl/newFrame/3Renderer/Basic/scatter.glsl'},
+                {file: '../glsl/newFrame/3Renderer/Basic/update.glsl'},
+                {file: '../glsl/newFrame/4Objects/computations.glsl'},
+                {file: '../glsl/newFrame/4Objects/basicObjects.glsl'},
+                {file: '../glsl/newFrame/5Scene/initialize.glsl'},
+                {file: '../glsl/newFrame/5Scene/scene.glsl'},
+                {file: '../glsl/newFrame/6Trace/raymarch.glsl'},
+                {file: '../glsl/newFrame/6Trace/pathTrace.glsl'},
+                {file: '../glsl/newFrame/main.glsl'},
     ];
 
 
