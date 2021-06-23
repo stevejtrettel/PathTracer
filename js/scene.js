@@ -61,12 +61,10 @@
                     file: '../glsl/newFrame/3Renderer/Basic/material.glsl'
                 },
                 {
-                    //NEW
-                    file: '../glsl/newFrame/3Renderer/Basic/path.glsl'
+                    file: '../glsl/accShader/06path.glsl'
                 },
                 {
-                    //NEW
-                    file: '../glsl/newFrame/3Renderer/Basic/scatter.glsl'
+                    file: '../glsl/accShader/07BSDF.glsl'
                 },
                 {
                     //NEW
@@ -91,10 +89,6 @@
                 {
                     //NEW
                     file: '../glsl/newFrame/6Trace/raymarch.glsl'
-                },
-                {
-                    //NEW
-                    file: '../glsl/newFrame/6Trace/stepForward.glsl'
                 },
                 {
                     //NEW

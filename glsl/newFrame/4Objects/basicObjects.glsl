@@ -37,18 +37,18 @@ Vector sphereNormal(Vector tv, Sphere sph){
 
 
 //------sdf
-float sphereSDF(inout Path path, Sphere sph){
+float sphereSDF(Vector tv, Sphere sph,inout localData dat){
 
     //distance to closest point:
-    float dist = sphereDistance(path.tv,sph);
+    float dist = sphereDistance(tv,sph);
 
     if(abs(dist)<EPSILON){
 
         //compute the normal
-        Vector normal=sphereNormal(path.tv,sph);
+        Vector normal=sphereNormal(tv,sph);
 
         //set the material
-        setObjectInAir(path,dist,normal,sph.mat);
+        setObjectInAir(dat,dist,normal,sph.mat);
     }
 
     return dist;
@@ -94,17 +94,17 @@ Vector planeNormal(Vector tv,Plane plane){
 }
 
 
-float planeSDF(inout Path path, Plane plane){
+float planeSDF(Vector tv, Plane plane, inout localData dat){
 
-    float dist=planeDistance(path.tv,plane);
+    float dist=planeDistance(tv,plane);
 
     if(abs(dist)<EPSILON){
 
         //compute the normal
-        Vector normal=planeNormal(path.tv,plane);
+        Vector normal=planeNormal(tv,plane);
 
         //set the material
-        setObjectInAir(path,dist,normal,plane.mat);
+        setObjectInAir(dat,dist,normal,plane.mat);
     }
 
     return dist;
