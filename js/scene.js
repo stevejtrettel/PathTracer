@@ -41,6 +41,7 @@
                 {file: '../glsl/newFrame/3Renderer/Basic/update.glsl'},
                 {file: '../glsl/newFrame/4Objects/computations.glsl'},
                 {file: '../glsl/newFrame/4Objects/basicObjects.glsl'},
+                {file: '../glsl/newFrame/4Objects/compoundObjects.glsl'},
                 {file: '../glsl/newFrame/5Scene/walls.glsl'},
                 {file: '../glsl/newFrame/5Scene/lights.glsl'},
                 {file: '../glsl/newFrame/5Scene/objects.glsl'},

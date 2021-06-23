@@ -12,7 +12,8 @@ float raytrace(Path path, float stopDist){
     //right now just tracing the scene
     dist= sceneTrace(path,dist);
 
-    return dist;
+    //move slightly less than the full distance to stop right before the object
+    return dist-EPSILON/2.;
 
 }
 

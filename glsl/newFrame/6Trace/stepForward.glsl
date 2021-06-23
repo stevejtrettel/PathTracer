@@ -14,7 +14,7 @@ void stepForward(inout Path path){
     distance=raytrace(path,distance);
 
     //do the raymarching, with threshhold from above
-    //distance=raymarch(path,distance);
+    distance=raymarch(path,distance);
 
     //move to this point of intersection
     path.distance=distance;

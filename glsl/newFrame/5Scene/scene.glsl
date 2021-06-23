@@ -32,8 +32,8 @@ void buildScene(){
 //-------------------------------------------------
 
 float sceneSDF(Path path){
-    //no SDF right now - everything is raytraced
-    return maxDist;
+
+    return sdfObjects(path);
 }
 
 
@@ -47,7 +47,9 @@ float sceneTrace(Path path, float stopDist){
     float dist=stopDist;
 
     dist=traceLights(path,dist);
+
     dist=traceWalls(path,dist);
+
     dist=traceObjects(path,dist);
 
     return dist;

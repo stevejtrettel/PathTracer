@@ -4,7 +4,7 @@
 // and updates if a material is intersected within a specified threshhold
 //-------------------------------------------------
 
-float raymarch(inout Path path, float stopDist){
+float raymarch(Path path, float stopDist){
 
     float totalDist=0.;
     float distToScene=0.;

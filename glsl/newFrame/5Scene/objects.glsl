@@ -13,6 +13,8 @@
 
 //set the names of global variables for the walls here:
 Sphere ball1, ball2, ball3;
+Bottle bottle;
+
 
 //this function constructs the objects
 void buildObjects(){
@@ -49,6 +51,23 @@ void buildObjects(){
     ball3.mat=makeMetal(color,specularity,roughness);
     //ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.3);
 
+
+
+    //-------- BOTTLE ----------------
+
+    bottle.baseHeight=1.;
+    bottle.baseRadius=1.;
+    bottle.neckHeight=1.;
+    bottle.neckRadius=0.3;
+    bottle.thickness=0.1;
+    bottle.rounded=0.2;
+    bottle.smoothJoin=0.3;
+    bottle.center=Point(vec3(3,0,3));
+    bottle.bump=1.;
+    //bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    bottle.mat=makeDielectric(0.7*vec3(0.3,0.2,0.6),0.2,0.2);
+
+
 }
 
 
@@ -57,7 +76,7 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//Finding the Lights
+//Finding the Objects
 //-------------------------------------------------
 
 
@@ -77,9 +96,15 @@ float traceObjects( inout Path path, float stopDist ){
 
 
 
+float sdfObjects( inout Path path ){
+    return bottleSDF(path,bottle);
+}
+
+
+
 
 //-------------------------------------------------
-//Setting the Lights Data
+//Setting the Objects Data
 //-------------------------------------------------
 
 void setDataObjects(inout Path path){
@@ -89,5 +114,7 @@ void setDataObjects(inout Path path){
     setSphereData(path, ball2);
 
     setSphereData(path, ball3);
+
+    setBottleData(path, bottle);
 
 }
