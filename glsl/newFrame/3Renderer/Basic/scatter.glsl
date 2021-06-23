@@ -12,3 +12,6 @@ void scatterRay(inout Path path){
     path.tv=diffuseDir;
     nudge(path.tv,normal,5.*EPSILON);
 }
+
+
+

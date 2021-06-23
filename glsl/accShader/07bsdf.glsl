@@ -34,8 +34,8 @@
 
     //if there's a chance of specular
     //update all chances via fresnel
-    //if (dat.mat.specularChance > 0.0)
-    //{
+    if (dat.mat.specularChance > 0.0)
+    {
         specularChance = FresnelReflectAmount(
             dat.IOR,
             path.tv, normal, dat.mat.specularChance, 1.0);
@@ -48,7 +48,7 @@
         refractionChance = chanceMultiplier*dat.mat.refractionChance;
         diffuseChance = 
             1.-refractionChance-specularChance;
-    //}
+    }
 //     
     // calculate whether we are going to do a diffuse, specular, or refractive ray
     float raySelectRoll = randomFloat();
