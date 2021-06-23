@@ -59,28 +59,101 @@ vec2 sphereIntersections(Vector tv, Sphere sph){
 }
 
 
+//float sphereTrace(inout Path path, Sphere sphere, float stopDist){
+//
+//    vec2 intPt=sphereIntersections(path.tv,sphere);
+//
+//    if(intPt.y<0.||intPt.x>stopDist){
+//        //the sphere is not in front of us
+//        return stopDist;
+//    }
+//
+//    //otherwise, find the first intersection of the sphere:
+//    float dist=intPt.x<0.?intPt.y:intPt.x;
+//
+//    if(dist<stopDist){
+//
+//        Vector test=path.tv;
+//        flow(test,dist);
+//
+//        //compute the normal
+//        Vector normal=sphereNormal(test,sphere);
+//
+//        //set the material
+//        setObjectInAir(path.dat,dist,normal,sphere.mat);
+//
+//    }
+//
+//    return min(dist,stopDist);
+//}
+
+
+
 
 
 //------sdf
-float sphereSDF(inout Path path, Sphere sph){
+//float sphereSDF(inout Path path, Sphere sph, float stopDist){
+//
+//    if(stopDist<EPSILON){return stopDist;}
+//
+//    //distance to closest point:
+//    float dist = sphereDistance(path.tv,sph);
+//
+//    if(abs(dist)<EPSILON){
+//
+//        //compute the normal
+//        Vector normal=sphereNormal(path.tv,sph);
+//
+//        //set the material
+//        setObjectInAir(path.dat,dist,normal,sph.mat);
+//
+//    }
+//
+//    return min(dist,stopDist);
+//}
 
-    //distance to closest point:
+float sphereSDF(Path path, Sphere sph, float stopDist){
+
+    if(stopDist<EPSILON){return stopDist;}
     float dist = sphereDistance(path.tv,sph);
+    return min(abs(dist),stopDist);
+}
 
-    if(abs(dist)<EPSILON){
 
-        //TEMPORARY
-        path.pixel=sph.mat.diffuseColor;
 
-        //compute the normal
-        Vector normal=sphereNormal(path.tv,sph);
 
-        //set the material
-        setObjectInAir(path.dat,dist,normal,sph.mat);
+
+
+float sphereTrace(Path path, Sphere sphere, float stopDist){
+
+    vec2 intPt=sphereIntersections(path.tv,sphere);
+
+    if(intPt.y<0.||intPt.x>stopDist){
+        //the sphere is not in front of us
+        return stopDist;
     }
 
-    return dist;
+    //otherwise, find the first intersection of the sphere:
+    float dist=intPt.x<0.?intPt.y:intPt.x;
+    return min(dist,stopDist);
+
 }
+
+void setSphereData(inout Path path, Sphere sphere){
+
+    //see if we are at the plane: if not, do nothing
+    float dist=sphereDistance(path.tv,sphere);
+
+    if(abs(dist)<EPSILON){
+        //compute the normal
+        Vector normal=sphereNormal(path.tv,sphere);
+
+        //set the material
+        setObjectInAir(path.dat,dist,normal,sphere.mat);
+    }
+
+}
+
 
 
 
@@ -136,15 +209,30 @@ float planeIntersection(Vector tv, Plane plane){
 
 
 
-float planeSDF(inout Path path,  Plane plane){
+float planeSDF(Path path,  Plane plane, float stopDist){
 
+    float dist=planeDistance(path.tv,plane);
+    return min(dist,stopDist);
+
+}
+
+
+
+float planeTrace(Path path, Plane plane, float stopDist){
+
+    float dist=planeIntersection(path.tv,plane);
+    return min(dist,stopDist);
+
+}
+
+
+
+void setPlaneData(inout Path path, Plane plane){
+
+    //see if we are at the plane: if not, do nothing
     float dist=planeDistance(path.tv,plane);
 
     if(abs(dist)<EPSILON){
-
-        //TEMPORARY
-        path.pixel=plane.mat.diffuseColor;
-
         //compute the normal
         Vector normal=planeNormal(path.tv,plane);
 
@@ -152,28 +240,4 @@ float planeSDF(inout Path path,  Plane plane){
         setObjectInAir(path.dat,dist,normal,plane.mat);
     }
 
-    return dist;
-
 }
-
-
-
-float planeTrace(inout Path path, Plane plane, float stopDist){
-
-    float dist=planeIntersection(path.tv,plane);
-
-    if(dist<stopDist){
-        //TEMPORARY
-        path.pixel=plane.mat.diffuseColor;
-
-        //compute the normal
-        Vector normal=planeNormal(path.tv,plane);
-
-        //set the material
-        setObjectInAir(path.dat,dist,normal,plane.mat);
-
-    }
-
-    return min(dist,stopDist);
-}
-

@@ -1,58 +1,70 @@
+//-------------------------------------------------
+// THE SCENE
+// collects all the pieces of the scene from other files to combine
+// this contains buildScene, sceneSDF, sceneTrace, and setDataScene
+//-------------------------------------------------
+
+
+
+
+
+
+
+
+
 
 
 
 
 //-------------------------------------------------
-//The WALLS
+//Building the Scene
 //-------------------------------------------------
 
+void buildScene(){
+    buildWalls();
+    buildLights();
+    buildObjects();
+}
 
 
-float wallsSDF(inout Path path){
+//-------------------------------------------------
+//Building the SDF
+//-------------------------------------------------
 
-    float dist=maxDist;
-
-        dist=min(dist,planeSDF(path,wall1));
-
-//        dist=min(dist,planeSDF(path,wall2));
-//
-//        dist=min(dist,planeSDF(path,wall3));
-
-        return dist;
-
+float sceneSDF(Path path){
+    //no SDF right now - everything is raytraced
+    return maxDist;
 }
 
 
 
 //-------------------------------------------------
-//The SCENE
+//Setting Up the RayTrace
 //-------------------------------------------------
 
+float sceneTrace(Path path, float stopDist){
 
+    float dist=stopDist;
 
-float sceneSDF(inout Path path){
-
-    float dist=maxDist;
-
-    dist=min(dist,sphereSDF(path,light2));
-
-    dist=min(dist,sphereSDF(path,light3));
-
-    dist=min(dist,sphereSDF(path,light4));
-
-
-    //------BALLS
-
-     dist=min(dist,sphereSDF(path,ball1));
-
-     dist=min(dist,sphereSDF(path,ball2));
-
-     dist=min(dist,sphereSDF(path, ball3));
-
+    dist=traceLights(path,dist);
+    dist=traceWalls(path,dist);
+    dist=traceObjects(path,dist);
 
     return dist;
 }
 
 
 
+//-------------------------------------------------
+//Setting Data Upon Reaching an Object
+//-------------------------------------------------
 
+void setDataScene(inout Path path){
+
+    setDataWalls(path);
+
+    setDataLights(path);
+
+    setDataObjects(path);
+
+}

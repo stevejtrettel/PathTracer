@@ -1,17 +1,18 @@
 //-------------------------------------------------
 // RAYTRACE
 // this function raytraces a scene
-// and updates if a material is intersected within a specified threshhold
+// does NOT update the path, but gives the distance to an intersection
 //-------------------------------------------------
 
 
-float raytraceWalls(inout Path path, float stopDist){
+float raytrace(Path path, float stopDist){
 
     float dist=stopDist;
-    dist=planeTrace(path,wall1,dist);
-    dist=planeTrace(path,wall2,dist);
-    dist=planeTrace(path,wall3,dist);
+
+    //right now just tracing the scene
+    dist= sceneTrace(path,dist);
 
     return dist;
+
 }
 

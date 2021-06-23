@@ -9,21 +9,23 @@
 void stepForward(inout Path path){
 
     float distance=maxDist;
-    Vector origTV=path.tv;
 
-    //march the walls
-    //start with threshhold=maxDist
-    //distance=raymarchWalls(path,distance);
-    distance=raytraceWalls(path,distance);
-    path.tv=origTV;//reset to orig loc
+    //do the raytracing
+    distance=raytrace(path,distance);
 
-    //march the scene, use wallDist as threshhold
-    distance=raymarchScene(path,distance);
-    path.tv=origTV;//reset to orig loc
+    //do the raymarching, with threshhold from above
+    //distance=raymarch(path,distance);
 
-    //set the path data:
+    //move to this point of intersection
     path.distance=distance;
     flow(path.tv,distance);
     path.dat.isSky=(path.distance==maxDist);
 
+    //if we hit the sky, quit:
+    if(path.dat.isSky){
+        return;
+    }
+
+    //otherwise set the local data
+    setDataScene(path);
 }

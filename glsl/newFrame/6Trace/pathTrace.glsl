@@ -50,13 +50,30 @@
 
 vec3 pathTrace(Path path){
 
-        stepForward(path);
+        maxBounces=50;
 
-       // if you hit the sky: stop
-        if(path.dat.isSky){
-            updateFromSky(path);
+        for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
+        {
+
+                stepForward(path);
+
+                // if you hit the sky: stop
+                if (path.dat.isSky){
+                        updateFromSky(path);
+                }
+
+                scatter(path);
+
+                updateFromSurface(path);
+
+                //probabilistically kill rays
+                roulette(path);
+
+                if(!path.keepGoing){
+                        break;
+                }
+
         }
-
-      return path.pixel;
+        return path.pixel;
 
 }
