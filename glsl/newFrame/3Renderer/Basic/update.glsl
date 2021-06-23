@@ -10,6 +10,9 @@ void setObjectInAir(inout localData dat, float dist, Vector normal, Material mat
     dat.isSky=false;
     dat.mat=mat;
 
+    dat.distanceTraveled=distance;
+    dat.surfaceColor=mat.diffuseColor;
+
     if(side<0.){
         //normal is inwward pointing;
         dat.normal=negate(normal);
@@ -72,6 +75,7 @@ void surfaceColor(inout Path path,localData dat){
 
     // update the colorMultiplier
     //only do if not refractive (those taken care of with volume)
+
     if(path.type.refract==0.){
         //color choice depends on specular or diffuse
         path.light *= (path.type.specular==1.)?dat.mat.specularColor:dat.mat.diffuseColor;
