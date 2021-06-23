@@ -43,6 +43,9 @@ void roulette(inout Path path){
 
 vec3 pathTrace(inout Path path){
 
+    Vector importanceSample;
+    localData dat;
+    initializeData(dat);
     maxBounces=50;
 
     for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
@@ -50,12 +53,12 @@ vec3 pathTrace(inout Path path){
 
         // shoot a ray out into the world
         //when you hit a material, update dat accordingly
-        stepForward(path);
+        path.distance=raymarch(path.tv,dat);
 
         //if you hit the sky: stop
-        if(path.dat.isSky){
+        if(dat.isSky){
             path.keepGoing=false;
-            skyColor(path);
+            skyColor(path,dat);
             break;
         }
         if(focusHelp){
@@ -64,17 +67,17 @@ vec3 pathTrace(inout Path path){
 
         // pick up any colors absorbed
         // while traveling inside an object:
-        volumeColor(path);
+        volumeColor(path,dat);
 
         //set probabilities for spec, refract, diffuse
-        setProbabilities(path);
+        updateProbabilities(path, dat);
 
         //use these probabilities to set the new ray
-        scatterRay(path);
+        updateRay(path, dat);
 
 
         //update the color from interacting with the surface
-        surfaceColor(path);
+        surfaceColor(path,dat);
 
         //probabilistically kill rays
         roulette(path);

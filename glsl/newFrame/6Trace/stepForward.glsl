@@ -7,6 +7,6 @@
 
 //
 //
-void stepForward(inout Path path){
-    path.distance=raymarch(path,maxDist);
-}
+//void stepForward(inout Path path){
+//    path.distance=raymarch(path);
+//}
