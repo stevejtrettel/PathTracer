@@ -3,13 +3,16 @@
 
 //if you hit an object which is not part of a compound, one side is the object (material) and the other side is air
 //set your local data appropriately
-void setObjectInAir(inout Path path, float dist, Vector normal, Material mat){
+void setObjectInAir(inout localData dat, float side, Vector normal, Material mat){
 
     //set the material
-    path.dat.isSky=false;
-    path.dat.mat=mat;
+    dat.isSky=false;
+    dat.materialInterface=false;
 
-    if(dist<0.){
+    dat.distanceTraveled=distance;
+    dat.surfaceColor=mat.diffuseColor;
+
+    if(side<0.){
         //normal is inwward pointing;
         path.dat.normal=negate(normal);
         //IOR is current/enteing
@@ -35,6 +38,24 @@ void setObjectInAir(inout Path path, float dist, Vector normal, Material mat){
 
 
 
+
+void initializeData(localData dat){
+    dat.isSky=false;
+    dat.isLight=false;
+    dat.materialInterface=false;
+
+    dat.distanceTraveled=0.;
+    dat.surfaceColor=vec3(0.);
+    dat.surfaceEmit=vec3(0.);
+    dat.currentAbsorb=vec3(0.);
+    dat.currentEmit=vec3(0.);
+    dat.neighborAbsorb=vec3(0.);
+    dat.neighborEmit=vec3(0.);
+    dat.IOR=1.;
+    dat.reflectionChance=0.;
+    dat.refractionChance=1.;
+    dat.diffuseChance=0.;
+}
 
 
 
@@ -73,10 +94,10 @@ void surfaceColor(inout Path path){
 
     // update the colorMultiplier
     //only do if not refractive (those taken care of with volume)
-    if(!path.type.refract){
+    //if(!path.type.refract){
         //color choice depends on specular or diffuse
         path.light *= path.type.specular?path.dat.mat.specularColor:path.dat.mat.diffuseColor;
-    }
+  //  }
 
 }
 
