@@ -14,14 +14,14 @@ uniform float brightness;
 
 //
 //
-//uniform float aperture;
-//uniform float focalLength;
-//uniform float fov;
-//uniform bool focusHelp;
-float aperture=0.;
-float focalLength=10.;
-float fov=50.;
-bool focusHelp=false;
+uniform float aperture;
+uniform float focalLength;
+uniform float fov;
+uniform bool focusHelp;
+//float aperture=0.;
+//float focalLength=10.;
+//float fov=50.;
+//bool focusHelp=false;
 
 //-------------------------------------------------
 //Constants

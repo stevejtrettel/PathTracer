@@ -7,7 +7,7 @@
 
 
 //get the new frame
-vec3 newFrame(vec2 fragCoord ){
+vec3 newFrame(vec2 fragCoord, float numRuns){
 
     // initialize a random number seed
     seed = randomSeed(fragCoord,frameSeed);
@@ -24,7 +24,6 @@ vec3 newFrame(vec2 fragCoord ){
 
     //do one trace out into the scene
     return pathTrace(path);
-
 }
 
 
@@ -38,6 +37,13 @@ vec3 newFrame(vec2 fragCoord ){
 //-------------------------------------------------
 
 void main() {
-    gl_FragColor=vec4(newFrame(gl_FragCoord.xy),1.);
+
+    vec3 pixel;
+    pixel += newFrame(gl_FragCoord.xy,0.);
+    pixel += newFrame(gl_FragCoord.xy,1239845.);
+    pixel /= 2.;
+
+    gl_FragColor=vec4(pixel,1.);
+
 }
 

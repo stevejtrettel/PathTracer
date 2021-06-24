@@ -46,19 +46,19 @@ let newFrameUniforms={
         value: 0
     },
     aperture: {
-        value: ui.aperture.value
+        value: 0.0
     },
     focalLength: {
-        value: ui.focalLength.value
+        value: 5.
     },
     brightness: {
-        value: ui.brightness.value
+        value: 1.
     },
     focusHelp: {
-        value: ui.focusHelp.value
+        value: false
     },
     fov: {
-        value: ui.fov.value
+        value: 50
     },
 };
 
