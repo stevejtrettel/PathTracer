@@ -1,7 +1,7 @@
 //-------------------------------------------------
 // RAYMARCH
 // this function raymarches a scene
-// and updates if a material is intersected within a specified threshhold
+// this does NOT update the path, and just gives the distance to an object
 //-------------------------------------------------
 
 float raymarch(Path path, float stopDist){

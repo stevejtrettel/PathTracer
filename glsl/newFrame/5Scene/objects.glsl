@@ -16,12 +16,15 @@ Sphere ball1, ball2, ball3;
 Bottle bottle;
 CocktailGlass cGlass;
 Cocktail negroni;
+LiquorBottle gin,campari;
 
 //this function constructs the objects
 void buildObjects(){
 
     vec3 color;
     float specularity, roughness;
+    vec3 brownAbsorb=(vec3(1.)-vec3(204./255.,142./255.,105./255.));
+    vec3 redAbsorb=vec3(0.2,1.,0.6);
 
     //----------- BALL 1 -------------------------
     ball1.center=Point(vec3(-1,0.3,-2));
@@ -74,6 +77,35 @@ void buildObjects(){
 
 
 
+    //-------- GIN BOTTLE ----------------
+
+    gin.glass=bottle;
+    gin.glass.center.coords=vec3(6,0.2,-4.5);
+    gin.glass.baseRadius=1.25;
+    gin.glass.baseHeight=1.5;
+    gin.glass.thickness=0.1;
+    gin.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.95);
+    gin.drink=makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
+    gin.fill=0.;
+    gin.glass.bump=1.;
+
+
+    //-------- CAMPARI BOTTLE ----------------
+
+    campari.glass=bottle;
+    campari.glass.center.coords=vec3(3,2.25,-9);
+    campari.glass.baseRadius=1.;
+    campari.glass.baseHeight=3.5;
+    campari.glass.neckHeight=0.75;
+    campari.glass.smoothJoin=0.5;
+    campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    campari.drink=makeGlass(2.5*redAbsorb,1.3,0.99);
+    campari.fill=0.5;
+    campari.glass.bump=0.;
+
+
+
+
     //-------- COCKTAIL GLASS----------------
 
     cGlass.center=Point(vec3(-3,-0.3,1));
@@ -85,11 +117,10 @@ void buildObjects(){
 
 
     //-------- NEGRONI ----------------
-    vec3 brownAbsorb=(vec3(1.)-vec3(204./255.,142./255.,105./255.));
-    vec3 redAbsorb=vec3(0.2,1.,0.6);
     negroni.glass=cGlass;
     negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
     negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+
 
 
 }
@@ -124,7 +155,8 @@ float sdfObjects( inout Path path ){
 
    float dist=maxDist;
 
-    dist=min(dist,bottleSDF(path,bottle));
+    //dist=min(dist,bottleSDF(path,bottle));
+    dist=min(dist,liquorBottleSDF(path,gin));
 
     dist=min(dist,cocktailSDF(path,negroni));
 
@@ -148,7 +180,8 @@ void setDataObjects(inout Path path){
 
     setSphereData(path, ball3);
 
-    setBottleData(path, bottle);
+    //setBottleData(path, bottle);
+    setLiquorBottleData(path, gin);
 
     setCocktailData(path, negroni);
 
