@@ -6,6 +6,7 @@ struct localData{
 
     bool isPhysical;
     bool isSky;
+    bool renderMaterial;
 
     float side;
 
@@ -29,6 +30,7 @@ localData trashDat;
 void initializeData(localData dat){
     dat.isSky=false;
     dat.isPhysical=true;
+    dat.renderMaterial=true;
     dat.reflectAbsorb=vec3(0.);
     dat.refractAbsorb=vec3(0.);
     dat.surfDiffuse=vec3(1.);

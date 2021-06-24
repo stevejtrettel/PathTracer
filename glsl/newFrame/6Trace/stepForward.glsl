@@ -14,10 +14,10 @@ void stepForward(inout Path path){
     distance=raytrace(path,distance);
 
     //do the raymarching, with threshhold from above
-    distance=raymarch(path,distance);
+    //distance=raymarch(path,distance);
 
     //trace the varieties, wtih threshhold from above:
-    distance=bisectvar(path,distance);
+    //distance=findNearestRoot(path,distance);
 
     //move to this point of intersection
     path.distance=distance;

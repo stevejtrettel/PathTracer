@@ -19,17 +19,21 @@ void updateFromVolume(inout Path path){
 
 void updateFromSurface(inout Path path){
 
-    //add in emissive lighting
-    if(length(path.dat.surfEmit)>0.001){
-        path.pixel += path.light * path.dat.surfEmit;
-    }
+    if(path.dat.renderMaterial){
 
-    //pick up some surface color upon reflection
-    if(path.type == 1){
-        path.light *=  path.dat.surfDiffuse;
-    }
-    if(path.type == 2){
-        path.light *=  path.dat.surfSpecular;
+        //add in emissive lighting
+        if (length(path.dat.surfEmit)>0.001){
+            path.pixel += path.light * path.dat.surfEmit;
+        }
+
+        //pick up some surface color upon reflection
+        if (path.type == 1){
+            path.light *=  path.dat.surfDiffuse;
+        }
+        if (path.type == 2){
+            path.light *=  path.dat.surfSpecular;
+        }
+
     }
 
 }

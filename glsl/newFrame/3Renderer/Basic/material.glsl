@@ -5,6 +5,7 @@
 
 
 struct Material{
+    bool render;
     vec3 emitColor;
     vec3 diffuseColor;
     vec3 specularColor;
@@ -19,9 +20,10 @@ struct Material{
 
 void zeroMat(inout Material mat){
     //initializes material:
+    mat.render=true;
     mat.emitColor=vec3(0.);
-    mat.diffuseColor=vec3(0.);
-    mat.specularColor=vec3(0.);
+    mat.diffuseColor=vec3(1.);
+    mat.specularColor=vec3(1.);
     mat.absorbColor=vec3(0.);
     mat.roughness=0.;
     mat.IOR=1.;
@@ -87,7 +89,15 @@ Material makeDielectric(vec3 color, float specularity, float roughness){
 
 
 
+Material air(vec3 absorbColor){
 
+    Material mat;
+    zeroMat(mat);
+    mat.render=false;
+    mat.absorbColor=absorbColor;
+
+    return mat;
+}
 
 
 

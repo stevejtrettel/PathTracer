@@ -6,6 +6,7 @@
 void setObjectInAir(inout localData dat, float side, Vector normal, Material mat){
 
     //set the material
+    dat.renderMaterial=mat.render;
     dat.isSky=false;
     dat.surfDiffuse=mat.diffuseColor;
     dat.surfSpecular=mat.specularColor;

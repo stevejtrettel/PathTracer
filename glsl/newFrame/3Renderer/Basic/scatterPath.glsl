@@ -33,6 +33,8 @@ void updateProbabilities( inout Path path ){
 
 void scatter( inout Path path ){
 
+    if(path.dat.renderMaterial){
+
         updateProbabilities(path);
 
         //random number we will use to select ray type
@@ -41,39 +43,39 @@ void scatter( inout Path path ){
         //----- useful vectors in the following computation ----------
         Vector normal=path.dat.normal;
         Vector randomDir=randomVector(path.tv.pos);
-        Vector diffuseDir=normalize(add(normal,randomDir));
+        Vector diffuseDir=normalize(add(normal, randomDir));
         Vector newDir;
 
         //------useful parameters--------
         float rough2=path.dat.surfRoughness * path.dat.surfRoughness;
 
-        if(random<path.dat.probSpecular){
+        if (random<path.dat.probSpecular){
 
             //its a specular ray
             path.type=2;
             path.prob=path.dat.probSpecular;
             path.absorb=path.dat.reflectAbsorb;
 
-            newDir=reflect(path.tv,normal);
+            newDir=reflect(path.tv, normal);
             //newDir=normalize(mix(newDir, diffuseDir,rough2));
 
         }
 
-        else if(random<path.dat.probRefract+path.dat.probSpecular){
+        else if (random<path.dat.probRefract+path.dat.probSpecular){
 
             //its a refractive ray
             path.type=3;
             path.prob=path.dat.probRefract;
             path.absorb=path.dat.refractAbsorb;
 
-            newDir=refract(path.tv,normal,path.dat.IOR);
+            newDir=refract(path.tv, normal, path.dat.IOR);
             //newDir=normalize(mix(newDir, negate(diffuseDir),rough2));
 
         }
 
-        else{
+        else {
 
-          //its a diffuse ray
+            //its a diffuse ray
             path.type=1;
             path.prob=path.dat.probDiffuse;
             path.absorb=path.dat.reflectAbsorb;
@@ -84,7 +86,7 @@ void scatter( inout Path path ){
 
 
         //fix up the path probability:
-        path.prob=max(path.prob,0.001);
+        path.prob=max(path.prob, 0.001);
         path.light /= path.prob;
 
         //----set the new vector and push off the surface
@@ -92,6 +94,21 @@ void scatter( inout Path path ){
 
         //which side to push the point: in or out rel the normal?
         float side=(path.type == 3) ?-1.:1.;
-        nudge(path.tv,multiplyScalar(side,normal),5.*EPSILON);
+        nudge(path.tv, multiplyScalar(side, normal), 5.*EPSILON);
         //flow(path.tv,5.*EPSILON);
+
+    }
+
+    else{
+        //if we do not render the material:
+
+        //we are passing through: so "refraction"
+        path.type=3;
+        path.prob=1.;//no other choices
+        path.absorb=path.dat.refractAbsorb;
+
+        //move ahead along our (unchanged) ray
+        flow(path.tv,10.*EPSILON);
+    }
+
 }

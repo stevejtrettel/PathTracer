@@ -53,8 +53,8 @@ void buildObjects(){
     specularity=0.4;
     roughness=0.1;
     //ball3.mat=makeMetal(color,specularity,roughness);
-    ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5);
-
+    //ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5);
+    ball3.mat=air(vec3(0.,0.3,0.5));
 
 
     //-------- BOTTLE ----------------
@@ -143,7 +143,7 @@ float traceObjects( inout Path path, float stopDist ){
 
     dist=sphereTrace(path,ball2,dist);
 
-    //dist=sphereTrace(path,ball3,dist);
+    dist=sphereTrace(path,ball3,dist);
 
     return dist;
 
@@ -160,7 +160,7 @@ float sdfObjects( inout Path path ){
 
     dist=min(dist,cocktailSDF(path,negroni));
 
-    dist=min(dist,sphereSDF(path,ball3));
+    //dist=min(dist,sphereSDF(path,ball3));
 
     return dist;
 }
@@ -181,8 +181,8 @@ void setDataObjects(inout Path path){
     setSphereData(path, ball3);
 
     //setBottleData(path, bottle);
-    setLiquorBottleData(path, gin);
+    //setLiquorBottleData(path, gin);
 
-    setCocktailData(path, negroni);
+    //setCocktailData(path, negroni);
 
 }
