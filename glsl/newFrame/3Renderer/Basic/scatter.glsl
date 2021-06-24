@@ -55,7 +55,7 @@ void scatter( inout Path path ){
             path.absorb=path.dat.reflectAbsorb;
 
             newDir=reflect(path.tv,normal);
-            newDir=normalize(mix(newDir, diffuseDir,rough2));
+            //newDir=normalize(mix(newDir, diffuseDir,rough2));
 
         }
 
@@ -67,7 +67,7 @@ void scatter( inout Path path ){
             path.absorb=path.dat.refractAbsorb;
 
             newDir=refract(path.tv,normal,path.dat.IOR);
-            newDir=normalize(mix(newDir, negate(diffuseDir),rough2));
+            //newDir=normalize(mix(newDir, negate(diffuseDir),rough2));
 
         }
 
@@ -91,8 +91,7 @@ void scatter( inout Path path ){
         path.tv=newDir;
 
         //which side to push the point: in or out rel the normal?
-        //float side=(path.type == 3) ?-1.:1.;
-        //nudge(path.tv,multiplyScalar(side,normal),EPSILON);
-
-        flow(path.tv,5.*EPSILON);
+        float side=(path.type == 3) ?-1.:1.;
+        nudge(path.tv,multiplyScalar(side,normal),5.*EPSILON);
+        //flow(path.tv,5.*EPSILON);
 }

@@ -59,7 +59,9 @@ void updateFromVolume(inout Path path){
 void updateFromSurface(inout Path path){
 
     //add in emissive lighting
-    path.pixel += path.light * path.dat.surfEmit;
+    if(length(path.dat.surfEmit)>0.){
+        path.pixel += path.light * path.dat.surfEmit;
+    }
 
     //pick up some surface color upon reflection
     if(path.type == 1){
@@ -68,6 +70,7 @@ void updateFromSurface(inout Path path){
     if(path.type == 2){
         path.light *=  path.dat.surfSpecular;
     }
+
 }
 
 
@@ -96,14 +99,14 @@ void roulette(inout Path path){
     // As the light left gets smaller, the ray is more likely to get terminated early.
     // Survivors have their value boosted to make up for fewer samples being in the average.
 
-    float p = L1_Norm(path.light);
+    float p = LInf_Norm(path.light);
     if (randomFloat() > p){
         path.keepGoing = false;
     }
     // Add the energy we 'lose' by randomly terminating paths
-    if(p>0.001){
+    //if(p>0.001){
         path.light *= 1. / p;
-    }
+   // }
 }
 
 
