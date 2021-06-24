@@ -31,7 +31,7 @@ void buildWalls(){
     offset=1.5;
 
     setPlane(wall1,normal,offset);
-    wall1.mat=makeDielectric(color,specularity,roughness);
+    wall1.mat=makeDielectric(color,0.1,roughness);
 
 
     //----------- WALL 2 -------------------------

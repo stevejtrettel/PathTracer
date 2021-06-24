@@ -11,6 +11,12 @@ vec3 rescaleCoords(Point p,Point center, float scale){
     return scale*(p.coords-center.coords);
 }
 
+
+
+
+
+
+
 //-------------------------------------------------
 // The BARTH SEXTIC variety
 //-------------------------------------------------
@@ -37,16 +43,35 @@ float barthSexticEqn(vec3 p){
 }
 
 //overload of variety for the barth sextic struct:
-float variety(Path path, BarthSextic Var){
+float variety(Path path, BarthSextic var){
 
     //if outside the bounding box, dont even bother computing:
-    if(sphereDistance(path.tv,Var.boundingBox)>0.){
+    if(sphereDistance(path.tv,var.boundingBox)>0.){
         return 1.;
     }
 
     //otherwise, get the value
-    vec3 pos=rescaleCoords(path.tv.coords,center,scale);
+    vec3 pos=rescaleCoords(path.tv.pos,var.center,var.scale);
     return barthSexticEqn(pos);
+
+}
+
+//overload of the normal vector function for the barth sextic struct:
+Vector normalVec(Path path, BarthSextic var){
+
+    vec3 pos=rescaleCoords(path.tv.pos,var.center,var.scale);
+
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+
+    float vxyy=barthSexticEqn( pos + e.xyy*ep);
+    float vyyx=barthSexticEqn( pos + e.yyx*ep);
+    float vyxy=barthSexticEqn( pos + e.yxy*ep);
+    float vxxx=barthSexticEqn( pos + e.xxx*ep);
+
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+
+    return Vector(path.tv.pos,normalize(dir));
 
 }
 

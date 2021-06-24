@@ -20,7 +20,7 @@ void updateFromVolume(inout Path path){
 void updateFromSurface(inout Path path){
 
     //add in emissive lighting
-    if(length(path.dat.surfEmit)>0.){
+    if(length(path.dat.surfEmit)>0.001){
         path.pixel += path.light * path.dat.surfEmit;
     }
 
@@ -48,9 +48,9 @@ void updateFromSky(inout Path path){
 
 
 void focusCheck(inout Path path){
-//    if(abs(path.distance-focalLength)<0.5&&focusHelp){
-//        path.pixel+=vec3(1.,0.,0.);
-//    }
+    if(abs(path.distance-focalLength)<0.5&&focusHelp){
+        path.pixel+=vec3(1.,0.,0.);
+    }
 }
 
 
@@ -65,9 +65,9 @@ void roulette(inout Path path){
         path.keepGoing = false;
     }
     // Add the energy we 'lose' by randomly terminating paths
-    //if(p>0.001){
+    if(p>0.001){
         path.light *= 1. / p;
-   // }
+    }
 }
 
 

@@ -16,6 +16,9 @@ void stepForward(inout Path path){
     //do the raymarching, with threshhold from above
     distance=raymarch(path,distance);
 
+    //trace the varieties, wtih threshhold from above:
+    distance=bisectvar(path,distance);
+
     //move to this point of intersection
     path.distance=distance;
     flow(path.tv,distance);
