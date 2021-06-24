@@ -24,8 +24,8 @@ void buildObjects(){
     float specularity, roughness;
 
     //----------- BALL 1 -------------------------
-    ball1.center=Point(vec3(-1,0,-2));
-    ball1.radius=1.;
+    ball1.center=Point(vec3(-1,0.3,-2));
+    ball1.radius=1.3;
 
     color= vec3(0.9,0.9,0.5);
     specularity=0.8;
@@ -33,7 +33,7 @@ void buildObjects(){
     ball1.mat= makeMetal(color,specularity,roughness);
 
     //----------- BALL 2 -------------------------
-    ball2.center=Point(vec3(0,0,1));
+    ball2.center=Point(vec3(0,0.5,2));
     ball2.radius=0.55;
 
     color= 0.7*vec3(0.3,0.2,0.6);
@@ -43,7 +43,7 @@ void buildObjects(){
 
 
     //----------- BALL 3 -------------------------
-    ball3.center=Point(vec3(0.,-0.8,-1));
+    ball3.center=Point(vec3(1.,-0.8,2));
     ball3.radius=0.6;
 
     color= 0.1*vec3(0.7,0.1,0.2);
@@ -65,7 +65,7 @@ void buildObjects(){
     bottle.smoothJoin=0.3;
     bottle.center=Point(vec3(3,0,3));
     bottle.bump=0.5;
-    bottle.mat=makeGlass(0.08*vec3(0.3,0.05,0.2),1.5,0.99);
+    bottle.mat=makeGlass(vec3(0),1.5,0.99);
     //bottle.mat=makeDielectric(0.7*vec3(0.3,0.2,0.6),0.2,0.2);
 
     //set up the bounding sphere
@@ -76,7 +76,7 @@ void buildObjects(){
 
     //-------- COCKTAIL GLASS----------------
 
-    cGlass.center=Point(vec3(-3,-0.3,-1));
+    cGlass.center=Point(vec3(-3,-0.3,1));
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;

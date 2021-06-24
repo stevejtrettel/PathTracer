@@ -59,14 +59,13 @@ struct Path{
 
     int type;//type of ray: 1=Diffuse, 2=Specular, 3=Refract
     float prob;//probability this type of ray was chosen;
+    vec3 absorb;
+    float distance; //distance traveled on a bounce
 
     localData dat;
 
-
     bool keepGoing;
-    float distance; //distance traveled on a bounce
 
-    vec3 absorb;
     vec3 debug;
 
 };

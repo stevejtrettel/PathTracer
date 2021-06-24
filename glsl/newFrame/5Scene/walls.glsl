@@ -40,7 +40,8 @@ void buildWalls(){
 
     setPlane(wall2,normal,offset);
     wall2.mat=makeDielectric(color,specularity,roughness);
-
+    wall2.mat.specularChance=1.;
+    wall2.mat.refractionChance=0.;
 
 
     //----------- WALL 3 -------------------------

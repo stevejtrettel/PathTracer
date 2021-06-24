@@ -17,7 +17,6 @@ vec3 pathTrace(Path path){
                 //pick up color from traveling through the medium
                 updateFromVolume(path);
 
-
                 // if you hit the sky: stop
                 updateFromSky(path);
 

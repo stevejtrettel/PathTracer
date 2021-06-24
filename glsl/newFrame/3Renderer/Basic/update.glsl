@@ -47,8 +47,11 @@ void setObjectInAir(inout localData dat, float side, Vector normal, Material mat
 
 
 void updateFromVolume(inout Path path){
-    if(length(path.absorb*path.distance)>0.001){
-        path.light *= exp(-path.absorb * path.distance);
+
+    vec3 beersLaw = path.absorb*path.distance;
+
+    if(length(beersLaw)>0.001){
+        path.light *= exp( -beersLaw );
     }
 }
 
@@ -98,7 +101,9 @@ void roulette(inout Path path){
         path.keepGoing = false;
     }
     // Add the energy we 'lose' by randomly terminating paths
-    path.light *= 1.0f / p;
+    if(p>0.001){
+        path.light *= 1. / p;
+    }
 }
 
 
