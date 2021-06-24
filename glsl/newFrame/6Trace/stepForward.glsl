@@ -24,4 +24,5 @@ void stepForward(inout Path path){
     if(!path.dat.isSky){
         setDataScene(path);
     }
+
 }

@@ -76,7 +76,7 @@ void buildObjects(){
 
     //-------- COCKTAIL GLASS----------------
 
-    cGlass.center=Point(vec3(2,-0.3,-3));
+    cGlass.center=Point(vec3(-3,-0.3,-1));
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;

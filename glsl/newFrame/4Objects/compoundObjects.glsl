@@ -122,7 +122,7 @@ void setBottleData(inout Path path, Bottle bottle){
     //see if we are at the plane: if not, do nothing
     float dist=bottleDistance(path.tv.pos.coords,bottle);
 
-    if(abs(dist)<EPSILON){
+    if(abs(dist)<5.*EPSILON){
         //compute the normal
         Vector normal=bottleNormal(path.tv,bottle);
 
@@ -252,7 +252,7 @@ void setCocktailGlassData(inout Path path, CocktailGlass glass){
     //see if we are at the plane: if not, do nothing
     float dist=cocktailGlassDistance(path.tv,glass);
 
-    if(abs(dist)<EPSILON){
+    if(abs(dist)<5.*EPSILON){
         //compute the normal
         Vector normal=cocktailGlassNormal(path.tv,glass);
 

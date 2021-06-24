@@ -176,7 +176,7 @@ void setCocktailData(inout Path path, Cocktail cocktail){
     float dist=min(abs(cup),abs(drink));
 
 
-    if(dist<EPSILON){
+    if(dist<5.*EPSILON){
         setTheData(cup,drinkSide,drinkTop,path.tv,path.dat,cocktail);
     }
 

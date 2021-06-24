@@ -7,7 +7,10 @@
 
 
 void updateProbabilities( inout Path path ){
+
+
         //update using Fresnel
+    if(path.dat.probSpecular!=0.){
         //always assume the normal is outward facing for the surface we are at
         Vector normal=path.dat.normal;
 
@@ -22,7 +25,7 @@ void updateProbabilities( inout Path path ){
 
         path.dat.probRefract  *= chanceMultiplier;
         path.dat.probDiffuse *= chanceMultiplier;
-
+    }
 }
 
 

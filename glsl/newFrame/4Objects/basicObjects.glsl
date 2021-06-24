@@ -143,7 +143,7 @@ void setSphereData(inout Path path, Sphere sphere){
     //see if we are at the plane: if not, do nothing
     float dist=sphereDistance(path.tv,sphere);
 
-    if(abs(dist)<EPSILON){
+    if(abs(dist)<5.*EPSILON){
         //compute the normal
         Vector normal=sphereNormal(path.tv,sphere);
 
@@ -231,7 +231,7 @@ void setPlaneData(inout Path path, Plane plane){
     //see if we are at the plane: if not, do nothing
     float dist=planeDistance(path.tv,plane);
 
-    if(abs(dist)<EPSILON){
+    if(abs(dist)<5.*EPSILON){
         //compute the normal
         Vector normal=planeNormal(path.tv,plane);
 

@@ -47,7 +47,9 @@ void setObjectInAir(inout localData dat, float side, Vector normal, Material mat
 
 
 void updateFromVolume(inout Path path){
-    path.light *= exp( -path.absorb * path.distance );
+    if(length(path.absorb*path.distance)>0.001){
+        path.light *= exp(-path.absorb * path.distance);
+    }
 }
 
 
@@ -57,8 +59,11 @@ void updateFromSurface(inout Path path){
     path.pixel += path.light * path.dat.surfEmit;
 
     //pick up some surface color upon reflection
-    if(path.type != 3){//don't do on refraction
-        path.light *= (path.type == 2) ? path.dat.surfSpecular : path.dat.surfDiffuse;
+    if(path.type == 1){
+        path.light *=  path.dat.surfDiffuse;
+    }
+    if(path.type == 2){
+        path.light *=  path.dat.surfSpecular;
     }
 }
 
