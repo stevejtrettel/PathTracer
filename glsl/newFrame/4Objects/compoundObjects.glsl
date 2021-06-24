@@ -104,11 +104,11 @@ Vector bottleNormal(Vector tv, Bottle bottle){
 float bottleSDF(Path path, Bottle bottle){
 
     //speed things up only calculating boundign sphere
-//    float bDist=sphereDistance(path.tv,bottle.boundingSphere);
-//
-//    if(bDist>0.){
-//        return bDist+0.01;
-//    }
+    float bDist=sphereTrace(path,bottle.boundingSphere,maxDist);
+
+    if(bDist>0.){
+        return bDist+0.05;
+    }
 
     //only if we are inside that, run bottleDist
     return bottleDistance(path.tv.pos.coords,bottle);
