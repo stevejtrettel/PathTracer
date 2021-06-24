@@ -97,7 +97,7 @@ void scatter( inout Path path ){
             path.type=3;
             path.prob=path.dat.probRefract;
 
-            newDir=refract(path.tv,normal,1.5);
+            newDir=refract(path.tv,normal,path.dat.IOR);
             newDir=normalize(mix(newDir, diffuseDir,rough2));
         }
 

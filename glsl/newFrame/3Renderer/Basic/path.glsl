@@ -17,6 +17,8 @@ struct localData{
     float probSpecular;
     float probRefract;
     float IOR;
+    vec3 refractAbsorb;
+    vec3 reflectAbsorb;
 
     Vector normal;//outward pointing (back at you) normal to surface just impacted
 };

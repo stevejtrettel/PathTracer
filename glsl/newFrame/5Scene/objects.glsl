@@ -42,14 +42,14 @@ void buildObjects(){
 
 
     //----------- BALL 3 -------------------------
-    ball3.center=Point(vec3(0.,0.,2));
+    ball3.center=Point(vec3(0.,1.,2));
     ball3.radius=0.6;
 
     color= 0.1*vec3(0.7,0.1,0.2);
     specularity=0.4;
     roughness=0.1;
-    ball3.mat=makeMetal(color,specularity,roughness);
-    //ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.3);
+    //ball3.mat=makeMetal(color,specularity,roughness);
+    ball3.mat=makeGlass(0.5*vec3(0.3,0.05,0.2),1.3);
 
 
 
