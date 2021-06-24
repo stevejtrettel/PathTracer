@@ -22,7 +22,8 @@ Vector refract(Vector incident, Vector normal, float n){
 
     if (sinT2>1.){
         //just returning a nonsense value here as we should never have refraction when TIR
-        return incident;
+        return Vector(incident.pos,vec3(0.,0.,0.));
+        //incident;
     }//TIR
 
     // reflect(incident,normal);}

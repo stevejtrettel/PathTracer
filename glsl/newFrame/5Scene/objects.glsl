@@ -56,15 +56,15 @@ void buildObjects(){
 
     //-------- BOTTLE ----------------
 
-    bottle.baseHeight=1.;
+    bottle.baseHeight=1.25;
     bottle.baseRadius=1.;
     bottle.neckHeight=1.;
     bottle.neckRadius=0.3;
-    bottle.thickness=0.1;
-    bottle.rounded=0.2;
+    bottle.thickness=0.05;
+    bottle.rounded=0.1;
     bottle.smoothJoin=0.3;
     bottle.center=Point(vec3(3,0,3));
-    bottle.bump=1.;
+    bottle.bump=0.5;
     bottle.mat=makeGlass(0.08*vec3(0.3,0.05,0.2),1.5,0.99);
     //bottle.mat=makeDielectric(0.7*vec3(0.3,0.2,0.6),0.2,0.2);
 

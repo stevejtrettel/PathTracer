@@ -4,75 +4,31 @@
 // Setting DIRECTIONS and PROBABILITIES
 //-------------------------------------------------
 
-//takes in data after a raymarch, and chooses the type of ray which is cast next: diffuse, specular or refract
-//void updateProbabilities( inout Path path ){
-////
-////    //always assume the normal is outward facing for the surface we are at
-////    Vector normal=dat.normal;
-////
-////    // take fresnel into account for specularChance and adjust other chances.
-////    // specular takes priority.
-////    // chanceMultiplier makes sure we keep diffuse / refraction ratio the same.
-//
-//    float specularChance=path.dat.mat.specularChance;
-//    float refractionChance=path.dat.mat.refractionChance;
-//    float diffuseChance=1.0-specularChance-refractionChance;
-//
-////    //if there's a chance of specular
-////    //update all chances via fresnel
-////    //if (dat.mat.specularChance > 0.0)
-////    //{
-////    specularChance = FresnelReflectAmount(
-////    dat.IOR,
-////    path.tv, normal, dat.mat.specularChance, 1.0);
-////
-////
-////    //--- update diffuse and refract accordingly
-////
-////    float chanceMultiplier = (1.0 - specularChance) / (1.0 - dat.mat.specularChance);
-////
-////    refractionChance = chanceMultiplier*dat.mat.refractionChance;
-////    diffuseChance =
-////    1.-refractionChance-specularChance;
-////    //}
-////    //
-//    // calculate whether we are going to do a diffuse, specular, or refractive ray
-//    float raySelectRoll = randomFloat();
-//    if (raySelectRoll < specularChance)
-//    {
-//        setSpecular(path.type,specularChance);
-//        path.absorb=path.dat.reflectAbsorb;
-//
-//    }
-//    else if (raySelectRoll < specularChance + refractionChance)
-//    {
-//        //this only runs if reflection is not 100%, which means we are not in the TIR situation
-//        setRefract(path.type,1.);
-//        path.absorb=path.dat.refractAbsorb;
-//    }
-//    else
-//    {
-//        setDiffuse(path.type, diffuseChance);
-//        path.absorb=path.dat.reflectAbsorb;
-//
-//    }
-//
-//    // numerical problems can cause ray Probability to become small enough to cause a divide by zero.
-//    path.type.probability = max(path.type.probability, 0.001);
-//
-//    //increase brightness of path chosen
-//    //to account for the energy not taken
-//    //IS THIS RIGHT?!?!
-//    path.light /= path.type.probability;
-//
-
-//}
-
 
 
 void updateProbabilities( inout Path path ){
         //update using Fresnel
+        //always assume the normal is outward facing for the surface we are at
+        Vector normal=path.dat.normal;
+
+        float origSpec=path.dat.probSpecular;
+
+        path.dat.probSpecular = FresnelReflectAmount(
+        path.dat.IOR,
+        path.tv, normal, origSpec, 1.0);
+
+        //--- update diffuse and refract accordingly
+        float chanceMultiplier = (1.0 - path.dat.probSpecular) / (1.0 - origSpec);
+
+        path.dat.probRefract  *= chanceMultiplier;
+        path.dat.probDiffuse *= chanceMultiplier;
+
 }
+
+
+
+
+
 
 void scatter( inout Path path ){
 
@@ -129,5 +85,5 @@ void scatter( inout Path path ){
         //float side=(path.type == 3) ?-1.:1.;
         //nudge(path.tv,multiplyScalar(side,normal),EPSILON);
 
-        flow(path.tv,3.*EPSILON);
+        flow(path.tv,10.*EPSILON);
 }

@@ -58,7 +58,7 @@ void buildWalls(){
 
     setPlane(wall4,normal,offset);
     //wall4.mat=makeDielectric(color,specularity,roughness);
-    wall4.mat=makeLight(vec3(1,0.6,0.4),5.);
+    wall4.mat=makeLight(vec3(1,0.6,0.4),1.);
 
     //----------- WALL 5 -------------------------
     normal=vec3(0,0,-1);
