@@ -28,7 +28,7 @@ void buildWalls(){
 
     //----------- WALL 1 -------------------------
     normal=vec3(0,1,0);
-    offset=10.;
+    offset=1.5;
 
     setPlane(wall1,normal,offset);
     wall1.mat=makeDielectric(color,specularity,roughness);

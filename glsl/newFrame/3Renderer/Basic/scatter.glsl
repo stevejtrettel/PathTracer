@@ -90,15 +90,13 @@ void scatter( inout Path path ){
         //------useful parameters--------
         float rough2=path.dat.surfRoughness * path.dat.surfRoughness;
 
-
-
         if(random<path.dat.probRefract){
 
             path.type=3;
             path.prob=path.dat.probRefract;
 
             newDir=refract(path.tv,normal,path.dat.IOR);
-            newDir=normalize(mix(newDir, diffuseDir,rough2));
+            newDir=normalize(mix(newDir, negate(diffuseDir),rough2));
         }
 
         else if(random<path.dat.probRefract+path.dat.probSpecular){
@@ -117,76 +115,12 @@ void scatter( inout Path path ){
             newDir=diffuseDir;
         }
 
+
+        //fix up the path probability:
+        path.prob=max(path.prob,0.001);
+        path.light /= path.prob;
+
         //----set the new vector and push off the surface
         path.tv=newDir;
-        flow(path.tv,20.*EPSILON);
+        flow(path.tv,10.*EPSILON);
 }
-
-
-
-
-//void scatter( inout Path path ){
-//
-//
-//    //update reflectivity,refractivity based on IOR and normal
-//    updateProbabilities(path);
-//
-//    Vector normal=path.dat.normal;
-//
-//    //----- get a uniformly distributed vector on the sphere ----------
-//    Vector randomSph=Vector(path.tv.pos,randomUnitVector());
-//
-//    //----- update the ray direction ----------
-//
-//    // Diffuse uses a normal oriented cosine weighted hemisphere sample.
-//    Vector diffuseDir= normalize(add(normal,randomSph));
-//
-//    // Perfectly smooth specular uses the reflection ray.
-//    Vector specularDir=reflect(path.tv,normal);
-//
-//    //roughness square for mixing
-//   // float rough2=dat.mat.roughness * dat.mat.roughness;
-//
-//    // Rough (glossy) specular lerps from the smooth specular to the rough diffuse by the material roughness squared
-//    //specularDir = normalize(mix(specularDir, diffuseDir,rough2));
-//
-//    Vector refractionDir;
-//
-//    //get the refracted ray direction from IOR
-//    refractionDir = refract(path.tv, normal, path.dat.IOR);
-//
-//    //update refraction ray based on roughness
-//    //refractionDir = normalize(mix(refractionDir, negate(diffuseDir), rough2));
-//
-//
-//
-//
-//
-//
-//
-//    //choose which one of these we will actually be doing
-//    //this is a weird way of doing it to avoid a 3-way if statement, unsure if this is necessary
-////    Vector rayDir = mix(diffuseDir, specularDir, path.type.specular);
-////    rayDir = mix(rayDir, refractionDir, path.type.refract);
-////    path.tv=rayDir;//use this direction
-//
-//    //THIS CODE BELOW SHOULD BE EQUIVALENT TO THE ABOVE, BUT ITS NOT...
-//        if(path.type.specular){
-//            path.tv=specularDir;
-//        }
-//        else if(path.type.refract){
-//            path.tv=refractionDir;
-//        }
-//        else{ path.tv=diffuseDir;}
-//
-//    flow(path.tv,20.*EPSILON);
-//    //----- update ray position ----------
-//    //which side to push the point: in or out rel the normal?
-//    //float side=-1.;
-//   // float side=(path.type.refract == 1.0f)?-1.:1.;
-//    //nudge(path.tv,multiplyScalar(side,normal),2.*EPSILON);
-
-//}
-
-
-

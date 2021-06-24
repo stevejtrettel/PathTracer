@@ -37,5 +37,4 @@ vec3 pathTrace(Path path){
         focusCheck(path);
 
         return path.pixel;
-
 }

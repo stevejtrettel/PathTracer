@@ -29,7 +29,7 @@ void setObjectInAir(inout localData dat, float side, Vector normal, Material mat
         dat.normal=normal;
         //IOR is current/enteing
         dat.IOR=1./mat.IOR;
-        dat.reflectAbsorb=vec3(0);
+        dat.reflectAbsorb=vec3(0.);
         dat.refractAbsorb=mat.absorbColor;
     }
 
@@ -47,11 +47,13 @@ void setObjectInAir(inout localData dat, float side, Vector normal, Material mat
 
 
 void updateFromVolume(inout Path path){
-   vec3 absorb=path.dat.refractAbsorb;
-    if(path.type==2){
-        absorb=path.dat.reflectAbsorb;
+
+   vec3 absorb = path.dat.refractAbsorb;
+
+    if(path.type == 2){//reflection
+        absorb = path.dat.reflectAbsorb;
     }
-   path.light *= exp(-absorb*path.distance);
+   path.light *= exp( -absorb * path.distance );
 }
 
 
@@ -61,10 +63,9 @@ void updateFromSurface(inout Path path){
     path.pixel += path.light * path.dat.surfEmit;
 
     //pick up some surface color upon reflection
-    if(path.type!=3){
-        path.light *= (path.type==2)?path.dat.surfSpecular:path.dat.surfDiffuse;
+    if(path.type != 3){//don't do on refraction
+        path.light *= (path.type == 2) ? path.dat.surfSpecular : path.dat.surfDiffuse;
     }
-
 }
 
 
@@ -81,9 +82,9 @@ void updateFromSky(inout Path path){
 
 
 void focusCheck(inout Path path){
-    if(abs(path.distance-focalLength)<0.5&&focusHelp){
-        path.pixel+=vec3(1.,0.,0.);
-    }
+//    if(abs(path.distance-focalLength)<0.5&&focusHelp){
+//        path.pixel+=vec3(1.,0.,0.);
+//    }
 }
 
 
@@ -93,9 +94,9 @@ void roulette(inout Path path){
     // As the light left gets smaller, the ray is more likely to get terminated early.
     // Survivors have their value boosted to make up for fewer samples being in the average.
 
-    float p = L1_Norm(path.light);
+    float p = max(L1_Norm(path.light), 0.01);
     if (randomFloat() > p){
-        path.keepGoing=false;
+        path.keepGoing = false;
     }
     // Add the energy we 'lose' by randomly terminating paths
     path.light *= 1.0f / p;
