@@ -47,13 +47,7 @@ void setObjectInAir(inout localData dat, float side, Vector normal, Material mat
 
 
 void updateFromVolume(inout Path path){
-
-   vec3 absorb = path.dat.refractAbsorb;
-
-    if(path.type == 2){//reflection
-        absorb = path.dat.reflectAbsorb;
-    }
-   path.light *= exp( -absorb * path.distance );
+    path.light *= exp( -path.absorb * path.distance );
 }
 
 
@@ -94,7 +88,7 @@ void roulette(inout Path path){
     // As the light left gets smaller, the ray is more likely to get terminated early.
     // Survivors have their value boosted to make up for fewer samples being in the average.
 
-    float p = max(L1_Norm(path.light), 0.01);
+    float p = L1_Norm(path.light);
     if (randomFloat() > p){
         path.keepGoing = false;
     }

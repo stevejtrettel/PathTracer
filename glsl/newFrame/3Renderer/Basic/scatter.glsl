@@ -94,6 +94,7 @@ void scatter( inout Path path ){
 
             path.type=3;
             path.prob=path.dat.probRefract;
+            path.absorb=path.dat.refractAbsorb;
 
             newDir=refract(path.tv,normal,path.dat.IOR);
             newDir=normalize(mix(newDir, negate(diffuseDir),rough2));
@@ -103,6 +104,7 @@ void scatter( inout Path path ){
            //its a specular ray
             path.type=2;
             path.prob=path.dat.probSpecular;
+            path.absorb=path.dat.reflectAbsorb;
 
             newDir=reflect(path.tv,normal);
             newDir=normalize(mix(newDir, diffuseDir,rough2));
@@ -122,5 +124,10 @@ void scatter( inout Path path ){
 
         //----set the new vector and push off the surface
         path.tv=newDir;
-        flow(path.tv,10.*EPSILON);
+
+        //which side to push the point: in or out rel the normal?
+        //float side=(path.type == 3) ?-1.:1.;
+        //nudge(path.tv,multiplyScalar(side,normal),EPSILON);
+
+        flow(path.tv,3.*EPSILON);
 }

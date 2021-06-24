@@ -14,7 +14,8 @@
 //set the names of global variables for the walls here:
 Sphere ball1, ball2, ball3;
 Bottle bottle;
-
+CocktailGlass cGlass;
+Cocktail negroni;
 
 //this function constructs the objects
 void buildObjects(){
@@ -71,6 +72,26 @@ void buildObjects(){
     bottle.boundingSphere.center=bottle.center;
     bottle.boundingSphere.radius=bottle.baseHeight+bottle.neckHeight+0.5;
 
+
+
+    //-------- COCKTAIL GLASS----------------
+
+    cGlass.center=Point(vec3(2,-0.3,-3));
+    cGlass.radius=1.;
+    cGlass.height=1.;
+    cGlass.thickness=0.1;
+    cGlass.base=0.3;
+    cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+
+
+    //-------- NEGRONI ----------------
+    vec3 brownAbsorb=(vec3(1.)-vec3(204./255.,142./255.,105./255.));
+    vec3 redAbsorb=vec3(0.2,1.,0.6);
+    negroni.glass=cGlass;
+    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+    negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+
+
 }
 
 
@@ -91,7 +112,7 @@ float traceObjects( inout Path path, float stopDist ){
 
     dist=sphereTrace(path,ball2,dist);
 
-    dist=sphereTrace(path,ball3,dist);
+    //dist=sphereTrace(path,ball3,dist);
 
     return dist;
 
@@ -100,8 +121,16 @@ float traceObjects( inout Path path, float stopDist ){
 
 
 float sdfObjects( inout Path path ){
-   // return maxDist;
-    return bottleSDF(path,bottle);
+
+   float dist=maxDist;
+
+    dist=min(dist,bottleSDF(path,bottle));
+
+    dist=min(dist,cocktailSDF(path,negroni));
+
+    dist=min(dist,sphereSDF(path,ball3));
+
+    return dist;
 }
 
 
@@ -120,5 +149,7 @@ void setDataObjects(inout Path path){
     setSphereData(path, ball3);
 
     setBottleData(path, bottle);
+
+    setCocktailData(path, negroni);
 
 }

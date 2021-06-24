@@ -113,10 +113,10 @@ vec2 sphereIntersections(Vector tv, Sphere sph){
 //    return min(dist,stopDist);
 //}
 
-float sphereSDF(Path path, Sphere sph, float stopDist){
+float sphereSDF(Path path, Sphere sph){
 
     float dist = sphereDistance(path.tv,sph);
-    return min(abs(dist),stopDist);
+    return dist;
 }
 
 

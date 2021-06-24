@@ -9,7 +9,7 @@ vec3 pathTrace(Path path){
 
         maxBounces=50;
 
-        for (int bounceIndex = 0; bounceIndex <maxBounces; ++bounceIndex)
+        for (int bounceIndex = 0; bounceIndex < maxBounces; ++bounceIndex)
         {
                 //move forward until the next intersection, update localData
                 stepForward(path);
@@ -37,4 +37,5 @@ vec3 pathTrace(Path path){
         focusCheck(path);
 
         return path.pixel;
+
 }

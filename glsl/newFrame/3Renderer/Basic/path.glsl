@@ -29,7 +29,16 @@ localData trashDat;
 void initializeData(localData dat){
     dat.isSky=false;
     dat.isPhysical=true;
-
+    dat.reflectAbsorb=vec3(0.);
+    dat.refractAbsorb=vec3(0.);
+    dat.surfDiffuse=vec3(1.);
+    dat.surfSpecular=vec3(1.);
+    dat.surfEmit=vec3(0.);
+    dat.surfRoughness=0.;
+    dat.IOR=1.;
+    dat.probDiffuse=1.;
+    dat.probRefract=0.;
+    dat.probSpecular=0.;
 }
 
 

@@ -8,15 +8,18 @@ float raymarch(Path path, float stopDist){
 
     float totalDist=0.;
     float distToScene=0.;
+    float marchFactor=0.9;
 
     for (int i = 0; i < maxMarchSteps; i++){
 
         distToScene = abs(sceneSDF(path));
 
         if (distToScene< EPSILON){
-            return totalDist;
+            return totalDist+distToScene;
         }
 
+        //slow down the march as it is not exact
+        distToScene *= marchFactor;
         totalDist += distToScene;
 
         if(totalDist>stopDist){
@@ -32,6 +35,9 @@ float raymarch(Path path, float stopDist){
     path.keepGoing=false;
     return stopDist;
 }
+
+
+
 
 
 
