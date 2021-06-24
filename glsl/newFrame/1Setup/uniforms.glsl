@@ -11,17 +11,11 @@ uniform vec3 location;
 uniform float frameSeed;
 uniform float brightness;
 
-
-//
-//
 uniform float aperture;
 uniform float focalLength;
 uniform float fov;
 uniform bool focusHelp;
-//float aperture=0.;
-//float focalLength=10.;
-//float fov=50.;
-//bool focusHelp=false;
+
 
 //-------------------------------------------------
 //Constants
@@ -35,11 +29,7 @@ int maxMarchSteps=500;
 float maxDist=75.;
 int maxBounces=50;
 
-
-
-//======spectral constants:
-bool doSpectral=false;
+//======trash constants:
 bool trashBool;
 float trashFloat;
-
 vec3 debug;

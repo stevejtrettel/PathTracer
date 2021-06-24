@@ -1,7 +1,5 @@
-
-
 //-------------------------------------------------
-//Post-Processing
+//Image Processing for Textures
 //-------------------------------------------------
 
 
@@ -41,17 +39,9 @@ vec3 SRGBToLinear(vec3 rgb)
 
 
 
-
-vec3 checkerboard(vec2 v){
-    float x=mod(20.*v.x/6.28,2.);
-    float y=mod(20.*v.y/3.14,2.);
-
-    if(x<1.&&y<1.||x>1.&&y>1.){
-        return vec3(1.);
-    }
-    else return vec3(0.0);
-}
-
+//-------------------------------------------------
+//Getting an equirectangular image as the sky
+//-------------------------------------------------
 
 
 vec2 toSphCoords(vec3 v){
@@ -63,23 +53,12 @@ vec2 toSphCoords(vec3 v){
 
 
 vec3 toSphCoordsNoSeam(vec3 v){
-
     float theta=atan(-v.z,v.x);
     float theta2=atan(v.y,abs(v.x));
     float phi=acos(v.y);
     return vec3(theta,phi,theta2);
 }
 
-
-
-
-
-
-
-
-//-------------------------------------------------
-//Backgrounds
-//-------------------------------------------------
 
 
 vec3 skyTex(vec3 v){
@@ -98,17 +77,6 @@ vec3 skyTex(vec3 v){
     return SRGBToLinear(textureGrad(sky,uv,dFdx(uv2), dFdy(uv2)).rgb);
 
 }
-
-
-
-
-vec3 checkerTex(vec3 v){
-    vec2 p=toSphCoords(v);
-    return checkerboard(p);
-}
-
-
-
 
 
 
