@@ -78,24 +78,47 @@ void scatter( inout Path path ){
 
         updateProbabilities(path);
 
+        //random number we will use to select ray type
         float random=randomFloat();
 
         //----- useful vectors in the following computation ----------
         Vector normal=path.dat.normal;
-        Vector randomSph=Vector(path.tv.pos,randomUnitVector());
+        Vector randomDir=randomVector(path.tv.pos);
+        Vector diffuseDir=normalize(add(normal,randomDir));
+        Vector newDir;
 
-        if(random<path.dat.probSpecular){
-           //its a specular ray
-           path.tv=reflect(path.tv,normal);
-           setSpecular(path.type, path.dat.probSpecular);
+        //------useful parameters--------
+        float rough2=path.dat.surfRoughness * path.dat.surfRoughness;
+
+
+
+        if(random<path.dat.probRefract){
+
+            path.type=3;
+            path.prob=path.dat.probRefract;
+
+            newDir=refract(path.tv,normal,1.5);
+            newDir=normalize(mix(newDir, diffuseDir,rough2));
         }
+
+        else if(random<path.dat.probRefract+path.dat.probSpecular){
+           //its a specular ray
+            path.type=2;
+            path.prob=path.dat.probSpecular;
+
+            newDir=reflect(path.tv,normal);
+            newDir=normalize(mix(newDir, diffuseDir,rough2));
+        }
+
         else{
           //its a diffuse ray
-          path.tv=normalize(add(normal,randomSph));
-          setDiffuse(path.type, path.dat.probDiffuse);
+            path.type=1;
+            path.prob=path.dat.probDiffuse;
+            newDir=diffuseDir;
         }
 
-        //----flow in this direction a bit to get off surface
+        //----set the new vector and push off the surface
+        path.tv=newDir;
         flow(path.tv,20.*EPSILON);
 }
 

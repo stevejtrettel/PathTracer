@@ -50,7 +50,7 @@ float randomFloat(float a,float b){
 
 //random unit vector at origin
 //this is thanks to archimedes sphere and the cylinder
-vec3 randomUnitVector()
+vec3 randomUnitVec3()
 {
     float z = randomFloat() * 2.0f - 1.0f;
     float a = randomFloat() * 6.28;

@@ -114,7 +114,7 @@ float sphereDist(Vector tv, float radius){
     float d = sphereDist(tv.pos.coords, radius);
 
     //if you are looking away from the sphere, stop
-    //if(d>0.&&dot(tv.dir,tv.pos.coords)>0.){return maxDist;}
+    if(d>0.&&dot(tv.dir,tv.pos.coords)>0.){return maxDist;}
 
     //otherwise return the actual distance
     return d;

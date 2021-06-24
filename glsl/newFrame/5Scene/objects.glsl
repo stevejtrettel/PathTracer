@@ -7,7 +7,7 @@
 
 
 //-------------------------------------------------
-//Defining the Lights
+//Defining the Objects
 //-------------------------------------------------
 
 
@@ -64,9 +64,12 @@ void buildObjects(){
     bottle.smoothJoin=0.3;
     bottle.center=Point(vec3(3,0,3));
     bottle.bump=1.;
-    //bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-    bottle.mat=makeDielectric(0.7*vec3(0.3,0.2,0.6),0.2,0.2);
+    bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    //bottle.mat=makeDielectric(0.7*vec3(0.3,0.2,0.6),0.2,0.2);
 
+    //set up the bounding sphere
+    bottle.boundingSphere.center=bottle.center;
+    bottle.boundingSphere.radius=bottle.baseHeight+bottle.neckHeight+0.5;
 
 }
 

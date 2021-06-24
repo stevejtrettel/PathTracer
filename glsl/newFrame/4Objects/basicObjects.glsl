@@ -25,6 +25,7 @@ struct Sphere{
 //----distance and normal functions
 
 float sphereDistance(Vector tv, Sphere sph){
+
     tv.pos.coords-=sph.center.coords;
     return sphereDist(tv,sph.radius);
 }
@@ -114,7 +115,6 @@ vec2 sphereIntersections(Vector tv, Sphere sph){
 
 float sphereSDF(Path path, Sphere sph, float stopDist){
 
-    if(stopDist<EPSILON){return stopDist;}
     float dist = sphereDistance(path.tv,sph);
     return min(abs(dist),stopDist);
 }
@@ -132,7 +132,6 @@ float sphereTrace(Path path, Sphere sphere, float stopDist){
         //the sphere is not in front of us
         return stopDist;
     }
-
     //otherwise, find the first intersection of the sphere:
     float dist=intPt.x<0.?intPt.y:intPt.x;
     return min(dist,stopDist);

@@ -40,6 +40,10 @@ struct Vector{
 
 Vector trashVector;
 
+Vector randomVector(Point pos){
+    return Vector(pos,randomUnitVec3());
+}
+
 //--basic geometry free operations
 
 Vector add(Vector v, Vector w){

@@ -8,22 +8,24 @@ void setObjectInAir(inout localData dat, float side, Vector normal, Material mat
     //set the material
     dat.isSky=false;
     dat.surfDiffuse=mat.diffuseColor;
+    dat.surfSpecular=mat.specularColor;
     dat.surfEmit=mat.emitColor;
+    dat.surfRoughness=mat.roughness;
     dat.probDiffuse=1.-mat.specularChance;
     dat.probSpecular=mat.specularChance;
 
     if(side<0.){
         //we are inside
         dat.normal=negate(normal);
-//        //IOR is current/enteing
-//        dat.IOR=mat.IOR/1.;
+        //IOR is current/enteing
+        dat.IOR=mat.IOR/1.;
     }
 
     else{
         //normal is outward pointing;
         dat.normal=normal;
-//        //IOR is current/enteing
-//        dat.IOR=1./mat.IOR;
+        //IOR is current/enteing
+        dat.IOR=1./mat.IOR;
     }
 
 }
@@ -49,9 +51,10 @@ void updateFromSurface(inout Path path){
     //add in emissive lighting
     path.pixel += path.light * path.dat.surfEmit;
 
-    //only do if not a refracive path
-    path.light *= path.dat.surfDiffuse;
-    //path.light *= (path.type.specular)?path.dat.mat.specularColor:path.dat.mat.diffuseColor;
+    //pick up some surface color upon reflection
+    if(path.type!=3){
+        path.light *= (path.type==2)?path.dat.surfSpecular:path.dat.surfDiffuse;
+    }
 
 }
 
@@ -69,9 +72,9 @@ void updateFromSky(inout Path path){
 
 
 void focusCheck(inout Path path){
-//    if(abs(path.distance-focalLength)<0.5&&focusHelp){
-//        path.pixel+=vec3(1.,0.,0.);
-//    }
+    if(abs(path.distance-focalLength)<0.5&&focusHelp){
+        path.pixel+=vec3(1.,0.,0.);
+    }
 }
 
 

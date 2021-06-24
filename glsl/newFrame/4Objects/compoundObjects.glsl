@@ -27,6 +27,7 @@ struct Bottle{
     float smoothJoin;
     float bump;
     Material mat;
+    Sphere boundingSphere;
 };
 
 
@@ -102,8 +103,15 @@ Vector bottleNormal(Vector tv, Bottle bottle){
 //------sdf
 float bottleSDF(Path path, Bottle bottle){
 
-    return bottleDistance(path.tv.pos.coords,bottle);
+    //speed things up only calculating boundign sphere
+    float bDist=sphereDistance(path.tv,bottle.boundingSphere);
 
+    if(bDist>0.){
+        return bDist+0.01;
+    }
+
+    //only if we are inside that, run bottleDist
+    return bottleDistance(path.tv.pos.coords,bottle);
 }
 
 void setBottleData(inout Path path, Bottle bottle){
