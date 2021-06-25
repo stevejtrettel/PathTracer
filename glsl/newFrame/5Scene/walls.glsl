@@ -31,7 +31,7 @@ void buildWalls(){
     offset=1.5;
 
     setPlane(wall1,normal,offset);
-    wall1.mat=makeDielectric(color,0.05,roughness);
+    wall1.mat=makeDielectric(color,0.0,roughness);
 
 
     //----------- WALL 2 -------------------------
@@ -91,25 +91,26 @@ void buildWalls(){
 //-------------------------------------------------
 
 
-float traceWalls(inout Path path,float stopDist){
+float trace_Walls(Vector tv ,float stopDist){
 
     float dist=stopDist;
 
-    dist=planeTrace(path,wall1,dist);
+    dist=min(dist, trace(tv, wall1));
 
-    dist=planeTrace(path,wall2,dist);
+    dist=min(dist, trace(tv, wall2));
 
-    dist=planeTrace(path,wall3,dist);
+    dist=min(dist, trace(tv, wall3));
 
-    dist=planeTrace(path,wall4,dist);
+    dist=min(dist, trace(tv, wall4));
 
-    dist=planeTrace(path,wall5,dist);
+    dist=min(dist, trace(tv, wall5));
 
-    dist=planeTrace(path,wall6,dist);
+    dist=min(dist, trace(tv, wall6));
 
     return dist;
 
 }
+
 
 
 
@@ -120,18 +121,18 @@ float traceWalls(inout Path path,float stopDist){
 
 
 
-void setDataWalls(inout Path path){
+void setData_Walls( inout Path path ){
 
-    setPlaneData(path,wall1);
+    setData(path, wall1);
 
-    setPlaneData(path,wall2);
+    setData(path, wall2);
 
-    setPlaneData(path,wall3);
+    setData(path, wall3);
 
-    setPlaneData(path,wall4);
+    setData(path, wall4);
 
-    setPlaneData(path,wall5);
+    setData(path, wall5);
 
-    setPlaneData(path,wall6);
+    setData(path, wall6);
 
 }

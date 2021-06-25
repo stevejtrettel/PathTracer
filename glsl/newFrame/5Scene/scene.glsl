@@ -24,7 +24,7 @@ void buildScene(){
     buildWalls();
     buildLights();
     buildObjects();
-    buildVarieties();
+    //buildVarieties();
 }
 
 
@@ -32,9 +32,9 @@ void buildScene(){
 //Building the SDF
 //-------------------------------------------------
 
-float sceneSDF(Path path){
-    //return maxDist;
-    return sdfObjects(path);
+float sdf_Scene(Path path){
+    return maxDist;
+    //return sdf_Objects(path);
 }
 
 
@@ -43,15 +43,15 @@ float sceneSDF(Path path){
 //Setting Up the RayTrace
 //-------------------------------------------------
 
-float sceneTrace(Path path, float stopDist){
+float trace_Scene(Vector tv, float stopDist){
 
     float dist=stopDist;
 
-    dist=traceLights(path, dist);
+    dist=trace_Lights(tv, dist);
 
-    dist=traceWalls(path, dist);
+    //dist=trace_Walls(tv, dist);
 
-    //dist=traceObjects(path, dist);
+    dist=trace_Objects(tv, dist);
 
     return dist;
 }
@@ -62,14 +62,14 @@ float sceneTrace(Path path, float stopDist){
 //Setting Data Upon Reaching an Object
 //-------------------------------------------------
 
-void setDataScene(inout Path path){
+void setData_Scene(inout Path path){
 
-    setDataWalls(path);
+    //setData_Walls(path);
 
-    setDataLights(path);
+    setData_Lights(path);
 
-    setDataObjects(path);
+    setData_Objects(path);
 
-    setDataVarieties(path);
+    //setDataVarieties(path);
 
 }

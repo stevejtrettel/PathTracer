@@ -22,30 +22,72 @@ struct Sphere{
     Material mat;
 };
 
-//----distance and normal functions
 
-float sphereDistance(Vector tv, Sphere sph){
+//overload of distR3: distance in R3 coordinates
+float distR3( vec3 p, Sphere sphere ){
+    //normalize position
+    vec3 pos = p - sphere.center.coords;
 
-    tv.pos.coords-=sph.center.coords;
-    return sphereDist(tv,sph.radius);
+    //distance to closest point on the sphere
+    return length(pos) - sphere.radius;
 }
 
-Vector sphereNormal(Vector tv, Sphere sph){
-    vec3 dir=normalize(tv.pos.coords-sph.center.coords);
+//overload of location booleans:
+bvec2 relPosition( Vector tv, Sphere sphere){
+
+    float d = distR3( tv.pos.coords, sphere );
+    bool atSurf = ((abs(d) - AT_THRESH)<0.);
+    bool inside = d<0.;
+    return bvec2(atSurf, inside);
+}
+
+//overload of location booleans:
+bool at( Vector tv, Sphere sphere){
+
+    float d = distR3( tv.pos.coords, sphere );
+    bool atSurf = ((abs(d) - AT_THRESH)<0.);
+    return atSurf;
+}
+
+bool inside( Vector tv, Sphere sphere ){
+    float d = distR3( tv.pos.coords, sphere );
+    return (d<0.);
+}
+
+
+
+
+//overload of sdf for a sphere
+float sdf( Vector tv, Sphere sphere ){
+
+    //distance to closest point on sphere
+    float d=distR3(tv.pos.coords, sphere);
+
+    //if you are looking away from the sphere, stop
+    if(d>0.&&dot(tv.dir,tv.pos.coords)>0.){return maxDist;}
+
+    //otherwise return the actual distance
+    return d;
+}
+
+//overload of normalVec for a sphere
+Vector normalVec( Vector tv, Sphere sphere ){
+    //position vector rel center
+    vec3 dir = tv.pos.coords-sphere.center.coords;
+    dir=normalize(dir);
+
     return Vector(tv.pos,dir);
 }
 
-
-
-
-vec2 sphereIntersections(Vector tv, Sphere sph){
+//auxilary function for writing trace()
+vec2 intersectRay_Sphere( Vector tv, Sphere sphere ){
     //return all intersections with the sphere along the line:
-    vec3 p=tv.pos.coords-sph.center.coords;
+    vec3 p=tv.pos.coords-sphere.center.coords;
     vec3 v=tv.dir;
 
     float a=dot(v,v);
     float b=2.*dot(p,v);
-    float c=(dot(p,p)-sph.radius*sph.radius)/a;
+    float c=(dot(p,p)-sphere.radius*sphere.radius)/a;
 
     float disc=b*b-4.*a*c;
     if(disc<0.){
@@ -53,102 +95,37 @@ vec2 sphereIntersections(Vector tv, Sphere sph){
         return 2.*vec2(maxDist,maxDist);
     }
     //else, return the two intersection points:
-    else {
         float D=sqrt(abs(disc));
         return vec2(-b-D, -b+D)/(2.*a);
-    }
+
 }
 
 
-//float sphereTrace(inout Path path, Sphere sphere, float stopDist){
-//
-//    vec2 intPt=sphereIntersections(path.tv,sphere);
-//
-//    if(intPt.y<0.||intPt.x>stopDist){
-//        //the sphere is not in front of us
-//        return stopDist;
-//    }
-//
-//    //otherwise, find the first intersection of the sphere:
-//    float dist=intPt.x<0.?intPt.y:intPt.x;
-//
-//    if(dist<stopDist){
-//
-//        Vector test=path.tv;
-//        flow(test,dist);
-//
-//        //compute the normal
-//        Vector normal=sphereNormal(test,sphere);
-//
-//        //set the material
-//        setObjectInAir(path.dat,dist,normal,sphere.mat);
-//
-//    }
-//
-//    return min(dist,stopDist);
-//}
+//overload of trace for a sphere
+float trace( Vector tv, Sphere sphere ){
 
+    vec2 intPt=intersectRay_Sphere(tv, sphere);
 
-
-
-
-//------sdf
-//float sphereSDF(inout Path path, Sphere sph, float stopDist){
-//
-//    if(stopDist<EPSILON){return stopDist;}
-//
-//    //distance to closest point:
-//    float dist = sphereDistance(path.tv,sph);
-//
-//    if(abs(dist)<EPSILON){
-//
-//        //compute the normal
-//        Vector normal=sphereNormal(path.tv,sph);
-//
-//        //set the material
-//        setObjectInAir(path.dat,dist,normal,sph.mat);
-//
-//    }
-//
-//    return min(dist,stopDist);
-//}
-
-float sphereSDF(Path path, Sphere sph){
-
-    float dist = sphereDistance(path.tv,sph);
-    return dist;
-}
-
-
-
-
-
-
-float sphereTrace(Path path, Sphere sphere, float stopDist){
-
-    vec2 intPt=sphereIntersections(path.tv,sphere);
-
-    if(intPt.y<0.||intPt.x>stopDist){
+    if(intPt.y < 0. || intPt.x > maxDist){
         //the sphere is not in front of us
-        return stopDist;
+        return maxDist;
     }
     //otherwise, find the first intersection of the sphere:
-    float dist=intPt.x<0.?intPt.y:intPt.x;
-    return min(dist,stopDist);
-
+    float dist=intPt.x < 0.  ?  intPt.y  :  intPt.x;
+    return min(dist,maxDist);
 }
 
-void setSphereData(inout Path path, Sphere sphere){
 
-    //see if we are at the plane: if not, do nothing
-    float dist=sphereDistance(path.tv,sphere);
+//overload of setData for a sphere
+void setData( inout Path path, Sphere sphere ){
 
-    if(abs(dist)<5.*EPSILON){
+    //if we are at the surface
+    if(at(path.tv, sphere)){
         //compute the normal
-        Vector normal=sphereNormal(path.tv,sphere);
-
+        Vector normal=normalVec(path.tv,sphere);
+        bool side = inside(path.tv, sphere);
         //set the material
-        setObjectInAir(path.dat,dist,normal,sphere.mat);
+        setObjectInAir(path.dat, side, normal, sphere.mat);
     }
 
 }
@@ -183,60 +160,65 @@ void setPlane(inout Plane plane,vec3 normal,float offset){
 }
 
 
-float planeDistance(Vector tv, Plane plane){
-    return planeDist(tv,plane.normal)+plane.offset;
+//overload of distR3
+float distR3( vec3 pos, Plane plane ){
+    return dot(pos, plane.normal) - plane.offset;
 }
 
 
-Vector planeNormal(Vector tv,Plane plane){
-    vec3 dir=planeGrad(tv.pos.coords,plane.normal);
-    return Vector(tv.pos, dir);
+//overload of location booleans:
+bool at( Vector tv, Plane plane){
+
+    float d = distR3( tv.pos.coords, plane );
+    bool atSurf = ((abs(d) - AT_THRESH)<0.);
+    return atSurf;
+}
+
+bool inside( Vector tv, Plane plane ){
+    float d = distR3( tv.pos.coords, plane );
+    return (d < 0.);
 }
 
 
 
-float planeIntersection(Vector tv, Plane plane){
+//overload of sdf
+float sdf(Vector tv, Plane plane){
+
+    //if aimed away from plane:
+    if(dot(tv.dir,plane.normal)>0.){return maxDist;}
+
+    //otherwise give distance
+    return distR3(tv.pos.coords, plane);
+}
+
+//overload of normalVec
+Vector normalVec(Vector tv,Plane plane){
+    //the normal is just the plane's normal vector
+    return Vector(tv.pos, plane.normal);
+}
+
+//overload of trace
+float trace( Vector tv, Plane plane ){
 
     float denom=dot(tv.dir,plane.normal);
-
     if(denom>0.){return maxDist;}
 
     //otherwise, aimed at plane
-    return -(plane.offset+dot(tv.pos.coords.xyz,plane.normal))/denom;
+    return -(plane.offset+dot(tv.pos.coords.xyz, plane.normal))/denom;
 }
 
 
+//overload of setData for a sphere
+void setData( inout Path path, Plane plane ){
 
-
-float planeSDF(Path path,  Plane plane, float stopDist){
-
-    float dist=planeDistance(path.tv,plane);
-    return min(dist,stopDist);
-
-}
-
-
-
-float planeTrace(Path path, Plane plane, float stopDist){
-
-    float dist=planeIntersection(path.tv,plane);
-    return min(dist,stopDist);
-
-}
-
-
-
-void setPlaneData(inout Path path, Plane plane){
-
-    //see if we are at the plane: if not, do nothing
-    float dist=planeDistance(path.tv,plane);
-
-    if(abs(dist)<5.*EPSILON){
+    //if we are at the surface
+    if(at(path.tv, plane)){
         //compute the normal
-        Vector normal=planeNormal(path.tv,plane);
-
+        Vector normal=normalVec(path.tv, plane);
+        bool side = inside(path.tv, plane);
         //set the material
-        setObjectInAir(path.dat,dist,normal,plane.mat);
+        setObjectInAir(path.dat, side, normal, plane.mat);
     }
 
 }
+

@@ -11,17 +11,17 @@ void stepForward(inout Path path){
     float distance=maxDist;
 
     //do the raytracing
-    distance=raytrace( path, distance );
+    distance=raytrace( path.tv, distance );
 
     //do the raymarching, with threshhold from above
-    distance=raymarch( path, distance );
+    //distance=raymarch( path, distance );
 
     //trace the varieties, if we are inside a bounding box
-    float varDist=trace_VarietyBBox( path, distance, insideVar );
-    if(insideVar){
-        varDist = findRoot( path, varDist );
-    }
-    distance=min(distance,varDist);
+//    float varDist=trace_VarietyBBox( path, distance, insideVar );
+//    if(insideVar){
+//        varDist = findRoot( path, varDist );
+//    }
+//    distance=min(distance,varDist);
 
     //move to this point of intersection
     path.distance=distance;
@@ -29,7 +29,7 @@ void stepForward(inout Path path){
     path.dat.isSky=(path.distance>maxDist-0.1);
 
     if(!path.dat.isSky){
-        setDataScene(path);
+        setData_Scene(path);
     }
 
 }

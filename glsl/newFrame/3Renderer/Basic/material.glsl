@@ -9,6 +9,8 @@ struct Material{
     vec3 emitColor;
     vec3 diffuseColor;
     vec3 specularColor;
+        vec3 diffuseColorBack;
+        vec3 specularColorBack;
     vec3 absorbColor;
     float roughness;
     float IOR;
@@ -24,6 +26,8 @@ void zeroMat(inout Material mat){
     mat.emitColor=vec3(0.);
     mat.diffuseColor=vec3(1.);
     mat.specularColor=vec3(1.);
+    mat.diffuseColorBack=vec3(1.);
+    mat.specularColorBack=vec3(1.);
     mat.absorbColor=vec3(0.);
     mat.roughness=0.;
     mat.IOR=1.;
@@ -33,7 +37,7 @@ void zeroMat(inout Material mat){
 
 
 
-
+//HAVE NOT SET BACK COLORS OF ANY OF THESE MATERIALS NEED TO DO IT BY HAND
 
 //------Metals--------------
 

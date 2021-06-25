@@ -22,33 +22,33 @@ void buildLights(){
     float intensity;
 
     //----------- LIGHT 1 -------------------------
-    light1.center=Point(vec3(-3.5,6.5,2));
+    light1.center=Point(vec3(2,3,0));
     light1.radius=0.5;
 
-    color= vec3(255., 147, 41)/255.;
-    intensity=30.;
+    color= vec3(1,0.7,0.5);
+    intensity=15.;
 
     light1.mat=makeLight(color,intensity);
 
 
 
     //----------- LIGHT 2 -------------------------
-    light2.center=Point(vec3(0,6,4));
-    light2.radius=0.6;
+    light2.center=Point(vec3(2,3,4));
+    light2.radius=0.5;
 
-    color= vec3(1.,0.6,0.4);
-    intensity=5.;
+    color= vec3(1.,0.7,0.5);
+    intensity=15.;
 
     light2.mat=makeLight(color,intensity);
 
 
 
     //----------- LIGHT 4 -------------------------
-    light3.center=Point(vec3(4,7,3));
+    light3.center=Point(vec3(-4,0,-2.5));
     light3.radius=0.4;
 
-    color= vec3(1.,0.6,0.4);
-    intensity=50.;
+    color= vec3(1.,0.7,0.5);
+    intensity=30.;
 
     light3.mat=makeLight(color,intensity);
 
@@ -64,15 +64,15 @@ void buildLights(){
 //-------------------------------------------------
 
 
-float traceLights( inout Path path, float stopDist ){
+float trace_Lights( Vector tv, float stopDist ){
 
     float dist=stopDist;
 
-    dist=sphereTrace(path,light1,dist);
+    dist=min(dist, trace(tv, light1));
 
-    dist=sphereTrace(path,light2,dist);
+    dist=min(dist, trace(tv, light2));
 
-    dist=sphereTrace(path,light3,dist);
+    dist=min(dist, trace(tv, light3));
 
     return dist;
 
@@ -85,12 +85,12 @@ float traceLights( inout Path path, float stopDist ){
 //Setting the Lights Data
 //-------------------------------------------------
 
-void setDataLights(inout Path path){
+void setData_Lights(inout Path path){
 
-    setSphereData(path, light1);
+    setData(path, light1);
 
-    setSphereData(path, light2);
+    setData(path, light2);
 
-    setSphereData(path, light3);
+    setData(path, light3);
 
 }

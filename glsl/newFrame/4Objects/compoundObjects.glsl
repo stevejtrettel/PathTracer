@@ -27,13 +27,14 @@ struct Bottle{
     float smoothJoin;
     float bump;
     Material mat;
-    Sphere boundingSphere;
+    Sphere boundingBox;
 };
 
 
 
 //----distance and normal functions
 
+//auxilary function calculating bottle distance, and giving inside/outside info
 float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
 
     vec3 pos=p-bottle.center.coords;
@@ -70,24 +71,43 @@ float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
 
 }
 
-float bottleDistance(vec3 pos, Bottle bottle){
+
+
+//overload: the distance in coordinates
+float distR3(vec3 pos, Bottle bottle){
     return bottleDistance(pos,bottle,trashFloat);
 }
 
 
+//overload of sdf
+float sdf(Vector tv, Bottle bottle){
 
-//the default option: 4 calls of SDF
-Vector bottleNormal(Vector tv, Bottle bottle){
+    //only bother if we are inside the bounding sphere:
+    float bBox=sdf(tv, bottle.boundingBox);
+
+    if(bBox>0.){
+        //if we are outisde the box, march towards it
+        return bBox+0.05;
+    }
+
+    //if we are inside, compute the actual distance
+    return distR3(tv.pos.coords, bottle);
+}
+
+
+
+//overload of normalVec
+Vector normalVec(Vector tv, Bottle bottle){
 
     vec3 pos=tv.pos.coords;
 
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
 
-    float vxyy=bottleDistance( pos + e.xyy*ep,bottle);
-    float vyyx=bottleDistance( pos + e.yyx*ep,bottle);
-    float vyxy=bottleDistance( pos + e.yxy*ep,bottle);
-    float vxxx=bottleDistance( pos + e.xxx*ep,bottle);
+    float vxyy=distR3( pos + e.xyy*ep, bottle);
+    float vyyx=distR3( pos + e.yyx*ep, bottle);
+    float vyxy=distR3( pos + e.yxy*ep, bottle);
+    float vxxx=distR3( pos + e.xxx*ep, bottle);
 
     vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
 
@@ -98,36 +118,27 @@ Vector bottleNormal(Vector tv, Bottle bottle){
 }
 
 
-
-
-//------sdf
-float bottleSDF(Path path, Bottle bottle){
-
-    //speed things up only calculating boundign sphere
-    float bDist=sphereTrace(path,bottle.boundingSphere,maxDist);
-
-    if(bDist>0.){
-        return bDist+0.05;
-    }
-
-    //only if we are inside that, run bottleDist
-    return bottleDistance(path.tv.pos.coords,bottle);
+//overload of location booleans
+//note inside here means in the glass of the bottle not the enclosed volume
+bvec2 relPosition( Vector tv, Bottle bottle ){
+    float d = distR3( tv.pos.coords, bottle );
+    bool atSurf = ((abs(d)-AT_THRESH)<0.);
+    bool inside = d<0.;
+    return bvec2(atSurf, inside);
 }
 
+//overload of setData
+void setData(inout Path path, Bottle bottle){
 
+    bvec2 loc=relPosition(path.tv, bottle);
 
-
-
-void setBottleData(inout Path path, Bottle bottle){
-    //see if we are at the plane: if not, do nothing
-    float dist=bottleDistance(path.tv.pos.coords,bottle);
-
-    if(abs(dist)<5.*EPSILON){
+    //if we are at the surface
+    if(loc.x){
         //compute the normal
-        Vector normal=bottleNormal(path.tv,bottle);
-
+        Vector normal=normalVec(path.tv, bottle);
+        bool inside=loc.y;
         //set the material
-        setObjectInAir(path.dat,dist,normal,bottle.mat);
+        setObjectInAir(path.dat,inside,normal,bottle.mat);
     }
 
 }
@@ -172,6 +183,7 @@ struct CocktailGlass{
     float thickness;
     float base;
     Material mat;
+    Sphere boundingBox;
 };
 
 
@@ -200,29 +212,39 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
 }
 
 
-//overload not worrying about if we are inside the glass
-float cocktailGlassDistance(vec3 p, CocktailGlass glass){
-    return cocktailGlassDistance(p,glass,trashFloat);
+//overload of distR3
+float distR3( vec3 p, CocktailGlass glass ){
+    return cocktailGlassDistance(p, glass, trashFloat);
 }
 
 
-float cocktailGlassDistance(Vector tv,CocktailGlass glass){
-    return cocktailGlassDistance(tv.pos.coords,glass);
+//overload of sdf
+float sdf(Vector tv, CocktailGlass glass){
+
+    //only bother if we are inside the bounding sphere:
+    float bBox=sdf(tv, glass.boundingBox);
+
+    if(bBox>0.){
+        //if we are outisde the box, march towards it
+        return bBox+0.05;
+    }
+
+    //if we are inside, compute the actual distance
+    return distR3(tv.pos.coords, glass);
 }
 
-
-
-Vector cocktailGlassNormal(Vector tv, CocktailGlass glass){
+//overload of normalVec
+Vector normalVec(Vector tv, CocktailGlass glass){
 
     vec3 pos=tv.pos.coords;
 
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
 
-    float vxyy=cocktailGlassDistance( pos + e.xyy*ep,glass);
-    float vyyx=cocktailGlassDistance( pos + e.yyx*ep,glass);
-    float vyxy=cocktailGlassDistance( pos + e.yxy*ep,glass);
-    float vxxx=cocktailGlassDistance( pos + e.xxx*ep,glass);
+    float vxyy=distR3( pos + e.xyy*ep, glass);
+    float vyyx=distR3( pos + e.yyx*ep, glass);
+    float vyxy=distR3( pos + e.yxy*ep, glass);
+    float vxxx=distR3( pos + e.xxx*ep, glass);
 
     vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
 
@@ -232,34 +254,30 @@ Vector cocktailGlassNormal(Vector tv, CocktailGlass glass){
 
 }
 
-
-
-
-
-//------sdf
-float cocktailGlassSDF(Path path, CocktailGlass glass){
-
-    float dist = cocktailGlassDistance(path.tv,glass);
-
-    return dist;
-
+//overload of location booleans
+//note inside here means in the glass of the cup not the enclosed volume
+bvec2 relPosition( Vector tv, CocktailGlass glass ){
+    float d = distR3( tv.pos.coords, glass );
+    bool atSurf = ((abs(d)-AT_THRESH)<0.);
+    bool inside = (d<0.);
+    return bvec2(atSurf, inside);
 }
 
 
 
+//overload of setData
+void setData(inout Path path, CocktailGlass glass){
 
-void setCocktailGlassData(inout Path path, CocktailGlass glass){
-    //see if we are at the plane: if not, do nothing
-    float dist=cocktailGlassDistance(path.tv,glass);
+    bvec2 loc=relPosition(path.tv, glass);
 
-    if(abs(dist)<5.*EPSILON){
+    //if we are at the surface
+    if(loc.x){
         //compute the normal
-        Vector normal=cocktailGlassNormal(path.tv,glass);
-
+        Vector normal=normalVec(path.tv, glass);
+        bool inside=loc.y;
         //set the material
-        setObjectInAir(path.dat,dist,normal,glass.mat);
+        setObjectInAir(path.dat,inside,normal,glass.mat);
     }
 
 }
-
 

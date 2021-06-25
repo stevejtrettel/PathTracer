@@ -13,10 +13,10 @@
 
 //set the names of global variables for the walls here:
 Sphere ball1, ball2, ball3;
-Bottle bottle;
-CocktailGlass cGlass;
-Cocktail negroni;
-LiquorBottle gin,campari;
+//Bottle bottle;
+//CocktailGlass cGlass;
+//Cocktail negroni;
+//LiquorBottle gin,campari;
 
 //this function constructs the objects
 void buildObjects(){
@@ -57,73 +57,73 @@ void buildObjects(){
     ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5);
 
 
-
-    //-------- BOTTLE ----------------
-
-    bottle.baseHeight=1.25;
-    bottle.baseRadius=1.;
-    bottle.neckHeight=1.;
-    bottle.neckRadius=0.3;
-    bottle.thickness=0.05;
-    bottle.rounded=0.1;
-    bottle.smoothJoin=0.3;
-    bottle.center=Point(vec3(3,0.2,3));
-    bottle.bump=0.5;
-    //bottle.mat=makeGlass(vec3(0),1.5,0.99);
-    bottle.mat=makeDielectric(0.7*vec3(0.3,0.2,0.6),0.2,0.2);
-
-    //set up the bounding sphere
-    bottle.boundingSphere.center=bottle.center;
-    bottle.boundingSphere.radius=bottle.baseHeight+bottle.neckHeight+0.5;
-
-
-
-    //-------- GIN BOTTLE ----------------
-
-    gin.glass=bottle;
-    gin.glass.center.coords=vec3(4,0.3,-4.5);
-    gin.glass.baseRadius=1.25;
-    gin.glass.baseHeight=1.5;
-    gin.glass.thickness=0.1;
-    gin.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.95);
-    gin.drink=makeGlass(2.*whiskey,1.3,0.99);
-    //makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
-    gin.fill=0.;
-    gin.glass.bump=1.;
-
-
-    //-------- CAMPARI BOTTLE ----------------
-
-    campari.glass=bottle;
-    campari.glass.center.coords=vec3(3,2.25,-9);
-    campari.glass.baseRadius=1.;
-    campari.glass.baseHeight=3.5;
-    campari.glass.neckHeight=0.75;
-    campari.glass.smoothJoin=0.5;
-    campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-    campari.drink=makeGlass(2.5*redAbsorb,1.3,0.99);
-    campari.fill=0.5;
-    campari.glass.bump=0.;
-
-
-
-
-    //-------- COCKTAIL GLASS----------------
-
-    cGlass.center=Point(vec3(-1,-0.35,-1.5));
-    cGlass.radius=1.;
-    cGlass.height=1.;
-    cGlass.thickness=0.1;
-    cGlass.base=0.3;
-    cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-
-
-    //-------- NEGRONI ----------------
-    negroni.glass=cGlass;
-    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
-    negroni.drink=makeGlass(2.*whiskey,1.2,0.99);
-//3.*(brownAbsorb+0.25*redAbsorb)
-
+//
+//    //-------- BOTTLE ----------------
+//
+//    bottle.baseHeight=1.25;
+//    bottle.baseRadius=1.;
+//    bottle.neckHeight=1.;
+//    bottle.neckRadius=0.3;
+//    bottle.thickness=0.05;
+//    bottle.rounded=0.1;
+//    bottle.smoothJoin=0.3;
+//    bottle.center=Point(vec3(3,0.2,3));
+//    bottle.bump=0.5;
+//    //bottle.mat=makeGlass(vec3(0),1.5,0.99);
+//    bottle.mat=makeDielectric(0.7*vec3(0.3,0.2,0.6),0.2,0.2);
+//
+//    //set up the bounding sphere
+//    bottle.boundingSphere.center=bottle.center;
+//    bottle.boundingSphere.radius=bottle.baseHeight+bottle.neckHeight+0.5;
+//
+//
+//
+//    //-------- GIN BOTTLE ----------------
+//
+//    gin.glass=bottle;
+//    gin.glass.center.coords=vec3(4,0.3,-4.5);
+//    gin.glass.baseRadius=1.25;
+//    gin.glass.baseHeight=1.5;
+//    gin.glass.thickness=0.1;
+//    gin.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.95);
+//    gin.drink=makeGlass(2.*whiskey,1.3,0.99);
+//    //makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
+//    gin.fill=0.;
+//    gin.glass.bump=1.;
+//
+//
+//    //-------- CAMPARI BOTTLE ----------------
+//
+//    campari.glass=bottle;
+//    campari.glass.center.coords=vec3(3,2.25,-9);
+//    campari.glass.baseRadius=1.;
+//    campari.glass.baseHeight=3.5;
+//    campari.glass.neckHeight=0.75;
+//    campari.glass.smoothJoin=0.5;
+//    campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+//    campari.drink=makeGlass(2.5*redAbsorb,1.3,0.99);
+//    campari.fill=0.5;
+//    campari.glass.bump=0.;
+//
+//
+//
+//
+//    //-------- COCKTAIL GLASS----------------
+//
+//    cGlass.center=Point(vec3(1,-0.34,-6));
+//    cGlass.radius=1.;
+//    cGlass.height=1.;
+//    cGlass.thickness=0.1;
+//    cGlass.base=0.3;
+//    cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+//
+//
+//    //-------- NEGRONI ----------------
+//    negroni.glass=cGlass;
+//    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+//    negroni.drink=makeGlass(2.*whiskey,1.2,0.99);
+////3.*(brownAbsorb+0.25*redAbsorb)
+//
 
 }
 
@@ -136,16 +136,15 @@ void buildObjects(){
 //Finding the Objects
 //-------------------------------------------------
 
-
-float traceObjects( inout Path path, float stopDist ){
+float trace_Objects( Vector tv, float stopDist ){
 
     float dist=stopDist;
 
-    dist=sphereTrace(path,ball1,dist);
+    dist=min(dist, trace(tv, ball1));
 
-    dist=sphereTrace(path,ball2,dist);
+    dist=min(dist, trace(tv, ball2));
 
-    dist=sphereTrace(path,ball3,dist);
+    dist=min(dist, trace(tv,ball3));
 
     return dist;
 
@@ -153,14 +152,16 @@ float traceObjects( inout Path path, float stopDist ){
 
 
 
-float sdfObjects( inout Path path ){
+
+
+float sdf_Objects( inout Path path ){
 
    float dist=maxDist;
 
     //dist=min(dist,bottleSDF(path,bottle));
-    dist=min(dist,liquorBottleSDF(path,gin));
+    //dist=min(dist,liquorBottleSDF(path,gin));
 
-    dist=min(dist,cocktailSDF(path,negroni));
+    //dist=min(dist,cocktailSDF(path,negroni));
 
     //dist=min(dist,sphereSDF(path,ball3));
 
@@ -174,17 +175,20 @@ float sdfObjects( inout Path path ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-void setDataObjects(inout Path path){
 
-    //setSphereData(path, ball1);
+void setData_Objects(inout Path path){
 
-    //setSphereData(path, ball2);
+    setData(path, ball1);
 
-    //setSphereData(path, ball3);
+    setData(path,ball2);
 
-    //setBottleData(path, bottle);
-    setLiquorBottleData(path, gin);
+    setData(path, ball3);
 
-    setCocktailData(path, negroni);
+    //setData(path, bottle);
+
+    //setData(path, cGlass);
 
 }
+
+
+

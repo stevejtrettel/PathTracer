@@ -5,12 +5,12 @@
 //-------------------------------------------------
 
 
-float raytrace(Path path, float stopDist){
+float raytrace(Vector tv, float stopDist){
 
     float dist=stopDist;
 
     //right now just tracing the scene
-    dist= sceneTrace(path,dist);
+    dist = trace_Scene(tv, dist);
 
     //move slightly less than the full distance to stop right before the object
     return dist-EPSILON/2.;

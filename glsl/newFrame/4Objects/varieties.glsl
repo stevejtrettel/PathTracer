@@ -31,9 +31,12 @@ struct BarthSextic{
 
 float barthSexticEqn(vec3 p){
 
-    float x=p.x;
-    float y=p.y;
-    float z=p.z;
+    float x=p.y;
+    float y=p.z;
+    float z=-p.x;
+
+    //AN ELLIPTIC SURFACE
+    //return 4.*(1.-x*x+y+z+y*z)+2.*(x*z+z*z)+(x*x*x-x-x*x*y-y*y-x*y*y-y*y*y+x*y*z-y*y*z+x*z*z+y*z*z+z*z*z);
 
     float t = 1.618034;
 
@@ -44,11 +47,6 @@ float barthSexticEqn(vec3 p){
 
 //overload of variety for the barth sextic struct:
 float variety(Vector tv, BarthSextic var){
-
-    //if outside the bounding box, dont even bother computing:
-//    if(sphereDistance(tv,var.boundingBox)>0.){
-//        return 1.;
-//    }
 
     //otherwise, get the value
     vec3 pos=rescaleCoords(tv.pos,var.center,var.scale);
@@ -78,56 +76,19 @@ Vector normalVec(Vector tv, BarthSextic var){
 
 void setData(inout Path path, BarthSextic var){
     Vector normal;
+    bvec2 bBoxLoc=relPosition(path.tv, var.boundingBox);
 
-    //if we are near the bounding box: set that material as the data
-    float distBB=sphereDistance(path.tv,var.boundingBox);
-
-    if(distBB>0.01){
-        return;
+    if(bBoxLoc.x){
+        //if we are at the surface of the bounding box:
+        setData(path,var.boundingBox);
     }
 
-    if( abs(distBB) < 5. * EPSILON ){
 
-        normal=sphereNormal(path.tv,var.boundingBox);
-        setObjectInAir(path.dat,distBB,normal,var.boundingBox.mat);
-
-    }
     //if we are inside the bounding box AND near the variety, set that material
     float distVar=variety(path.tv, var);
-
-    if (distBB < 0. && abs(distVar) < 5.*EPSILON){
-
+    if (bBoxLoc.y && abs(distVar) < 0.1){
         normal=normalVec(path.tv, var);
-        setObjectInAir(path.dat, distVar, normal, var.mat);
-
+        setSurfaceInMat(path.dat, distVar, normal, var.mat,var.boundingBox.mat);
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
