@@ -49,7 +49,7 @@ float trace_Scene(Vector tv, float stopDist){
 
     dist=trace_Lights(tv, dist);
 
-    //dist=trace_Walls(tv, dist);
+    dist=trace_Walls(tv, dist);
 
     dist=trace_Objects(tv, dist);
 
@@ -64,7 +64,7 @@ float trace_Scene(Vector tv, float stopDist){
 
 void setData_Scene(inout Path path){
 
-    //setData_Walls(path);
+    setData_Walls(path);
 
     setData_Lights(path);
 

@@ -12,12 +12,13 @@
 
 
 //set the names of global variables for the walls here:
-Plane wall1, wall2, wall3, wall4, wall5, wall6;
+Plane bottomWall,topWall,leftWall,rightWall,backWall,frontWall;
 
 //this function constructs the objects
 void buildWalls(){
 
-    vec3 color,normal;
+    Vector orientation;
+    vec3 color;
     float specularity, roughness, offset;
 
     //-----------GENERAL FOR THE WALLS -------------------------
@@ -26,57 +27,57 @@ void buildWalls(){
     roughness=0.;
 
 
-    //----------- WALL 1 -------------------------
-    normal=vec3(0,1,0);
-    offset=1.5;
+    //----------- THE FLOOR -------------------------
+    orientation.pos.coords=vec3(0,-1,0);
+    orientation.dir=vec3(0,1,0);
 
-    setPlane(wall1,normal,offset);
-    wall1.mat=makeDielectric(color,0.0,roughness);
-
-
-    //----------- WALL 2 -------------------------
-    normal=vec3(0,0,1);
-    offset=10.;
-
-    setPlane(wall2,normal,offset);
-    wall2.mat=makeDielectric(color,specularity,roughness);
-    wall2.mat.specularColor=vec3(0.75);
-    wall2.mat.specularChance=1.;
-    wall2.mat.refractionChance=0.;
+    bottomWall.orientation=orientation;
+    bottomWall.mat=makeDielectric(color,0.0,roughness);
 
 
-    //----------- WALL 3 -------------------------
-    normal=vec3(1,0,0);
-    offset=10.;
+    //----------- THE CEILING -------------------------
+    orientation.pos.coords=vec3(0,9,0);
+    orientation.dir=vec3(0,-1,0);
 
-    setPlane(wall3,normal,offset);
-    wall3.mat=makeDielectric(color,specularity,roughness);
-
-
-
-    //----------- WALL 4 -------------------------
-    normal=vec3(0,-1,0);
-    offset=10.;
-
-    setPlane(wall4,normal,offset);
-    //wall4.mat=makeDielectric(color,specularity,roughness);
-    wall4.mat=makeLight(vec3(1,0.6,0.4),0.25);
-
-    //----------- WALL 5 -------------------------
-    normal=vec3(0,0,-1);
-    offset=5.;
-
-    setPlane(wall5,normal,offset);
-    wall5.mat=makeDielectric(color,specularity,roughness);
+    topWall.orientation=orientation;
+    //topWall.mat=makeDielectric(color,0.0,roughness);
+    topWall.mat=makeLight(vec3(1,0.6,0.4),0.25);
 
 
+    //----------- THE FRONT -------------------------
+    orientation.pos.coords=vec3(0,0,-5);
+    orientation.dir=vec3(0,0,1);
 
-    //----------- WALL 6 -------------------------
-    normal=vec3(-1,0,0);
-    offset=10.;
+    frontWall.orientation=orientation;
+    //need a "make mirror" command
+    frontWall.mat=makeDielectric(color,0.0,roughness);
+    frontWall.mat.specularColor=vec3(0.75);
+    frontWall.mat.specularChance=1.;
+    frontWall.mat.refractionChance=0.;
 
-    setPlane(wall6,normal,offset);
-    wall6.mat=makeDielectric(color,specularity,roughness);
+
+    //----------- THE BACK -------------------------
+    orientation.pos.coords=vec3(0,0,5);
+    orientation.dir=vec3(0,0,-1);
+
+    backWall.orientation=orientation;
+    backWall.mat=makeDielectric(color,0.0,roughness);
+
+
+    //----------- THE LEFT -------------------------
+    orientation.pos.coords=vec3(-5,0,0);
+    orientation.dir=vec3(1,0,0);
+
+    leftWall.orientation=orientation;
+    leftWall.mat=makeDielectric(color,0.0,roughness);
+
+
+    //----------- THE RIGHT -------------------------
+    orientation.pos.coords=vec3(5,0,0);
+    orientation.dir=vec3(-1,0,0);
+
+    rightWall.orientation=orientation;
+    rightWall.mat=makeDielectric(color,0.0,roughness);
 
 
 }
@@ -95,17 +96,17 @@ float trace_Walls(Vector tv ,float stopDist){
 
     float dist=stopDist;
 
-    dist=min(dist, trace(tv, wall1));
+    dist=min(dist, trace(tv, bottomWall));
 
-    dist=min(dist, trace(tv, wall2));
+    dist=min(dist, trace(tv, topWall));
 
-    dist=min(dist, trace(tv, wall3));
+    dist=min(dist, trace(tv, frontWall));
 
-    dist=min(dist, trace(tv, wall4));
+    dist=min(dist, trace(tv, backWall));
 
-    dist=min(dist, trace(tv, wall5));
+    dist=min(dist, trace(tv, leftWall));
 
-    dist=min(dist, trace(tv, wall6));
+    dist=min(dist, trace(tv, rightWall));
 
     return dist;
 
@@ -123,16 +124,16 @@ float trace_Walls(Vector tv ,float stopDist){
 
 void setData_Walls( inout Path path ){
 
-    setData(path, wall1);
+    setData(path, bottomWall);
 
-    setData(path, wall2);
+    setData(path, topWall);
 
-    setData(path, wall3);
+    setData(path, frontWall);
 
-    setData(path, wall4);
+    setData(path, backWall);
 
-    setData(path, wall5);
+    setData(path, leftWall);
 
-    setData(path, wall6);
+    setData(path, rightWall);
 
 }

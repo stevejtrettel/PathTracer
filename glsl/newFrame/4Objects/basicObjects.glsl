@@ -146,23 +146,22 @@ void setData( inout Path path, Sphere sphere ){
 //the data of a plane is its normal and a constant:
 
 struct Plane{
-    vec3 normal;
-    float offset;
+    //a plane is given by a position and the unit normal at that point:
+    Vector orientation;
     Material mat;
 };
 
 
-//normalize the plane's vector before adding it:
-void setPlane(inout Plane plane,vec3 normal,float offset){
-    normal=normalize(normal);
-    plane.normal=normal;
-    plane.offset=offset;
-}
-
 
 //overload of distR3
 float distR3( vec3 pos, Plane plane ){
-    return dot(pos, plane.normal) - plane.offset;
+
+    //get position relative to point on plane
+    vec3 relPos = pos - plane.orientation.pos.coords;
+
+    //project onto the normal vector
+    return dot( relPos, plane.orientation.dir );
+
 }
 
 
@@ -170,8 +169,8 @@ float distR3( vec3 pos, Plane plane ){
 bool at( Vector tv, Plane plane){
 
     float d = distR3( tv.pos.coords, plane );
-    bool atSurf = ((abs(d) - AT_THRESH)<0.);
-    return atSurf;
+    return  (abs(d) < AT_THRESH);
+
 }
 
 bool inside( Vector tv, Plane plane ){
@@ -182,29 +181,29 @@ bool inside( Vector tv, Plane plane ){
 
 
 //overload of sdf
-float sdf(Vector tv, Plane plane){
+float sdf( Vector tv, Plane plane ){
 
     //if aimed away from plane:
-    if(dot(tv.dir,plane.normal)>0.){return maxDist;}
+    if(dot(tv.dir,plane.orientation.dir)>0.){return maxDist;}
 
     //otherwise give distance
     return distR3(tv.pos.coords, plane);
 }
 
 //overload of normalVec
-Vector normalVec(Vector tv,Plane plane){
+Vector normalVec( Vector tv,Plane plane ){
     //the normal is just the plane's normal vector
-    return Vector(tv.pos, plane.normal);
+    return Vector(tv.pos, plane.orientation.dir);
 }
 
 //overload of trace
 float trace( Vector tv, Plane plane ){
 
-    float denom=dot(tv.dir,plane.normal);
+    float denom=dot(tv.dir,plane.orientation.dir);
     if(denom>0.){return maxDist;}
 
     //otherwise, aimed at plane
-    return -(plane.offset+dot(tv.pos.coords.xyz, plane.normal))/denom;
+    return - distR3( tv.pos.coords, plane) / denom;
 }
 
 
