@@ -28,7 +28,7 @@ void buildObjects(){
     vec3 whiskey=vec3(0.18,0.43,0.62);
 
     //----------- BALL 1 -------------------------
-    ball1.center=Point(vec3(1,0.3,-2));
+    ball1.center=vec3(1,0.3,-2);
     ball1.radius=1.3;
 
     color= vec3(0.9,0.9,0.5);
@@ -37,7 +37,7 @@ void buildObjects(){
     ball1.mat= makeMetal(color,specularity,roughness);
 
     //----------- BALL 2 -------------------------
-    ball2.center=Point(vec3(0,-0.5,2));
+    ball2.center=vec3(0,-0.5,2);
     ball2.radius=0.55;
 
     color= 0.7*vec3(0.3,0.2,0.6);
@@ -47,7 +47,7 @@ void buildObjects(){
 
 
     //----------- BALL 3 -------------------------
-    ball3.center=Point(vec3(1.5,0.6,2));
+    ball3.center=vec3(1.5,0.6,2);
     ball3.radius=1.6;
 
     color= 0.1*vec3(0.7,0.1,0.2);
@@ -67,7 +67,7 @@ void buildObjects(){
     bottle.thickness=0.05;
     bottle.rounded=0.1;
     bottle.smoothJoin=0.3;
-    bottle.center=Point(vec3(2,0.75,-2));
+    bottle.center=vec3(2,0.75,-2);
     bottle.bump=0.5;
     bottle.mat=makeGlass(vec3(0.3,0.05,0.08),1.5,0.99);
 
@@ -109,7 +109,7 @@ void buildObjects(){
 //
     //-------- COCKTAIL GLASS----------------
 
-    cGlass.center=Point(vec3(-2,0.1,-1));
+    cGlass.center=vec3(-2,0.1,-1);
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;

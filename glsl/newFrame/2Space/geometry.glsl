@@ -1,31 +1,6 @@
 
-//-------------------------------------------------
-//The POINT Struct
-//-------------------------------------------------
 
-
-struct Point {
-    vec3 coords;
-};
-
-// origin of the space
-const Point ORIGIN = Point(vec3(0, 0, 0));
-
-//in case we need something in a function
-Point trashPoint;
-
-Point createPoint(vec3 p){
-    return Point(p);
-}
-
-void shiftPoint(Point p, vec3 v, float ep){
-    p.coords.xyz+=ep*v;
-}
-
-
-
-
-
+vec3 ORIGIN=vec3(0,0,0);
 
 //-------------------------------------------------
 //The VECTOR Struct
@@ -34,13 +9,13 @@ void shiftPoint(Point p, vec3 v, float ep){
 
 //tangent vector
 struct Vector{
-    Point pos;//point in the space
+    vec3 pos;//point in the space
     vec3 dir; //tangent vector,
 };
 
 Vector trashVector;
 
-Vector randomVector(Point pos){
+Vector randomVector(vec3 pos){
     return Vector(pos,randomUnitVec3());
 }
 
@@ -73,9 +48,9 @@ Vector rotateByFacing(Vector v, mat3 facing){
 //use mix instead of if/then statements to choose
 //this is NOT to take an average; x should be 0 or 1.
 Vector select(Vector v, Vector w,float x){
-    vec3 pos=mix(v.pos.coords,w.pos.coords,x);
+    vec3 pos=mix(v.pos,w.pos,x);
     vec3 dir=mix(v.dir,w.dir,x);
-    return Vector(Point(pos),dir);
+    return Vector(pos,dir);
 }
 
 
@@ -89,7 +64,7 @@ Vector mix(Vector v, Vector w, float x){
 
 
 void nudge(inout Vector v, vec3 dir,float amt){
-    v.pos.coords+=dir*amt;
+    v.pos+=dir*amt;
 }
 
 //overload to nudge along a tangent vector
@@ -141,7 +116,7 @@ float cosAng(Vector v, Vector w){
 //actually flowing along a geodesic
 void flow(inout Vector tv, float t){
     //flow distance t in direction tv
-    tv.pos.coords+=t*tv.dir;
+    tv.pos += t*tv.dir;
 }
 
 
@@ -180,9 +155,9 @@ Isometry getInverse(Isometry isom) {
 
 
 // Translate a point by the given isometry
-Point translate(Isometry isom, Point p) {
-    vec4 coords=isom.mat * vec4(p.coords,1.);
-    return Point(coords.xyz);
+vec3 translate(Isometry isom, vec3 p) {
+    vec4 coords=isom.mat * vec4(p,1.);
+    return coords.xyz;
 }
 
 
@@ -191,7 +166,7 @@ Point translate(Isometry isom, Point p) {
 //applying isometry acts via linear part on direction
 Vector translate(Isometry isom, Vector v) {
     // apply an isometry to the tangent vector
-    Point newPos=translate(isom, v.pos);
+    vec3 newPos=translate(isom, v.pos);
     vec3 newDir=(isom.mat*vec4(v.dir,0.)).xyz;
     return Vector(newPos,newDir);
 }
@@ -215,10 +190,6 @@ Isometry makeTranslation(vec3 p){
     return Isometry(mat);
 }
 
-//overload for points
-Isometry makeTranslation(Point p){
-    return makeTranslation(p.coords);
-}
 
 //return isometry rotating angle around axis
 Isometry makeRotation(vec3 axis, float angle)
@@ -245,9 +216,3 @@ Isometry makeIsometry(vec3 pos, vec3 axis, float angle){
     return composeIsometry(trans,rot);
 
 }
-
-//overload for point
-Isometry makeIsometry(Point pos, vec3 axis, float angle){
-    return makeIsometry(pos.coords, axis, angle);
-}
-

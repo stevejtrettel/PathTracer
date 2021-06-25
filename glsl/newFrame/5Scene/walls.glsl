@@ -28,7 +28,7 @@ void buildWalls(){
 
 
     //----------- THE FLOOR -------------------------
-    orientation.pos.coords=vec3(0,-1,0);
+    orientation.pos=vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
 
     bottomWall.orientation=orientation;
@@ -36,7 +36,7 @@ void buildWalls(){
 
 
     //----------- THE CEILING -------------------------
-    orientation.pos.coords=vec3(0,9,0);
+    orientation.pos=vec3(0,9,0);
     orientation.dir=vec3(0,-1,0);
 
     topWall.orientation=orientation;
@@ -45,7 +45,7 @@ void buildWalls(){
 
 
     //----------- THE FRONT -------------------------
-    orientation.pos.coords=vec3(0,0,-5);
+    orientation.pos=vec3(0,0,-5);
     orientation.dir=vec3(0,0,1);
 
     frontWall.orientation=orientation;
@@ -57,7 +57,7 @@ void buildWalls(){
 
 
     //----------- THE BACK -------------------------
-    orientation.pos.coords=vec3(0,0,5);
+    orientation.pos=vec3(0,0,5);
     orientation.dir=vec3(0,0,-1);
 
     backWall.orientation=orientation;
@@ -65,7 +65,7 @@ void buildWalls(){
 
 
     //----------- THE LEFT -------------------------
-    orientation.pos.coords=vec3(-8,0,0);
+    orientation.pos=vec3(-8,0,0);
     orientation.dir=vec3(1,0,0);
 
     leftWall.orientation=orientation;
@@ -73,7 +73,7 @@ void buildWalls(){
 
 
     //----------- THE RIGHT -------------------------
-    orientation.pos.coords=vec3(5,0,0);
+    orientation.pos=vec3(5,0,0);
     orientation.dir=vec3(-1,0,0);
 
     rightWall.orientation=orientation;

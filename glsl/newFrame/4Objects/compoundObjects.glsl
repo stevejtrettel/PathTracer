@@ -17,7 +17,7 @@
 
 
 struct Bottle{
-    Point center;
+    vec3 center;
     float baseRadius;
     float baseHeight;
     float neckRadius;
@@ -37,7 +37,7 @@ struct Bottle{
 //auxilary function calculating bottle distance, and giving inside/outside info
 float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
 
-    vec3 pos=p-bottle.center.coords;
+    vec3 pos=p-bottle.center;
 
     //the base of the bottle
     float base=cylinderDist(pos,bottle.baseRadius, bottle.baseHeight,bottle.rounded);
@@ -91,7 +91,7 @@ float sdf(Vector tv, Bottle bottle){
 //    }
 
     //if we are inside, compute the actual distance
-    return distR3(tv.pos.coords, bottle);
+    return distR3(tv.pos, bottle);
 }
 
 
@@ -99,7 +99,7 @@ float sdf(Vector tv, Bottle bottle){
 //overload of normalVec
 Vector normalVec(Vector tv, Bottle bottle){
 
-    vec3 pos=tv.pos.coords;
+    vec3 pos=tv.pos;
 
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
@@ -121,7 +121,7 @@ Vector normalVec(Vector tv, Bottle bottle){
 //overload of location booleans
 //note inside here means in the glass of the bottle not the enclosed volume
 bvec2 relPosition( Vector tv, Bottle bottle ){
-    float d = distR3( tv.pos.coords, bottle );
+    float d = distR3( tv.pos, bottle );
     bool atSurf = ((abs(d)-AT_THRESH)<0.);
     bool inside = d<0.;
     return bvec2(atSurf, inside);
@@ -177,7 +177,7 @@ void setData(inout Path path, Bottle bottle){
 //thus the first distance function has an inout telling you if you are inside the glass
 
 struct CocktailGlass{
-    Point center;
+    vec3 center;
     float radius;
     float height;
     float thickness;
@@ -189,7 +189,7 @@ struct CocktailGlass{
 
 float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
 
-    vec3 pos=p-glass.center.coords;
+    vec3 pos=p-glass.center;
 
     float outside=cylinderDist(pos,glass.radius,glass.height,0.1);
 
@@ -230,13 +230,13 @@ float sdf(Vector tv, CocktailGlass glass){
 //    }
 
     //if we are inside, compute the actual distance
-    return distR3(tv.pos.coords, glass);
+    return distR3(tv.pos, glass);
 }
 
 //overload of normalVec
 Vector normalVec(Vector tv, CocktailGlass glass){
 
-    vec3 pos=tv.pos.coords;
+    vec3 pos=tv.pos;
 
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
@@ -257,7 +257,7 @@ Vector normalVec(Vector tv, CocktailGlass glass){
 //overload of location booleans
 //note inside here means in the glass of the cup not the enclosed volume
 bvec2 relPosition( Vector tv, CocktailGlass glass ){
-    float d = distR3( tv.pos.coords, glass );
+    float d = distR3( tv.pos, glass );
     bool atSurf = ((abs(d)-AT_THRESH)<0.);
     bool inside = (d<0.);
     return bvec2(atSurf, inside);

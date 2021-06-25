@@ -144,11 +144,11 @@ float sdf( Vector tv, Cocktail cocktail){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup = cocktailGlassDistance(tv.pos.coords, cocktail.glass, drinkSide);
+    float cup = cocktailGlassDistance(tv.pos, cocktail.glass, drinkSide);
 
     //distance to the top of the drink
     //right now direcly in the center of the cup
-    float drinkTop = tv.pos.coords.y-cocktail.glass.center.coords.y-cocktail.glass.height/3.;
+    float drinkTop = tv.pos.y-cocktail.glass.center.y-cocktail.glass.height/3.;
 
     //distance to drink is intersection of inside dist and this top
     float drink = max(drinkSide, drinkTop);
@@ -167,11 +167,11 @@ void setData(inout Path path, Cocktail cocktail){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup=cocktailGlassDistance(path.tv.pos.coords,cocktail.glass,drinkSide);
+    float cup=cocktailGlassDistance(path.tv.pos,cocktail.glass,drinkSide);
 
     //distance to the top of the drink
     //right now direcly in the center of the cup
-    float drinkTop=path.tv.pos.coords.y-cocktail.glass.center.coords.y-cocktail.glass.height/3.;
+    float drinkTop=path.tv.pos.y-cocktail.glass.center.y-cocktail.glass.height/3.;
 
     //distance to drink is intersection of inside dist and this top
     float drink=max(drinkSide,drinkTop);
@@ -346,13 +346,13 @@ float sdf(Vector tv, LiquorBottle gin){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup=bottleDistance(tv.pos.coords,gin.glass,drinkSide);
+    float cup=bottleDistance(tv.pos,gin.glass,drinkSide);
 
 
     //distance to the top of the drink
     //right now no fill=exactly bottom of the glass
 
-    float drinkTop=tv.pos.coords.y-gin.glass.center.coords.y;
+    float drinkTop=tv.pos.y-gin.glass.center.y;
 
     drinkTop-=gin.glass.baseHeight*gin.fill;
 
@@ -373,13 +373,13 @@ void setData(inout Path path, LiquorBottle gin){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup=bottleDistance(path.tv.pos.coords,gin.glass,drinkSide);
+    float cup=bottleDistance(path.tv.pos,gin.glass,drinkSide);
 
 
     //distance to the top of the drink
     //right now no fill=exactly bottom of the glass
 
-    float drinkTop=path.tv.pos.coords.y-gin.glass.center.coords.y;
+    float drinkTop=path.tv.pos.y-gin.glass.center.y;
 
     drinkTop-=gin.glass.baseHeight*gin.fill;
 

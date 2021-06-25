@@ -17,7 +17,7 @@
 
 //the data of a sphere is its center and radius
 struct Sphere{
-    Point center;
+    vec3 center;
     float radius;
     Material mat;
 };
@@ -26,7 +26,7 @@ struct Sphere{
 //overload of distR3: distance in R3 coordinates
 float distR3( vec3 p, Sphere sphere ){
     //normalize position
-    vec3 pos = p - sphere.center.coords;
+    vec3 pos = p - sphere.center;
 
     //distance to closest point on the sphere
     return length(pos) - sphere.radius;
@@ -35,7 +35,7 @@ float distR3( vec3 p, Sphere sphere ){
 //overload of location booleans:
 bvec2 relPosition( Vector tv, Sphere sphere){
 
-    float d = distR3( tv.pos.coords, sphere );
+    float d = distR3( tv.pos, sphere );
     bool atSurf = ((abs(d) - AT_THRESH)<0.);
     bool inside = d<0.;
     return bvec2(atSurf, inside);
@@ -44,13 +44,13 @@ bvec2 relPosition( Vector tv, Sphere sphere){
 //overload of location booleans:
 bool at( Vector tv, Sphere sphere){
 
-    float d = distR3( tv.pos.coords, sphere );
+    float d = distR3( tv.pos, sphere );
     bool atSurf = ((abs(d) - AT_THRESH)<0.);
     return atSurf;
 }
 
 bool inside( Vector tv, Sphere sphere ){
-    float d = distR3( tv.pos.coords, sphere );
+    float d = distR3( tv.pos, sphere );
     return (d<0.);
 }
 
@@ -61,10 +61,10 @@ bool inside( Vector tv, Sphere sphere ){
 float sdf( Vector tv, Sphere sphere ){
 
     //distance to closest point on sphere
-    float d=distR3(tv.pos.coords, sphere);
+    float d=distR3(tv.pos, sphere);
 
     //if you are looking away from the sphere, stop
-    if(d>0.&&dot(tv.dir,tv.pos.coords)>0.){return maxDist;}
+    if(d>0.&&dot(tv.dir,tv.pos)>0.){return maxDist;}
 
     //otherwise return the actual distance
     return d;
@@ -73,7 +73,7 @@ float sdf( Vector tv, Sphere sphere ){
 //overload of normalVec for a sphere
 Vector normalVec( Vector tv, Sphere sphere ){
     //position vector rel center
-    vec3 dir = tv.pos.coords-sphere.center.coords;
+    vec3 dir = tv.pos-sphere.center;
     dir=normalize(dir);
 
     return Vector(tv.pos,dir);
@@ -82,7 +82,7 @@ Vector normalVec( Vector tv, Sphere sphere ){
 //auxilary function for writing trace()
 vec2 intersectRay_Sphere( Vector tv, Sphere sphere ){
     //return all intersections with the sphere along the line:
-    vec3 p=tv.pos.coords-sphere.center.coords;
+    vec3 p=tv.pos-sphere.center;
     vec3 v=tv.dir;
 
     float a=dot(v,v);
@@ -157,7 +157,7 @@ struct Plane{
 float distR3( vec3 pos, Plane plane ){
 
     //get position relative to point on plane
-    vec3 relPos = pos - plane.orientation.pos.coords;
+    vec3 relPos = pos - plane.orientation.pos;
 
     //project onto the normal vector
     return dot( relPos, plane.orientation.dir );
@@ -168,13 +168,13 @@ float distR3( vec3 pos, Plane plane ){
 //overload of location booleans:
 bool at( Vector tv, Plane plane){
 
-    float d = distR3( tv.pos.coords, plane );
+    float d = distR3( tv.pos, plane );
     return  (abs(d) < AT_THRESH);
 
 }
 
 bool inside( Vector tv, Plane plane ){
-    float d = distR3( tv.pos.coords, plane );
+    float d = distR3( tv.pos, plane );
     return (d < 0.);
 }
 
@@ -187,7 +187,7 @@ float sdf( Vector tv, Plane plane ){
     if(dot(tv.dir,plane.orientation.dir)>0.){return maxDist;}
 
     //otherwise give distance
-    return distR3(tv.pos.coords, plane);
+    return distR3(tv.pos, plane);
 }
 
 //overload of normalVec
@@ -203,7 +203,7 @@ float trace( Vector tv, Plane plane ){
     if(denom>0.){return maxDist;}
 
     //otherwise, aimed at plane
-    return - distR3( tv.pos.coords, plane) / denom;
+    return - distR3( tv.pos, plane) / denom;
 }
 
 

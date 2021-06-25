@@ -7,8 +7,8 @@
 
 
 //----useful funtion for rescaling:
-vec3 rescaleCoords(Point p,Point center, float scale){
-    return scale*(p.coords-center.coords);
+vec3 rescaleCoords(vec3 p, vec3 center, float scale){
+    return scale*(p-center);
 }
 
 
@@ -23,7 +23,7 @@ vec3 rescaleCoords(Point p,Point center, float scale){
 
 struct BarthSextic{
     Sphere boundingBox;
-    Point center;
+    vec3 center;
     float scale;
     Material mat;
 };

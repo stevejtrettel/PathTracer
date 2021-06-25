@@ -11,7 +11,7 @@ void updateFromVolume(inout Path path){
 
     vec3 beersLaw = path.absorb*path.distance;
 
-    if(length(beersLaw)>0.001){
+    if(length(beersLaw)>0.0001){
         path.light *= exp( -beersLaw );
     }
 }
