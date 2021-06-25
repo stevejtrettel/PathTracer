@@ -20,8 +20,8 @@ void buildVarieties(){
 
 
     //----------- BARTH SEXTIC -------------------------
-    sextic.center=Point(vec3(-3,1.,2.));
-    sextic.scale=1.5;
+    sextic.center=Point(vec3(-2.5,0.2,-2));
+    sextic.scale=2.;
 
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
@@ -31,8 +31,9 @@ void buildVarieties(){
 
     sextic.boundingBox.center=sextic.center;
     sextic.boundingBox.radius=1.5;
-    sextic.boundingBox.mat=air(vec3(0.2,0.1,0.));
-    
+    sextic.boundingBox.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.3,0.99);
+    //air(vec3(0.2,0.1,0.));
+
 }
 
 
@@ -50,8 +51,9 @@ float trace_VarietyBBox( Path path, float stopDist, out bool insideVar ){
 
     insideVar = (sphereDistance(path.tv,sextic.boundingBox)<0.);
 
-    //add a little so you end up on the other side
-    return dist;
+    //move back a little bit so we are not RIGHT on the surface...
+    //prevents some weird things
+    return dist-EPSILON/2.;
 
 }
 

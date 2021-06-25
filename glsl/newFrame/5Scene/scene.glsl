@@ -51,7 +51,7 @@ float sceneTrace(Path path, float stopDist){
 
     dist=traceWalls(path, dist);
 
-    dist=traceObjects(path, dist);
+    //dist=traceObjects(path, dist);
 
     return dist;
 }
@@ -68,7 +68,7 @@ void setDataScene(inout Path path){
 
     setDataLights(path);
 
-    setDataObjects(path);
+    //setDataObjects(path);
 
     setDataVarieties(path);
 

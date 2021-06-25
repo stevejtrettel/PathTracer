@@ -21,7 +21,6 @@ void stepForward(inout Path path){
     if(insideVar){
         varDist = findRoot( path, varDist );
     }
-
     distance=min(distance,varDist);
 
     //move to this point of intersection

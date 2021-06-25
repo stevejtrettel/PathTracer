@@ -31,7 +31,7 @@ void buildWalls(){
     offset=1.5;
 
     setPlane(wall1,normal,offset);
-    wall1.mat=makeDielectric(color,0.1,roughness);
+    wall1.mat=makeDielectric(color,0.05,roughness);
 
 
     //----------- WALL 2 -------------------------
@@ -40,6 +40,7 @@ void buildWalls(){
 
     setPlane(wall2,normal,offset);
     wall2.mat=makeDielectric(color,specularity,roughness);
+    wall2.mat.specularColor=vec3(0.75);
     wall2.mat.specularChance=1.;
     wall2.mat.refractionChance=0.;
 
@@ -59,7 +60,7 @@ void buildWalls(){
 
     setPlane(wall4,normal,offset);
     //wall4.mat=makeDielectric(color,specularity,roughness);
-    wall4.mat=makeLight(vec3(1,0.6,0.4),1.);
+    wall4.mat=makeLight(vec3(1,0.6,0.4),0.25);
 
     //----------- WALL 5 -------------------------
     normal=vec3(0,0,-1);

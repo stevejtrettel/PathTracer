@@ -108,7 +108,7 @@ void buildObjects(){
 
     //-------- COCKTAIL GLASS----------------
 
-    cGlass.center=Point(vec3(-3,-0.3,1));
+    cGlass.center=Point(vec3(2.5,-0.3,1));
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;
@@ -174,15 +174,15 @@ float sdfObjects( inout Path path ){
 
 void setDataObjects(inout Path path){
 
-    setSphereData(path, ball1);
+    //setSphereData(path, ball1);
 
-    setSphereData(path, ball2);
+    //setSphereData(path, ball2);
 
-    setSphereData(path, ball3);
+    //setSphereData(path, ball3);
 
     //setBottleData(path, bottle);
-    //setLiquorBottleData(path, gin);
+    setLiquorBottleData(path, gin);
 
-    //setCocktailData(path, negroni);
+    setCocktailData(path, negroni);
 
 }

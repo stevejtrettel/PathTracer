@@ -108,6 +108,7 @@ Material air(vec3 absorbColor){
 void setGlass(inout Material mat, vec3 color, float IOR,float refractivity){
 
     zeroMat(mat);//initialize
+    mat.render=true;
 
     mat.specularColor=vec3(1.);
     mat.diffuseColor=vec3(1.);
