@@ -31,6 +31,8 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
 
     float eps=2.*EPSILON;
     float drink=max(drinkSide,drinkTop);
+    dat.renderMaterial=true;
+
     //------------------------------------------------
     if(abs(cup)<eps){
         //if we hit the cup (the main option)
@@ -229,6 +231,9 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
 
     float eps=2.*EPSILON;
     float drink=max(drinkSide,drinkTop);
+
+    dat.renderMaterial=true;
+
     //------------------------------------------------
     if(abs(cup)<eps){
         //if we hit the cup (the main option)

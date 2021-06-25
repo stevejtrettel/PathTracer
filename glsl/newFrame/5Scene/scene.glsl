@@ -33,8 +33,8 @@ void buildScene(){
 //-------------------------------------------------
 
 float sceneSDF(Path path){
-    return maxDist;
-    //return sdfObjects(path);
+    //return maxDist;
+    return sdfObjects(path);
 }
 
 
@@ -68,7 +68,7 @@ void setDataScene(inout Path path){
 
     setDataLights(path);
 
-    //setDataObjects(path);
+    setDataObjects(path);
 
     setDataVarieties(path);
 
