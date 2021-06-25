@@ -82,13 +82,13 @@ float distR3(vec3 pos, Bottle bottle){
 //overload of sdf
 float sdf(Vector tv, Bottle bottle){
 
-    //only bother if we are inside the bounding sphere:
-    float bBox=sdf(tv, bottle.boundingBox);
-
-    if(bBox>0.){
-        //if we are outisde the box, march towards it
-        return bBox+0.05;
-    }
+//    //only bother if we are inside the bounding sphere:
+//    float bBox=sdf(tv, bottle.boundingBox);
+//
+//    if(bBox>0.){
+//        //if we are outisde the box, march towards it
+//        return bBox+0.05;
+//    }
 
     //if we are inside, compute the actual distance
     return distR3(tv.pos.coords, bottle);
@@ -222,12 +222,12 @@ float distR3( vec3 p, CocktailGlass glass ){
 float sdf(Vector tv, CocktailGlass glass){
 
     //only bother if we are inside the bounding sphere:
-    float bBox=sdf(tv, glass.boundingBox);
-
-    if(bBox>0.){
-        //if we are outisde the box, march towards it
-        return bBox+0.05;
-    }
+//    float bBox=sdf(tv, glass.boundingBox);
+//
+//    if(bBox>0.){
+//        //if we are outisde the box, march towards it
+//        return bBox+0.05;
+//    }
 
     //if we are inside, compute the actual distance
     return distR3(tv.pos.coords, glass);

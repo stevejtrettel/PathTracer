@@ -7,13 +7,16 @@
 
 float raytrace(Vector tv, float stopDist){
 
-    float dist=stopDist;
 
-    //right now just tracing the scene
-    dist = trace_Scene(tv, dist);
+    float dist =  trace_Scene( tv ) ;
 
-    //move slightly less than the full distance to stop right before the object
-    return dist-EPSILON/2.;
+    //if we hit something
+    if(dist<stopDist){
+        //move slightly less than the full distance to stop right before the object
+        return dist- EPSILON/2.;
+    }
 
+    //otherwise, return the threshhold
+    return stopDist;
 }
 

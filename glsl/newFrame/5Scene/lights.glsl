@@ -64,9 +64,9 @@ void buildLights(){
 //-------------------------------------------------
 
 
-float trace_Lights( Vector tv, float stopDist ){
+float trace_Lights( Vector tv ){
 
-    float dist=stopDist;
+    float dist=maxDist;
 
     dist=min(dist, trace(tv, light1));
 

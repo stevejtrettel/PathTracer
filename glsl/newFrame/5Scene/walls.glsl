@@ -92,9 +92,9 @@ void buildWalls(){
 //-------------------------------------------------
 
 
-float trace_Walls(Vector tv ,float stopDist){
+float trace_Walls(Vector tv ){
 
-    float dist=stopDist;
+    float dist=maxDist;
 
     dist=min(dist, trace(tv, bottomWall));
 

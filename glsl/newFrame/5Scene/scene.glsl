@@ -32,9 +32,11 @@ void buildScene(){
 //Building the SDF
 //-------------------------------------------------
 
-float sdf_Scene(Path path){
-    return maxDist;
-    //return sdf_Objects(path);
+float sdf_Scene( Vector tv ){
+
+    //all walls and lights are traced
+    return  sdf_Objects( tv );
+
 }
 
 
@@ -43,15 +45,15 @@ float sdf_Scene(Path path){
 //Setting Up the RayTrace
 //-------------------------------------------------
 
-float trace_Scene(Vector tv, float stopDist){
+float trace_Scene( Vector tv ){
 
-    float dist=stopDist;
+    float dist=maxDist;
 
-    dist=trace_Lights(tv, dist);
+    dist = min( dist, trace_Lights(tv) );
 
-    dist=trace_Walls(tv, dist);
+    dist = min( dist, trace_Walls(tv) );
 
-    dist=trace_Objects(tv, dist);
+    dist = min( dist, trace_Objects(tv) );
 
     return dist;
 }

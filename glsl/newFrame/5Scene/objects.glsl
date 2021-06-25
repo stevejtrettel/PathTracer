@@ -13,8 +13,8 @@
 
 //set the names of global variables for the walls here:
 Sphere ball1, ball2, ball3;
-//Bottle bottle;
-//CocktailGlass cGlass;
+Bottle bottle;
+CocktailGlass cGlass;
 //Cocktail negroni;
 //LiquorBottle gin,campari;
 
@@ -57,26 +57,26 @@ void buildObjects(){
     ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5);
 
 
-//
-//    //-------- BOTTLE ----------------
-//
-//    bottle.baseHeight=1.25;
-//    bottle.baseRadius=1.;
-//    bottle.neckHeight=1.;
-//    bottle.neckRadius=0.3;
-//    bottle.thickness=0.05;
-//    bottle.rounded=0.1;
-//    bottle.smoothJoin=0.3;
-//    bottle.center=Point(vec3(3,0.2,3));
-//    bottle.bump=0.5;
-//    //bottle.mat=makeGlass(vec3(0),1.5,0.99);
-//    bottle.mat=makeDielectric(0.7*vec3(0.3,0.2,0.6),0.2,0.2);
-//
-//    //set up the bounding sphere
-//    bottle.boundingSphere.center=bottle.center;
-//    bottle.boundingSphere.radius=bottle.baseHeight+bottle.neckHeight+0.5;
-//
-//
+
+    //-------- BOTTLE ----------------
+
+    bottle.baseHeight=1.25;
+    bottle.baseRadius=1.;
+    bottle.neckHeight=1.;
+    bottle.neckRadius=0.3;
+    bottle.thickness=0.05;
+    bottle.rounded=0.1;
+    bottle.smoothJoin=0.3;
+    bottle.center=Point(vec3(2,1,-2));
+    bottle.bump=0.5;
+    bottle.mat=makeGlass(vec3(0.3,0.05,0.08),1.5,0.99);
+
+
+    //set up the bounding sphere
+    bottle.boundingBox.center=bottle.center;
+    bottle.boundingBox.radius=bottle.baseHeight+bottle.neckHeight+0.5;
+
+
 //
 //    //-------- GIN BOTTLE ----------------
 //
@@ -108,16 +108,16 @@ void buildObjects(){
 //
 //
 //
-//    //-------- COCKTAIL GLASS----------------
-//
-//    cGlass.center=Point(vec3(1,-0.34,-6));
-//    cGlass.radius=1.;
-//    cGlass.height=1.;
-//    cGlass.thickness=0.1;
-//    cGlass.base=0.3;
-//    cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-//
-//
+    //-------- COCKTAIL GLASS----------------
+
+    cGlass.center=Point(vec3(1,-0.34,-6));
+    cGlass.radius=1.;
+    cGlass.height=1.;
+    cGlass.thickness=0.1;
+    cGlass.base=0.3;
+    cGlass.mat=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+
+
 //    //-------- NEGRONI ----------------
 //    negroni.glass=cGlass;
 //    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
@@ -136,15 +136,15 @@ void buildObjects(){
 //Finding the Objects
 //-------------------------------------------------
 
-float trace_Objects( Vector tv, float stopDist ){
+float trace_Objects( Vector tv ){
 
-    float dist=stopDist;
+    float dist=maxDist;
 
-    dist=min(dist, trace(tv, ball1));
-
-    dist=min(dist, trace(tv, ball2));
-
-    dist=min(dist, trace(tv,ball3));
+//    dist=min(dist, trace(tv, ball1));
+//
+//    dist=min(dist, trace(tv, ball2));
+//
+//    dist=min(dist, trace(tv,ball3));
 
     return dist;
 
@@ -154,11 +154,13 @@ float trace_Objects( Vector tv, float stopDist ){
 
 
 
-float sdf_Objects( inout Path path ){
+float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    //dist=min(dist,bottleSDF(path,bottle));
+    dist=min( dist, sdf(tv, bottle) );
+
+
     //dist=min(dist,liquorBottleSDF(path,gin));
 
     //dist=min(dist,cocktailSDF(path,negroni));
@@ -178,13 +180,13 @@ float sdf_Objects( inout Path path ){
 
 void setData_Objects(inout Path path){
 
-    setData(path, ball1);
+//    setData(path, ball1);
+//
+//    setData(path,ball2);
+//
+//    setData(path, ball3);
 
-    setData(path,ball2);
-
-    setData(path, ball3);
-
-    //setData(path, bottle);
+    setData(path, bottle);
 
     //setData(path, cGlass);
 
