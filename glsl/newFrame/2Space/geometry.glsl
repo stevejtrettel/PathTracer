@@ -45,14 +45,6 @@ Vector rotateByFacing(Vector v, mat3 facing){
 }
 
 
-//use mix instead of if/then statements to choose
-//this is NOT to take an average; x should be 0 or 1.
-Vector select(Vector v, Vector w,float x){
-    vec3 pos=mix(v.pos,w.pos,x);
-    vec3 dir=mix(v.dir,w.dir,x);
-    return Vector(pos,dir);
-}
-
 
 //overload of the usual mix command for vector directions
 //assumes same starting point, interpolates directions

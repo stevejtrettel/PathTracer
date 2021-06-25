@@ -24,7 +24,7 @@ void buildScene(){
     buildWalls();
     buildLights();
     buildObjects();
-    //buildVarieties();
+    buildVarieties();
 }
 
 
@@ -72,6 +72,6 @@ void setData_Scene(inout Path path){
 
     setData_Objects(path);
 
-    //setDataVarieties(path);
+    setData_Varieties(path);
 
 }
