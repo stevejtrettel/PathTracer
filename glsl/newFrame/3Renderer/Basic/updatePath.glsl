@@ -19,6 +19,7 @@ void updateFromVolume(inout Path path){
 
 void updateFromSurface(inout Path path){
 
+    //only do this if we are actually rendering the material
     if(path.dat.renderMaterial){
 
         //add in emissive lighting

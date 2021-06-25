@@ -10,7 +10,7 @@ bool changeSign(Vector u, Vector v){
     float x=variety(u);
     float y=variety(v);
 
-    bool change = (x*y>0.) ? true : false;
+    bool change = (x*y<0.) ? true : false;
     return change;
 //
 //    if(x*y<0.){
@@ -20,13 +20,14 @@ bool changeSign(Vector u, Vector v){
 }
 
 
-void binarySearch(inout Vector tv, inout float dt){
+float binarySearch(Vector tv, float dt){
     //given that you just passed changed sign, find the root
     float dist=0.;
     //flowing dist from tv doesnt hit the plane, dist+dt does:
     float testDist=dt;
     Vector temp;
-    for(int i=0;i<3;i++){
+
+    for(int i=0;i<10;i++){
 
         //divide the step size in half
         testDist=testDist/2.;
@@ -43,18 +44,20 @@ void binarySearch(inout Vector tv, inout float dt){
     }
 
     //step tv ahead by the right ammount;
-    flow(tv,dist);
+   // flow(tv,dist);
 
+    return dist;
 }
 
 
 
 
-float findRoot(Vector tv, float stopDist){
+float findRoot(Path path, float stopDist){
+
     float depth=0.;
     float dt;
 
-    Vector temp=tv;
+    Vector temp=path.tv;
 
     vec3 dir;
     Vector normal;
@@ -63,28 +66,21 @@ float findRoot(Vector tv, float stopDist){
     for (int i = 0; i <500; i++){
 
         //determine how far to test flow from current location
-        dt=0.05;
+        dt=0.01;
         //setStepSize(tv);
 
         //temporarily step forward that distance along the ray
-        temp=tv;
+        temp=path.tv;
         flow(temp,dt);
 
         //check if we crossed the surface:f
-        if(changeSign(temp,tv)){
-            //set side based on orig position:
-            //side=variety(tv);
-            return depth;
-
+        if(changeSign(temp,path.tv)){
             //use a binary search to give exact intersection
-            //binarySearch(tv,dt);
-
-            //return the actual distance to the variety
-            //return depth+dt;
+            return depth+binarySearch(path.tv,dt);
         }
 
         //if we didn't cross the surface, move tv ahead by this step
-        tv=temp;
+        path.tv=temp;
         //increase the total distance marched
         depth+=dt;
 
@@ -95,33 +91,5 @@ float findRoot(Vector tv, float stopDist){
     }
 
     //if there are no roots inside the sphere
-    return maxDist;
-}
-
-
-
-
-
-float findNearestRoot(Path path, float stopDist){
-
-    return findRoot(path.tv,stopDist);
-
-//    float dist=stopDist;
-//    float distToBBox;
-//
-//    //trace bounding box, see if outside
-//    distToBBox=traceBBox(path,stopDist);
-//    bool outside=sphereDistance(path.tv,sextic.boundingBox)>0.?true:false;
-//
-//    //if it is, return this distance
-//    if(outside){
-//        return min(dist,stopDist);
-//    }
-//
-//    //otherwise, we know from traceBoundingBox how far
-//    //we have to look on the interior for a root:
-//    dist+=findRoot(path.tv,distToBBox);
-//
-//    return min(dist,stopDist);
-
+    return stopDist;
 }

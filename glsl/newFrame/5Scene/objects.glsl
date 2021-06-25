@@ -27,7 +27,7 @@ void buildObjects(){
     vec3 redAbsorb=vec3(0.2,1.,0.6);
 
     //----------- BALL 1 -------------------------
-    ball1.center=Point(vec3(-1,0.3,-2));
+    ball1.center=Point(vec3(1,0.3,-2));
     ball1.radius=1.3;
 
     color= vec3(0.9,0.9,0.5);
@@ -36,7 +36,7 @@ void buildObjects(){
     ball1.mat= makeMetal(color,specularity,roughness);
 
     //----------- BALL 2 -------------------------
-    ball2.center=Point(vec3(0,0.5,2));
+    ball2.center=Point(vec3(0,-0.5,2));
     ball2.radius=0.55;
 
     color= 0.7*vec3(0.3,0.2,0.6);
@@ -46,15 +46,15 @@ void buildObjects(){
 
 
     //----------- BALL 3 -------------------------
-    ball3.center=Point(vec3(1.,0.6,2));
+    ball3.center=Point(vec3(1.5,0.6,2));
     ball3.radius=1.6;
 
     color= 0.1*vec3(0.7,0.1,0.2);
     specularity=0.4;
     roughness=0.1;
     //ball3.mat=makeMetal(color,specularity,roughness);
-    //ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5);
-    ball3.mat=air(vec3(0.,0.3,0.5));
+    ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5);
+
 
 
     //-------- BOTTLE ----------------

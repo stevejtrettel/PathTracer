@@ -24,6 +24,7 @@ void buildScene(){
     buildWalls();
     buildLights();
     buildObjects();
+    buildVarieties();
 }
 
 
@@ -46,11 +47,11 @@ float sceneTrace(Path path, float stopDist){
 
     float dist=stopDist;
 
-    dist=traceLights(path,dist);
+    dist=traceLights(path, dist);
 
-    dist=traceWalls(path,dist);
+    dist=traceWalls(path, dist);
 
-    dist=traceObjects(path,dist);
+    dist=traceObjects(path, dist);
 
     return dist;
 }
@@ -69,6 +70,6 @@ void setDataScene(inout Path path){
 
     setDataObjects(path);
 
-   // setDataVarieties(path);
+    setDataVarieties(path);
 
 }

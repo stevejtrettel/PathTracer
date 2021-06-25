@@ -35,12 +35,10 @@ float barthSexticEqn(vec3 p){
     float y=p.y;
     float z=p.z;
 
-    return x*x+y*y+z*z-0.2;
+    float t = 1.618034;
 
-//    float t = 1.618034;
-//
-//    return 4.*(t*t*x*x - y*y ) * ( t*t *y*y - z*z ) *( t*t* z*z - x*x )
-//    - ( 1. + 2.*t) *(x*x + y*y + z*z- 1.)*(x*x + y*y + z*z- 1.);
+    return 4.*(t*t*x*x - y*y ) * ( t*t *y*y - z*z ) *( t*t* z*z - x*x )
+    - ( 1. + 2.*t) *(x*x + y*y + z*z- 1.)*(x*x + y*y + z*z- 1.);
 
 }
 
@@ -48,9 +46,9 @@ float barthSexticEqn(vec3 p){
 float variety(Vector tv, BarthSextic var){
 
     //if outside the bounding box, dont even bother computing:
-    if(sphereDistance(tv,var.boundingBox)>0.){
-        return 1.;
-    }
+//    if(sphereDistance(tv,var.boundingBox)>0.){
+//        return 1.;
+//    }
 
     //otherwise, get the value
     vec3 pos=rescaleCoords(tv.pos,var.center,var.scale);
@@ -79,18 +77,29 @@ Vector normalVec(Vector tv, BarthSextic var){
 
 
 void setData(inout Path path, BarthSextic var){
+    Vector normal;
 
-    //see if we are at the plane: if not, do nothing
-    float dist=variety(path.tv,var);
+    //if we are near the bounding box: set that material as the data
+    float distBB=sphereDistance(path.tv,var.boundingBox);
 
-    if(abs(dist)<5.*EPSILON&&sphereDistance(path.tv,var.boundingBox)<0.){
+    if(distBB>0.01){
+        return;
+    }
 
-        path.pixel+=vec3(1,0,0);
-//        //compute the normal
-//        Vector normal=normalVec(path.tv,var);
-//
-//        //set the material
-//        setObjectInAir(path.dat,dist,normal,var.mat);
+    if( abs(distBB) < 5. * EPSILON ){
+
+        normal=sphereNormal(path.tv,var.boundingBox);
+        setObjectInAir(path.dat,distBB,normal,var.boundingBox.mat);
+
+    }
+    //if we are inside the bounding box AND near the variety, set that material
+    float distVar=variety(path.tv, var);
+
+    if (distBB < 0. && abs(distVar) < 5.*EPSILON){
+
+        normal=normalVec(path.tv, var);
+        setObjectInAir(path.dat, distVar, normal, var.mat);
+
     }
 
 }

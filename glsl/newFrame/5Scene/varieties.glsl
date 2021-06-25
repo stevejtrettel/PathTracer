@@ -20,16 +20,19 @@ void buildVarieties(){
 
 
     //----------- BARTH SEXTIC -------------------------
-    sextic.center=Point(vec3(0,1.,-3.));
-    sextic.scale=3.;
+    sextic.center=Point(vec3(-3,1.,2.));
+    sextic.scale=1.5;
+
+    color= 0.7*vec3(0.3,0.2,0.6);
+    specularity=0.2;
+    roughness=0.01;
+    sextic.mat=makeDielectric(color,specularity,roughness);
+
+
     sextic.boundingBox.center=sextic.center;
-    sextic.boundingBox.radius=1.;
-
-    color= vec3(0.9,0.9,0.5);
-    specularity=0.8;
-    roughness=0.;
-    sextic.mat= makeMetal(color,specularity,roughness);
-
+    sextic.boundingBox.radius=1.5;
+    sextic.boundingBox.mat=air(vec3(0.2,0.1,0.));
+    
 }
 
 
@@ -39,14 +42,16 @@ void buildVarieties(){
 //Finding the Bounding Boxes
 //-------------------------------------------------
 
-float traceBBox( Path path, float stopDist ){
+float trace_VarietyBBox( Path path, float stopDist, out bool insideVar ){
 
     float dist=stopDist;
 
     dist=sphereTrace(path, sextic.boundingBox, dist);
 
+    insideVar = (sphereDistance(path.tv,sextic.boundingBox)<0.);
+
     //add a little so you end up on the other side
-    return dist+5.*EPSILON;
+    return dist;
 
 }
 

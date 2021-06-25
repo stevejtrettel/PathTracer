@@ -7,17 +7,22 @@
 
 
 void stepForward(inout Path path){
-
+    bool insideVar;
     float distance=maxDist;
 
     //do the raytracing
-    distance=raytrace(path,distance);
+    distance=raytrace( path, distance );
 
     //do the raymarching, with threshhold from above
-    //distance=raymarch(path,distance);
+    //distance=raymarch( path, distance );
 
-    //trace the varieties, wtih threshhold from above:
-    //distance=findNearestRoot(path,distance);
+    //trace the varieties, if we are inside a bounding box
+    float varDist=trace_VarietyBBox( path, distance, insideVar );
+    if(insideVar){
+        varDist = findRoot( path, varDist );
+    }
+
+    distance=min(distance,varDist);
 
     //move to this point of intersection
     path.distance=distance;
