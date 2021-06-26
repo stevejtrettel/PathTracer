@@ -17,6 +17,8 @@ Bottle bottle;
 CocktailGlass cGlass;
 Cocktail negroni;
 LiquorBottle gin,campari;
+Pint pint;
+
 
 //this function constructs the objects
 void buildObjects(){
@@ -130,6 +132,15 @@ void buildObjects(){
 
 
 
+    //----------PINT GLASS----------
+    pint.center=vec3(-2,1.5,-2);
+    pint.height=1.5;
+    pint.base=0.75;
+    pint.flare=1.2;
+    pint.thickness=0.1;
+    pint.rounded=0.1;
+    pint.mat=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+
 }
 
 
@@ -172,6 +183,8 @@ float sdf_Objects( Vector tv ){
 
     dist=min( dist, sdf(tv, bottle) );
 
+    dist=min( dist, sdf(tv, pint) );
+
     //ist=min( dist, sdf(tv, negroni) );
 
     return dist;
@@ -201,6 +214,8 @@ void setData_Objects(inout Path path){
 //    setData(path, ball3);
 
       setData(path, bottle);
+
+      setData(path, pint);
 
     //setData(path, negroni);
 

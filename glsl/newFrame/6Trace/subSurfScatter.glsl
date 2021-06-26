@@ -7,11 +7,11 @@
 
 void subSurfScatter(inout Path path){
 
-    int scatterSteps=500;
+    int scatterSteps=100;
     float depth=0.;
 
     //length of a mean free path in the material:
-    float mfp=0.003;
+    float mfp=0.05;
     float flowDist;
 
     //set the vector we will carry along for the ride
