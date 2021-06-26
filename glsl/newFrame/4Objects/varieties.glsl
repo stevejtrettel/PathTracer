@@ -31,28 +31,30 @@ float isoSurfEqn(vec3 p){
     float z=p.z;
     float w=1.;
 
-    float x2=x*x;
-    float y2=y*y;
-    float z2=z*z;
-    float w2=1.;
-    float r2=x2+y2+z2;
+    return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
 
-    float sqrt2=sqrt(2.);
-
-    float term1=64.*(x2-w2)*(y2-w2)*((x+y)*(x+y)-2.*w2)*((x-y)*(x-y)-2.*w2);
-
-    float term21=-4.*(1.+sqrt2)*(x2+y2)*(x2+y2);
-    float term22=(8.*(2.+sqrt2)*z2+2.*(2.+7.*sqrt2)*w2)*(x2+y2);
-    float term23=-16.*z2*z2+8.*(1.-2.*sqrt2)*z2*w2-(1.+12.*sqrt2)*w2*w2;
-
-    float term2=term21+term22+term23;
-
-    float val = term1-term2*term2;
-
-    return val;
-
-    //AN ELLIPTIC SURFACE
-    //return 4.*(1.-x*x+y+z+y*z)+2.*(x*z+z*z)+(x*x*x-x-x*x*y-y*y-x*y*y-y*y*y+x*y*z-y*y*z+x*z*z+y*z*z+z*z*z);
+//    float x2=x*x;
+//    float y2=y*y;
+//    float z2=z*z;
+//    float w2=1.;
+//    float r2=x2+y2+z2;
+//
+//    float sqrt2=sqrt(2.);
+//
+//    float term1=64.*(x2-w2)*(y2-w2)*((x+y)*(x+y)-2.*w2)*((x-y)*(x-y)-2.*w2);
+//
+//    float term21=-4.*(1.+sqrt2)*(x2+y2)*(x2+y2);
+//    float term22=(8.*(2.+sqrt2)*z2+2.*(2.+7.*sqrt2)*w2)*(x2+y2);
+//    float term23=-16.*z2*z2+8.*(1.-2.*sqrt2)*z2*w2-(1.+12.*sqrt2)*w2*w2;
+//
+//    float term2=term21+term22+term23;
+//
+//    float val = term1-term2*term2;
+//
+//    return val;
+//
+//    //AN ELLIPTIC SURFACE
+//    //return 4.*(1.-x*x+y+z+y*z)+2.*(x*z+z*z)+(x*x*x-x-x*x*y-y*y-x*y*y-y*y*y+x*y*z-y*y*z+x*z*z+y*z*z+z*z*z);
 
 }
 
@@ -134,16 +136,18 @@ float barthSexticEqn(vec3 p){
     float y=p.y;
     float z=p.z;
 
-    float x2=x*x;
-    float y2=y*y;
-    float z2=z*z;
-    float r2=x2+y2+z2;
+    return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
 
-    float t = 1.618034;
-    float t2=t*t;
-
-    return 4.*(t2*x2 - y2) * ( t2*y2 - z2 ) *( t2*z2 - x2 )
-    - ( 1. + 2.*t) *(r2- 1.)*(r2- 1.);
+//    float x2=x*x;
+//    float y2=y*y;
+//    float z2=z*z;
+//    float r2=x2+y2+z2;
+//
+//    float t = 1.618034;
+//    float t2=t*t;
+//
+//    return 4.*(t2*x2 - y2) * ( t2*y2 - z2 ) *( t2*z2 - x2 )
+//    - ( 1. + 2.*t) *(r2- 1.)*(r2- 1.);
 
 }
 

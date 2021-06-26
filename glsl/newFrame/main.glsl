@@ -10,7 +10,7 @@
 vec3 newFrame(vec2 fragCoord, float numRuns){
 
     // initialize a random number seed
-    seed = randomSeed(fragCoord,frameSeed);
+    seed = randomSeed(fragCoord,frameSeed+numRuns);
 
     //set up the camera:
     Camera cam=buildCamFromUniforms();
@@ -38,21 +38,13 @@ vec3 newFrame(vec2 fragCoord, float numRuns){
 
 void main() {
 
-    vec3 pixel;
+    vec3 pixel=vec3(0);
     pixel += newFrame(gl_FragCoord.xy,0.);
-    pixel += newFrame(gl_FragCoord.xy,1239845.);
-    pixel /= 2.;
-
-
-    //get rid of black pixels which ruin the accumulation!
-//    float len=length(pixel);
-//    if(!isnan(len)){
+//    pixel += newFrame(gl_FragCoord.xy,1239845.);
+//    pixel += newFrame(gl_FragCoord.xy,1573655.);
+//    pixel /= 3.;
 
         gl_FragColor=vec4(pixel, 1.);
-//    }
-//    else{
-//        gl_FragColor=vec4(0,0,0, 1.);
-//    }
 
 }
 

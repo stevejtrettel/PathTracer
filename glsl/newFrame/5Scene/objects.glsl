@@ -167,6 +167,13 @@ float sdf_Objects( Vector tv ){
 
 
 
+
+//will go in the objects file; tells us if we are inside an object of interest
+bool inside_Objects( Vector tv ){
+    return true;
+}
+
+
 //-------------------------------------------------
 //Setting the Objects Data
 //-------------------------------------------------

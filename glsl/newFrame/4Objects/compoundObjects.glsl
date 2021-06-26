@@ -117,34 +117,34 @@ Vector normalVec(Vector tv, Bottle bottle){
 
 }
 
+//overload of location booleans:
+bool at( Vector tv, Bottle bottle){
 
-//overload of location booleans
-//note inside here means in the glass of the bottle not the enclosed volume
-bvec2 relPosition( Vector tv, Bottle bottle ){
     float d = distR3( tv.pos, bottle );
-    bool atSurf = ((abs(d)-AT_THRESH)<0.);
-    bool inside = d<0.;
-    return bvec2(atSurf, inside);
+    bool atSurf = ((abs(d) - AT_THRESH)<0.);
+    return atSurf;
 }
 
-//overload of setData
-void setData(inout Path path, Bottle bottle){
+//note inside here means in the glass of the bottle not the enclosed volume
+bool inside( Vector tv, Bottle bottle ){
+    float d = distR3( tv.pos, bottle );
+    return (d<0.);
+}
 
-    bvec2 loc=relPosition(path.tv, bottle);
+
+//overload of setData for a sphere
+void setData( inout Path path, Bottle bottle ){
 
     //if we are at the surface
-    if(loc.x){
+    if(at(path.tv, bottle)){
         //compute the normal
-        Vector normal=normalVec(path.tv, bottle);
-        bool inside=loc.y;
+        Vector normal=normalVec(path.tv,bottle);
+        bool side = inside(path.tv, bottle);
         //set the material
-        setObjectInAir(path.dat,inside,normal,bottle.mat);
+        setObjectInAir(path.dat, side, normal, bottle.mat);
     }
 
 }
-
-
-
 
 
 

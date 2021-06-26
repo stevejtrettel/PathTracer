@@ -16,6 +16,17 @@ void updateFromVolume(inout Path path){
     }
 }
 
+//right now this is the same as update from volume
+//but in the future may likely be different
+void updateFromSubSurf(inout Path path){
+
+    vec3 beersLaw = path.absorb*path.distance;
+
+    if(length(beersLaw)>0.0001){
+        path.light *= exp( -beersLaw );
+    }
+}
+
 
 void updateFromSurface(inout Path path){
 

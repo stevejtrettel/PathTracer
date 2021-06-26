@@ -26,8 +26,16 @@ vec3 pathTrace(Path path){
                 //scatter the path off in a new direction
                 scatter(path);
 
-                //pick up any color from the reflection off surface
-                updateFromSurface(path);
+                if(path.subSurface){
+                       //do the subsurface scattering
+                        subSurfScatter(path);
+                        //update the color
+                        updateFromSubSurf(path);
+                }
+                else{
+                        //pick up any color from the reflection off surface
+                        updateFromSurface(path);
+                }
 
                 //probabilistically kill rays
                 roulette(path);

@@ -52,6 +52,7 @@
                 {file: '../glsl/newFrame/5Scene/scene.glsl'},
                 {file: '../glsl/newFrame/6Trace/raymarch.glsl'},
                 {file: '../glsl/newFrame/6Trace/raytrace.glsl'},
+                {file: '../glsl/newFrame/6Trace/subSurfScatter.glsl'},
                 {file: '../glsl/newFrame/6Trace/findRoot.glsl'},
                 {file: '../glsl/newFrame/6Trace/stepForward.glsl'},
                 {file: '../glsl/newFrame/6Trace/pathTrace.glsl'},

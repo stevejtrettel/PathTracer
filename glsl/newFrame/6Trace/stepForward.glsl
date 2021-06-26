@@ -17,8 +17,8 @@ void stepForward(inout Path path){
     distance=raymarch( path.tv, distance );
 
     //trace the varieties, if we are inside a bounding box
-    float varDist=trace_VarietyBBox( path.tv, insideVar );
-    if(insideVar){
+    float varDist=trace_VarietyBBox( path.tv );
+    if(varID!=0){
         varDist = findRoot( path.tv, varDist );
     }
     distance=min(distance, varDist);

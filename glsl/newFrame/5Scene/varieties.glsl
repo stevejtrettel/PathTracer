@@ -22,7 +22,7 @@ void buildVarieties(){
 
     //----------- BARTH SEXTIC -------------------------
     sextic.center=vec3(1,0,3);
-    sextic.scale=4.;
+    sextic.scale=8.;
 
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
@@ -39,7 +39,7 @@ void buildVarieties(){
 
     //----------- ENDRASS -------------------------
     iso.center=vec3(-3,0,2);
-    iso.scale=6.;
+    iso.scale=10.;
 
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
@@ -63,29 +63,28 @@ void buildVarieties(){
 //Finding the Bounding Boxes
 //-------------------------------------------------
 
-int varIndex;
+//global variable keeping track of what variety we hit
+int varID=0;
 
-float trace_VarietyBBox( Vector tv, out bool insideVar ){
+float trace_VarietyBBox( Vector tv ){
 
+    bool in1 = inside( tv, sextic.boundingBox );
     float dist1 = trace( tv, sextic.boundingBox );
+    if(in1){
+        varID=1;
+        return dist1-EPSILON/2.;
+    }
+
+    bool in2 = inside( tv, iso.boundingBox );
     float dist2 = trace( tv, iso.boundingBox );
-
-    bool var1=inside( tv, sextic.boundingBox );
-    bool var2=inside( tv, iso.boundingBox );
-
-    insideVar=var1||var2;
-    if(var1){
-        varIndex=1;
-    }
-    if(var2){
-        varIndex=2;
+    if(in2){
+        varID=2;
+        return dist2-EPSILON/2.;
     }
 
-    float dist=min(dist1,dist2);
-
-    //move back a little bit so we are not RIGHT on the surface...
-    //prevents some weird things
-    return dist-EPSILON/2.;
+    //if inside neither
+    varID=0;
+    return min(dist1,dist2)-EPSILON/2.;
 }
 
 
@@ -96,13 +95,12 @@ float trace_VarietyBBox( Vector tv, out bool insideVar ){
 
 float variety( Vector tv ){
 
-    if(varIndex==1){
-        return variety(tv, sextic);
+    switch(varID){
+        case 1: return variety(tv, sextic);
+        case 2: return variety(tv, iso);
+        default: return maxDist;
     }
-    if(varIndex==2){
-        return variety(tv, iso);
-    }
-     return maxDist;
+
 }
 
 
@@ -113,5 +111,5 @@ float variety( Vector tv ){
 
 void setData_Varieties(inout Path path){
     setData(path, sextic);
-    setData(path,iso);
+    setData(path, iso);
 }

@@ -67,6 +67,7 @@ struct Path{
     localData dat;
 
     bool keepGoing;
+    bool subSurface;
 
     vec3 debug;
 
@@ -85,6 +86,7 @@ Path initializePath(Vector tv){
 
     path.distance=0.;
     path.keepGoing=true;
+    path.subSurface=false;
 
     path.type=1;
     path.prob=1.;
