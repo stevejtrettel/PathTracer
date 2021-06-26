@@ -17,11 +17,13 @@ void stepForward(inout Path path){
     distance=raymarch( path.tv, distance );
 
     //trace the varieties, if we are inside a bounding box
-    float varDist=trace_VarietyBBox( path.tv );
-    if(varID!=0){
-        varDist = findRoot( path.tv, varDist );
+    if(render_Varieties){
+        float varDist=trace_VarietyBBox(path.tv);
+        if (varID!=0){
+            varDist = findRoot(path.tv, varDist);
+        }
+        distance=min(distance, varDist);
     }
-    distance=min(distance, varDist);
 
     //move to this point of intersection
     path.distance=distance;

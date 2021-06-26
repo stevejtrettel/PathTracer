@@ -33,9 +33,13 @@ void buildScene(){
 //-------------------------------------------------
 
 float sdf_Scene( Vector tv ){
+    float dist=maxDist;
 
-    //all walls and lights are traced
-    return  sdf_Objects( tv );
+    if(render_Objects){
+        dist=min(dist, sdf_Objects( tv ));
+    }
+
+    return dist;
 
 }
 
@@ -49,11 +53,17 @@ float trace_Scene( Vector tv ){
 
     float dist=maxDist;
 
-    dist = min( dist, trace_Lights(tv) );
+    if(render_Lights){
+        dist = min(dist, trace_Lights(tv));
+    }
 
-    dist = min( dist, trace_Walls(tv) );
+    if(render_Walls){
+        dist = min(dist, trace_Walls(tv));
+    }
 
-    //dist = min( dist, trace_Objects(tv) );
+    if(render_Objects){
+        dist = min( dist, trace_Objects(tv) );
+    }
 
     return dist;
 }
@@ -66,12 +76,20 @@ float trace_Scene( Vector tv ){
 
 void setData_Scene(inout Path path){
 
-    setData_Walls(path);
+    if(render_Walls){
+        setData_Walls(path);
+    }
 
-    setData_Lights(path);
+    if(render_Lights){
+        setData_Lights(path);
+    }
 
-    setData_Objects(path);
+    if(render_Objects){
+        setData_Objects(path);
+    }
 
-    setData_Varieties(path);
+    if(render_Varieties){
+        setData_Varieties(path);
+    }
 
 }

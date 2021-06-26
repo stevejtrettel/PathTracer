@@ -130,6 +130,13 @@ void buildObjects(){
 
 
 
+//-------------------------------------------------
+//DO WE RENDER THEM?
+//-------------------------------------------------
+
+bool render_Objects=true;
+
+
 
 //-------------------------------------------------
 //Finding the Objects
@@ -157,7 +164,7 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    //dist=min( dist, sdf(tv, gin) );
+    dist=min( dist, sdf(tv, bottle) );
 
     //ist=min( dist, sdf(tv, negroni) );
 
@@ -170,7 +177,7 @@ float sdf_Objects( Vector tv ){
 
 //will go in the objects file; tells us if we are inside an object of interest
 bool inside_Objects( Vector tv ){
-    return true;
+    return inside(tv, bottle);
 }
 
 
@@ -187,7 +194,7 @@ void setData_Objects(inout Path path){
 //
 //    setData(path, ball3);
 
-    //setData(path, gin);
+      setData(path, bottle);
 
     //setData(path, negroni);
 
