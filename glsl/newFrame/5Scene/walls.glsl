@@ -32,6 +32,7 @@ void buildWalls(){
     orientation.pos=vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
 
+    color=vec3(0.2);
     bottomWall.orientation=orientation;
     bottomWall.mat=makeDielectric(color,0.0,roughness);
 
@@ -40,14 +41,16 @@ void buildWalls(){
     orientation.pos=vec3(0,9,0);
     orientation.dir=vec3(0,-1,0);
 
+
     topWall.orientation=orientation;
     //topWall.mat=makeDielectric(color,0.0,roughness);
-    topWall.mat=makeLight(vec3(1,0.6,0.4),0.15);
+    topWall.mat=makeLight(vec3(1,0.6,0.4),0.75);
 
 
     //----------- THE FRONT -------------------------
     orientation.pos=vec3(0,0,-5);
     orientation.dir=vec3(0,0,1);
+
 
     frontWall.orientation=orientation;
     //need a "make mirror" command
@@ -61,6 +64,7 @@ void buildWalls(){
     orientation.pos=vec3(0,0,8);
     orientation.dir=vec3(0,0,-1);
 
+    color=0.5*vec3(107,152,250)/255.;
     backWall.orientation=orientation;
     backWall.mat=makeDielectric(color,0.0,roughness);
 
@@ -69,6 +73,7 @@ void buildWalls(){
     orientation.pos=vec3(-8,0,0);
     orientation.dir=vec3(1,0,0);
 
+    color=0.4*vec3(250,229,147)/255.;
     leftWall.orientation=orientation;
     leftWall.mat=makeDielectric(color,0.0,roughness);
 
@@ -77,6 +82,7 @@ void buildWalls(){
     orientation.pos=vec3(5,0,0);
     orientation.dir=vec3(-1,0,0);
 
+    color=0.4*vec3(240,126,106)/255.;
     rightWall.orientation=orientation;
     rightWall.mat=makeDielectric(color,0.0,roughness);
 
@@ -90,8 +96,6 @@ void buildWalls(){
 //-------------------------------------------------
 
 bool render_Walls=true;
-
-
 
 
 //-------------------------------------------------

@@ -18,7 +18,7 @@ CocktailGlass cGlass;
 Cocktail negroni;
 LiquorBottle gin,campari;
 Pint pint;
-
+Beer beer;
 
 //this function constructs the objects
 void buildObjects(){
@@ -69,13 +69,12 @@ void buildObjects(){
     bottle.thickness=0.02;
     bottle.rounded=0.1;
     bottle.smoothJoin=0.3;
-    bottle.center=vec3(2,0.75,-2);
+    bottle.center=vec3(1,0.4,-2);
     bottle.bump=0.5;
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
     bottle.mat.diffuseColor=0.7*vec3(0.3,0.2,0.6);
-    bottle.mat.absorbColor=vec3(0,0.02,0.05);
-    //vec3(1)-0.9*vec3(0.3,0.2,0.6);
+    bottle.mat.absorbColor=vec3(0.1,0.1,0.05);
     bottle.mat.refractionChance=0.;
     bottle.mat.subSurface=true;
 
@@ -117,7 +116,7 @@ void buildObjects(){
 //
     //-------- COCKTAIL GLASS----------------
 
-    cGlass.center=vec3(-2,0.1,-1);
+    cGlass.center=vec3(0,0.1,2);
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;
@@ -130,16 +129,33 @@ void buildObjects(){
     negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
     negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
 
+    negroni.drink.diffuseColor=vec3(1.);
+    negroni.drink.absorbColor=vec3(0.);
+    //vec3(1)-0.9*vec3(0.3,0.2,0.6);
+    negroni.drink.refractionChance=0.;
+    negroni.drink.subSurface=true;
 
 
     //----------PINT GLASS----------
-    pint.center=vec3(-2,1.5,-2);
+    pint.center=vec3(-2,0.6,-2);
     pint.height=1.5;
     pint.base=0.75;
     pint.flare=1.2;
     pint.thickness=0.1;
     pint.rounded=0.1;
     pint.mat=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+
+    //-------- BEER ----------------
+    beer.glass=pint;
+    beer.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+    beer.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+
+    beer.drink.diffuseColor=vec3(1);
+    beer.drink.absorbColor=vec3(0);
+    //vec3(1)-0.9*vec3(0.3,0.2,0.6);
+    beer.drink.refractionChance=0.;
+    beer.drink.subSurface=true;
+
 
 }
 
@@ -183,9 +199,9 @@ float sdf_Objects( Vector tv ){
 
     dist=min( dist, sdf(tv, bottle) );
 
-    dist=min( dist, sdf(tv, pint) );
+    dist=min( dist, sdf(tv, beer) );
 
-    //ist=min( dist, sdf(tv, negroni) );
+    dist=min( dist, sdf(tv, negroni) );
 
     return dist;
 }
@@ -196,7 +212,12 @@ float sdf_Objects( Vector tv ){
 
 //will go in the objects file; tells us if we are inside an object of interest
 bool inside_Object( Vector tv ){
-    return inside(tv, bottle);
+
+    bool bottle=inside(tv, bottle);
+    bool juice= inDrink(tv, negroni);
+    bool milk= inDrink(tv, beer);
+
+    return bottle||milk||juice;
 }
 
 
@@ -215,9 +236,9 @@ void setData_Objects(inout Path path){
 
       setData(path, bottle);
 
-      setData(path, pint);
+      setData(path, beer);
 
-    //setData(path, negroni);
+      setData(path, negroni);
 
 }
 

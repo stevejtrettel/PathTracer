@@ -40,12 +40,7 @@ float sdCappedCone( vec3 p, float h, float r1, float r2 )
 }
 
 
-
-
-
-
-//overload of distR3
-float distR3( vec3 pos, Pint pint ){
+float pintDistance(vec3 pos, Pint pint, out float insideBottle){
 
     //get position relative to point on plane
     vec3 pOut = pos - pint.center;
@@ -56,9 +51,18 @@ float distR3( vec3 pos, Pint pint ){
     //get the second one
     pint.center+=vec3(0,2.*pint.thickness,0);
     vec3 pIn=pos-pint.center;
-    float innerWall=sdCappedCone(pIn, pint.height, pint.base-pint.thickness, pint.flare*(pint.base-pint.thickness));
+    insideBottle=sdCappedCone(pIn, pint.height, pint.base-pint.thickness, pint.flare*(pint.base-pint.thickness));
     //return outerWall;
-    return max(outerWall,-innerWall);
+    return max(outerWall,-insideBottle);
+
+}
+
+
+
+//overload of distR3
+float distR3( vec3 pos, Pint pint ){
+
+    return pintDistance(pos, pint, trashFloat);
 
 }
 
