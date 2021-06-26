@@ -20,8 +20,8 @@ void buildVarieties(){
 
 
     //----------- BARTH SEXTIC -------------------------
-    sextic.center=vec3(2,1,0);
-    sextic.scale=4.;
+    sextic.center=vec3(0,0,3);
+    sextic.scale=6.;
 
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
@@ -31,7 +31,7 @@ void buildVarieties(){
     sextic.mat.diffuseColor=0.7*vec3(163,124,250)/255.;
 
     sextic.boundingBox.center=sextic.center;
-    sextic.boundingBox.radius=1.5;
+    sextic.boundingBox.radius=1.;
     sextic.boundingBox.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.4,0.99);
     //air(vec3(0));
 

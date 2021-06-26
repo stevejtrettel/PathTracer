@@ -157,9 +157,9 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    //dist=min( dist, sdf(tv, gin) );
+    dist=min( dist, sdf(tv, gin) );
 
-    //dist=min( dist, sdf(tv, negroni) );
+    dist=min( dist, sdf(tv, negroni) );
 
     return dist;
 }
@@ -180,9 +180,9 @@ void setData_Objects(inout Path path){
 //
 //    setData(path, ball3);
 
-    //setData(path, gin);
+    setData(path, gin);
 
-    //setData(path, negroni);
+    setData(path, negroni);
 
 }
 

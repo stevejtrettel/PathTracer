@@ -40,8 +40,8 @@ void buildWalls(){
     orientation.dir=vec3(0,-1,0);
 
     topWall.orientation=orientation;
-    //topWall.mat=makeDielectric(color,0.0,roughness);
-    topWall.mat=makeLight(vec3(1,0.6,0.4),1.5);
+    topWall.mat=makeDielectric(color,0.0,roughness);
+    //topWall.mat=makeLight(vec3(1,0.6,0.4),0.2);
 
 
     //----------- THE FRONT -------------------------
@@ -57,7 +57,7 @@ void buildWalls(){
 
 
     //----------- THE BACK -------------------------
-    orientation.pos=vec3(0,0,5);
+    orientation.pos=vec3(0,0,8);
     orientation.dir=vec3(0,0,-1);
 
     backWall.orientation=orientation;
