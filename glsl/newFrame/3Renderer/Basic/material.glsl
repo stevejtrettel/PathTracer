@@ -6,11 +6,12 @@
 
 struct Material{
     bool render;
+    bool subSurface;
     vec3 emitColor;
     vec3 diffuseColor;
     vec3 specularColor;
-        vec3 diffuseColorBack;
-        vec3 specularColorBack;
+    vec3 diffuseColorBack;
+    vec3 specularColorBack;
     vec3 absorbColor;
     float roughness;
     float IOR;
@@ -23,6 +24,7 @@ struct Material{
 void zeroMat(inout Material mat){
     //initializes material:
     mat.render=true;
+    mat.subSurface=false;
     mat.emitColor=vec3(0.);
     mat.diffuseColor=vec3(1.);
     mat.specularColor=vec3(1.);

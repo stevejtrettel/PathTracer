@@ -64,12 +64,18 @@ void buildObjects(){
     bottle.baseRadius=1.;
     bottle.neckHeight=1.;
     bottle.neckRadius=0.3;
-    bottle.thickness=0.05;
+    bottle.thickness=0.02;
     bottle.rounded=0.1;
     bottle.smoothJoin=0.3;
     bottle.center=vec3(2,0.75,-2);
     bottle.bump=0.5;
-    bottle.mat=makeGlass(vec3(0.3,0.05,0.08),1.5,0.99);
+    bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
+
+    bottle.mat.diffuseColor=0.7*vec3(0.3,0.2,0.6);
+    bottle.mat.absorbColor=vec3(0,0.02,0.05);
+    //vec3(1)-0.9*vec3(0.3,0.2,0.6);
+    bottle.mat.refractionChance=0.;
+    bottle.mat.subSurface=true;
 
 
     //set up the bounding sphere
@@ -176,7 +182,7 @@ float sdf_Objects( Vector tv ){
 
 
 //will go in the objects file; tells us if we are inside an object of interest
-bool inside_Objects( Vector tv ){
+bool inside_Object( Vector tv ){
     return inside(tv, bottle);
 }
 

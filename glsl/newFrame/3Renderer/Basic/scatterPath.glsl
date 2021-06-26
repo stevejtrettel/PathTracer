@@ -55,6 +55,7 @@ void scatter( inout Path path ){
             path.type=2;
             path.prob=path.dat.probSpecular;
             path.absorb=path.dat.reflectAbsorb;
+            path.subSurface=false;
 
             newDir=reflect(path.tv, normal);
             //newDir=normalize(mix(newDir, diffuseDir,rough2));
@@ -67,6 +68,7 @@ void scatter( inout Path path ){
             path.type=3;
             path.prob=path.dat.probRefract;
             path.absorb=path.dat.refractAbsorb;
+            path.subSurface=false;
 
             newDir=refract(path.tv, normal, path.dat.IOR);
             //newDir=normalize(mix(newDir, negate(diffuseDir),rough2));
@@ -76,11 +78,22 @@ void scatter( inout Path path ){
         else {
 
             //its a diffuse ray
-            path.type=1;
             path.prob=path.dat.probDiffuse;
-            path.absorb=path.dat.reflectAbsorb;
 
-            newDir=diffuseDir;
+
+            if(path.dat.subSurface){
+                path.subSurface=true;
+                path.type=3;//we are entering material
+                path.absorb=path.dat.refractAbsorb;
+                newDir=path.tv;//dont change direction
+            }
+
+            else{
+                //just reflect off in a random direction
+                path.type=1;
+                path.absorb=path.dat.reflectAbsorb;
+                newDir=diffuseDir;
+            }
 
         }
 
@@ -106,6 +119,7 @@ void scatter( inout Path path ){
         path.type=3;
         path.prob=1.;//no other choices
         path.absorb=path.dat.refractAbsorb;
+        path.subSurface=false;
 
         //move ahead along our (unchanged) ray
         flow(path.tv,10.*EPSILON);

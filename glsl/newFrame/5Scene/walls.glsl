@@ -22,7 +22,8 @@ void buildWalls(){
     float specularity, roughness, offset;
 
     //-----------GENERAL FOR THE WALLS -------------------------
-    color=vec3(0.4);
+    color=0.4*vec3(171,203,240)/255.;
+    //vec3(0.4);
     specularity=0.;
     roughness=0.;
 
@@ -41,7 +42,7 @@ void buildWalls(){
 
     topWall.orientation=orientation;
     //topWall.mat=makeDielectric(color,0.0,roughness);
-    topWall.mat=makeLight(vec3(1,0.6,0.4),0.5);
+    topWall.mat=makeLight(vec3(1,0.6,0.4),0.15);
 
 
     //----------- THE FRONT -------------------------

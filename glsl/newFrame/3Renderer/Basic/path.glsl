@@ -9,6 +9,7 @@ struct localData{
     bool renderMaterial;
 
     float side;
+    bool subSurface;
 
     vec3 surfDiffuse;
     vec3 surfSpecular;
@@ -28,6 +29,7 @@ struct localData{
 localData trashDat;
 
 void initializeData(localData dat){
+    dat.subSurface=false;
     dat.isSky=false;
     dat.isPhysical=true;
     dat.renderMaterial=true;

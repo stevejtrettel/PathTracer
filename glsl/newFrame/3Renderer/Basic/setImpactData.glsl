@@ -18,6 +18,7 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
         dat.IOR=mat.IOR/1.;
         dat.reflectAbsorb=mat.absorbColor;
         dat.refractAbsorb=vec3(0.);
+        dat.subSurface=false;
     }
 
     else{
@@ -27,6 +28,7 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
         dat.IOR=1./mat.IOR;
         dat.reflectAbsorb=vec3(0.);
         dat.refractAbsorb=mat.absorbColor;
+        dat.subSurface=mat.subSurface;
     }
 
 }
@@ -55,6 +57,7 @@ void setObjectInAir(inout localData dat, float side, Vector normal, Material mat
         dat.IOR=mat.IOR/1.;
         dat.reflectAbsorb=mat.absorbColor;
         dat.refractAbsorb=vec3(0.);
+        dat.subSurface=false;
     }
 
     else{
@@ -64,6 +67,7 @@ void setObjectInAir(inout localData dat, float side, Vector normal, Material mat
         dat.IOR=1./mat.IOR;
         dat.reflectAbsorb=vec3(0.);
         dat.refractAbsorb=mat.absorbColor;
+        dat.subSurface=mat.subSurface;
     }
 
 }
@@ -85,6 +89,7 @@ void setSurfaceInMat(inout localData dat, float side, Vector normal, Material su
     dat.reflectAbsorb=mat.absorbColor;
     dat.refractAbsorb=mat.absorbColor;
     dat.IOR=1.;
+    dat.subSurface=false;
 
     if(side<0.){
         //we are inside
