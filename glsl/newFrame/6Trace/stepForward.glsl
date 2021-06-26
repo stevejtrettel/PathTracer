@@ -26,7 +26,7 @@ void stepForward(inout Path path){
     //move to this point of intersection
     path.distance=distance;
     flow(path.tv,distance);
-    //path.dat.isSky=(path.distance>maxDist-0.1);
+    path.dat.isSky=(path.distance>maxDist-0.1);
 
     if(!path.dat.isSky){
         setData_Scene(path);

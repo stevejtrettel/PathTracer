@@ -36,6 +36,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord )
     vec4 new = newFrame(fragCoord);
     vec4 prev = accFrame(fragCoord);
 
+    //discard a pixel if it has 'nan' values in the new frame
+    new = isnan(length(new)) ? vec4(0,0,0,1) : new;
+
     //blend them together
     float blend = (frameNumber < 2. || prev.a == 0.0f) ? 1.0f :  1. / (1. + 1./prev.a);
     vec3 color = mix(prev.rgb,new.rgb,blend);

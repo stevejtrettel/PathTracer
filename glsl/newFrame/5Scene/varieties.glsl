@@ -20,7 +20,7 @@ void buildVarieties(){
 
 
     //----------- BARTH SEXTIC -------------------------
-    sextic.center=vec3(-1,1,-1);
+    sextic.center=vec3(2,1,0);
     sextic.scale=4.;
 
     color= 0.7*vec3(0.3,0.2,0.6);

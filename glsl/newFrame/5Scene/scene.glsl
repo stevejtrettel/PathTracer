@@ -49,11 +49,11 @@ float trace_Scene( Vector tv ){
 
     float dist=maxDist;
 
-    dist = min( dist, trace_Lights(tv) );
+    //dist = min( dist, trace_Lights(tv) );
 
     dist = min( dist, trace_Walls(tv) );
 
-    dist = min( dist, trace_Objects(tv) );
+    //dist = min( dist, trace_Objects(tv) );
 
     return dist;
 }
@@ -68,9 +68,9 @@ void setData_Scene(inout Path path){
 
     setData_Walls(path);
 
-    setData_Lights(path);
+    //setData_Lights(path);
 
-    setData_Objects(path);
+    //setData_Objects(path);
 
     setData_Varieties(path);
 

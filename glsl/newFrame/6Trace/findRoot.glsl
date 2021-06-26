@@ -8,15 +8,17 @@
 
 float setStepSize( Vector tv ){
 
-    float val=variety(tv);
+    float val=abs(variety(tv));
     if(val>5.){
-        return 0.2;
+        return 0.1;
     }
     else if(val>1.){
-        return 0.05;
+        return 0.01;
     }
-    return 0.01;
-
+    else if(val>0.5){
+        return 0.01;
+    }
+return 0.1;
 }
 
 bool changeSign(Vector u, Vector v){
@@ -61,7 +63,7 @@ float binarySearch(Vector tv, float dt){
 float findRoot(Vector tv, float stopDist){
 
     float depth=0.;
-    float dt;
+    float dt=3./400.;
 
     Vector temp=tv;
 
@@ -69,10 +71,11 @@ float findRoot(Vector tv, float stopDist){
     Vector normal;
     float side;
 
-    for (int i = 0; i <500; i++){
+    for (int i = 0; i <400; i++){
 
         //determine how far to test flow from current location
-        dt=setStepSize(tv);
+        //dt=setStepSize(tv);
+        //dt=0.05;
 
         //temporarily step forward that distance along the ray
         temp=tv;
@@ -81,7 +84,7 @@ float findRoot(Vector tv, float stopDist){
         //check if we crossed the surface:f
         if(changeSign(temp, tv)){
             //use a binary search to give exact intersection
-            return depth+binarySearch(tv, dt)-EPSILON/5.;
+            return depth+binarySearch(tv, dt);
         }
 
         //if we didn't cross the surface, move tv ahead by this step

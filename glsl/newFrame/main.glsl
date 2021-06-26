@@ -43,7 +43,16 @@ void main() {
     pixel += newFrame(gl_FragCoord.xy,1239845.);
     pixel /= 2.;
 
-    gl_FragColor=vec4(pixel,1.);
+
+    //get rid of black pixels which ruin the accumulation!
+//    float len=length(pixel);
+//    if(!isnan(len)){
+
+        gl_FragColor=vec4(pixel, 1.);
+//    }
+//    else{
+//        gl_FragColor=vec4(0,0,0, 1.);
+//    }
 
 }
 
