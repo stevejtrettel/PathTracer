@@ -77,7 +77,7 @@ void buildObjects(){
     bottle.mat.absorbColor=vec3(0.1,0.1,0.05);
     bottle.mat.refractionChance=0.;
     bottle.mat.subSurface=true;
-
+    bottle.mat.meanFreePath=0.05;
 
     //set up the bounding sphere
     bottle.boundingBox.center=bottle.center;

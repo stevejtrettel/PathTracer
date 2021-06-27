@@ -58,7 +58,7 @@ void subSurfScatter(inout Path path){
         tv=temp;
 
         //choose the distance to flow
-        flowDist=mfp;
+        flowDist=path.dat.meanFreePath;
         //to a trial flow of this distance
         flow(temp,flowDist);
 
@@ -69,7 +69,7 @@ void subSurfScatter(inout Path path){
             flowDist=bisect(tv,flowDist);
             //flow slightly farther so you get out
             //SHOULD MOVE THIS TO A NEW FUNCTION WHREE WE PICK THE NEW RAY?
-            flow(tv,flowDist-EPSILON/2.);
+            flow(tv,flowDist-EPSILON/4.);
             path.tv=tv;
             path.distance=depth+flowDist;
             path.subSurface=false;

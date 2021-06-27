@@ -19,6 +19,7 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
         dat.reflectAbsorb=mat.absorbColor;
         dat.refractAbsorb=vec3(0.);
         dat.subSurface=false;
+        dat.meanFreePath=maxDist;
     }
 
     else{
@@ -29,6 +30,7 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
         dat.reflectAbsorb=vec3(0.);
         dat.refractAbsorb=mat.absorbColor;
         dat.subSurface=mat.subSurface;
+        dat.meanFreePath=mat.meanFreePath;
     }
 
 }
