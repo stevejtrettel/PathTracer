@@ -19,6 +19,8 @@ Cocktail negroni;
 LiquorBottle gin,campari;
 Pint pint;
 Beer beer;
+Cone cone;
+
 
 //this function constructs the objects
 void buildObjects(){
@@ -141,7 +143,7 @@ void buildObjects(){
     //----------PINT GLASS----------
     pint.center=vec3(-2,0.6,-2);
     pint.height=1.5;
-    pint.base=0.75;
+    pint.base=0.3;
     pint.flare=1.2;
     pint.thickness=0.1;
     pint.rounded=0.1;
@@ -158,7 +160,27 @@ void buildObjects(){
     beer.drink.refractionChance=0.;
     beer.drink.subSurface=true;
     beer.drink.meanFreePath=0.1;
-    beer.drink.roughness=1.;
+    beer.drink.roughness=0.9;
+
+
+    //-------- TRUNCATED CONE ----------------
+    cone.center=vec3(1,0,-2);
+    cone.height=2.;
+    cone.base=0.5;
+    cone.flare=1.5;
+
+//    cone.mat=makeGlass(vec3(0.02,0.02,0.06),1.2,0.99);
+//    cone.mat.refractionChance=0.0;
+//    cone.mat.subSurface=true;
+//    cone.mat.meanFreePath=0.1;
+//    cone.mat.roughness=0.1;
+
+    cone.mat=makeGlass(vec3(0.),1.2,0.99);
+    cone.mat.refractionChance=0.0;
+    cone.mat.subSurface=true;
+    cone.mat.meanFreePath=0.1;
+    cone.mat.roughness=1.;
+
 
 }
 
@@ -202,7 +224,9 @@ float sdf_Objects( Vector tv ){
 
     //dist=min( dist, sdf(tv, bottle) );
 
-    dist=min( dist, sdf(tv, beer) );
+    //dist=min( dist, sdf(tv, beer) );
+
+    dist=min( dist, sdf(tv, cone) );
 
     //dist=min( dist, sdf(tv, negroni) );
 
@@ -240,7 +264,8 @@ bool inside_Object( Vector tv ){
 //
 //    return jar||milk||juice;
 //
-return inDrink(tv, beer);
+
+    return inside(tv, cone);
 
 //    switch(objID){
 //        default: false;
@@ -266,7 +291,8 @@ void setData_Objects(inout Path path){
 
       //setData(path, bottle);
 
-      setData(path, beer);
+      //setData(path, beer);
+        setData(path, cone);
 
       //setData(path, negroni);
 

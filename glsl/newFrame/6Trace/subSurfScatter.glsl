@@ -44,9 +44,10 @@ void subSurfScatter(inout Path path){
     Vector tv=path.tv;
     Vector temp=path.tv;
     Vector newDir;
-    float rough=path.dat.surfRoughness*path.dat.surfRoughness;
+    float rough=path.dat.surfRoughness;
 
 
+    flow(path.tv,path.dat.meanFreePath);
     setObjID(path.tv);
 
     //do the subsurface scattering for the surface we are at
@@ -84,8 +85,12 @@ void subSurfScatter(inout Path path){
         tv=temp;
         depth+=flowDist;
 
+        //kill off rays
+        roulette(path);
+
     }
 
     //we got stuck inside the material
+    path.distance=depth;
     path.keepGoing=false;
 }

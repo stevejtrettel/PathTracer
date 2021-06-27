@@ -44,13 +44,13 @@ void buildLights(){
 
 
     //----------- LIGHT 4 -------------------------
-    light3.center=vec3(-3,8,-2);
+    light3.center=vec3(4,1,-2);
     //vec3(2,1,-2);
 
     light3.radius=0.4;
 
     color= vec3(1.,0.8,0.6);
-    intensity=5.;
+    intensity=8.;
 
     light3.mat=makeLight(color,intensity);
 
