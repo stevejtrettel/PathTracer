@@ -24,13 +24,20 @@ vec3 pathTrace(Path path){
                 updateFromSky(path);
 
                 //scatter the path off in a new direction
-                scatter(path);
+                //false=we did not just subsurface scatter
+                scatter(path,false);
 
                 if(path.subSurface){
-                       //do the subsurface scattering
+                       //do the subsurface scattering: stop at the surface
+                       //set the new ray's directoin
                         subSurfScatter(path);
-                        //update the color
+                        //update the color from the trajectory
                         updateFromSubSurf(path);
+                        //update data for new ray exit point
+                        setData_Scene(path);
+                        //choose new ray direction/type:
+                        flow(path.tv,2.*EPSILON);
+                        //scatter(path,true);//true=dont' choose another subsurf scattering event
                 }
                 else{
                         //pick up any color from the reflection off surface

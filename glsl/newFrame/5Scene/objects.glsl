@@ -199,9 +199,9 @@ float sdf_Objects( Vector tv ){
 
     dist=min( dist, sdf(tv, bottle) );
 
-    dist=min( dist, sdf(tv, beer) );
+    //dist=min( dist, sdf(tv, beer) );
 
-    dist=min( dist, sdf(tv, negroni) );
+    //dist=min( dist, sdf(tv, negroni) );
 
     return dist;
 }
@@ -214,10 +214,12 @@ float sdf_Objects( Vector tv ){
 bool inside_Object( Vector tv ){
 
     bool bottle=inside(tv, bottle);
-    bool juice= inDrink(tv, negroni);
-    bool milk= inDrink(tv, beer);
+    return bottle;
 
-    return bottle||milk||juice;
+    //bool juice= inDrink(tv, negroni);
+    //bool milk= inDrink(tv, beer);
+
+    //return bottle||milk||juice;
 }
 
 
@@ -236,9 +238,9 @@ void setData_Objects(inout Path path){
 
       setData(path, bottle);
 
-      setData(path, beer);
+      //setData(path, beer);
 
-      setData(path, negroni);
+      //setData(path, negroni);
 
 }
 

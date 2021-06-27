@@ -31,7 +31,7 @@ void updateProbabilities( inout Path path ){
 
 
 
-void scatter( inout Path path ){
+void scatter( inout Path path, bool justSubSurf ){
 
     if(path.dat.renderMaterial){
 
@@ -80,8 +80,9 @@ void scatter( inout Path path ){
             //its a diffuse ray
             path.prob=path.dat.probDiffuse;
 
-
-            if(path.dat.subSurface){
+            //if the material subsurface scatters, and we
+            //have NOT JUST scattered this way
+            if(path.dat.subSurface && !justSubSurf){
                 path.subSurface=true;
                 path.type=3;//we are entering material
                 path.absorb=path.dat.refractAbsorb;
