@@ -36,6 +36,9 @@ vec3 pathTrace(Path path){
                         //update data for new ray exit point
                         setData_Scene(path);
                         //choose new ray direction/type:
+                        path.absorb=vec3(0);
+                        //path.dat.refractAbsorb;
+                        //path.tv=refract(path.tv,path.dat.normal,path.dat.IOR);
                         flow(path.tv,2.*EPSILON);
                         //scatter(path,true);//true=dont' choose another subsurf scattering event
                 }

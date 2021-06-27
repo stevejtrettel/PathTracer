@@ -74,10 +74,11 @@ void buildObjects(){
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
     bottle.mat.diffuseColor=0.7*vec3(0.3,0.2,0.6);
-    bottle.mat.absorbColor=vec3(0.1,0.1,0.05);
+    bottle.mat.absorbColor=vec3(0.2,0.2,0.05);
     bottle.mat.refractionChance=0.;
     bottle.mat.subSurface=true;
     bottle.mat.meanFreePath=0.05;
+    bottle.mat.roughness=0.5;
 
     //set up the bounding sphere
     bottle.boundingBox.center=bottle.center;
@@ -134,7 +135,8 @@ void buildObjects(){
     //vec3(1)-0.9*vec3(0.3,0.2,0.6);
     negroni.drink.refractionChance=0.;
     negroni.drink.subSurface=true;
-
+    negroni.drink.meanFreePath=0.05;
+    negroni.drink.roughness=1.;
 
     //----------PINT GLASS----------
     pint.center=vec3(-2,0.6,-2);
@@ -155,7 +157,8 @@ void buildObjects(){
     //vec3(1)-0.9*vec3(0.3,0.2,0.6);
     beer.drink.refractionChance=0.;
     beer.drink.subSurface=true;
-
+    beer.drink.meanFreePath=0.1;
+    beer.drink.roughness=1.;
 
 }
 
@@ -197,9 +200,9 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, bottle) );
+    //dist=min( dist, sdf(tv, bottle) );
 
-    //dist=min( dist, sdf(tv, beer) );
+    dist=min( dist, sdf(tv, beer) );
 
     //dist=min( dist, sdf(tv, negroni) );
 
@@ -210,16 +213,41 @@ float sdf_Objects( Vector tv ){
 
 
 
+
+
+
+int objID=0;
+void setObjID( Vector tv ){
+//    objID=0;
+//    if(inside(tv, bottle)){
+//        objID=1;
+//    }
+//    if(inDrink(tv, beer)){
+//        objID=2;
+//    }
+//    if(inDrink(tv, negroni)){
+//        objID=3;
+//    }
+}
+
+
 //will go in the objects file; tells us if we are inside an object of interest
 bool inside_Object( Vector tv ){
 
-    bool bottle=inside(tv, bottle);
-    return bottle;
+//    bool jar=inside(tv, bottle);
+//    bool milk=inDrink(tv, beer);
+//    bool juice=inDrink(tv, negroni);
+//
+//    return jar||milk||juice;
+//
+return inDrink(tv, beer);
 
-    //bool juice= inDrink(tv, negroni);
-    //bool milk= inDrink(tv, beer);
-
-    //return bottle||milk||juice;
+//    switch(objID){
+//        default: false;
+//        case 1: return inside(tv, bottle);
+//        case 2: return inDrink(tv, beer);
+//        case 3: return inDrink(tv, negroni);
+//    }
 }
 
 
@@ -236,9 +264,9 @@ void setData_Objects(inout Path path){
 //
 //    setData(path, ball3);
 
-      setData(path, bottle);
+      //setData(path, bottle);
 
-      //setData(path, beer);
+      setData(path, beer);
 
       //setData(path, negroni);
 

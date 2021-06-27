@@ -33,7 +33,7 @@ float bisect(Vector tv, float dt){
 
 void subSurfScatter(inout Path path){
 
-    int scatterSteps=100;
+    int scatterSteps=500;
     float depth=0.;
 
     //length of a mean free path in the material:
@@ -44,6 +44,10 @@ void subSurfScatter(inout Path path){
     Vector tv=path.tv;
     Vector temp=path.tv;
     Vector newDir;
+    float rough=path.dat.surfRoughness*path.dat.surfRoughness;
+
+
+    setObjID(path.tv);
 
     //do the subsurface scattering for the surface we are at
     for (int i = 0; i < scatterSteps; i++){
@@ -51,8 +55,7 @@ void subSurfScatter(inout Path path){
         //choose the direction of scatter
         newDir=randomVector(temp.pos);
 
-        temp=newDir;
-        //mix(temp,newDir,0.5);
+        temp=mix(temp,newDir,rough);
 
         //update tv's direction
         tv=temp;
@@ -68,7 +71,7 @@ void subSurfScatter(inout Path path){
             //find the distance
             flowDist=bisect(tv,flowDist);
             //flow slightly farther so you get out
-            //SHOULD MOVE THIS TO A NEW FUNCTION WHREE WE PICK THE NEW RAY?
+            //SHOULD MOVE THIS TO A NEW FUNCTION WHERE WE PICK THE NEW RAY?
             flow(tv,flowDist-EPSILON/4.);
             path.tv=tv;
             path.distance=depth+flowDist;

@@ -50,9 +50,12 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
         dat.probRefract=cocktail.cup.refractionChance;
         dat.probDiffuse=1.-dat.probRefract-dat.probSpecular;
 
+
+
         //if we hit the cup from inside or outside determines direction of normal
         if(cup>0.){
-            dat.subSurface=cocktail.cup.subSurface;
+//            dat.subSurface=cocktail.cup.subSurface;
+//            dat.meanFreePath=cocktail.cup.meanFreePath;
             //we hit the cup from outside
             //the normal stays the same
             //but did we hit it near the drink?
@@ -62,6 +65,8 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
                 dat.IOR=1./cocktail.cup.IOR;
                 dat.reflectAbsorb=vec3(0.);
                 dat.refractAbsorb=cocktail.cup.absorbColor;
+                dat.subSurface=cocktail.cup.subSurface;
+                dat.meanFreePath=cocktail.cup.meanFreePath;
             }
             else{
                 //we are inside the drink
@@ -69,6 +74,8 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
                 dat.IOR=cocktail.drink.IOR/cocktail.cup.IOR;
                 dat.reflectAbsorb=cocktail.drink.absorbColor;
                 dat.refractAbsorb=cocktail.cup.absorbColor;
+                dat.subSurface=cocktail.cup.subSurface;
+                dat.meanFreePath=cocktail.cup.meanFreePath;
             }
 
         }
@@ -84,8 +91,10 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
                 dat.reflectAbsorb=cocktail.cup.absorbColor;
                 dat.refractAbsorb=vec3(0.);
                 dat.subSurface=false;//entering air
+                dat.meanFreePath=maxDist;
             }
             else{
+
                 //we are entering the drink
                 //RESET PROBABILITIES FROM THE DRINK
                 dat.probSpecular=cocktail.drink.specularChance;
@@ -96,6 +105,8 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
                 dat.reflectAbsorb=cocktail.cup.absorbColor;
                 dat.refractAbsorb=cocktail.drink.absorbColor;
                 dat.subSurface=cocktail.drink.subSurface;
+                dat.meanFreePath=cocktail.drink.meanFreePath;
+                dat.surfRoughness=cocktail.drink.roughness;
             }
         }
 
@@ -126,6 +137,8 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
             dat.reflectAbsorb=vec3(0.);
             dat.refractAbsorb=cocktail.drink.absorbColor;
             dat.subSurface=cocktail.drink.subSurface;
+            dat.meanFreePath=cocktail.drink.meanFreePath;
+            dat.surfRoughness=cocktail.drink.roughness;
         }
         else{
             //below the water line
@@ -135,6 +148,8 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
             dat.reflectAbsorb=cocktail.drink.absorbColor;
             dat.refractAbsorb=vec3(0.);
             dat.subSurface=false;//air
+            dat.meanFreePath=maxDist;
+
         }
 
     }
@@ -278,6 +293,7 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
                 dat.reflectAbsorb=vec3(0.);
                 dat.refractAbsorb=beer.cup.absorbColor;
                 dat.subSurface=beer.cup.subSurface;
+                dat.meanFreePath=beer.cup.meanFreePath;
             }
             else{
                 //we are inside the drink
@@ -286,6 +302,7 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
                 dat.reflectAbsorb=beer.drink.absorbColor;
                 dat.refractAbsorb=beer.cup.absorbColor;
                 dat.subSurface=beer.cup.subSurface;
+                dat.meanFreePath=beer.cup.meanFreePath;
             }
 
         }
@@ -301,6 +318,7 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
                 dat.reflectAbsorb=beer.cup.absorbColor;
                 dat.refractAbsorb=vec3(0.);
                 dat.subSurface=false;//air
+                dat.meanFreePath=maxDist;
             }
             else{
                 //we are entering the drink
@@ -313,6 +331,8 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
                 dat.reflectAbsorb=beer.cup.absorbColor;
                 dat.refractAbsorb=beer.drink.absorbColor;
                 dat.subSurface=beer.drink.subSurface;
+                dat.meanFreePath=beer.drink.meanFreePath;
+                dat.surfRoughness=beer.drink.roughness;
             }
         }
 
@@ -343,6 +363,8 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
             dat.reflectAbsorb=vec3(0.);
             dat.refractAbsorb=beer.drink.absorbColor;
             dat.subSurface=beer.drink.subSurface;
+            dat.meanFreePath=beer.drink.meanFreePath;
+            dat.surfRoughness=beer.drink.roughness;
         }
         else{
             //below the water line
@@ -352,6 +374,7 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
             dat.reflectAbsorb=beer.drink.absorbColor;
             dat.refractAbsorb=vec3(0.);
             dat.subSurface=false;//entering air
+            dat.meanFreePath=maxDist;
         }
 
     }

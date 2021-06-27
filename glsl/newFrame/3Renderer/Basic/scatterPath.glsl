@@ -86,7 +86,9 @@ void scatter( inout Path path, bool justSubSurf ){
                 path.subSurface=true;
                 path.type=3;//we are entering material
                 path.absorb=path.dat.refractAbsorb;
-                newDir=path.tv;//dont change direction
+                //newDir=refract(path.tv, normal, path.dat.IOR);
+                newDir=path.tv;
+                //we refract into the new material and then scatter
             }
 
             else{
