@@ -31,7 +31,7 @@ void updateProbabilities( inout Path path ){
 
 
 
-void scatter( inout Path path, bool justSubSurf ){
+void scatter( inout Path path){
 
     if(path.dat.renderMaterial){
 
@@ -82,13 +82,11 @@ void scatter( inout Path path, bool justSubSurf ){
 
             //if the material subsurface scatters, and we
             //have NOT JUST scattered this way
-            if(path.dat.subSurface && !justSubSurf){
+            if(path.dat.subSurface){
                 path.subSurface=true;
                 path.type=3;//we are entering material
                 path.absorb=path.dat.refractAbsorb;
-                //newDir=refract(path.tv, normal, path.dat.IOR);
-                newDir=path.tv;
-                //we refract into the new material and then scatter
+                newDir=refract(path.tv, normal, path.dat.IOR);
             }
 
             else{
@@ -109,9 +107,9 @@ void scatter( inout Path path, bool justSubSurf ){
         path.tv=newDir;
 
         //which side to push the point: in or out rel the normal?
-        float side=(path.type == 3) ?-1.:1.;
-        nudge(path.tv, multiplyScalar(side, normal), 5.*EPSILON);
-        //flow(path.tv,5.*EPSILON);
+        //float side=(path.type == 3) ?-1.:1.;
+        //nudge(path.tv, multiplyScalar(side, normal), 5.*EPSILON);
+        flow(path.tv,10.*EPSILON);
 
     }
 

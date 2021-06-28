@@ -66,7 +66,7 @@ struct Path{
     float prob;//probability this type of ray was chosen;
     vec3 absorb;
     float distance; //distance traveled on a bounce
-
+    float numScatters;//num of scattering events, when this is the useful metric instead of distance
     localData dat;
 
     bool keepGoing;
@@ -86,7 +86,7 @@ Path initializePath(Vector tv){
     path.tv=tv;//set the initial direction
     path.pixel=vec3(0.);//set the pixel black
     path.light=vec3(1.);
-
+    path.numScatters=0.;
     path.distance=0.;
     path.keepGoing=true;
     path.subSurface=false;

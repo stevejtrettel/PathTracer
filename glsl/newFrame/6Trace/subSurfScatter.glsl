@@ -44,11 +44,11 @@ void subSurfScatter(inout Path path){
     Vector tv=path.tv;
     Vector temp=path.tv;
     Vector newDir;
-    float rough=path.dat.surfRoughness;
+    float rough=path.dat.surfRoughness*path.dat.surfRoughness;
 
 
     flow(path.tv,path.dat.meanFreePath);
-    setObjID(path.tv);
+    //setObjID(path.tv);
 
     //do the subsurface scattering for the surface we are at
     for (int i = 0; i < scatterSteps; i++){
@@ -72,10 +72,11 @@ void subSurfScatter(inout Path path){
             //find the distance
             flowDist=bisect(tv,flowDist);
             //flow slightly farther so you get out
-            //SHOULD MOVE THIS TO A NEW FUNCTION WHERE WE PICK THE NEW RAY?
-            flow(tv,flowDist-EPSILON/4.);
+            flow(tv,flowDist-EPSILON/2.);
+            //set your new data, right back on the surface
             path.tv=tv;
             path.distance=depth+flowDist;
+            path.numScatters=float(i);
             path.subSurface=false;
             return;
         }
@@ -87,10 +88,14 @@ void subSurfScatter(inout Path path){
 
         //kill off rays
         roulette(path);
+        if(!path.keepGoing){
+            break;
+        }
 
     }
 
     //we got stuck inside the material
+    path.numScatters=float(scatterSteps);
     path.distance=depth;
     path.keepGoing=false;
 }

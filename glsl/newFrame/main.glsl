@@ -40,11 +40,11 @@ void main() {
 
     vec3 pixel=vec3(0);
     pixel += newFrame(gl_FragCoord.xy,0.);
-    pixel += newFrame(gl_FragCoord.xy,1239845.);
-    pixel += newFrame(gl_FragCoord.xy,1573655.);
+//    pixel += newFrame(gl_FragCoord.xy,1239845.);
+//    pixel += newFrame(gl_FragCoord.xy,1573655.);
 //    pixel += newFrame(gl_FragCoord.xy,1241245.);
 //    pixel += newFrame(gl_FragCoord.xy,15738765.);
-    pixel /= 3.;
+//    pixel /= 5.;
 
         gl_FragColor=vec4(pixel, 1.);
 

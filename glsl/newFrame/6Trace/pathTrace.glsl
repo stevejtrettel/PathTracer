@@ -25,22 +25,34 @@ vec3 pathTrace(Path path){
 
                 //scatter the path off in a new direction
                 //false=we did not just subsurface scatter
-                scatter(path,false);
+                scatter(path);
 
                 if(path.subSurface){
-                       //do the subsurface scattering: stop at the surface
-                       //set the new ray's directoin
+                       //do the subsurface scattering:
+                        //this leaves the ray at a new location and in a new direction,
+                        //still just outside the surface
                         subSurfScatter(path);
+
                         //update the color from the trajectory
                         updateFromSubSurf(path);
-                        //update data for new ray exit point
-                        setData_Scene(path);
-                        //choose new ray direction/type:
-                        path.absorb=vec3(0);
-                        //path.dat.refractAbsorb;
-                        //path.tv=refract(path.tv,path.dat.normal,path.dat.IOR);
-                        flow(path.tv,2.*EPSILON);
-                        //scatter(path,true);//true=dont' choose another subsurf scattering event
+
+                        //reset the absorb color to the orig medium
+                        path.absorb=path.dat.reflectAbsorb;
+
+                        //OPTION 1: JUST FLOW FORWARDS
+                        //step forward a bit to get off the surface
+                        flow(path.tv,10.*EPSILON);
+
+                        //OPTION 2: USE NORMAL TO PUSH OFF
+                        //setData_Scene(path);
+                        //nudge(path.tv, path.dat.normal,8.*EPSILON);
+
+                        //OPTION 3: DECIDE WHAT TO DO BY RE-SCATTERING
+                        //need the new normal vector
+                        //setData_Scene(path);
+                        //scatter(path);
+
+
                 }
                 else{
                         //pick up any color from the reflection off surface
