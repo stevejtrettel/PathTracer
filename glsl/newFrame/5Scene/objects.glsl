@@ -210,10 +210,10 @@ void buildObjects(){
     cone.base=0.5;
     cone.flare=1.5;
 
-    cone.mat=makeGlass(1.5*vec3(0.02,0.02,0.06),1.2,0.99);
+    cone.mat=makeGlass(vec3(0),1.2,0.99);
     cone.mat.refractionChance=0.0;
     cone.mat.subSurface=true;
-    cone.mat.meanFreePath=0.1;
+    cone.mat.meanFreePath=0.05;
     cone.mat.roughness=0.25;
 
 
@@ -224,14 +224,14 @@ void buildObjects(){
     cone2.base=0.5;
     cone2.flare=1.5;
 
-    cone2.mat=makeGlass(1.5*vec3(0.02,0.02,0.06),1.2,0.99);
+    cone2.mat=makeGlass(vec3(0),1.2,0.99);
     cone2.mat.refractionChance=0.0;
     cone2.mat.subSurface=true;
-    cone2.mat.meanFreePath=0.1;
-    cone2.mat.roughness=0.3;
+    cone2.mat.meanFreePath=0.05;
+    cone2.mat.roughness=0.85;
 
 
-
+    //BEER COLOR vec3(0.02,0.02,0.06)
 
     //-------- TRUNCATED CONE ----------------
     cone3.center=vec3(1,0.8,1);
@@ -239,11 +239,11 @@ void buildObjects(){
     cone3.base=0.5;
     cone3.flare=1.5;
 
-    cone3.mat=makeGlass(2.5*vec3(0.02,0.02,0.06),1.2,0.99);
+    cone3.mat=makeGlass(vec3(0),1.2,0.99);
     cone3.mat.refractionChance=0.0;
     cone3.mat.subSurface=true;
-    cone3.mat.meanFreePath=0.1;
-    cone3.mat.roughness=0.5;
+    cone3.mat.meanFreePath=0.05;
+    cone3.mat.roughness=1.;
 
 
 //    cone.mat=makeGlass(vec3(0.),1.2,0.99);

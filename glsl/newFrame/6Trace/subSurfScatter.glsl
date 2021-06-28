@@ -33,7 +33,7 @@ float bisect(Vector tv, float dt){
 
 void subSurfScatter(inout Path path){
 
-    int scatterSteps=500;
+    int scatterSteps=3000;
     float depth=0.;
 
     //length of a mean free path in the material:
