@@ -97,7 +97,7 @@ void buildObjects(){
     bottle2.thickness=0.02;
     bottle2.rounded=0.1;
     bottle2.smoothJoin=0.3;
-    bottle2.center=vec3(1,0.6,-2);
+    bottle2.center=vec3(-1,0.6,-2);
     bottle2.bump=0.;
     bottle2.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
@@ -144,7 +144,7 @@ void buildObjects(){
 //
     //-------- COCKTAIL GLASS----------------
 
-    cGlass.center=vec3(0,0.1,2);
+    cGlass.center=vec3(1.5,0.1,1);
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;
@@ -157,11 +157,11 @@ void buildObjects(){
     negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
     negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
 
-    negroni.drink=makeGlass(vec3(0.),1.2,0.99);
-    negroni.drink.refractionChance=0.0;
-    negroni.drink.subSurface=true;
-    negroni.drink.meanFreePath=0.1;
-    negroni.drink.roughness=0.4;
+//    negroni.drink=makeGlass(vec3(0.),1.2,0.99);
+//    negroni.drink.refractionChance=0.0;
+//    negroni.drink.subSurface=true;
+//    negroni.drink.meanFreePath=0.1;
+//    negroni.drink.roughness=0.4;
 
     //----------PINT GLASS----------
     pint.center=vec3(-1,1.2,-2);
@@ -294,19 +294,19 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    //dist=min( dist, sdf(tv, bottle) );
+    dist=min( dist, sdf(tv, bottle) );
 
     //dist=min( dist, sdf(tv, bottle2) );
 
     //dist=min( dist, sdf(tv, beer) );
 
-    dist=min( dist, sdf(tv, cone) );
+    //dist=min( dist, sdf(tv, cone) );
 
-    dist=min( dist, sdf(tv, cone2) );
+    //dist=min( dist, sdf(tv, cone2) );
 
-    dist=min( dist, sdf(tv, cone3) );
+    //dist=min( dist, sdf(tv, cone3) );
 
-  //  dist=min( dist, sdf(tv, negroni) );
+    dist=min( dist, sdf(tv, negroni) );
 
     return dist;
 }
@@ -333,18 +333,18 @@ void setObjID( Vector tv ){
 //will go in the objects file; tells us if we are inside an object of interest
 bool inside_Object( Vector tv ){
 
-//    bool jar=inside(tv, bottle);
+    bool jar=inside(tv, bottle);
 //
-
+return jar;
     //bool milk=inDrink(tv, beer);
    // bool juice=inDrink(tv, negroni);
     //return juice;
 //bool inBeer= inDrink(tv, beer);
 //    return jar||milk||juice;
-bool inCone= inside(tv, cone);
-    bool inCone2= inside(tv, cone2);
-    bool inCone3= inside(tv, cone3);
-    return inCone||inCone2||inCone3;
+//bool inCone= inside(tv, cone);
+   // bool inCone2= inside(tv, cone2);
+    //bool inCone3= inside(tv, cone3);
+    //return inCone||inCone2||inCone3;
 //return inside(tv, bottle)||inside(tv, bottle2);
 }
 
@@ -362,14 +362,14 @@ void setData_Objects(inout Path path){
 //
 //    setData(path, ball3);
 
-      //setData(path, bottle);
+      setData(path, bottle);
    // setData(path, bottle2);
 
       //setData(path, beer);
-        setData(path, cone);
-    setData(path, cone2);
-    setData(path, cone3);
-     //setData(path, negroni);
+     //   setData(path, cone);
+  //  setData(path, cone2);
+  //  setData(path, cone3);
+     setData(path, negroni);
 
 }
 

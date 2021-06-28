@@ -55,6 +55,7 @@
                 {file: '../glsl/newFrame/6Trace/subSurfScatter.glsl'},
                 {file: '../glsl/newFrame/6Trace/findRoot.glsl'},
                 {file: '../glsl/newFrame/6Trace/stepForward.glsl'},
+                {file: '../glsl/newFrame/6Trace/importanceSample.glsl'},
                 {file: '../glsl/newFrame/6Trace/pathTrace.glsl'},
                 {file: '../glsl/newFrame/main.glsl'},
     ];

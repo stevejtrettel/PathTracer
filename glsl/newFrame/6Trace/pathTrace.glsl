@@ -59,6 +59,10 @@ vec3 pathTrace(Path path){
                         updateFromSurface(path);
                 }
 
+
+                //importance sample the lighting from the current location:
+                //importanceSample(path);
+
                 //probabilistically kill rays
                 roulette(path);
 

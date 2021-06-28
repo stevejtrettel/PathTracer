@@ -87,6 +87,21 @@ float trace_Lights( Vector tv ){
 
 
 
+//-------------------------------------------------
+//SELECTING A LIGHT SOURCE (Importance Sampling)
+//-------------------------------------------------
+//BIG LIMITATION: RIGHT NOW LIGHTS HAVE TO BE SAME OBJECT TYPE
+Sphere chooseLightSource(){
+    float random = randomFloat();
+    if(random<0.333){
+        return light1;
+    }
+    else if(random<0.666){
+        return light2;
+    }
+    return light3;
+}
+
 
 //-------------------------------------------------
 //Setting the Lights Data
