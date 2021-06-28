@@ -136,18 +136,18 @@ float barthSexticEqn(vec3 p){
     float y=p.y;
     float z=p.z;
 
-    return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
+    //return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
 
-//    float x2=x*x;
-//    float y2=y*y;
-//    float z2=z*z;
-//    float r2=x2+y2+z2;
-//
-//    float t = 1.618034;
-//    float t2=t*t;
-//
-//    return 4.*(t2*x2 - y2) * ( t2*y2 - z2 ) *( t2*z2 - x2 )
-//    - ( 1. + 2.*t) *(r2- 1.)*(r2- 1.);
+    float x2=x*x;
+    float y2=y*y;
+    float z2=z*z;
+    float r2=x2+y2+z2;
+
+    float t = 1.618034;
+    float t2=t*t;
+
+    return 4.*(t2*x2 - y2) * ( t2*y2 - z2 ) *( t2*z2 - x2 )
+    - ( 1. + 2.*t) *(r2- 1.)*(r2- 1.);
 
 }
 

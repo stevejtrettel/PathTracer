@@ -21,8 +21,8 @@ void buildVarieties(){
 
 
     //----------- BARTH SEXTIC -------------------------
-    sextic.center=vec3(1,0,3);
-    sextic.scale=8.;
+    sextic.center=vec3(1,0,4);
+    sextic.scale=4.;
 
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
@@ -63,7 +63,7 @@ void buildVarieties(){
 //DO WE RENDER THEM?
 //-------------------------------------------------
 
-bool render_Varieties=false;
+bool render_Varieties=true;
 
 
 

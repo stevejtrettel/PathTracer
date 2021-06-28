@@ -90,6 +90,9 @@ vec2 sampleAperture(Camera cam){
 
 Vector cameraRay(vec2 fragCoord, Camera cam){
 
+    //SET THE POSITION THE CAMERA STARTS AT REL THE ORIGIN
+    vec3 startPos=vec3(-2,0,6);
+
     //set up pinhole camera at origin
     Vector tv=initializeRay(fragCoord,cam.fov);
 
@@ -114,7 +117,7 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
     tv.pos=facing*tv.pos;
 
     //translate by the right amount
-    tv.pos+=cam.pos;
+    tv.pos+=cam.pos+startPos;
 
 
     //rotate by facing (a uniform)

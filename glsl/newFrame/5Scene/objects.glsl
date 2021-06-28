@@ -71,7 +71,7 @@ void buildObjects(){
     bottle.thickness=0.02;
     bottle.rounded=0.1;
     bottle.smoothJoin=0.3;
-    bottle.center=vec3(-1,0.4,1);
+    bottle.center=vec3(2,0.4,1);
     bottle.bump=0.5;
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
@@ -144,7 +144,7 @@ void buildObjects(){
 //
     //-------- COCKTAIL GLASS----------------
 
-    cGlass.center=vec3(0,0.1,2);
+    cGlass.center=vec3(-1.,0.,-1.2);
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;
@@ -157,11 +157,11 @@ void buildObjects(){
     negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
     negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
 
-    negroni.drink=makeGlass(vec3(0.),1.2,0.99);
-    negroni.drink.refractionChance=0.0;
-    negroni.drink.subSurface=true;
-    negroni.drink.meanFreePath=0.1;
-    negroni.drink.roughness=0.4;
+//    negroni.drink=makeGlass(vec3(0.),1.2,0.99);
+//    negroni.drink.refractionChance=0.0;
+//    negroni.drink.subSurface=true;
+//    negroni.drink.meanFreePath=0.1;
+//    negroni.drink.roughness=0.4;
 
     //----------PINT GLASS----------
     pint.center=vec3(-1,1.2,-2);
@@ -202,56 +202,6 @@ void buildObjects(){
 //    beer.drink.subSurface=true;
 //    beer.drink.meanFreePath=0.1;
 //    beer.drink.roughness=0.9;
-
-
-    //-------- TRUNCATED CONE ----------------
-    cone.center=vec3(1,0.8,-3);
-    cone.height=1.5;
-    cone.base=0.5;
-    cone.flare=1.5;
-
-    cone.mat=makeGlass(1.5*vec3(0.02,0.02,0.06),1.2,0.99);
-    cone.mat.refractionChance=0.0;
-    cone.mat.subSurface=true;
-    cone.mat.meanFreePath=0.1;
-    cone.mat.roughness=0.25;
-
-
-
-    //-------- TRUNCATED CONE ----------------
-    cone2.center=vec3(1,0.8,-1);
-    cone2.height=1.5;
-    cone2.base=0.5;
-    cone2.flare=1.5;
-
-    cone2.mat=makeGlass(1.5*vec3(0.02,0.02,0.06),1.2,0.99);
-    cone2.mat.refractionChance=0.0;
-    cone2.mat.subSurface=true;
-    cone2.mat.meanFreePath=0.1;
-    cone2.mat.roughness=0.3;
-
-
-
-
-    //-------- TRUNCATED CONE ----------------
-    cone3.center=vec3(1,0.8,1);
-    cone3.height=1.5;
-    cone3.base=0.5;
-    cone3.flare=1.5;
-
-    cone3.mat=makeGlass(2.5*vec3(0.02,0.02,0.06),1.2,0.99);
-    cone3.mat.refractionChance=0.0;
-    cone3.mat.subSurface=true;
-    cone3.mat.meanFreePath=0.1;
-    cone3.mat.roughness=0.5;
-
-
-//    cone.mat=makeGlass(vec3(0.),1.2,0.99);
-//    cone.mat.diffuseColor=(vec3(1.)-10.*vec3(0.02,0.02,0.06));
-//    cone.mat.refractionChance=0.0;
-//    cone.mat.subSurface=true;
-//    cone.mat.meanFreePath=0.1;
-//    cone.mat.roughness=1.;
 
 
 }
@@ -299,14 +249,9 @@ float sdf_Objects( Vector tv ){
     //dist=min( dist, sdf(tv, bottle2) );
 
     //dist=min( dist, sdf(tv, beer) );
+    dist=min( dist, sdf(tv, gin) );
 
-    dist=min( dist, sdf(tv, cone) );
-
-    dist=min( dist, sdf(tv, cone2) );
-
-    dist=min( dist, sdf(tv, cone3) );
-
-  //  dist=min( dist, sdf(tv, negroni) );
+    dist=min( dist, sdf(tv, negroni) );
 
     return dist;
 }
@@ -320,19 +265,13 @@ float sdf_Objects( Vector tv ){
 
 int objID=0;
 void setObjID( Vector tv ){
-//    objID=0;
-//    if(inside(tv, bottle)){
-//        objID=1;
-//    }
-//    if(inside(tv, bottle2)){
-//        objID=2;
-//    }
 }
 
 
 //will go in the objects file; tells us if we are inside an object of interest
+//used in subsurface scattering
 bool inside_Object( Vector tv ){
-
+return false;
 //    bool jar=inside(tv, bottle);
 //
 
@@ -341,10 +280,7 @@ bool inside_Object( Vector tv ){
     //return juice;
 //bool inBeer= inDrink(tv, beer);
 //    return jar||milk||juice;
-bool inCone= inside(tv, cone);
-    bool inCone2= inside(tv, cone2);
-    bool inCone3= inside(tv, cone3);
-    return inCone||inCone2||inCone3;
+
 //return inside(tv, bottle)||inside(tv, bottle2);
 }
 
@@ -362,14 +298,9 @@ void setData_Objects(inout Path path){
 //
 //    setData(path, ball3);
 
-      //setData(path, bottle);
-   // setData(path, bottle2);
+      setData(path, gin);
 
-      //setData(path, beer);
-        setData(path, cone);
-    setData(path, cone2);
-    setData(path, cone3);
-     //setData(path, negroni);
+     setData(path, negroni);
 
 }
 
