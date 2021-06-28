@@ -2,94 +2,61 @@
         //=============================================
         import * as THREE from './libs/three.module.js';
 
-        import {
-            rotControls,
-            translControls
-        } from './controls.js';
+        import{
+            newFrameUniforms,
+            combineUniforms,
+            displayUniforms,
+        } from "./uniforms.js";
 
 
         //Scene Variables
         //=============================================
 
 
-        //background sky texture
-        const skyTex = new THREE.TextureLoader().load('/js/tex/bk.jpg');
-
-
-        //background sky texture
-        const skyTexSmall = new THREE.TextureLoader().load('/js/tex/bk_sm.jpg');
-
-
-
         // things for building display and accumulation scenes
-        let accScene, dispScene;
-        let accMaterial, dispMaterial;
-        let accUniforms, dispUniforms;
-        let accShader, dispShader;
-
-
-
-
-
-
+        let newFrameScene, dispScene,combineScene;
+        let newFrameMaterial, dispMaterial,combineMaterial;
 
 
 
         //Build Accumulation Scene
         //=============================================
 
-
-
-
-
-        async function buildAccShader() {
+        async function buildNewFrameShader() {
 
             let newShader = '';
 
 
             const shaders = [] = [
-                {
-                    file: '../glsl/accShader/01setup.glsl'
-                },
-                {
-                    file: '../glsl/accShader/02random.glsl'
-                },
-                {
-                    file: '../glsl/accShader/03spectral.glsl'
-                },
-                {
-                    file: '../glsl/accShader/04geometry.glsl'
-                },
-                {
-                    file: '../glsl/accShader/05materials.glsl'
-                },
-                {
-                    file: '../glsl/accShader/06path.glsl'
-                },
-                {
-                    file: '../glsl/accShader/07BSDF.glsl'
-                },
-                {
-                    file: '../glsl/accShader/08distanceFields.glsl'
-                },
-                {
-                    file: '../glsl/accShader/09basicObjects.glsl'
-                },
-                           {
-                    file: '../glsl/accShader/10compoundObjects.glsl'
-                },
-                {
-                    file: '../glsl/accShader/11scene.glsl'
-                },
-                {
-                    file: '../glsl/accShader/12trace.glsl'
-                },
-                {
-                    file: '../glsl/accShader/13render.glsl'
-                },
-                {
-                    file: '../glsl/accShader/14accumulate.glsl'
-                },
+                {file: '../glsl/newFrame/1Setup/uniforms.glsl'},
+                {file: '../glsl/newFrame/1Setup/math.glsl'},
+                {file: '../glsl/newFrame/1Setup/random.glsl'},
+                {file: '../glsl/newFrame/1Setup/sky.glsl'},
+                {file: '../glsl/newFrame/2Space/geometry.glsl'},
+                {file: '../glsl/newFrame/2Space/physics.glsl'},
+                {file: '../glsl/newFrame/2Space/camera.glsl'},
+                {file: '../glsl/newFrame/3Renderer/Basic/material.glsl'},
+                {file: '../glsl/newFrame/3Renderer/Basic/path.glsl'},
+                {file: '../glsl/newFrame/3Renderer/Basic/setImpactData.glsl'},
+                {file: '../glsl/newFrame/3Renderer/Basic/scatterPath.glsl'},
+                {file: '../glsl/newFrame/3Renderer/Basic/updatePath.glsl'},
+                {file: '../glsl/newFrame/4Objects/computations.glsl'},
+                {file: '../glsl/newFrame/4Objects/basicObjects.glsl'},
+                {file: '../glsl/newFrame/4Objects/compoundObjects.glsl'},
+                {file: '../glsl/newFrame/4Objects/multiMatObjects.glsl'},
+                {file: '../glsl/newFrame/4Objects/varieties.glsl'},
+                {file: '../glsl/newFrame/5Scene/walls.glsl'},
+                {file: '../glsl/newFrame/5Scene/lights.glsl'},
+                {file: '../glsl/newFrame/5Scene/objects.glsl'},
+                {file: '../glsl/newFrame/5Scene/varieties.glsl'},
+                {file: '../glsl/newFrame/5Scene/scene.glsl'},
+                {file: '../glsl/newFrame/6Trace/raymarch.glsl'},
+                {file: '../glsl/newFrame/6Trace/raytrace.glsl'},
+                {file: '../glsl/newFrame/6Trace/subSurfScatter.glsl'},
+                {file: '../glsl/newFrame/6Trace/findRoot.glsl'},
+                {file: '../glsl/newFrame/6Trace/stepForward.glsl'},
+                {file: '../glsl/newFrame/6Trace/pathTrace.glsl'},
+                {file: '../glsl/newFrame/main.glsl'},
     ];
 
 
@@ -108,142 +75,59 @@
 
 
 
-        async function createAccShaderMat() {
-
-            //OLD WAY: LOAD SINGLE SHADER
-            //            const accText = await fetch('../glsl/accShader.glsl');
-            //            accShader = await accText.text();
-            //build the shader out of files
-
-            //build the shader text
-            accShader = await buildAccShader();
-
-            accUniforms = {
-                iTime: {
-                    value: 0
-                },
-                iResolution: {
-                    value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
-                },
-                //frame number we are on
-                iFrame: {
-                    value: 0
-                },
-                sky: {
-                    value: skyTex
-                },
-                skySM: {
-                    value: skyTexSmall
-                },
-                //accumulated texture
-                acc: {
-                    value: null
-                },
-                facing: {
-                    value: new THREE.Matrix3().identity()
-                },
-                location: {
-                    value: new THREE.Vector3(0, 0, 0)
-                },
-                seed: {
-                    value: 0
-                }
-            };
-
-        }
-
-
-        function createAccScene(accShader, accUniforms) {
-
-
+        async function createNewFrameScene() {
 
             //make the actual scene, and the buffer Scene
-            accScene = new THREE.Scene();
+            newFrameScene = new THREE.Scene();
 
             //make the plane we will add to both scenes
-            const accPlane = new THREE.PlaneBufferGeometry(2, 2);
+            const newFramePlane = new THREE.PlaneBufferGeometry(2, 2);
 
-            accMaterial = new THREE.ShaderMaterial({
-                fragmentShader: accShader,
-                uniforms: accUniforms,
+            newFrameMaterial = new THREE.ShaderMaterial({
+                fragmentShader: await buildNewFrameShader(),
+                uniforms: newFrameUniforms,
             });
 
-            accScene.add(new THREE.Mesh(accPlane, accMaterial));
-
-        }
-
-
-
-        function updateAccUniforms() {
-
-
-
-            //  accMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
-            //  accMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
-            accMaterial.uniforms.iTime.value = 0;
-            accMaterial.uniforms.iFrame.value += 1.;
-            accMaterial.uniforms.seed.value += 1.;
-
-            let rotData = rotControls();
-            let mat = rotData[0];
-            let detectRot = rotData[1];
-
-            let translData = translControls();
-            let vec = translData[0];
-            let detectTransl = translData[1];
-
-            if (detectRot || detectTransl) {
-
-                accMaterial.uniforms.facing.value.multiply(mat);
-
-                accMaterial.uniforms.location.value.add(vec);
-
-                accMaterial.uniforms.iFrame.value = 0.;
-            }
-
+            newFrameScene.add(new THREE.Mesh(newFramePlane, newFrameMaterial));
 
         }
 
 
 
 
+        //Build Combine Scene
+        //=============================================
+
+        async function createCombineScene() {
+
+            //build the shader
+            const combineText = await fetch('../glsl/combine/combine.glsl');
+
+            //make the actual scene, and the buffer Scene
+            combineScene = new THREE.Scene();
+
+
+            //make the plane we will add to both scenes
+            const combinePlane = new THREE.PlaneBufferGeometry(2, 2);
+
+
+            combineMaterial = new THREE.ShaderMaterial({
+                fragmentShader: await combineText.text(),
+                uniforms: combineUniforms,
+            });
+
+            combineScene.add(new THREE.Mesh(combinePlane, combineMaterial));
+        }
 
 
 
         //Build Display Scene
         //=============================================
 
+        async function createDispScene() {
 
-        async function createDispShaderMat() {
-
-            const dispText = await fetch('../glsl/dispShader.glsl');
-            dispShader = await dispText.text();
-
-
-            dispUniforms = {
-                //                iTime: {
-                //                    value: 0
-                //                },
-                iResolution: {
-                    value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
-                },
-                //                //frame number we are on
-                //                iFrame: {
-                //                    value: 0
-                //                },
-                //raw display texture
-                acc: {
-                    value: null
-                }
-            };
-
-
-        }
-
-
-
-        function createDispScene(dispShader, dispUniforms) {
-
+            //build the shader
+            const dispText = await fetch('../glsl/display/display.glsl');
 
             //make the actual scene, and the buffer Scene
             dispScene = new THREE.Scene();
@@ -254,27 +138,13 @@
 
 
             dispMaterial = new THREE.ShaderMaterial({
-                fragmentShader: dispShader,
-                uniforms: dispUniforms,
+                fragmentShader: await dispText.text(),
+                uniforms: displayUniforms,
             });
-
 
             dispScene.add(new THREE.Mesh(dispPlane, dispMaterial));
 
-
         }
-
-
-
-        function updateDispUniforms() {
-
-            //dispMaterial.uniforms.iResolution.value.set(canvas.width, canvas.height, 1);
-            // dispMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
-            //dispMaterial.uniforms.iFrame.value += 1.;
-            //dispMaterial.uniforms.iTime.value = 0;
-
-        }
-
 
 
 
@@ -285,30 +155,24 @@
         //run one time to set things up
         async function buildScenes() {
 
-            await createAccShaderMat();
+            await createNewFrameScene();
 
-            createAccScene(accShader, accUniforms);
+            await createCombineScene();
 
-            await createDispShaderMat();
+            await createDispScene();
 
-            createDispScene(dispShader, dispUniforms);
 
         }
 
-
-        //updates materials each time a frame runs: resizing canvas if necessary
-        function updateUniforms() {
-            updateAccUniforms();
-            updateDispUniforms();
-        }
 
 
 
         export {
-            accMaterial,
+            newFrameMaterial,
+            combineMaterial,
             dispMaterial,
-            accScene,
+            newFrameScene,
+            combineScene,
             dispScene,
             buildScenes,
-            updateUniforms
         }

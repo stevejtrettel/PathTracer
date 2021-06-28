@@ -168,42 +168,42 @@ let transSide = new THREE.Vector3(1, 0, 0);
 let transUp = new THREE.Vector3(0, 1, 0);
 
 
-function translControls() {
+function translControls(facing) {
 
     let totalTrans = new THREE.Vector3(0, 0, 0);
     let newTrans = new THREE.Vector3(0, 0, 0);
 
     // KEYBOARD
     if (rightPressed) {
-        newTrans = transSide.clone().multiplyScalar(transAmt);
+        newTrans = transSide.clone().applyMatrix3(facing).multiplyScalar(transAmt);
         totalTrans.add(newTrans);
 
     }
 
     if (leftPressed) {
-        newTrans = transSide.clone().multiplyScalar(-transAmt);
+        newTrans = transSide.clone().applyMatrix3(facing).multiplyScalar(-transAmt);
         totalTrans.add(newTrans);
     }
 
     if (downPressed) {
-        newTrans = transUp.clone().multiplyScalar(-transAmt);
+        newTrans = transUp.clone().applyMatrix3(facing).multiplyScalar(-transAmt);
         totalTrans.add(newTrans);
 
     }
 
     if (upPressed) {
-        newTrans = transUp.clone().multiplyScalar(transAmt);
+        newTrans = transUp.clone().applyMatrix3(facing).multiplyScalar(transAmt);
         totalTrans.add(newTrans);
     }
 
     if (fwdPressed) {
-        newTrans = transFwd.clone().multiplyScalar(transAmt);
+        newTrans = transFwd.clone().applyMatrix3(facing).multiplyScalar(transAmt);
         totalTrans.add(newTrans);
 
     }
 
     if (bkPressed) {
-        newTrans = transFwd.clone().multiplyScalar(-transAmt);
+        newTrans = transFwd.clone().applyMatrix3(facing).multiplyScalar(-transAmt);
         totalTrans.add(newTrans);
     }
 

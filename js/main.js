@@ -10,19 +10,28 @@
         //Import My Own Stuff
         //=============================================
         import {
-            accMaterial,
+            newFrameMaterial,
+            combineMaterial,
             dispMaterial,
-            accScene,
+            newFrameScene,
+            combineScene,
             dispScene,
             buildScenes,
-            updateUniforms
-        } from './scene.js'
+        } from './scene.js';
 
+        import{
+            updateUniforms
+        } from "./uniforms.js";
 
         import {
             keyDownHandler,
             keyUpHandler
-        } from './controls.js'
+        } from './controls.js';
+
+        import {
+            ui,
+            createUI
+        } from './ui.js';
 
 
 
@@ -36,6 +45,7 @@
 
         //textures for accumulating frames
         let readTex, writeTex, tempTex;
+        let texA,texB;
 
 
 
@@ -120,6 +130,18 @@
                 format: THREE.RGBAFormat,
             });
 
+            texA = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
+
+            texB = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+                //IMPORTANT! MAKE SURE IT READS OUT FLOATS
+                type: THREE.FloatType,
+                format: THREE.RGBAFormat,
+            });
+
             // writeTex.texture.encoding = THREE.LinearEncoding;
             // readTex.texture.encoding = THREE.LinearEncoding;
 
@@ -161,10 +183,9 @@
 
         function render() {
 
-
-            //render to the texture B
+            //render to the texture
             renderer.setRenderTarget(writeTex);
-            renderer.render(accScene, camera);
+            renderer.render(newFrameScene, camera);
 
             // swap the read and write buffers
             tempTex = readTex;
@@ -172,9 +193,22 @@
             writeTex = tempTex;
 
             //read off the new frame from readTex
-            //set this as the acc uniform for the displayMaterial
-            accMaterial.uniforms.acc.value = readTex.texture;
-            dispMaterial.uniforms.acc.value = readTex.texture;
+            combineMaterial.uniforms.new.value = readTex.texture;
+
+            //run the accumulation shader
+            renderer.setRenderTarget(texA);
+            renderer.render(combineScene, camera);
+
+            // //swap read and write
+            tempTex = texB;
+            texB = texA;
+            texA = tempTex;
+
+            //set the accumulated frame to acc
+            combineMaterial.uniforms.acc.value=texB.texture;
+
+            //also send this off to the display
+            dispMaterial.uniforms.acc.value = texB.texture;
 
             //make the next move render to canvas
             renderer.setRenderTarget(null);
@@ -216,6 +250,8 @@
             canvas = document.querySelector('#c');
 
             stats = createStats();
+
+            createUI();
 
             createRenderer();
 
