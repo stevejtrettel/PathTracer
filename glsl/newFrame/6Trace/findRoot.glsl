@@ -63,7 +63,7 @@ float binarySearch(Vector tv, float dt){
 float findRoot(Vector tv, float stopDist){
 
     float depth=0.;
-    float dt=3./400.;
+    float dt=4./800.;
 
     Vector temp=tv;
 
@@ -71,7 +71,7 @@ float findRoot(Vector tv, float stopDist){
     Vector normal;
     float side;
 
-    for (int i = 0; i <400; i++){
+    for (int i = 0; i <800; i++){
 
         //determine how far to test flow from current location
         //dt=setStepSize(tv);

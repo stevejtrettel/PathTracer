@@ -22,34 +22,34 @@ void buildLights(){
     float intensity;
 
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(-2,6,1);
+    light1.center=vec3(-1,6,0);
     light1.radius=0.5;
 
     color= vec3(1.,0.8,0.6);
-    intensity=20.;
+    intensity=5.;
 
     light1.mat=makeLight(color,intensity);
 
 
 
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(-2,6,-1);
+    light2.center=vec3(-4,1,-1);
     light2.radius=0.5;
 
     color= vec3(1.,0.8,0.6);
-    intensity=20.;
+    intensity=10.;
 
     light2.mat=makeLight(color,intensity);
 
 
 
     //----------- LIGHT 4 -------------------------
-    light3.center=vec3(-2,6,-3);
+    light3.center=vec3(2,6,-3);
 
     light3.radius=0.5;
 
     color= vec3(1.,0.8,0.6);
-    intensity=20.;
+    intensity=5.;
 
     light3.mat=makeLight(color,intensity);
 
@@ -92,6 +92,7 @@ float trace_Lights( Vector tv ){
 //-------------------------------------------------
 //BIG LIMITATION: RIGHT NOW LIGHTS HAVE TO BE SAME OBJECT TYPE
 Sphere chooseLightSource(){
+
     float random = randomFloat();
     if(random<0.333){
         return light1;

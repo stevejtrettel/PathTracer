@@ -8,6 +8,10 @@
 
 //get the new frame
 vec3 newFrame(vec2 fragCoord, float numRuns){
+doImportanceSampling=false;
+    if(fragCoord.x/iResolution.x<0.5){
+        doImportanceSampling=true;
+    }
 
     // initialize a random number seed
     seed = randomSeed(fragCoord,frameSeed+numRuns);

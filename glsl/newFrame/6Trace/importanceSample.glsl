@@ -20,9 +20,14 @@ Vector dirToLight(Vector tv, Sphere sphere){
 }
 
 
-float lightArea(float distance, Sphere sphere){
-    float rad=atan(sphere.radius,distance);
-    return rad*rad;
+float lightArea(Vector tv, Sphere sphere){
+    float dist=length(tv.pos-sphere.center);
+    float rad=sphere.radius;
+
+    //the half angle subtended from sphere center to its edge
+    float cosTheta=dist/length(vec2(dist,rad));
+    float area = 2.*PI*(1.-cosTheta);
+    return area;
 }
 
 
@@ -59,11 +64,11 @@ void importanceSample(inout Path path){
 
         //get the distance to the light source along this direction
         float distToLight = trace(sampleLight, light);
-
+       // path.pixel+=vec3(1./distToLight,0,0);
         //compare this with the distance to the scene:
         float distToScene = distToObj( sampleLight );
 
-        if(distToScene>distToLight-0.1){
+        if(distToScene<distToLight+2.*light.radius){
             //we hit something else before we hit the light
             return;
         }
@@ -72,12 +77,15 @@ void importanceSample(inout Path path){
         //otherwise, add the light color
         vec3 lightAmt=light.mat.emitColor;
 
-        lightAmt*=lightArea(distToLight,light)/(4.*PI);
-        lightAmt*=cosFactor;
+        lightAmt *= lightArea(path.tv, light)/(4.*PI);
+
+        //we should not be scaling by cosFactor (this is a uniformly diffuse surface)
+        //but rather by the PROBABILITY of a ray reflecting / diffusing in that direction for the material?
+        lightAmt *= cosFactor;
+
 
         // add in emissive lighting
-        path.pixel += path.light*lightAmt ;
-        path.light *= light.mat.diffuseColor;
+        path.pixel += path.light*lightAmt*path.dat.surfDiffuse;
     }
 
 }

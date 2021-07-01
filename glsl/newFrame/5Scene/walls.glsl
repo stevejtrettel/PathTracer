@@ -43,8 +43,8 @@ void buildWalls(){
 
 
     topWall.orientation=orientation;
-    //topWall.mat=makeDielectric(color,0.0,roughness);
-    topWall.mat=makeLight(vec3(1,0.6,0.4),0.5);
+    topWall.mat=makeDielectric(color,0.0,roughness);
+    //topWall.mat=makeLight(vec3(1,0.6,0.4),0.5);
 
 
     //----------- THE FRONT -------------------------

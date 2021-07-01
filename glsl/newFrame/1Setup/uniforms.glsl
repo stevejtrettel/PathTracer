@@ -22,6 +22,9 @@ uniform bool focusHelp;
 //-------------------------------------------------
 
 
+bool doImportanceSampling=false;
+
+
 // constants
 float PI=3.1415926;
 float EPSILON=0.001;

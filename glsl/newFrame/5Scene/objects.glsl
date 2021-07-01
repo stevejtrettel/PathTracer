@@ -97,7 +97,7 @@ void buildObjects(){
     bottle2.thickness=0.02;
     bottle2.rounded=0.1;
     bottle2.smoothJoin=0.3;
-    bottle2.center=vec3(-1,0.6,-2);
+    bottle2.center=vec3(0,0.6,0);
     bottle2.bump=0.;
     bottle2.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
@@ -144,7 +144,7 @@ void buildObjects(){
 //
     //-------- COCKTAIL GLASS----------------
 
-    cGlass.center=vec3(1.5,0.1,1);
+    cGlass.center=vec3(1.5,0.1,-2);
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;

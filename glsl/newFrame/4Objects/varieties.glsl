@@ -31,30 +31,49 @@ float isoSurfEqn(vec3 p){
     float z=p.z;
     float w=1.;
 
-    return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
-
+//    float A=1.;
+//    float B=-15.;
+//    float C=-3.;
+//    float D=-3.;
+//    float E=-3.;
+//
 //    float x2=x*x;
 //    float y2=y*y;
 //    float z2=z*z;
-//    float w2=1.;
-//    float r2=x2+y2+z2;
+//    float w2=w*w;
 //
-//    float sqrt2=sqrt(2.);
+//    float T1=x2*x2+y2*y2+z2*z2+w2*w2;
+//    float T2=x*y*z*w;
+//    float T3=x2*y2+z2*w2;
+//    float T4=x2*z2+y2*w2;
+//    float T5=x2*w2+y2*z2;
 //
-//    float term1=64.*(x2-w2)*(y2-w2)*((x+y)*(x+y)-2.*w2)*((x-y)*(x-y)-2.*w2);
-//
-//    float term21=-4.*(1.+sqrt2)*(x2+y2)*(x2+y2);
-//    float term22=(8.*(2.+sqrt2)*z2+2.*(2.+7.*sqrt2)*w2)*(x2+y2);
-//    float term23=-16.*z2*z2+8.*(1.-2.*sqrt2)*z2*w2-(1.+12.*sqrt2)*w2*w2;
-//
-//    float term2=term21+term22+term23;
-//
-//    float val = term1-term2*term2;
-//
-//    return val;
-//
-//    //AN ELLIPTIC SURFACE
-//    //return 4.*(1.-x*x+y+z+y*z)+2.*(x*z+z*z)+(x*x*x-x-x*x*y-y*y-x*y*y-y*y*y+x*y*z-y*y*z+x*z*z+y*z*z+z*z*z);
+//    return -(A*T1+B*T2+C*T3+D*T4+E*T5);
+
+   // return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
+
+    float x2=x*x;
+    float y2=y*y;
+    float z2=z*z;
+    float w2=1.;
+    float r2=x2+y2+z2;
+
+    float sqrt2=sqrt(2.);
+
+    float term1=64.*(x2-w2)*(y2-w2)*((x+y)*(x+y)-2.*w2)*((x-y)*(x-y)-2.*w2);
+
+    float term21=-4.*(1.+sqrt2)*(x2+y2)*(x2+y2);
+    float term22=(8.*(2.+sqrt2)*z2+2.*(2.+7.*sqrt2)*w2)*(x2+y2);
+    float term23=-16.*z2*z2+8.*(1.-2.*sqrt2)*z2*w2-(1.+12.*sqrt2)*w2*w2;
+
+    float term2=term21+term22+term23;
+
+    float val = term1-term2*term2;
+
+    return -val;
+
+    //AN ELLIPTIC SURFACE
+    //return 4.*(1.-x*x+y+z+y*z)+2.*(x*z+z*z)+(x*x*x-x-x*x*y-y*y-x*y*y-y*y*y+x*y*z-y*y*z+x*z*z+y*z*z+z*z*z);
 
 }
 
@@ -135,8 +154,34 @@ float barthSexticEqn(vec3 p){
     float x=p.x;
     float y=p.y;
     float z=p.z;
+    float w=1.;
 
-    return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
+
+    float A=1.;
+    float B=-15.;
+    float C=-3.;
+    float D=-3.;
+    float E=-3.;
+//    float A=425.;
+//    float B=0.;
+//    float C=-1207.;
+//    float D=-1207.;
+//    float E=1025.;
+
+    float x2=x*x;
+    float y2=y*y;
+    float z2=z*z;
+    float w2=w*w;
+
+    float T1=x2*x2+y2*y2+z2*z2+w2*w2;
+    float T2=x*y*z*w;
+    float T3=x2*y2+z2*w2;
+    float T4=x2*z2+y2*w2;
+    float T5=x2*w2+y2*z2;
+
+    return -(A*T1+B*T2+C*T3+D*T4+E*T5);
+
+    //return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
 
 //    float x2=x*x;
 //    float y2=y*y;

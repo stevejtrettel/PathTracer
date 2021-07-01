@@ -61,7 +61,8 @@ vec3 pathTrace(Path path){
 
 
                 //importance sample the lighting from the current location:
-                //importanceSample(path);
+                if(doImportanceSampling){
+                importanceSample(path);}
 
                 //probabilistically kill rays
                 roulette(path);
