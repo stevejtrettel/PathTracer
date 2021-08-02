@@ -7,17 +7,17 @@
 
 
 //reflect the unit tangent vector u off the surface with unit normal n
-Vector reflect(Vector v, Vector n){
-    return add(multiplyScalar(-2.0 * dot(v, n), n), v);
+Vector vReflect(Vector v, Vector n){
+    return add(multiplyScalar(-2.0 * vDot(v, n), n), v);
 }
 
 
 
 
 //refract the vector v through the surface with normal vector n, and ratio of indices IOR=current/entering
-Vector refract(Vector incident, Vector normal, float n){
+Vector vRefract(Vector incident, Vector normal, float n){
 
-    float cosX=-dot(normal, incident);
+    float cosX=-vDot(normal, incident);
     float sinT2=n*n* (1.0 - cosX * cosX);
 
     if (sinT2>1.){
@@ -47,7 +47,7 @@ float FresnelReflectAmount(float n, Vector normal, Vector incident, float f0, fl
     // Schlick aproximation
     float r0 = (n-1.)/(n+1.);
     r0 *= r0;
-    float cosX = -dot(normal, incident);
+    float cosX = -vDot(normal, incident);
     if (n>1.)
     {
         float sinT2 = n*n*(1.0-cosX*cosX);

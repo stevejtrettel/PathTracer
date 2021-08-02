@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/2Space/camera.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/2Space/camera.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/varieties.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/varieties.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/2Space/geometry.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/2Space/geometry.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/2Space/physics.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/2Space/physics.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/scatterPath.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/scatterPath.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,6 +57,7 @@
       <workItem from="1624738940080" duration="14147000" />
       <workItem from="1624761813219" duration="45489000" />
       <workItem from="1624896729118" duration="1759000" />
+      <workItem from="1627927038759" duration="537000" />
     </task>
     <servers />
   </component>

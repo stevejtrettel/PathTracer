@@ -78,23 +78,23 @@ void nudge(inout Vector v, Vector offset,float amt){
 
 
 //riemannian metric
-float dot(Vector v, Vector w){
+float vDot(Vector v, Vector w){
     return dot(v.dir,w.dir);
 }
 
 
-float norm(Vector v){
-    return sqrt(dot(v,v));
+float vNorm(Vector v){
+    return sqrt(vDot(v,v));
 }
 
-Vector normalize(Vector v){
-    float length=norm(v);
+Vector vNormalize(Vector v){
+    float length=vNorm(v);
     return multiplyScalar(1./length,v);
 }
 
 
 float cosAng(Vector v, Vector w){
-    return dot(normalize(v),normalize(w));
+    return vDot(vNormalize(v),vNormalize(w));
 }
 
 

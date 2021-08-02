@@ -43,7 +43,7 @@ void scatter( inout Path path){
         //----- useful vectors in the following computation ----------
         Vector normal=path.dat.normal;
         Vector randomDir=randomVector(path.tv.pos);
-        Vector diffuseDir=normalize(add(normal, randomDir));
+        Vector diffuseDir=vNormalize(add(normal, randomDir));
         Vector newDir;
 
         //------useful parameters--------
@@ -57,8 +57,8 @@ void scatter( inout Path path){
             path.absorb=path.dat.reflectAbsorb;
             path.subSurface=false;
 
-            newDir=reflect(path.tv, normal);
-            //newDir=normalize(mix(newDir, diffuseDir,rough2));
+            newDir=vReflect(path.tv, normal);
+            //newDir=vNormalizeormalize(mix(newDir, diffuseDir,rough2));
 
         }
 
@@ -70,8 +70,8 @@ void scatter( inout Path path){
             path.absorb=path.dat.refractAbsorb;
             path.subSurface=false;
 
-            newDir=refract(path.tv, normal, path.dat.IOR);
-            //newDir=normalize(mix(newDir, negate(diffuseDir),rough2));
+            newDir=vRefract(path.tv, normal, path.dat.IOR);
+            //newDir=vNormalize(mix(newDir, negate(diffuseDir),rough2));
 
         }
 
@@ -86,7 +86,7 @@ void scatter( inout Path path){
                 path.subSurface=true;
                 path.type=3;//we are entering material
                 path.absorb=path.dat.refractAbsorb;
-                newDir=refract(path.tv, normal, path.dat.IOR);
+                newDir=vRefract(path.tv, normal, path.dat.IOR);
             }
 
             else{
