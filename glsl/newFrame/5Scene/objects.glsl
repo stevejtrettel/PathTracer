@@ -20,7 +20,7 @@ LiquorBottle gin,campari;
 Pint pint;
 Beer beer;
 Cone cone,cone2,cone3;
-
+Box table;
 
 //this function constructs the objects
 void buildObjects(){
@@ -60,6 +60,16 @@ void buildObjects(){
     //ball3.mat=makeMetal(color,specularity,roughness);
     ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5);
 
+    //----------- TABLE  -------------------------
+    table.center=vec3(2.,-1.85,0);
+    table.sides=vec3(6,0.5,4);
+    table.rounded=0.1;
+
+    color= vec3(0.1);
+    specularity=0.1;
+    roughness=0.2;
+    table.mat=makeMetal(color,specularity,roughness);
+
 
 
     //-------- BOTTLE ----------------
@@ -71,7 +81,7 @@ void buildObjects(){
     bottle.thickness=0.02;
     bottle.rounded=0.1;
     bottle.smoothJoin=0.3;
-    bottle.center=vec3(2,0.4,1);
+    bottle.center=vec3(2,0.45,1);
     bottle.bump=0.5;
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
@@ -97,7 +107,7 @@ void buildObjects(){
     bottle2.thickness=0.02;
     bottle2.rounded=0.1;
     bottle2.smoothJoin=0.3;
-    bottle2.center=vec3(1,0.6,-2);
+    bottle2.center=vec3(1,0.65,-2);
     bottle2.bump=0.;
     bottle2.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
@@ -118,10 +128,10 @@ void buildObjects(){
     gin.glass.baseRadius=1.25;
     gin.glass.baseHeight=1.5;
     gin.glass.thickness=0.1;
-    gin.cup=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.95);
+    gin.cup=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
     gin.drink=makeGlass(vec3(0.1,0.05,0.),1.3,0.99);
     //makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
-    gin.fill=0.;
+    gin.fill=0.6;
     gin.glass.bump=1.;
 
 
@@ -144,7 +154,7 @@ void buildObjects(){
 //
     //-------- COCKTAIL GLASS----------------
 
-    cGlass.center=vec3(-1.,0.,-1.2);
+    cGlass.center=vec3(-1.,-0.15,-1.2);
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;
@@ -253,6 +263,8 @@ float sdf_Objects( Vector tv ){
 
     dist=min( dist, sdf(tv, negroni) );
 
+    dist=min( dist, sdf(tv, table) );
+
     return dist;
 }
 
@@ -301,6 +313,8 @@ void setData_Objects(inout Path path){
       setData(path, gin);
 
      setData(path, negroni);
+
+    setData(path, table);
 
 }
 

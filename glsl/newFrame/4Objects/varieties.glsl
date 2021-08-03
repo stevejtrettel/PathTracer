@@ -32,7 +32,7 @@ float isoSurfEqn(vec3 p){
     float w=1.;
 
     return sin(x)*cos(y)+sin(y)*cos(z)+sin(z)*cos(x);
-
+//
 //    float x2=x*x;
 //    float y2=y*y;
 //    float z2=z*z;
