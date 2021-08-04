@@ -34,41 +34,42 @@ void buildVarieties(){
     sextic.boundingBox.center=sextic.center;
     sextic.boundingBox.radius=1.;
     sextic.boundingBox.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.4,0.94);
+    //
     //air(vec3(0));
 
 
     //----------- ENDRASS -------------------------
-//    iso.center=vec3(-3,0,2);
-//    iso.scale=10.;
-//
-//    color= 0.7*vec3(0.3,0.2,0.6);
-//    specularity=0.2;
-//    roughness=0.01;
-//    iso.mat=makeDielectric(color,specularity,roughness);
-//    iso.mat.diffuseColorBack=0.7*vec3(255,194,130)/255.;
-//    iso.mat.diffuseColor=0.7*vec3(250,124,163)/255.;
-//
-//    iso.boundingBox.center=iso.center;
-//    iso.boundingBox.radius=1.;
-//    iso.boundingBox.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.4,0.99);
-//    //air(vec3(0));
-//
-
-
-    iso.center=vec3(1,0.3,4);
-    iso.scale=12.;
+    iso.center=vec3(-3,0,2);
+    iso.scale=10.;
 
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;
     iso.mat=makeDielectric(color,specularity,roughness);
-    iso.mat.diffuseColorBack=0.7*vec3(109,194,242)/255.;
-    iso.mat.diffuseColor=0.7*vec3(163,124,250)/255.;
+    iso.mat.diffuseColorBack=0.7*vec3(255,194,130)/255.;
+    iso.mat.diffuseColor=0.7*vec3(250,124,163)/255.;
 
-    iso.boundingBox.center=sextic.center;
+    iso.boundingBox.center=iso.center;
     iso.boundingBox.radius=1.;
-    iso.boundingBox.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.4,0.94);
+    iso.boundingBox.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.4,0.99);
     //air(vec3(0));
+
+
+
+//    iso.center=vec3(1,0.3,4);
+//    iso.scale=12.;
+//
+//    color= 0.7*vec3(0.3,0.2,0.6);
+//    specularity=0.2;
+//    roughness=0.01;
+//    iso.mat=makeDielectric(color,specularity,roughness);
+//    iso.mat.diffuseColorBack=0.7*vec3(109,194,242)/255.;
+//    iso.mat.diffuseColor=0.7*vec3(163,124,250)/255.;
+//
+//    iso.boundingBox.center=sextic.center;
+//    iso.boundingBox.radius=1.;
+//    iso.boundingBox.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.4,0.94);
+//    //air(vec3(0));
 
 
 }
@@ -94,13 +95,13 @@ int varID=0;
 
 float trace_VarietyBBox( Vector tv ){
 
-//    bool in1 = inside( tv, sextic.boundingBox );
-//    float dist1 = trace( tv, sextic.boundingBox );
-//
-//    if(in1){
-//        varID=1;
-//        return dist1-EPSILON/2.;
-//    }
+    bool in1 = inside( tv, sextic.boundingBox );
+    float dist1 = trace( tv, sextic.boundingBox );
+
+    if(in1){
+        varID=1;
+        return dist1-EPSILON/2.;
+    }
 
 
     bool in2 = inside( tv, iso.boundingBox );
@@ -113,8 +114,8 @@ float trace_VarietyBBox( Vector tv ){
 
     //if inside neither
     varID=0;
-    return dist2-EPSILON/2.;
-//    return min(dist1,dist2)-EPSILON/2.;
+
+ return min(dist1,dist2)-EPSILON/2.;
 }
 
 
@@ -140,6 +141,6 @@ float variety( Vector tv ){
 //-------------------------------------------------
 
 void setData_Varieties(inout Path path){
-  //  setData(path, sextic);
+  setData(path, sextic);
     setData(path, iso);
 }
