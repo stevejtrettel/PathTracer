@@ -229,8 +229,8 @@ void buildObjects(){
         //vec3(1)-0.9*vec3(0.3,0.2,0.6);
         bunny.mat.refractionChance=0.;
         bunny.mat.subSurface=true;
-        bunny.mat.meanFreePath=0.2;
-        bunny.mat.isotropicScatter=0.2;
+        bunny.mat.meanFreePath=0.5*extra2;
+        bunny.mat.isotropicScatter=extra;
         bunny.mat.roughness=0.2;
 }
 

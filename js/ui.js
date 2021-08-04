@@ -27,7 +27,9 @@ let ui = {
     aperture:0.05,
     focalLength:4.,
     fov:60,
-    focusHelp:true,
+    focusHelp:false,
+    extra:0.5,
+    extra2:0.5,
 };
 
 
@@ -52,7 +54,8 @@ function createUI() {
     let focalLengthController=mainMenu.add(ui,'focalLength',0,40,0.1).name('FocalLength');
     let focusHelpController=mainMenu.add(ui,'focusHelp').name('FocusHelp');
     let fovController=mainMenu.add(ui,'fov',40,140,1).name('FOV');
-
+    let extraController=mainMenu.add(ui,'extra',0,1,0.01).name('extra');
+    let extra2Controller=mainMenu.add(ui,'extra2',0,1,0.01).name('extra2');
 
     brightnessController.onChange(function(value){
         newFrameMaterial.uniforms.brightness.value=value;
@@ -76,6 +79,18 @@ function createUI() {
 
     fovController.onChange(function(value){
         newFrameMaterial.uniforms.fov.value=value;
+        combineMaterial.uniforms.frameNumber.value=0;
+    });
+
+
+    extraController.onChange(function(value){
+        newFrameMaterial.uniforms.extra.value=value;
+        combineMaterial.uniforms.frameNumber.value=0;
+    });
+
+
+    extra2Controller.onChange(function(value){
+        newFrameMaterial.uniforms.extra2.value=value;
         combineMaterial.uniforms.frameNumber.value=0;
     });
 }

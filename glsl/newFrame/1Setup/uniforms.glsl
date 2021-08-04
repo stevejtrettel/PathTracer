@@ -15,8 +15,8 @@ uniform float aperture;
 uniform float focalLength;
 uniform float fov;
 uniform bool focusHelp;
-
-
+uniform float extra;
+uniform float extra2;
 //-------------------------------------------------
 //Constants
 //-------------------------------------------------

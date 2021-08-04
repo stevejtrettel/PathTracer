@@ -26,7 +26,7 @@ void buildLights(){
     light1.radius=0.4;
 
     color= vec3(1.,0.8,0.6);
-    intensity=300.;
+    intensity=50.;
 
     light1.mat=makeLight(color,intensity);
 
@@ -62,7 +62,7 @@ void buildLights(){
 //DO WE RENDER THEM?
 //-------------------------------------------------
 
-bool render_Lights=true;
+bool render_Lights=false;
 
 
 

@@ -60,6 +60,12 @@ let newFrameUniforms={
     fov: {
         value: 50
     },
+    extra: {
+        value: 0.5
+    },
+    extra2: {
+        value: 0.5
+    },
 };
 
 
