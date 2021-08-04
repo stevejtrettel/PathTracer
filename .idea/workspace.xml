@@ -3,14 +3,16 @@
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/1Setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/1Setup/uniforms.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/material.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/material.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/path.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/path.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/scatterPath.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/scatterPath.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/setImpactData.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/setImpactData.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/basicObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/basicObjects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/varieties.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/varieties.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/ui.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/6Trace/subSurfScatter.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/6Trace/subSurfScatter.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/uniforms.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/uniforms.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,6 +39,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/js/tex" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />

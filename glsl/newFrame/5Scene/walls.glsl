@@ -55,9 +55,9 @@ void buildWalls(){
     frontWall.orientation=orientation;
     //need a "make mirror" command
     frontWall.mat=makeDielectric(color,0.0,roughness);
-    //frontWall.mat.specularColor=vec3(0.75);
-    //frontWall.mat.specularChance=1.;
-    //frontWall.mat.refractionChance=0.;
+    frontWall.mat.specularColor=vec3(0.75);
+    frontWall.mat.specularChance=1.;
+    frontWall.mat.refractionChance=0.;
 
 
     //----------- THE BACK -------------------------
@@ -107,17 +107,17 @@ float trace_Walls(Vector tv ){
 
     float dist=maxDist;
 
-    dist=min(dist, trace(tv, bottomWall));
+   // dist=min(dist, trace(tv, bottomWall));
 
-//    dist=min(dist, trace(tv, topWall));
-//
-    //dist=min(dist, trace(tv, frontWall));
-//
-//    dist=min(dist, trace(tv, backWall));
-//
-//    dist=min(dist, trace(tv, leftWall));
-//
-//    dist=min(dist, trace(tv, rightWall));
+    dist=min(dist, trace(tv, topWall));
+
+    dist=min(dist, trace(tv, frontWall));
+
+    dist=min(dist, trace(tv, backWall));
+
+    dist=min(dist, trace(tv, leftWall));
+
+    dist=min(dist, trace(tv, rightWall));
 
     return dist;
 
@@ -135,16 +135,16 @@ float trace_Walls(Vector tv ){
 
 void setData_Walls( inout Path path ){
 
-    setData(path, bottomWall);
+   // setData(path, bottomWall);
 
-//    setData(path, topWall);
-//
-  //  setData(path, frontWall);
-//
-//    setData(path, backWall);
-//
-//    setData(path, leftWall);
-//
-//    setData(path, rightWall);
+    setData(path, topWall);
+
+    setData(path, frontWall);
+
+    setData(path, backWall);
+
+    setData(path, leftWall);
+
+    setData(path, rightWall);
 
 }

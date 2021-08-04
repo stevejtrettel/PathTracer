@@ -14,6 +14,7 @@ struct Material{
     vec3 specularColorBack;
     vec3 absorbColor;
     float roughness;
+    float isotropicScatter;
     float meanFreePath;
     float IOR;
     float specularChance;
@@ -32,6 +33,7 @@ void zeroMat(inout Material mat){
     mat.diffuseColorBack=vec3(1.);
     mat.specularColorBack=vec3(1.);
     mat.absorbColor=vec3(0.);
+    mat.isotropicScatter=1.;
     mat.roughness=0.;
     mat.IOR=1.;
     mat.meanFreePath=1.;

@@ -21,6 +21,7 @@ Pint pint;
 Beer beer;
 Cone cone,cone2,cone3;
 Box table;
+Bunny bunny;
 
 //this function constructs the objects
 void buildObjects(){
@@ -62,11 +63,11 @@ void buildObjects(){
 
     //----------- TABLE  -------------------------
     table.center=vec3(2.,-1.85,0);
-    table.sides=vec3(6,0.5,4);
+    table.sides=vec3(15,0.5,10);
     table.rounded=0.1;
 
     color= vec3(0.1);
-    specularity=0.1;
+    specularity=0.05;
     roughness=0.2;
     table.mat=makeMetal(color,specularity,roughness);
 
@@ -100,24 +101,25 @@ void buildObjects(){
 
     //-------- BOTTLE ----------------
 
-    bottle2.baseHeight=1.5;
+    bottle2.baseHeight=1.35;
     bottle2.baseRadius=0.5;
-    bottle2.neckHeight=1.;
+    bottle2.neckHeight=0.5;
     bottle2.neckRadius=0.2;
-    bottle2.thickness=0.02;
+    bottle2.thickness=0.05;
     bottle2.rounded=0.1;
     bottle2.smoothJoin=0.3;
-    bottle2.center=vec3(1,0.65,-2);
+    bottle2.center=vec3(1,0.35,-2);
     bottle2.bump=0.;
     bottle2.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
-    bottle2.mat.diffuseColor=0.8*vec3(0.5,0.5,0.9);
+    bottle2.mat.diffuseColor=0.3*vec3(0.5,0.5,0.9);
     //0.7*vec3(0.3,0.2,0.6);
-    bottle2.mat.absorbColor=8.*vec3(0.5,0.5,0.0);
+    bottle2.mat.absorbColor=2.*vec3(0.5,0.5,0.0);
     bottle2.mat.refractionChance=0.;
     bottle2.mat.subSurface=true;
-    bottle2.mat.meanFreePath=0.1;
-    bottle2.mat.roughness=1.;
+    bottle2.mat.meanFreePath=0.01;
+    bottle2.mat.isotropicScatter=0.5;
+    bottle2.mat.roughness=0.2;
 
 
 
@@ -214,6 +216,22 @@ void buildObjects(){
 //    beer.drink.roughness=0.9;
 
 
+
+    bunny.center=vec3(0,-0.12,0);
+    bunny.scale=2.;
+    bunny.mat=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+
+        bunny.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.9);
+
+        bunny.mat.diffuseColor=vec3(1);
+        bunny.mat.absorbColor=vec3(1)-0.9*vec3(0,0.65,0.35);
+        //vec3(0.01);
+        //vec3(1)-0.9*vec3(0.3,0.2,0.6);
+        bunny.mat.refractionChance=0.;
+        bunny.mat.subSurface=true;
+        bunny.mat.meanFreePath=0.2;
+        bunny.mat.isotropicScatter=0.2;
+        bunny.mat.roughness=0.2;
 }
 
 
@@ -256,14 +274,17 @@ float sdf_Objects( Vector tv ){
 
     //dist=min( dist, sdf(tv, bottle) );
 
-    //dist=min( dist, sdf(tv, bottle2) );
+  //  dist=min( dist, sdf(tv, bottle2) );
 
     //dist=min( dist, sdf(tv, beer) );
-    dist=min( dist, sdf(tv, gin) );
 
-    dist=min( dist, sdf(tv, negroni) );
-
+   // dist=min( dist, sdf(tv, gin) );
+//
+   // dist=min( dist, sdf(tv, negroni) );
+//
     dist=min( dist, sdf(tv, table) );
+
+    dist=min( dist, sdf(tv, bunny) );
 
     return dist;
 }
@@ -283,10 +304,9 @@ void setObjID( Vector tv ){
 //will go in the objects file; tells us if we are inside an object of interest
 //used in subsurface scattering
 bool inside_Object( Vector tv ){
-return false;
+//return false;
 //    bool jar=inside(tv, bottle);
 //
-
     //bool milk=inDrink(tv, beer);
    // bool juice=inDrink(tv, negroni);
     //return juice;
@@ -294,6 +314,10 @@ return false;
 //    return jar||milk||juice;
 
 //return inside(tv, bottle)||inside(tv, bottle2);
+
+    return inside(tv, bunny);
+   // return inside(tv, bunny)||inside(tv, bottle2);
+
 }
 
 
@@ -310,11 +334,15 @@ void setData_Objects(inout Path path){
 //
 //    setData(path, ball3);
 
-      setData(path, gin);
+     // setData(path, gin);
 
-     setData(path, negroni);
-
+   // setData(path, bottle2);
+//
+   //  setData(path, negroni);
+//
     setData(path, table);
+
+    setData(path, bunny);
 
 }
 

@@ -11,6 +11,7 @@ struct localData{
     float side;
     bool subSurface;
     float meanFreePath;
+    float isotropicScatter;
     vec3 surfDiffuse;
     vec3 surfSpecular;
     vec3 surfEmit;
@@ -39,6 +40,7 @@ void initializeData(localData dat){
     dat.surfSpecular=vec3(1.);
     dat.surfEmit=vec3(0.);
     dat.surfRoughness=0.;
+    dat.isotropicScatter=0.;
     dat.meanFreePath=1.;
     dat.IOR=1.;
     dat.probDiffuse=1.;

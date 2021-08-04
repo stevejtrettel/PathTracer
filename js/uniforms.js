@@ -17,7 +17,7 @@ import {newFrameMaterial, combineMaterial} from "./scene.js";
 
 
 //background sky texture
-const skyTex = new THREE.TextureLoader().load('/js/tex/bk.jpg');
+const skyTex = new THREE.TextureLoader().load('/js/tex/office.jpg');
 
 
 //background sky texture

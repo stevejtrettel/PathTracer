@@ -44,7 +44,7 @@ void subSurfScatter(inout Path path){
     Vector tv=path.tv;
     Vector temp=path.tv;
     Vector newDir;
-    float rough=path.dat.surfRoughness*path.dat.surfRoughness;
+    float rough=path.dat.isotropicScatter*path.dat.isotropicScatter;
 
 
     flow(path.tv,path.dat.meanFreePath);

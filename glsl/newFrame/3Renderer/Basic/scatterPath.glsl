@@ -58,7 +58,7 @@ void scatter( inout Path path){
             path.subSurface=false;
 
             newDir=vReflect(path.tv, normal);
-            //newDir=vNormalizeormalize(mix(newDir, diffuseDir,rough2));
+            newDir=vNormalize(mix(newDir, diffuseDir,rough2));
 
         }
 
@@ -71,7 +71,7 @@ void scatter( inout Path path){
             path.subSurface=false;
 
             newDir=vRefract(path.tv, normal, path.dat.IOR);
-            //newDir=vNormalize(mix(newDir, negate(diffuseDir),rough2));
+            newDir=vNormalize(mix(newDir, negate(diffuseDir),rough2));
 
         }
 
