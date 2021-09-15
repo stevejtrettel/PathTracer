@@ -237,13 +237,17 @@ void buildObjects(){
 
 
     //----------- GASKET -------------------------
-    gasket.center=vec3(0,0.3,0);
-    gasket.radius=2.5;
+    gasket.center=vec3(0,1.8,0);
+    gasket.radius=1.;
 
-    color= 0.7*vec3(1);
-    specularity=0.1;
+    color= vec3(0.4,0.3,0.2);
+    specularity=0.5;
     roughness=0.01;
-    gasket.mat=makeDielectric(color,specularity,roughness);
+    gasket.mat= makeMetal(color,specularity,roughness);
+   // makeDielectric(color,specularity,roughness);
+  //  gasket.mat.emitColor=0.1*vec3(0.02,0.02,0.04);
+
+  //  gasket.mat=makeGlass(vec3(1)-0.9*vec3(0,0.65,0.35),1.2,0.8);
 }
 
 
@@ -266,7 +270,7 @@ float trace_Objects( Vector tv ){
 
     float dist=maxDist;
 
-    dist=min(dist, trace(tv, gasket));
+   // dist=min(dist, trace(tv, gasket));
 
 //    dist=min(dist, trace(tv, ball1));
 //
@@ -285,6 +289,8 @@ float trace_Objects( Vector tv ){
 float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
+
+   dist=min( dist, sdf(tv, gasket) );
 
     //dist=min( dist, sdf(tv, bottle) );
 
@@ -356,11 +362,13 @@ void setData_Objects(inout Path path){
 //
    //  setData(path, negroni);
 //
- //   setData(path, table);
+
+    setData(path,gasket);
+   // setData(path, table);
 
     //setData(path, bunny);
 
-    setData(path,gasket);
+
 
 }
 
