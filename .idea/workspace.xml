@@ -3,7 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/varieties.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/basicObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/basicObjects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/scene.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/scene.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,8 +34,10 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/js/tex" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
@@ -57,6 +63,10 @@
       <workItem from="1624761813219" duration="45489000" />
       <workItem from="1624896729118" duration="1759000" />
       <workItem from="1627927038759" duration="537000" />
+      <workItem from="1628090238849" duration="200000" />
+      <workItem from="1628254379507" duration="222000" />
+      <workItem from="1629734906548" duration="276000" />
+      <workItem from="1631689394900" duration="3571000" />
     </task>
     <servers />
   </component>

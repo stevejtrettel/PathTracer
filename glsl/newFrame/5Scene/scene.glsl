@@ -76,6 +76,14 @@ float trace_Scene( Vector tv ){
 
 void setData_Scene(inout Path path){
 
+    if(render_Objects){
+        setData_Objects(path);
+    }
+
+    if(render_Varieties){
+        setData_Varieties(path);
+    }
+
     if(render_Walls){
         setData_Walls(path);
     }
@@ -84,12 +92,6 @@ void setData_Scene(inout Path path){
         setData_Lights(path);
     }
 
-    if(render_Objects){
-        setData_Objects(path);
-    }
 
-    if(render_Varieties){
-        setData_Varieties(path);
-    }
 
 }

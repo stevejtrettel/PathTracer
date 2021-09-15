@@ -22,6 +22,7 @@ Beer beer;
 Cone cone,cone2,cone3;
 Box table;
 Bunny bunny;
+Gasket gasket;
 
 //this function constructs the objects
 void buildObjects(){
@@ -232,6 +233,17 @@ void buildObjects(){
         bunny.mat.meanFreePath=0.5*extra2;
         bunny.mat.isotropicScatter=extra;
         bunny.mat.roughness=0.2;
+
+
+
+    //----------- GASKET -------------------------
+    gasket.center=vec3(0,0.3,0);
+    gasket.radius=2.5;
+
+    color= 0.7*vec3(1);
+    specularity=0.1;
+    roughness=0.01;
+    gasket.mat=makeDielectric(color,specularity,roughness);
 }
 
 
@@ -253,6 +265,8 @@ bool render_Objects=true;
 float trace_Objects( Vector tv ){
 
     float dist=maxDist;
+
+    dist=min(dist, trace(tv, gasket));
 
 //    dist=min(dist, trace(tv, ball1));
 //
@@ -282,9 +296,9 @@ float sdf_Objects( Vector tv ){
 //
    // dist=min( dist, sdf(tv, negroni) );
 //
-    dist=min( dist, sdf(tv, table) );
+    //dist=min( dist, sdf(tv, table) );
 
-    dist=min( dist, sdf(tv, bunny) );
+    //dist=min( dist, sdf(tv, bunny) );
 
     return dist;
 }
@@ -315,6 +329,8 @@ bool inside_Object( Vector tv ){
 
 //return inside(tv, bottle)||inside(tv, bottle2);
 
+
+    return false;
     return inside(tv, bunny);
    // return inside(tv, bunny)||inside(tv, bottle2);
 
@@ -340,9 +356,11 @@ void setData_Objects(inout Path path){
 //
    //  setData(path, negroni);
 //
-    setData(path, table);
+ //   setData(path, table);
 
-    setData(path, bunny);
+    //setData(path, bunny);
+
+    setData(path,gasket);
 
 }
 

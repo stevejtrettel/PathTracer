@@ -22,8 +22,8 @@ void buildLights(){
     float intensity;
 
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(10,6,0);
-    light1.radius=0.4;
+    light1.center=vec3(5,6,0);
+    light1.radius=0.25;
 
     color= vec3(1.,0.8,0.6);
     intensity=50.;
@@ -33,8 +33,8 @@ void buildLights(){
 
 
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(-10,3,0);
-    light2.radius=0.7;
+    light2.center=vec3(-3,6,0);
+    light2.radius=0.4;
 
     color= vec3(1.,0.8,0.6);
     intensity=30.;
@@ -44,9 +44,9 @@ void buildLights(){
 
 
     //----------- LIGHT 4 -------------------------
-    light3.center=vec3(-2,8,-3);
+    light3.center=vec3(-2,6,-3);
 
-    light3.radius=0.5;
+    light3.radius=0.4;
 
     color= vec3(1.,0.8,0.6);
     intensity=20.;
@@ -62,7 +62,7 @@ void buildLights(){
 //DO WE RENDER THEM?
 //-------------------------------------------------
 
-bool render_Lights=false;
+bool render_Lights=true;
 
 
 
@@ -79,7 +79,7 @@ float trace_Lights( Vector tv ){
 
     dist=min(dist, trace(tv, light2));
 
-//    dist=min(dist, trace(tv, light3));
+    dist=min(dist, trace(tv, light3));
 
     return dist;
 
@@ -98,6 +98,6 @@ void setData_Lights(inout Path path){
 
     setData(path, light2);
 
-//    setData(path, light3);
+    setData(path, light3);
 
 }

@@ -584,3 +584,152 @@ void setData( inout Path path, Bunny bunny ){
 }
 
 
+
+
+
+//-------------------------------------------------
+//The APOLLONIAN GASKET sdf
+//-------------------------------------------------
+
+//the data of a sphere is its center and radius
+struct Gasket{
+    vec3 center;
+    float radius;
+    Material mat;
+};
+
+
+//auxillary function for calculating this
+float apollonian(vec3 p)
+{
+    float K=0.4;
+    float scale = 1.0;
+    vec4 orb = vec4(1000.0);
+
+    for( int i=0; i < 10;  i++ )
+    {
+        p = -1.0 + 2.0*fract(0.5*p+0.5);
+        float r2 = dot(p,p);
+        orb = min( orb, vec4(abs(p),r2) );
+        float k = (1.0 + K)/r2;
+        p *= k;
+        scale *= k;
+    }
+
+    //this adds in balls insteaad
+     float res = abs(p.y);
+//
+//    float  res = min(abs(p.z)+abs(p.x),
+//    min(abs(p.x)+abs(p.y),
+//    abs(p.y)+abs(p.z)));
+
+    return 0.25/scale*res;
+}
+
+
+
+//overload of distR3: distance in R3 coordinates
+float distR3( vec3 p, Gasket gasket ){
+
+    p-=gasket.center;
+    p=gasket.radius*p;
+
+    float scale = 6.0;
+    vec3 q=p;
+    p /= scale;
+    float s = 1.0;
+//    if (doInversion) {
+        s = dot(p,p);
+        p /= s;
+        p += vec3(1.0);
+//    }
+    //if (doTranslate) p.y += 0.1*iTime;
+    float d0=apollonian(p)*scale;
+    float d = d0;
+    return d*s;
+}
+
+
+
+//overload of location booleans:
+bool at( Vector tv, Gasket gasket){
+
+    float d = distR3( tv.pos, gasket );
+    bool atSurf = ((abs(d) - AT_THRESH)<0.);
+    return atSurf;
+}
+
+bool inside( Vector tv, Gasket gasket ){
+    return false;
+    float d = distR3( tv.pos, gasket );
+    return (d<0.);
+}
+
+
+
+
+//overload of sdf for a gasket
+float sdf( Vector tv, Gasket gasket ){
+
+    //distance to closest point on fractal
+    return distR3(tv.pos, gasket);
+
+}
+
+//overload of normalVec for a sphere
+Vector normalVec( Vector tv, Gasket gasket ){
+
+    vec3 pos=tv.pos;
+
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+
+    float vxyy=distR3( pos + e.xyy*ep, gasket);
+    float vyyx=distR3( pos + e.yyx*ep, gasket);
+    float vyxy=distR3( pos + e.yxy*ep, gasket);
+    float vxxx=distR3( pos + e.xxx*ep, gasket);
+
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+
+    dir=normalize(dir);
+
+    return Vector(tv.pos,dir);
+
+}
+
+
+//overload of trace for a gasket
+float trace( Vector tv, Gasket gasket ){
+
+    vec3 ro=tv.pos;
+    vec3 rd=tv.dir;
+    float pixel_size = 1.0/(iResolution.y * 2.0);
+    float t = 1.0;
+
+    for( int i=0; i<2048; i++ )
+    {
+        float c = distR3(ro + rd*t,gasket);
+        if( c<0.5*pixel_size*t ) break;
+        t += c;
+        if( t>100.0 ) return maxDist;
+    }
+    return t;
+
+}
+
+
+
+//overload of setData for a sphere
+void setData( inout Path path, Gasket gasket){
+
+    //if we are at the surface
+    //if(at(path.tv, gasket)){
+        //compute the normal
+        Vector normal=normalVec(path.tv,gasket);
+        bool side = inside(path.tv, gasket);
+        //set the material
+        setObjectInAir(path.dat, side, normal, gasket.mat);
+   // }
+
+}
+

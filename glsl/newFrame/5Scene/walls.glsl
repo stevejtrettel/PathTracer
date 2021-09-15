@@ -95,7 +95,7 @@ void buildWalls(){
 //DO WE RENDER THEM?
 //-------------------------------------------------
 
-bool render_Walls=false;
+bool render_Walls=true;
 
 
 //-------------------------------------------------
@@ -107,7 +107,7 @@ float trace_Walls(Vector tv ){
 
     float dist=maxDist;
 
-   // dist=min(dist, trace(tv, bottomWall));
+    dist=min(dist, trace(tv, bottomWall));
 
     dist=min(dist, trace(tv, topWall));
 
@@ -135,7 +135,7 @@ float trace_Walls(Vector tv ){
 
 void setData_Walls( inout Path path ){
 
-   // setData(path, bottomWall);
+    setData(path, bottomWall);
 
     setData(path, topWall);
 
