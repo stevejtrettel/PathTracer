@@ -21,8 +21,12 @@ Pint pint;
 Beer beer;
 Cone cone,cone2,cone3;
 Box table;
+Box box;
 Bunny bunny;
 Gasket gasket;
+Torus torus;
+DonutBottle donut;
+LayerDonutBottle layerDonut;
 
 //this function constructs the objects
 void buildObjects(){
@@ -53,8 +57,9 @@ void buildObjects(){
 
 
     //----------- BALL 3 -------------------------
-    ball3.center=vec3(1.5,0.6,2);
-    ball3.radius=1.6;
+    ball3.center=vec3(0);
+    //vec3(1.5,0.6,2);
+    ball3.radius=6.6;
 
     color= 0.1*vec3(0.7,0.1,0.2);
     specularity=0.4;
@@ -229,7 +234,7 @@ void buildObjects(){
         //vec3(0.01);
         //vec3(1)-0.9*vec3(0.3,0.2,0.6);
         bunny.mat.refractionChance=0.;
-        bunny.mat.subSurface=true;
+        bunny.mat.subSurface=false;
         bunny.mat.meanFreePath=0.5*extra2;
         bunny.mat.isotropicScatter=extra;
         bunny.mat.roughness=0.2;
@@ -248,6 +253,66 @@ void buildObjects(){
   //  gasket.mat.emitColor=0.1*vec3(0.02,0.02,0.04);
 
   //  gasket.mat=makeGlass(vec3(1)-0.9*vec3(0,0.65,0.35),1.2,0.8);
+
+
+
+    //----------- BOX  -------------------------
+    box.center=vec3(0.,-2.75,0.);
+    box.sides=vec3(3,0.25,3);
+    box.rounded=0.1;
+
+    color= 0.25*vec3(0.4,0.3,0.2);
+    specularity=0.5;
+    roughness=0.01;
+
+    zeroMat(box.mat);
+    box.mat = makeMetal(color,specularity,roughness);
+  //  box.mat = makeGlass(0.5*vec3(0.3,0.05,0.2),1.75,0.95);
+
+
+
+
+
+    //----------- TORUS BOTTLE -------------------------
+    donut.center=vec3(0,1.,0);
+    donut.inner=1.2;
+    donut.outer=2.;
+    donut.height=2.25;
+    donut.base=0.4;
+    donut.flare=3.5;
+    donut.smoothing = 2.75;
+    donut.thickness = 0.08;
+
+
+    donut.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.6,0.99);
+    //donut.mat.diffuseColor=0.6*(vec3(1.)-4.*vec3(0.2,0.03,0.0));
+    donut.mat.absorbColor=4.*vec3(0.2,0.04,0.0);
+    donut.mat.specularChance=0.05;
+    donut.mat.specularColor=vec3(1.)-donut.mat.absorbColor/3.;
+    donut.mat.refractionChance=0.0;
+    donut.mat.subSurface=true;
+    donut.mat.meanFreePath=0.02;
+    donut.mat.isotropicScatter=0.4;
+    donut.mat.roughness=0.0;
+
+
+
+
+
+
+
+    layerDonut.inner=donut;
+    layerDonut.outer=donut;
+
+    layerDonut.outer.thickness=0.3;
+    layerDonut.outer.mat=makeGlass(vec3(0.),1.4);
+    layerDonut.outer.mat.specularChance=0.05;
+
+   // zeroMat(layerDonut.outer.mat);
+   // layerDonut.outer.mat=makeGlass(vec3(1.),1.5);
+   // layerDonut.outer.mat.subSurface=false;
+    //layerDonut.outer.thickness=0.2;
+
 }
 
 
@@ -290,7 +355,15 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-   dist=min( dist, sdf(tv, gasket) );
+
+
+    dist = min(dist, sdf(tv, layerDonut));
+   dist = min(dist, sdf(tv, box));
+
+
+   //dist = min(dist, sdf(tv, donut));
+
+   //dist=min( dist, sdf(tv, gasket) );
 
     //dist=min( dist, sdf(tv, bottle) );
 
@@ -298,7 +371,7 @@ float sdf_Objects( Vector tv ){
 
     //dist=min( dist, sdf(tv, beer) );
 
-   // dist=min( dist, sdf(tv, gin) );
+    //dist=min( dist, sdf(tv, gin) );
 //
    // dist=min( dist, sdf(tv, negroni) );
 //
@@ -335,9 +408,11 @@ bool inside_Object( Vector tv ){
 
 //return inside(tv, bottle)||inside(tv, bottle2);
 
+    return inside(tv, layerDonut.inner);
+    //return inside(tv, donut);
 
-    return false;
-    return inside(tv, bunny);
+  //  return false;
+   // return inside(tv, bunny);
    // return inside(tv, bunny)||inside(tv, bottle2);
 
 }
@@ -356,19 +431,26 @@ void setData_Objects(inout Path path){
 //
 //    setData(path, ball3);
 
-     // setData(path, gin);
+   //  setData(path, gin);
 
    // setData(path, bottle2);
 //
    //  setData(path, negroni);
 //
 
-    setData(path,gasket);
+    //setData(path,gasket);
    // setData(path, table);
 
     //setData(path, bunny);
 
 
+
+
+   setData(path, layerDonut);
+   setData(path, box);
+
+
+    //setData(path, donut);
 
 }
 

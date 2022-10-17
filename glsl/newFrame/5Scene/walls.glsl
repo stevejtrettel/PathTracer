@@ -22,14 +22,15 @@ void buildWalls(){
     float specularity, roughness, offset;
 
     //-----------GENERAL FOR THE WALLS -------------------------
-    color=0.4*vec3(171,203,240)/255.;
+    color=vec3(0.7);
+    //0.4*vec3(171,203,240)/255.;
     //vec3(0.4);
     specularity=0.;
-    roughness=0.2;
+    roughness=0.1;
 
 
     //----------- THE FLOOR -------------------------
-    orientation.pos=vec3(0,-2,0);
+    orientation.pos=vec3(0,-3.1,0);
     //vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
 
@@ -43,13 +44,14 @@ void buildWalls(){
     bottomWall.mat.refractionChance=0.;
 
     //----------- THE CEILING -------------------------
-    orientation.pos=vec3(0,9,0);
+    orientation.pos=vec3(0,14,0);
     orientation.dir=vec3(0,-1,0);
 
 
     topWall.orientation=orientation;
     //topWall.mat=makeDielectric(color,0.0,roughness);
-    topWall.mat=makeLight(vec3(1,0.6,0.4),0.5);
+   /// vec3(1,0.6,0.4)
+    topWall.mat=makeLight(vec3(1,1,1),0.1);
 
 
     //----------- THE FRONT -------------------------
@@ -61,24 +63,26 @@ void buildWalls(){
     //need a "make mirror" command
     frontWall.mat=makeDielectric(color,0.0,roughness);
     frontWall.mat.specularColor=vec3(0.75);
-    frontWall.mat.specularChance=0.05;
+    frontWall.mat.specularChance=0.075;
     frontWall.mat.refractionChance=0.;
 
 
     //----------- THE BACK -------------------------
-    orientation.pos=vec3(0,0,8);
+    orientation.pos=vec3(0,0,30);
     orientation.dir=vec3(0,0,-1);
 
     color=0.5*vec3(107,152,250)/255.;
     backWall.orientation=orientation;
     backWall.mat=makeDielectric(color,0.0,roughness);
+    backWall.mat.specularColor=vec3(0.75);
+    backWall.mat.specularChance=0.075;
 
 
     //----------- THE LEFT -------------------------
-    orientation.pos=vec3(-8,0,0);
+    orientation.pos=vec3(-20,0,0);
     orientation.dir=vec3(1,0,0);
 
-    color=0.4*vec3(250,229,147)/255.;
+    color=0.5*vec3(250,229,147)/255.;
     leftWall.orientation=orientation;
     leftWall.mat=makeDielectric(color,0.0,roughness);
 
@@ -87,14 +91,14 @@ void buildWalls(){
     orientation.pos=vec3(5,0,0);
     orientation.dir=vec3(-1,0,0);
 
-    color=0.4*vec3(240,126,106)/255.;
+    //color=0.4*vec3(240,126,106)/255.;
     color=vec3(0.1);
     rightWall.orientation=orientation;
     rightWall.mat=makeDielectric(color,0.0,roughness);
 
    rightWall.mat=makeDielectric(color,0.0,roughness);
    rightWall.mat.specularColor=vec3(0.75);
-    rightWall.mat.specularChance=0.05;
+    rightWall.mat.specularChance=0.075;
     rightWall.mat.refractionChance=0.;
 
 }
@@ -119,13 +123,13 @@ float trace_Walls(Vector tv ){
 
     dist=min(dist, trace(tv, bottomWall));
 
-   // dist=min(dist, trace(tv, topWall));
+    dist=min(dist, trace(tv, topWall));
 
     dist=min(dist, trace(tv, frontWall));
 
-  //  dist=min(dist, trace(tv, backWall));
+    dist=min(dist, trace(tv, backWall));
 
-   // dist=min(dist, trace(tv, leftWall));
+    dist=min(dist, trace(tv, leftWall));
 
     dist=min(dist, trace(tv, rightWall));
 
@@ -147,13 +151,13 @@ void setData_Walls( inout Path path ){
 
     setData(path, bottomWall);
 
-    //setData(path, topWall);
+    setData(path, topWall);
 
     setData(path, frontWall);
 
-    //setData(path, backWall);
+    setData(path, backWall);
 
-  //  setData(path, leftWall);
+    setData(path, leftWall);
 
     setData(path, rightWall);
 
