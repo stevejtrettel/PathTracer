@@ -7,12 +7,13 @@
 struct Material{
     bool render;
     bool subSurface;
-    vec3 emitColor;
+    vec3 surfaceEmit;
     vec3 diffuseColor;
     vec3 specularColor;
     vec3 diffuseColorBack;
     vec3 specularColorBack;
     vec3 absorbColor;
+    vec3 emitColor;
     float roughness;
     float isotropicScatter;
     float meanFreePath;
@@ -27,7 +28,7 @@ void zeroMat(inout Material mat){
     //initializes material:
     mat.render=true;
     mat.subSurface=false;
-    mat.emitColor=vec3(0.);
+    mat.surfaceEmit=vec3(0.);
     mat.diffuseColor=vec3(1.);
     mat.specularColor=vec3(1.);
     mat.diffuseColorBack=vec3(1.);
@@ -166,7 +167,7 @@ Material makeLight(vec3 color,float intensity){
     zeroMat(mat);//initialize
 
 
-    mat.emitColor=intensity*color;
+    mat.surfaceEmit=intensity*color;
 
     return mat;
 }
@@ -174,7 +175,7 @@ Material makeLight(vec3 color,float intensity){
 void setLight(inout Material mat, vec3 color,float intensity){
     zeroMat(mat);//initialize
 
-    mat.emitColor=intensity*color;
+    mat.surfaceEmit=intensity*color;
 
 }
 

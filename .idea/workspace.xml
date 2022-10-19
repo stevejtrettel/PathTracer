@@ -3,9 +3,18 @@
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/1Setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/1Setup/uniforms.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/material.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/material.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/path.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/path.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/scatterPath.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/scatterPath.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/setImpactData.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/setImpactData.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/updatePath.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Renderer/Basic/updatePath.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/multiMatObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/multiMatObjects.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/ui.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/uniforms.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/uniforms.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +45,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/stevetrettel/GitHub/PathTracer",
+    "last_opened_file_path": "C:/Users/steve/Documents/GitHub/PathTracer",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -65,6 +74,7 @@
       <workItem from="1629734906548" duration="276000" />
       <workItem from="1631689394900" duration="3571000" />
       <workItem from="1665960804295" duration="23193000" />
+      <workItem from="1666145129607" duration="10705000" />
     </task>
     <servers />
   </component>

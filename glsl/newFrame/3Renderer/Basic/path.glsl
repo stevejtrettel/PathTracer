@@ -22,6 +22,8 @@ struct localData{
     float IOR;
     vec3 refractAbsorb;
     vec3 reflectAbsorb;
+    vec3 refractEmit;
+    vec3 reflectEmit;
 
     Vector normal;//outward pointing (back at you) normal to surface just impacted
 };
@@ -42,6 +44,8 @@ void initializeData(localData dat){
     dat.surfRoughness=0.;
     dat.isotropicScatter=0.;
     dat.meanFreePath=1.;
+    dat.reflectEmit=vec3(0);
+    dat.refractEmit=vec3(0);
     dat.IOR=1.;
     dat.probDiffuse=1.;
     dat.probRefract=0.;
@@ -67,6 +71,7 @@ struct Path{
     int type;//type of ray: 1=Diffuse, 2=Specular, 3=Refract
     float prob;//probability this type of ray was chosen;
     vec3 absorb;
+    vec3 emit;
     float distance; //distance traveled on a bounce
     float numScatters;//num of scattering events, when this is the useful metric instead of distance
     localData dat;
@@ -100,6 +105,7 @@ Path initializePath(Vector tv){
 
     path.debug=vec3(0.);
     path.absorb=vec3(0.);
+    path.emit = vec3(0);
     return path;
 
 }

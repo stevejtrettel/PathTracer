@@ -5,7 +5,7 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
     dat.isSky=false;
     dat.surfDiffuse=mat.diffuseColor;
     dat.surfSpecular=mat.specularColor;
-    dat.surfEmit=mat.emitColor;
+    dat.surfEmit=mat.surfaceEmit;
     dat.surfRoughness=mat.roughness;
     dat.probDiffuse=1.-mat.specularChance-mat.refractionChance;
     dat.probSpecular=mat.specularChance;
@@ -16,8 +16,10 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
         dat.normal=negate(normal);
         //IOR is current/enteing
         dat.IOR=mat.IOR/1.;
+        dat.reflectEmit = mat.emitColor;
         dat.reflectAbsorb=mat.absorbColor;
         dat.refractAbsorb=vec3(0.);
+        dat.refractEmit=vec3(0.);
         dat.subSurface=false;
         dat.meanFreePath=maxDist;
         dat.isotropicScatter=0.;
@@ -30,6 +32,8 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
         dat.IOR=1./mat.IOR;
         dat.reflectAbsorb=vec3(0.);
         dat.refractAbsorb=mat.absorbColor;
+        dat.reflectEmit=vec3(0.);
+        dat.refractEmit=mat.emitColor;
         dat.subSurface=mat.subSurface;
         dat.meanFreePath=mat.meanFreePath;
         dat.isotropicScatter=mat.isotropicScatter;
@@ -44,7 +48,7 @@ void setSurfaceInMat(inout localData dat, float side, Vector normal, Material su
     //set the material
     dat.renderMaterial=surf.render;
     dat.isSky=false;
-    dat.surfEmit=surf.emitColor;
+    dat.surfEmit=surf.surfaceEmit;
     dat.surfRoughness=surf.roughness;
     dat.probDiffuse=1.-surf.specularChance-surf.refractionChance;
     dat.probSpecular=surf.specularChance;
@@ -53,6 +57,8 @@ void setSurfaceInMat(inout localData dat, float side, Vector normal, Material su
     //both sides of surface leave to same ambient material
     dat.reflectAbsorb=mat.absorbColor;
     dat.refractAbsorb=mat.absorbColor;
+    dat.reflectEmit=mat.emitColor;
+    dat.refractEmit=mat.emitColor;
     dat.IOR=1.;
     dat.subSurface=false;
 
@@ -89,7 +95,7 @@ void setMaterialInterface(inout localData dat, Material current, Material neighb
     //set the surface properties of the dominant material
     dat.surfDiffuse=dominant.diffuseColor;
     dat.surfSpecular=dominant.specularColor;
-    dat.surfEmit=dominant.emitColor;
+    dat.surfEmit=dominant.surfaceEmit;
     //dat.surfRoughness=dominant.roughness;
 
 
@@ -106,6 +112,9 @@ void setMaterialInterface(inout localData dat, Material current, Material neighb
 
     dat.reflectAbsorb=current.absorbColor;
     dat.refractAbsorb=neighbor.absorbColor;
+
+    dat.reflectEmit=current.emitColor;
+    dat.refractEmit=neighbor.emitColor;
 
 }
 

@@ -17,6 +17,8 @@ uniform float fov;
 uniform bool focusHelp;
 uniform float extra;
 uniform float extra2;
+uniform float extra3;
+uniform float extra4;
 //-------------------------------------------------
 //Constants
 //-------------------------------------------------

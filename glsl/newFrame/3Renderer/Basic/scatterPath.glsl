@@ -55,6 +55,7 @@ void scatter( inout Path path){
             path.type=2;
             path.prob=path.dat.probSpecular;
             path.absorb=path.dat.reflectAbsorb;
+            path.emit=path.dat.reflectEmit;
             path.subSurface=false;
 
             newDir=vReflect(path.tv, normal);
@@ -68,6 +69,7 @@ void scatter( inout Path path){
             path.type=3;
             path.prob=path.dat.probRefract;
             path.absorb=path.dat.refractAbsorb;
+            path.emit=path.dat.refractEmit;
             path.subSurface=false;
 
             newDir=vRefract(path.tv, normal, path.dat.IOR);
@@ -86,6 +88,7 @@ void scatter( inout Path path){
                 path.subSurface=true;
                 path.type=3;//we are entering material
                 path.absorb=path.dat.refractAbsorb;
+                path.emit=path.dat.refractEmit;
                 newDir=vRefract(path.tv, normal, path.dat.IOR);
             }
 
@@ -93,6 +96,7 @@ void scatter( inout Path path){
                 //just reflect off in a random direction
                 path.type=1;
                 path.absorb=path.dat.reflectAbsorb;
+                path.emit=path.dat.reflectEmit;
                 newDir=diffuseDir;
             }
 
@@ -120,6 +124,7 @@ void scatter( inout Path path){
         path.type=3;
         path.prob=1.;//no other choices
         path.absorb=path.dat.refractAbsorb;
+        path.emit=path.dat.refractEmit;
         path.subSurface=false;
 
         //move ahead along our (unchanged) ray

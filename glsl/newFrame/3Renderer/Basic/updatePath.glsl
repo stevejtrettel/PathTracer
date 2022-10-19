@@ -20,14 +20,18 @@ void updateFromVolume(inout Path path){
 //but in the future may likely be different
 void updateFromSubSurf(inout Path path){
 
-//    vec3 totAbsorb=pow(vec3(1)-path.absorb,vec3(abs(path.numScatters)));
-//    path.light *= totAbsorb;
+    //vec3 totAbsorb=pow(vec3(1)-path.absorb,vec3(abs(path.numScatters)));
+    //path.light *= totAbsorb;
 
     vec3 beersLaw = path.absorb*path.distance;
+    vec3 emitAmt = path.emit*path.distance;
 
     if(length(beersLaw)>0.0001){
+        emitAmt *= exp( -beersLaw);
         path.light *= exp( -beersLaw );
     }
+
+    path.pixel += path.light*emitAmt;
 }
 
 

@@ -51,7 +51,7 @@ void buildWalls(){
     topWall.orientation=orientation;
     //topWall.mat=makeDielectric(color,0.0,roughness);
    /// vec3(1,0.6,0.4)
-    topWall.mat=makeLight(vec3(1,1,1),0.1);
+    topWall.mat=makeLight(vec3(1,1,1),3.*extra4);
 
 
     //----------- THE FRONT -------------------------
@@ -109,7 +109,7 @@ void buildWalls(){
 //DO WE RENDER THEM?
 //-------------------------------------------------
 
-bool render_Walls=false;
+bool render_Walls=true;
 
 
 //-------------------------------------------------

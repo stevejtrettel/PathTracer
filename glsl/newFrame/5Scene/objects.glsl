@@ -230,14 +230,17 @@ void buildObjects(){
         bunny.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.9);
 
         bunny.mat.diffuseColor=vec3(1);
-        bunny.mat.absorbColor=vec3(1)-0.9*vec3(0,0.65,0.35);
+        bunny.mat.absorbColor=vec3(0.1);
+        //vec3(1)-0.9*vec3(0,0.65,0.35);
+        bunny.mat.emitColor =  0.4*extra2*vec3(1.,0.15,0.);
+        bunny.mat.surfaceEmit =  0.1*extra3*vec3(0.75,0.25,0.);
         //vec3(0.01);
         //vec3(1)-0.9*vec3(0.3,0.2,0.6);
         bunny.mat.refractionChance=0.;
-        bunny.mat.subSurface=false;
-        bunny.mat.meanFreePath=0.5*extra2;
+        bunny.mat.subSurface=true;
+        bunny.mat.meanFreePath=0.2;
         bunny.mat.isotropicScatter=extra;
-        bunny.mat.roughness=0.2;
+        bunny.mat.roughness=0.0;
 
 
 
@@ -250,7 +253,7 @@ void buildObjects(){
     roughness=0.01;
     gasket.mat= makeMetal(color,specularity,roughness);
    // makeDielectric(color,specularity,roughness);
-  //  gasket.mat.emitColor=0.1*vec3(0.02,0.02,0.04);
+  //  gasket.mat.surfaceEmit=0.1*vec3(0.02,0.02,0.04);
 
   //  gasket.mat=makeGlass(vec3(1)-0.9*vec3(0,0.65,0.35),1.2,0.8);
 
@@ -286,13 +289,15 @@ void buildObjects(){
 
     donut.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.6,0.99);
     //donut.mat.diffuseColor=0.6*(vec3(1.)-4.*vec3(0.2,0.03,0.0));
-    donut.mat.absorbColor=4.*vec3(0.2,0.04,0.0);
+    donut.mat.absorbColor= 4.*0.01*vec3(0.2,0.04,0.0);
+    donut.mat.emitColor= extra*vec3(0.5,0.1,0.0);
+    donut.mat.surfaceEmit=0.5*extra2*vec3(0.3,0.3,0.0);
     donut.mat.specularChance=0.05;
     donut.mat.specularColor=vec3(1.)-donut.mat.absorbColor/3.;
     donut.mat.refractionChance=0.0;
     donut.mat.subSurface=true;
     donut.mat.meanFreePath=0.02;
-    donut.mat.isotropicScatter=0.4;
+    donut.mat.isotropicScatter=extra3;
     donut.mat.roughness=0.0;
 
 
@@ -357,8 +362,8 @@ float sdf_Objects( Vector tv ){
 
 
 
-    dist = min(dist, sdf(tv, layerDonut));
-   dist = min(dist, sdf(tv, box));
+   // dist = min(dist, sdf(tv, layerDonut));
+  // dist = min(dist, sdf(tv, box));
 
 
    //dist = min(dist, sdf(tv, donut));
@@ -377,7 +382,7 @@ float sdf_Objects( Vector tv ){
 //
     //dist=min( dist, sdf(tv, table) );
 
-    //dist=min( dist, sdf(tv, bunny) );
+    dist=min( dist, sdf(tv, bunny) );
 
     return dist;
 }
@@ -408,11 +413,11 @@ bool inside_Object( Vector tv ){
 
 //return inside(tv, bottle)||inside(tv, bottle2);
 
-    return inside(tv, layerDonut.inner);
+   // return inside(tv, layerDonut.inner);
     //return inside(tv, donut);
 
   //  return false;
-   // return inside(tv, bunny);
+    return inside(tv, bunny);
    // return inside(tv, bunny)||inside(tv, bottle2);
 
 }
@@ -441,13 +446,13 @@ void setData_Objects(inout Path path){
     //setData(path,gasket);
    // setData(path, table);
 
-    //setData(path, bunny);
+    setData(path, bunny);
 
 
 
 
-   setData(path, layerDonut);
-   setData(path, box);
+   //setData(path, layerDonut);
+  // setData(path, box);
 
 
     //setData(path, donut);

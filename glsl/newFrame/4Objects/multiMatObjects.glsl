@@ -174,7 +174,7 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
         //whether we are in the drink or not, will use the glass as the interacting material
         dat.surfDiffuse=beer.cup.diffuseColor;
         dat.surfSpecular=beer.cup.specularColor;
-        dat.surfEmit=beer.cup.emitColor;
+        dat.surfEmit=beer.cup.surfaceEmit;
         dat.surfRoughness=beer.cup.roughness;
 
         dat.probSpecular=beer.cup.specularChance;
@@ -245,7 +245,7 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
         //if we didn't hit the cup, we hit the liquid's surface
         dat.surfDiffuse=beer.drink.diffuseColor;
         dat.surfSpecular=beer.drink.specularColor;
-        dat.surfEmit=beer.drink.emitColor;
+        dat.surfEmit=beer.drink.surfaceEmit;
         dat.surfRoughness=beer.drink.roughness;
 
         dat.probSpecular=beer.drink.specularChance;
@@ -447,7 +447,7 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
         //whether we are in the drink or not, will use the glass as the interacting material
         dat.surfDiffuse=cocktail.cup.diffuseColor;
         dat.surfSpecular=cocktail.cup.specularColor;
-        dat.surfEmit=cocktail.cup.emitColor;
+        dat.surfEmit=cocktail.cup.surfaceEmit;
         dat.surfRoughness=cocktail.cup.roughness;
 
         dat.probSpecular=cocktail.cup.specularChance;
@@ -505,7 +505,7 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
         //if we didn't hit the cup, we hit the liquid's surface
         dat.surfDiffuse=cocktail.drink.diffuseColor;
         dat.surfSpecular=cocktail.drink.specularColor;
-        dat.surfEmit=cocktail.drink.emitColor;
+        dat.surfEmit=cocktail.drink.surfaceEmit;
         dat.surfRoughness=cocktail.drink.roughness;
 
         dat.probSpecular=cocktail.drink.specularChance;

@@ -63,7 +63,7 @@ void buildLights(){
 //DO WE RENDER THEM?
 //-------------------------------------------------
 
-bool render_Lights=true;
+bool render_Lights=false;
 
 
 
