@@ -277,9 +277,9 @@ void buildObjects(){
     donut.center=vec3(0,1.,0);
     donut.inner=1.2;
     donut.outer=2.;
-    donut.height=2.25;
-    donut.base=0.4;
-    donut.flare=3.5;
+    donut.height=2.5;
+    donut.base=0.3;
+    donut.flare=6.;
     donut.smoothing = 2.75;
     donut.thickness = 0.08;
 

@@ -88,7 +88,7 @@ void buildWalls(){
 
 
     //----------- THE RIGHT -------------------------
-    orientation.pos=vec3(5,0,0);
+    orientation.pos=vec3(6,0,0);
     orientation.dir=vec3(-1,0,0);
 
     //color=0.4*vec3(240,126,106)/255.;
@@ -109,7 +109,7 @@ void buildWalls(){
 //DO WE RENDER THEM?
 //-------------------------------------------------
 
-bool render_Walls=true;
+bool render_Walls=false;
 
 
 //-------------------------------------------------
