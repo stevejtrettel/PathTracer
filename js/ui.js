@@ -53,7 +53,7 @@ function createUI() {
 
     let brightnessController=mainMenu.add(ui,'brightness',0,2,0.01).name('Brightness');
     let apertureController=mainMenu.add(ui,'aperture',0,0.2,0.001).name('Aperture');
-    let focalLengthController=mainMenu.add(ui,'focalLength',0,40,0.1).name('FocalLength');
+    let focalLengthController=mainMenu.add(ui,'focalLength',0,40,0.01).name('FocalLength');
     let focusHelpController=mainMenu.add(ui,'focusHelp').name('FocusHelp');
     let fovController=mainMenu.add(ui,'fov',40,140,1).name('FOV');
     let extraController=mainMenu.add(ui,'extra',0,1,0.01).name('extra');

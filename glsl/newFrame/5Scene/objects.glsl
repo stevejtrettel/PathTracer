@@ -27,6 +27,7 @@ Gasket gasket;
 Torus torus;
 DonutBottle donut;
 LayerDonutBottle layerDonut;
+Kleinian klein;
 
 //this function constructs the objects
 void buildObjects(){
@@ -318,6 +319,33 @@ void buildObjects(){
    // layerDonut.outer.mat.subSurface=false;
     //layerDonut.outer.thickness=0.2;
 
+
+
+    klein.center=vec3(-2,-1,-3);
+    color= 0.7*vec3(0.3,0.2,0.6);
+    specularity=0.2;
+    roughness=0.01;
+    klein.mat=makeDielectric(color,specularity,roughness);
+
+
+
+    klein.mat=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+
+    klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.9);
+
+   // klein.mat.diffuseColor=vec3(1);
+   // klein.mat.absorbColor=vec3(0.1);
+    //vec3(1)-0.9*vec3(0,0.65,0.35);
+    //klein.mat.emitColor =  0.4*extra2*vec3(1.,0.15,0.);
+    //klein.mat.surfaceEmit =  0.1*extra3*vec3(0.75,0.25,0.);
+    //vec3(0.01);
+    //vec3(1)-0.9*vec3(0.3,0.2,0.6);
+    klein.mat.refractionChance=0.;
+    klein.mat.subSurface=true;
+    klein.mat.meanFreePath=0.2;
+    klein.mat.isotropicScatter=extra;
+    klein.mat.roughness=0.0;
+
 }
 
 
@@ -382,7 +410,9 @@ float sdf_Objects( Vector tv ){
 //
     //dist=min( dist, sdf(tv, table) );
 
-    dist=min( dist, sdf(tv, bunny) );
+  //  dist=min( dist, sdf(tv, bunny) );
+
+    dist=min( dist, sdf(tv, klein) );
 
     return dist;
 }
@@ -417,7 +447,7 @@ bool inside_Object( Vector tv ){
     //return inside(tv, donut);
 
   //  return false;
-    return inside(tv, bunny);
+    return inside(tv, klein);
    // return inside(tv, bunny)||inside(tv, bottle2);
 
 }
@@ -446,7 +476,7 @@ void setData_Objects(inout Path path){
     //setData(path,gasket);
    // setData(path, table);
 
-    setData(path, bunny);
+    setData(path, klein);
 
 
 
