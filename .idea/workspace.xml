@@ -4,8 +4,10 @@
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/basicObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/basicObjects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/ui.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/6Trace/pathTrace.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/6Trace/pathTrace.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +68,8 @@
       <workItem from="1631689394900" duration="3571000" />
       <workItem from="1665960804295" duration="23193000" />
       <workItem from="1666145129607" duration="10705000" />
+      <workItem from="1693675419448" duration="6610000" />
+      <workItem from="1693710489157" duration="11130000" />
     </task>
     <servers />
   </component>

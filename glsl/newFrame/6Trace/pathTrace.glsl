@@ -41,7 +41,7 @@ vec3 pathTrace(Path path){
 
                         //OPTION 1: JUST FLOW FORWARDS
                         //step forward a bit to get off the surface
-                        flow(path.tv,10.*EPSILON);
+                        flow(path.tv,5.*EPSILON);
 
                         //OPTION 2: USE NORMAL TO PUSH OFF
                         //setData_Scene(path);

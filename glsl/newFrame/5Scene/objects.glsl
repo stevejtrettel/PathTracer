@@ -28,6 +28,7 @@ Torus torus;
 DonutBottle donut;
 LayerDonutBottle layerDonut;
 Kleinian klein;
+Sextic sex;
 
 //this function constructs the objects
 void buildObjects(){
@@ -321,20 +322,18 @@ void buildObjects(){
 
 
 
-    klein.center=vec3(-2,-1,-3);
+    klein.center=vec3(-2,0,-3);
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;
-    klein.mat=makeDielectric(color,specularity,roughness);
+    //klein.mat=makeDielectric(color,specularity,roughness);
 
+    klein.mat=makeGlass(3.*vec3(0.3,0.05,0.2),1.5,0.95);
 
-
-    klein.mat=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
-
-    klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.9);
+    //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
 
    // klein.mat.diffuseColor=vec3(1);
-   // klein.mat.absorbColor=vec3(0.1);
+    //klein.mat.absorbColor=vec3(0.1);
     //vec3(1)-0.9*vec3(0,0.65,0.35);
     //klein.mat.emitColor =  0.4*extra2*vec3(1.,0.15,0.);
     //klein.mat.surfaceEmit =  0.1*extra3*vec3(0.75,0.25,0.);
@@ -342,9 +341,33 @@ void buildObjects(){
     //vec3(1)-0.9*vec3(0.3,0.2,0.6);
     klein.mat.refractionChance=0.;
     klein.mat.subSurface=true;
-    klein.mat.meanFreePath=0.2;
+    klein.mat.meanFreePath=0.5*extra2;
     klein.mat.isotropicScatter=extra;
-    klein.mat.roughness=0.0;
+    klein.mat.roughness=0.04;
+
+
+
+
+
+
+    sex.center=vec3(0,0,0);
+    sex.size=3.;
+    sex.thickness=5.;
+    sex.offset=0.01;
+    sex.boundingSphere=2.5;
+
+    sex.mat=makeGlass(5.*vec3(0.3,0.05,0.2),1.5,0.95);
+    //sex.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+    sex.mat.refractionChance=0.;
+    sex.mat.subSurface=true;
+    sex.mat.meanFreePath=0.5*extra2;
+    sex.mat.isotropicScatter=extra;
+    sex.mat.roughness=0.4;
+
+
+
+
+
 
 }
 
@@ -412,7 +435,9 @@ float sdf_Objects( Vector tv ){
 
   //  dist=min( dist, sdf(tv, bunny) );
 
-    dist=min( dist, sdf(tv, klein) );
+    //dist=min( dist, sdf(tv, klein) );
+
+    dist=min( dist, sdf(tv, sex) );
 
     return dist;
 }
@@ -447,7 +472,7 @@ bool inside_Object( Vector tv ){
     //return inside(tv, donut);
 
   //  return false;
-    return inside(tv, klein);
+    return inside(tv, sex);
    // return inside(tv, bunny)||inside(tv, bottle2);
 
 }
@@ -476,7 +501,7 @@ void setData_Objects(inout Path path){
     //setData(path,gasket);
    // setData(path, table);
 
-    setData(path, klein);
+    setData(path, sex);
 
 
 
