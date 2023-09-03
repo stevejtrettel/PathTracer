@@ -29,6 +29,8 @@ DonutBottle donut;
 LayerDonutBottle layerDonut;
 Kleinian klein;
 Sextic sex;
+GlassSextic gSex;
+
 
 //this function constructs the objects
 void buildObjects(){
@@ -353,11 +355,11 @@ void buildObjects(){
     sex.center=vec3(0,0,0);
     sex.size=3.;
     sex.thickness=5.;
-    sex.offset=0.01;
+    sex.offset=0.;
     sex.boundingSphere=2.5;
 
-    sex.mat=makeGlass(5.*vec3(0.3,0.05,0.2),1.5,0.95);
-    //sex.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+    //sex.mat=makeGlass(5.*vec3(0.3,0.05,0.2),1.5,0.95);
+    sex.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     sex.mat.refractionChance=0.;
     sex.mat.subSurface=true;
     sex.mat.meanFreePath=0.5*extra2;
@@ -365,7 +367,8 @@ void buildObjects(){
     sex.mat.roughness=0.4;
 
 
-
+    Material glassMat = makeGlass(vec3(0),1.1,0.98);
+    gSex = createGlassSextic(sex,glassMat,0.04);
 
 
 
@@ -437,7 +440,7 @@ float sdf_Objects( Vector tv ){
 
     //dist=min( dist, sdf(tv, klein) );
 
-    dist=min( dist, sdf(tv, sex) );
+    dist=min( dist, sdf(tv, gSex) );
 
     return dist;
 }
@@ -472,7 +475,7 @@ bool inside_Object( Vector tv ){
     //return inside(tv, donut);
 
   //  return false;
-    return inside(tv, sex);
+    return inside(tv, gSex.glass);
    // return inside(tv, bunny)||inside(tv, bottle2);
 
 }
@@ -501,7 +504,7 @@ void setData_Objects(inout Path path){
     //setData(path,gasket);
    // setData(path, table);
 
-    setData(path, sex);
+    setData(path, gSex);
 
 
 

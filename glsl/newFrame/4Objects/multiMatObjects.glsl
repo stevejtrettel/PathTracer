@@ -20,9 +20,6 @@ struct Cocktail{
 };
 
 
-
-
-
 bool inDrink( Vector tv, Cocktail cocktail){
 
     float drinkSide;
@@ -609,7 +606,7 @@ void setData(inout Path path, LiquorBottle gin){
 
 
 //-------------------------------------------------
-// The COCKTAIL sdf
+// The LAYEERDONUT sdf
 //-------------------------------------------------
 
 struct LayerDonutBottle{
@@ -688,6 +685,101 @@ void setData(inout Path path, LayerDonutBottle donut){
 
 
 
+
+
+
+
+
+
+//-------------------------------------------------
+// The GLASS VARIETY sdf
+//-------------------------------------------------
+
+struct GlassSextic{
+    Sextic var;
+    Sextic glass;
+};
+
+GlassSextic createGlassSextic(Sextic var, Material glassMat, float thickness){
+    GlassSextic obj;
+    obj.var = var;
+    obj.glass.center=var.center;
+    obj.glass.size=var.size;
+    obj.glass.boundingSphere = var.boundingSphere;
+    obj.glass.thickness=var.thickness;
+    obj.glass.offset = thickness;
+    obj.glass.mat = glassMat;
+
+    return obj;
+}
+
+
+
+//overload of sdf for the cocktail struct
+float sdf( Vector tv, GlassSextic sex){
+
+    float innerDist = sdf(tv, sex.var);
+    float outerDist = sdf(tv, sex.glass);
+
+    //make the total distance:
+    float dist = min( abs(innerDist), abs(outerDist));
+
+    return dist;
+}
+
+
+
+//overload of set data
+void setData(inout Path path, GlassSextic sex){
+
+    Vector normal;
+
+    float innerDist = sdf(path.tv, sex.var);
+    float outerDist = sdf(path.tv, sex.glass);
+
+    if(abs(outerDist)<abs(innerDist)) {
+        //----if we hit the outer shell
+
+        //get outward pointing normal to this shell
+        normal = normalVec(path.tv, sex.glass);
+
+        //figure out if we are incoming or outgoing:
+        bool inside = dot(path.tv.dir,normal.dir)>0.;
+
+        //if we are outgoing: we are leaving the glass material and going into the air
+        if (inside) {
+            setObjectInAir(path.dat, true, normal, sex.glass.mat);
+        }
+
+        else {
+            //if we are ingoing: we are leaving the air and going into the glass
+            setObjectInAir(path.dat, false, normal, sex.glass.mat);
+        }
+
+    }
+
+    else {
+        //----if we hit the inner shell
+
+        //get outward pointing normal to this shell
+        normal = normalVec(path.tv, sex.var);
+
+        //figure out if we are incoming or outgoing:
+        bool inside = dot(path.tv.dir,normal.dir)>0.;
+
+        //if we are outgoing: we are leaving the colored material and going into the clear
+        if (inside) {
+            setMaterialInterface(path.dat, sex.var.mat, sex.glass.mat, sex.var.mat);
+        }
+
+        else {
+            //if we are ingoing: we are leaving the clear material and going into the colored
+            setMaterialInterface(path.dat, sex.glass.mat, sex.var.mat, sex.var.mat);
+        }
+
+    }
+
+}
 
 
 
