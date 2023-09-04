@@ -91,6 +91,15 @@ float randomGaussian(float mean, float stdev){
 
 
 
+// get a single random sample from an exponential distribtution of specified mean
+//calculated by sampling uniform, and inverting CDF:
+//https://www.baeldung.com/cs/sampling-exponential-distribution
+float randomExponential(float mean){
+    float u = randomFloat();
+    float x = - mean * log(1.-u);
+    return x;
+}
+
 
 
 

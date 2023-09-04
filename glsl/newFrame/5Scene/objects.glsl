@@ -348,18 +348,18 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
     var.center=vec3(0,0.5,0);
-    var.size=1.;
+    var.size=1.5;
     var.inside=5.;
     var.outside=0.;
     var.boundingSphere=1.75;
     var.smoothing =0.05;
 
-    //var.mat=makeGlass(6.*vec3(0.3,0.05,0.2),1.5,0.95);
-    var.mat=makeGlass(5.*vec3(0.7,0.9,0.9),1.6,0.95);
-   // var.mat.refractionChance=0.;
-    //var.mat.subSurface=true;
-   // var.mat.meanFreePath=0.5*extra2;
-   // var.mat.isotropicScatter=extra;
+    var.mat=makeGlass(6.*vec3(0.3,0.05,0.2),1.5,0.95);
+    //var.mat=makeGlass(5.*vec3(0.7,0.9,0.9),1.6,0.95);
+    var.mat.refractionChance=0.;
+    var.mat.subSurface=true;
+    var.mat.meanFreePath=0.5*extra2;
+    var.mat.isotropicScatter=extra;
     //var.mat.roughness=0.4;
 
     Material glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.3,0.95);
@@ -369,6 +369,23 @@ void buildObjects(){
 
     marble = createGlassMarble(var,outerVarMat, glassMat);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -384,17 +401,13 @@ bool render_Objects=true;
 //Finding the Objects
 //-------------------------------------------------
 
+
+//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
 
     float dist=maxDist;
 
-   // dist=min(dist, trace(tv, gasket));
-
 //    dist=min(dist, trace(tv, ball1));
-//
-//    dist=min(dist, trace(tv, ball2));
-//
-//    dist=min(dist, trace(tv,ball3));
 
     return dist;
 
@@ -403,74 +416,26 @@ float trace_Objects( Vector tv ){
 
 
 
-
+//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-
-
-   // dist = min(dist, sdf(tv, layerDonut));
-  // dist = min(dist, sdf(tv, box));
-
-
-   //dist = min(dist, sdf(tv, donut));
-
-   //dist=min( dist, sdf(tv, gasket) );
-
-    //dist=min( dist, sdf(tv, bottle) );
-
-  //  dist=min( dist, sdf(tv, bottle2) );
-
-    //dist=min( dist, sdf(tv, beer) );
-
-    //dist=min( dist, sdf(tv, gin) );
-//
-   // dist=min( dist, sdf(tv, negroni) );
-//
-    //dist=min( dist, sdf(tv, table) );
-
-  //  dist=min( dist, sdf(tv, bunny) );
-
-    //dist=min( dist, sdf(tv, klein) );
-
-    dist=min( dist, sdf(tv, marble) );
+    dist=min( dist, sdf(tv, gVar) );
 
     return dist;
 }
 
 
 
-
-
-
-
-
-int objID=0;
-void setObjID( Vector tv ){
-}
-
-
-//will go in the objects file; tells us if we are inside an object of interest
-//used in subsurface scattering
+//used in subsurface scattering: right now we keep scattering if we are inside of this object!
+//so, in a multi-material object just put the parts that subsurface scatter.
+//PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
-//return false;
-//    bool jar=inside(tv, bottle);
-//
-    //bool milk=inDrink(tv, beer);
-   // bool juice=inDrink(tv, negroni);
-    //return juice;
-//bool inBeer= inDrink(tv, beer);
-//    return jar||milk||juice;
 
-//return inside(tv, bottle)||inside(tv, bottle2);
 
-   // return inside(tv, layerDonut.inner);
-    //return inside(tv, donut);
+    return inside(tv, gVar.surf);
 
-  //  return false;
-    return inside(tv, marble.glass);
-   // return inside(tv, bunny)||inside(tv, bottle2);
 
 }
 
@@ -480,32 +445,11 @@ bool inside_Object( Vector tv ){
 //-------------------------------------------------
 
 
+//put multiple copies of "setData"; one for each object in the scene.
+
 void setData_Objects(inout Path path){
 
-//    setData(path, ball1);
-//
-//    setData(path,ball2);
-//
-//    setData(path, ball3);
-
-   //  setData(path, gin);
-
-   // setData(path, bottle2);
-//
-   //  setData(path, negroni);
-//
-
-    //setData(path,gasket);
-   // setData(path, table);
-
-    setData(path, marble);
-
-
-   //setData(path, layerDonut);
-  // setData(path, box);
-
-
-    //setData(path, donut);
+    setData(path, gVar);
 
 }
 

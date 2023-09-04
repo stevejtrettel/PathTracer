@@ -6,10 +6,6 @@
 
 
 
-
-
-
-
 //-------------------------------------------------
 //Building the Scene
 //-------------------------------------------------
@@ -31,6 +27,8 @@ float sdf_Scene( Vector tv ){
     if(render_Objects){
         dist=min(dist, sdf_Objects( tv ));
     }
+    //if we had to march walls or lights; would add them here
+    // but right now all those are simple objects: we trace them
 
     return dist;
 
@@ -69,16 +67,17 @@ float trace_Scene( Vector tv ){
 
 void setData_Scene(inout Path path){
 
+    //need to set this data first!
     if(render_Objects){
         setData_Objects(path);
     }
 
-    if(render_Walls){
-        setData_Walls(path);
-    }
-
     if(render_Lights){
         setData_Lights(path);
+    }
+
+    if(render_Walls){
+        setData_Walls(path);
     }
 
 

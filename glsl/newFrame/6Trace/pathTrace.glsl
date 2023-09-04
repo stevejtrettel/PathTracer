@@ -17,7 +17,7 @@ vec3 pathTrace(Path path){
                 //help with focusing
                 focusCheck(path);
 
-                //pick up color from traveling through the medium
+                //pick up color from traveling through the medium we were just in.
                 updateFromVolume(path);
 
                 // if you hit the sky: stop
@@ -50,9 +50,7 @@ vec3 pathTrace(Path path){
                         //OPTION 3: DECIDE WHAT TO DO BY RE-SCATTERING
                         //need the new normal vector
                         //setData_Scene(path);
-                        //scatter(path);
-
-
+                       // scatter(path);
                 }
                 else{
                         //pick up any color from the reflection off surface

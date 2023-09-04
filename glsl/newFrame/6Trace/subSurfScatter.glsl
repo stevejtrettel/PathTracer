@@ -1,9 +1,8 @@
 //-------------------------------------------------
 // SUB SURFACE SCATTERING
-// this function maybe conceptually belongs in the '3Renderer' folder
+// this function maybe conceptually belongs in the '3MATERIALS' folder
 // as it updates a path before the next bounce.  But it needs the sdfs....
 //-------------------------------------------------
-
 
 float bisect(Vector tv, float dt){
     float dist=0.;
@@ -30,7 +29,6 @@ float bisect(Vector tv, float dt){
 }
 
 
-
 void subSurfScatter(inout Path path){
 
     int scatterSteps=500;
@@ -40,27 +38,26 @@ void subSurfScatter(inout Path path){
     //set the vector we will carry along for the ride
     Vector tv=path.tv;
     Vector temp=path.tv;
-    Vector newDir;
+    Vector randomDir;
+
+    //parameters of the random walk
     float rough=path.dat.isotropicScatter*path.dat.isotropicScatter;
+    float mfp = path.dat.meanFreePath;
 
-
-    flow(path.tv,path.dat.meanFreePath);
-    //setObjID(path.tv);
 
     //do the subsurface scattering for the surface we are at
     for (int i = 0; i < scatterSteps; i++){
 
         //choose the direction of scatter
-        newDir=randomVector(temp.pos);
-
-        temp=mix(temp,newDir,rough);
-
+        randomDir=randomVector(temp.pos);
+        temp=mix(temp,randomDir,rough);
         //update tv's direction
         tv=temp;
+        //choose the distance to flow: exponential dist with mean free path mfp
+        flowDist=randomExponential(mfp);
 
-        //choose the distance to flow
-        flowDist=path.dat.meanFreePath;
-        //to a trial flow of this distance
+
+        //to a trial flow of this distance, in given direction
         flow(temp,flowDist);
 
         //if we have left the object
