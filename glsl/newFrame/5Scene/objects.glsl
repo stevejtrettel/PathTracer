@@ -351,21 +351,21 @@ void buildObjects(){
     var.size=1.;
     var.inside=5.;
     var.outside=0.;
-    var.boundingSphere=2.5;
+    var.boundingSphere=1.75;
     var.smoothing =0.05;
 
     //var.mat=makeGlass(6.*vec3(0.3,0.05,0.2),1.5,0.95);
-    var.mat=makeGlass(4.*(brownAbsorb+0.25*redAbsorb),1.5,0.95);
-    //var.mat.refractionChance=0.;
+    var.mat=makeGlass(5.*vec3(0.7,0.9,0.9),1.6,0.95);
+   // var.mat.refractionChance=0.;
     //var.mat.subSurface=true;
-    //var.mat.meanFreePath=0.5*extra2;
-    //var.mat.isotropicScatter=extra;
+   // var.mat.meanFreePath=0.5*extra2;
+   // var.mat.isotropicScatter=extra;
     //var.mat.roughness=0.4;
 
-    Material glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+    Material glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.3,0.95);
     gVar = createGlassVariety(var,glassMat,0.05);
 
-    Material outerVarMat = makeGlass(3.*vec3(0.05,0.5,0.05),1.5,0.95);
+    Material outerVarMat = makeGlass(5.*vec3(0.05,0.5,0.05),1.4,0.95);
 
     marble = createGlassMarble(var,outerVarMat, glassMat);
 }

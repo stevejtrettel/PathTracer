@@ -808,13 +808,13 @@ GlassMarble createGlassMarble(Variety surf, Material outerMat, Material glassMat
 
     obj.outerVar.center = surf.center;
     obj.outerVar.size = surf.size;
-    obj.outerVar.boundingSphere = 0.75*surf.boundingSphere;
+    obj.outerVar.boundingSphere = 1.2*surf.boundingSphere;
     obj.outerVar.inside = surf.inside;
     obj.outerVar.outside = surf.outside+thickness;
     obj.outerVar.smoothing = surf.smoothing;
     obj.outerVar.mat = outerMat;
 
-    obj.glass = Sphere(surf.center, 1.2*surf.boundingSphere,glassMat);
+    obj.glass = Sphere(surf.center, 1.75*surf.boundingSphere, glassMat);
     return obj;
 
 }

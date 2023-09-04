@@ -99,6 +99,7 @@ float distR3( vec3 p, Variety surf ){
 
     //normalize position
     vec3 pos = p - surf.center;
+    float rad = length(pos);
     pos *= surf.size;
 
     //get the distance estimate
@@ -110,7 +111,7 @@ float distR3( vec3 p, Variety surf ){
     //adjust to account for thickness of surface
     dist=abs(dist+surf.inside)-surf.inside-surf.outside;
     //adjust for the bounding box
-    dist = smax(dist,length(p)-surf.boundingSphere,surf.smoothing);
+    dist = smax(dist,rad-surf.boundingSphere,surf.smoothing);
 
     return dist;
 }
