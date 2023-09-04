@@ -30,7 +30,7 @@ LayerDonutBottle layerDonut;
 Kleinian klein;
 Variety var;
 GlassVariety gVar;
-
+GlassMarble marble;
 
 //this function constructs the objects
 void buildObjects(){
@@ -347,33 +347,28 @@ void buildObjects(){
     klein.mat.isotropicScatter=extra;
     klein.mat.roughness=0.04;
 
-
-
-
-
-
-    var.center=vec3(0,0.3,0);
+    var.center=vec3(0,0.5,0);
     var.size=1.;
     var.inside=5.;
     var.outside=0.;
     var.boundingSphere=2.5;
     var.smoothing =0.05;
 
-    var.mat=makeGlass(6.*vec3(0.3,0.05,0.2),1.5,0.95);
-    //sex.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
-    var.mat.refractionChance=0.;
-    var.mat.subSurface=true;
-    var.mat.meanFreePath=0.5*extra2;
-    var.mat.isotropicScatter=extra;
-    var.mat.roughness=0.4;
+    //var.mat=makeGlass(6.*vec3(0.3,0.05,0.2),1.5,0.95);
+    var.mat=makeGlass(4.*(brownAbsorb+0.25*redAbsorb),1.5,0.95);
+    //var.mat.refractionChance=0.;
+    //var.mat.subSurface=true;
+    //var.mat.meanFreePath=0.5*extra2;
+    //var.mat.isotropicScatter=extra;
+    //var.mat.roughness=0.4;
 
-
-    Material glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.1,0.95);
+    Material glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
     gVar = createGlassVariety(var,glassMat,0.05);
 
+    Material outerVarMat = makeGlass(3.*vec3(0.05,0.5,0.05),1.5,0.95);
+
+    marble = createGlassMarble(var,outerVarMat, glassMat);
 }
-
-
 
 
 
@@ -439,7 +434,7 @@ float sdf_Objects( Vector tv ){
 
     //dist=min( dist, sdf(tv, klein) );
 
-    dist=min( dist, sdf(tv, gVar) );
+    dist=min( dist, sdf(tv, marble) );
 
     return dist;
 }
@@ -474,7 +469,7 @@ bool inside_Object( Vector tv ){
     //return inside(tv, donut);
 
   //  return false;
-    return inside(tv, gVar.glass);
+    return inside(tv, marble.glass);
    // return inside(tv, bunny)||inside(tv, bottle2);
 
 }
@@ -503,7 +498,7 @@ void setData_Objects(inout Path path){
     //setData(path,gasket);
    // setData(path, table);
 
-    setData(path, gVar);
+    setData(path, marble);
 
 
    //setData(path, layerDonut);
