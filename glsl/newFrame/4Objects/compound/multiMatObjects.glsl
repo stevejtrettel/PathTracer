@@ -695,20 +695,21 @@ void setData(inout Path path, LayerDonutBottle donut){
 // The GLASS VARIETY sdf
 //-------------------------------------------------
 
-struct GlassSextic{
-    Sextic var;
-    Sextic glass;
+struct GlassVariety{
+    Variety surf;
+    Variety glass;
 };
 
-GlassSextic createGlassSextic(Sextic var, Material glassMat, float thickness){
-    GlassSextic obj;
-    obj.var = var;
-    obj.glass.center=var.center;
-    obj.glass.size=var.size;
-    obj.glass.boundingSphere = var.boundingSphere+2.*thickness;
-    obj.glass.inside=var.inside+thickness;
-    obj.glass.outside = var.outside+thickness;
-    obj.glass.smoothing = var.smoothing;
+GlassVariety createGlassVariety(Variety surf, Material glassMat, float thickness){
+
+    GlassVariety obj;
+    obj.surf = surf;
+    obj.glass.center=surf.center;
+    obj.glass.size=surf.size;
+    obj.glass.boundingSphere = surf.boundingSphere+2.*thickness;
+    obj.glass.inside=surf.inside+thickness;
+    obj.glass.outside = surf.outside+thickness;
+    obj.glass.smoothing = surf.smoothing;
     obj.glass.mat = glassMat;
 
     return obj;
@@ -717,10 +718,10 @@ GlassSextic createGlassSextic(Sextic var, Material glassMat, float thickness){
 
 
 //overload of sdf for the cocktail struct
-float sdf( Vector tv, GlassSextic sex){
+float sdf( Vector tv, GlassVariety var){
 
-    float innerDist = sdf(tv, sex.var);
-    float outerDist = sdf(tv, sex.glass);
+    float innerDist = sdf(tv, var.surf);
+    float outerDist = sdf(tv, var.glass);
 
     //make the total distance:
     float dist = min( abs(innerDist), abs(outerDist));
@@ -731,30 +732,30 @@ float sdf( Vector tv, GlassSextic sex){
 
 
 //overload of set data
-void setData(inout Path path, GlassSextic sex){
+void setData(inout Path path, GlassVariety var){
 
     Vector normal;
 
-    float innerDist = sdf(path.tv, sex.var);
-    float outerDist = sdf(path.tv, sex.glass);
+    float innerDist = sdf(path.tv, var.surf);
+    float outerDist = sdf(path.tv, var.glass);
 
     if(abs(outerDist)<abs(innerDist)) {
         //----if we hit the outer shell
 
         //get outward pointing normal to this shell
-        normal = normalVec(path.tv, sex.glass);
+        normal = normalVec(path.tv, var.glass);
 
         //figure out if we are incoming or outgoing:
         bool inside = dot(path.tv.dir,normal.dir)>0.;
 
         //if we are outgoing: we are leaving the glass material and going into the air
         if (inside) {
-            setObjectInAir(path.dat, true, normal, sex.glass.mat);
+            setObjectInAir(path.dat, true, normal, var.glass.mat);
         }
 
         else {
             //if we are ingoing: we are leaving the air and going into the glass
-            setObjectInAir(path.dat, false, normal, sex.glass.mat);
+            setObjectInAir(path.dat, false, normal, var.glass.mat);
         }
 
     }
@@ -763,19 +764,19 @@ void setData(inout Path path, GlassSextic sex){
         //----if we hit the inner shell
 
         //get outward pointing normal to this shell
-        normal = normalVec(path.tv, sex.var);
+        normal = normalVec(path.tv, var.surf);
 
         //figure out if we are incoming or outgoing:
         bool inside = dot(path.tv.dir,normal.dir)>0.;
 
         //if we are outgoing: we are leaving the colored material and going into the clear
         if (inside) {
-            setMaterialInterface(path.dat, sex.var.mat, sex.glass.mat, sex.var.mat);
+            setMaterialInterface(path.dat, var.surf.mat, var.glass.mat, var.surf.mat);
         }
 
         else {
             //if we are ingoing: we are leaving the clear material and going into the colored
-            setMaterialInterface(path.dat, sex.glass.mat, sex.var.mat, sex.var.mat);
+            setMaterialInterface(path.dat, var.glass.mat, var.surf.mat, var.surf.mat);
         }
 
     }

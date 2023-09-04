@@ -91,12 +91,12 @@ T tinv(T z){
     return T(1./z.x, -z.y/(z.x*z.x));
 }
 
-    T tdiv(T x, T y){
+T tdiv(T x, T y){
     return tmul(x,tinv(y));
 }
 
-    // (T)Chebyshev polynomials
-    // Use T(2n,x) = T(n,x)*T(n,x)-1
+// (T)Chebyshev polynomials
+// Use T(2n,x) = T(n,x)*T(n,x)-1
 T tcheb(T x, int n) {
     for (int i = 0; i < n; i++) {
         x = 2.0*tsqr(x) - tfloat(1.0);
@@ -104,9 +104,7 @@ T tcheb(T x, int n) {
     return x;
 }
 
-T chmutov(T x, T y, T z, int n) {
-    return tcheb(x,n)+tcheb(y,n)+tcheb(z,n)+tfloat(1.0);
-}
+
 
 
 T tabs( T v){
