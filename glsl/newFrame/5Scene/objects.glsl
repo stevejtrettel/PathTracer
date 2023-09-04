@@ -354,12 +354,13 @@ void buildObjects(){
 
     sex.center=vec3(0,0,0);
     sex.size=3.;
-    sex.thickness=5.;
-    sex.offset=0.;
+    sex.inside=5.;
+    sex.outside=0.;
     sex.boundingSphere=2.5;
+    sex.smoothing =0.05;
 
-    //sex.mat=makeGlass(5.*vec3(0.3,0.05,0.2),1.5,0.95);
-    sex.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+    sex.mat=makeGlass(6.*vec3(0.3,0.05,0.2),1.5,0.95);
+    //sex.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     sex.mat.refractionChance=0.;
     sex.mat.subSurface=true;
     sex.mat.meanFreePath=0.5*extra2;
@@ -367,9 +368,8 @@ void buildObjects(){
     sex.mat.roughness=0.4;
 
 
-    Material glassMat = makeGlass(vec3(0),1.1,0.98);
-    gSex = createGlassSextic(sex,glassMat,0.04);
-
+    Material glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.1,0.95);
+    gSex = createGlassSextic(sex,glassMat,0.05);
 
 
 }

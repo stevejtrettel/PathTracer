@@ -705,9 +705,10 @@ GlassSextic createGlassSextic(Sextic var, Material glassMat, float thickness){
     obj.var = var;
     obj.glass.center=var.center;
     obj.glass.size=var.size;
-    obj.glass.boundingSphere = var.boundingSphere;
-    obj.glass.thickness=var.thickness;
-    obj.glass.offset = thickness;
+    obj.glass.boundingSphere = var.boundingSphere+thickness;
+    obj.glass.inside=var.inside+thickness;
+    obj.glass.outside = var.outside+thickness;
+    obj.glass.smoothing = var.smoothing;
     obj.glass.mat = glassMat;
 
     return obj;

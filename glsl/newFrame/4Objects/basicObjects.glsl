@@ -1584,9 +1584,10 @@ float DE(vec3 z)
 struct Sextic{
     vec3 center;
     float size;
-    float thickness;
-    float offset;
+    float inside;
+    float outside;
     float boundingSphere;
+    float smoothing;
     Material mat;
 };
 
@@ -1601,9 +1602,9 @@ float distR3( vec3 p, Sextic sex ){
     pos *= sex.size;
 
     float v =Fn_(p);
-    v=abs(v+sex.thickness)-sex.thickness-sex.offset;
+    v=abs(v+sex.inside)-sex.inside-sex.outside;
 
-    v = max(v,length(p)-sex.boundingSphere);
+    v = smax(v,length(p)-sex.boundingSphere,sex.smoothing);
 
         return v;
 }
