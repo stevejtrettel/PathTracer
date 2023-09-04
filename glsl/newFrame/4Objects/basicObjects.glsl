@@ -1293,293 +1293,64 @@ void setData( inout Path path, Kleinian klein ){
 //------------------------------------------------------------------------------------------------
 
 
+//redefining T so this file doesnt get mad --------------------------------------
+#define T vec2
 
-struct DualFloat{
-    float f;
-    float df;
-};
-
-//Add
-DualFloat ADadd(in DualFloat v0, in DualFloat v1){
-    v0.f  += v1.f;
-    v0.df += v1.df;
-    return v0;
-}
-
-DualFloat ADadd(in float v0, in DualFloat v1){
-    v1.f += v0;
-    return v1;
-}
-
-DualFloat ADadd(in DualFloat v0, in float v1){
-    return ADadd(v1, v0);
-}
-
-//Negate
-DualFloat ADneg(in DualFloat v){
-    v.f = -v.f;
-    v.df = -v.df;
-    return v;
-}
-
-//Subtract
-DualFloat ADsub(in DualFloat v0, in DualFloat v1){
-    return ADadd(v0, ADneg(v1));
-}
-
-DualFloat ADsub(in float v0, in DualFloat v1){
-    return ADadd(v0, ADneg(v1));
-}
-
-DualFloat ADsub(in DualFloat v0, in float v1){
-    return ADadd(v0, -v1);
-}
-
-//Multiply
-DualFloat ADmul(in DualFloat v0, in DualFloat v1){
-    return DualFloat( v0.f * v1.f, v0.f * v1.df + v1.f * v0.df);
-}
-
-DualFloat ADmul(in float v0, in DualFloat v1){
-    v1.f *= v0; v1.df *= v0;
-    return v1;
-}
-
-DualFloat ADmul(in DualFloat v0, in float v1){
-    return ADmul(v1 , v0);
-}
-
-//Multiplicative inverse
-DualFloat ADinv(in DualFloat v){
-    v.f = 1./v.f;
-    return ADmul( DualFloat( 1., -v.df * v.f ) , v.f );
-}
-
-//Divide
-DualFloat ADdiv(in DualFloat v0, in DualFloat v1){
-    return ADmul(v0, ADinv(v1) );
-}
-
-DualFloat ADdiv(in float v0, in DualFloat v1){
-    return ADmul(v0, ADinv(v1) );
-}
-
-DualFloat ADdiv(in DualFloat v0, in float v1){
-    return ADmul( v0, 1./v1 );
-}
-
-    //util
-    #ifndef EVENFUNC
-    #define EVENFUNC
-bool even(in float n){return fract(n*0.5)==0.;}
-bool even(in int n){return even(float(n));}
-//bool even(in int n){return (n&1)==0;}
-
-float Npow(in float x, in int n){
-    if(n==2) return x*x;
-    if(n<0){n=-n; x=1./x;}
-    float r = 1.;
-    float p = x;
-    while(n>0){
-        if(!even(n)){r*=p; n--;}
-        else {p*=p; n/=2;}
-    }
-    return r;
-}
-    #endif
-
-
-//Some common functions
-//Monotonous functions are the easiest: just apply the function to the bounds of the interval and swap them in the case where the function decreases.
-//Othetwise it can become a little bit complicated.
-
-DualFloat ADexp(in DualFloat v){
-    return ADmul( DualFloat( 1., v.df) , exp(v.f) );
-}
-
-DualFloat ADsqr(in DualFloat v){
-    return DualFloat( v.f * v.f , 2. * v.df * v.f) ;
-}
-
-DualFloat ADabs(in DualFloat v){
-    if( v.f < 0. ) {
-        v.f = -v.f;
-        v.df= -v.df;
-    }
-    return v;
-}
-
-DualFloat ADmin(in DualFloat v0, in DualFloat v1){
-    if( v0.f < v1.f ) return v0;
-    else return v1;
-}
-
-DualFloat ADmax(in DualFloat v0, in DualFloat v1){
-    if( v0.f > v1.f ) return v0;
-    else return v1;
-}
-
-    #if 1
-//quite complicated. In general p is a constat so the compiler should be able to simplify things a lot.
-DualFloat ADpow(in DualFloat v, in int p){
-    if(p==0) return DualFloat( 1. , 0. );
-    if(p<0) { v = ADinv(v); p = -p;}
-    if(p==1) return v;
-    if(p==2) return ADsqr(v);
-    if(p==3) return DualFloat( v.f * v.f  * v.f , 3. * v.df * v.f * v.f );
-    if(p==4) {float vx2 = v.f * v.f; return DualFloat( vx2 * vx2 , 4. * v.df * vx2 * v.f ) ;}
-    if(p==5) {float vx2 = v.f * v.f; return DualFloat( v.f * vx2  * vx2 , 5. * v.df * vx2  * vx2 ) ;}
-    if(p==6) {float vx2 = v.f * v.f; return DualFloat( vx2 * vx2  * vx2 , 6. * v.df * vx2  * vx2 * v.f );}
-    // p > 4
-    float s=sign(v.f);
-    v = ADabs(v);
-    float f = pow( v.f , float(p-1) ) ;
-    v = DualFloat( v.f * f , float(p) * v.df * f ) ;// if v<0 --> nan that is why it is done this way
-    if(even(p)) return v;
-    return ADmul( s , v );
-}
-    #else
-DualFloat ADpow(in DualFloat v, in int p){
-    if(p==0) return DualFloat( 1. , 0. );
-    if(p<0) { v = ADinv(v); p = -p;}
-
-    vec2 r = vec2( v.f , float(p) * v.df ) * Npow( v.f , p-1 );
-    return DualFloat( r.x , r.y );
-}
-    #endif
-
-
-DualFloat ADlog(in DualFloat v){
-    return DualFloat( log(v.f) , v.df / v.f );
-}
-
-DualFloat ADsqrt(in DualFloat v){
-    float r = sqrt(v.f);
-    return DualFloat( r , 0.5 * v.df / r );
-}
-
-DualFloat ADpow(in DualFloat v, in float p){//v must be positive ! //p is a constant .
-    return ADmul( DualFloat( v.f , p * v.df ) , pow( v.f , p - 1. ) );
-}
-
-DualFloat ADpow(in DualFloat v, in DualFloat p){//v.x must be positive ! //p is a constant .
-    return ADexp( ADmul( p , ADlog( v ) ) );
-}
-
-DualFloat ADasin(in DualFloat v){
-    return DualFloat( asin(v.f) , v.df / sqrt( 1. - v.f * v.f ) );
-}
-
-DualFloat ADacos(in DualFloat v){
-    return DualFloat( acos(v.f) , - v.df / sqrt( 1. - v.f * v.f ) );
-}
-
-DualFloat ADatan(in DualFloat v){
-    return DualFloat( atan(v.f) , v.df / ( 1. + v.f * v.f ) );
-}
-
-DualFloat ADcos(in DualFloat v){
-    return DualFloat( cos( v.f ) , - v.df * sin( v.f ) );
-}
-
-DualFloat ADsin(in DualFloat v){
-    return DualFloat( sin( v.f ) ,  v.df * cos( v.f ) );
-}
-    //-------------------------------------------------------------------
-
-    #define Phi (.5*(1.+sqrt(5.)))
-
-    #define PHI  1.618034
-    #define PHI2 2.618034
-    #define PHI4 6.854102
-
-    #define Tau (1.+2.*Phi)
-
-    #define Eps 0.00048828125               //epsilon
-    #define IEps 2048.0                     //Inverse of epsilon
-
-float param2       = 3.0;               //a prameter used in the DE formula. The value depends on the function
-float IntThick     = 100.;             //interior thickness. Interior is where the function is <0
-float SphereCutRad = 2.5;               //the radius of the sphere that limits the extension of the rendered parts of the implicit
-
-//The implicit function -------------------------------------
-//This is a degree 6 algebraic implicit function discovered by Barth.
-float Barth(float x, float y, float z){
-    float phi1=(1.+sqrt(5.))/2., phi2=phi1*phi1;
-    float x2=x*x, y2=y*y, z2=z*z;
-    return -(4.*(phi2*x2-y2)*(phi2*y2-z2)*(phi2*z2-x2)-(1.+2.*phi1)*(x2+y2+z2-1.)*(x2+y2+z2-1.));
-}
-
-//just a wrapper---------------------------------------
-float Fn1(vec3 p)
+T surf(T x, T y, T z)
 {
-    return Barth(p.x,p.y,p.z);
+//    T x2 = tsqr(x);
+//    T y2 = tsqr(y);
+//    T z2 = tsqr(z);
+//    float phi1=(1.+sqrt(5.))/2., phi2=phi1*phi1;
+//
+//    T term1 = 4.*tmul(phi2*x2-y2, phi2*y2-z2, phi2*z2-x2);
+//    T term2 = (1.+2.*phi1) * tmul(x2+y2+z2-T(1,0),x2+y2+z2-T(1,0));
+//
+//    return -(term1-term2);
+
+    T term1 = tmul(tsin(x),cos(y));
+    T term2 = tmul(tsin(y), tcos(z));
+    T term3 = tmul(tsin(z),tcos(x));
+    return term1 + term2 + term3;
+
+
+    //return chmutov(x,y,z,4);
 }
 
-//Estimate distance using numerical derivatives
-float Fn(vec3 p)
-{
-    float v =Fn1(p);
-    vec2 eps=vec2(Eps,0);
-    //Compute gradient's length
-    float dv=length(IEps*(vec3(Fn1(p+eps.xyy),Fn1(p+eps.yxy),Fn1(p+eps.yyx))-vec3(v)));
+vec4 surf_Data( vec3 p ){
 
-    //Use function value and gradient magnitude to get a distance estimate. param2 depends on the function at hand.
-    float k = 1.-1./(abs(v)+1.);
-    v=v/(dv+param2*k+.001);
-    return 0.5*v;
-}
+    //Compute gradient.
+    T vx = surf( T(p.x, 1.), T(p.y, 0.), T(p.z, 0.) );
+    T vy = surf( T(p.x, 0.), T(p.y, 1.), T(p.z, 0.) );
+    T vz = surf( T(p.x, 0.), T(p.y, 0.), T(p.z, 1.) );
+    vec3 grad = vec3(vx.y,vy.y,vz.y);
 
-//Using AutoDiff. The compiler seems to optimise the xpresesions very well.
-//This function was generated using a python script that converts expression to function calls form.
-//The python script is in the commented section belooow.
-DualFloat Barth(DualFloat x, DualFloat y, DualFloat z){
-    return ADneg(ADsub(ADmul(ADmul(ADmul(ADsub(ADmul(ADpow(x,2),2.618033988749895),ADpow(y,2)),4.0),ADsub(ADmul(ADpow(y,2),2.618033988749895),ADpow(z,2))),ADsub(ADmul(ADpow(z,2),2.618033988749895),ADpow(x,2))),ADmul(ADpow(ADsub(ADadd(ADadd(ADpow(x,2),ADpow(y,2)),ADpow(z,2)),1.0),2),4.23606797749979)));
-}
+    //the value of the function is automatically computed in each of the above:
+    float val = vx.x;
 
-//just a wrapper---------------------------------------
-DualFloat Fn1_(DualFloat x, DualFloat y, DualFloat z)
-{
-    return Barth(x,y,z);
+    return vec4(grad,val);
 }
 
 //Estimate distance using automatic differentiation technique
-float Fn_(vec3 p){
+float surf_DE(vec3 p){
 
-    //Compute gradient. The compiler should be able to inline and simplify.
-    DualFloat vx = Fn1_( DualFloat(p.x, 1.), DualFloat(p.y, 0.), DualFloat(p.z, 0.) );
-    DualFloat vy = Fn1_( DualFloat(p.x, 0.), DualFloat(p.y, 1.), DualFloat(p.z, 0.) );
-    DualFloat vz = Fn1_( DualFloat(p.x, 0.), DualFloat(p.y, 0.), DualFloat(p.z, 1.) );
-
-    //Length of gradient
-    float dv = length(vec3( vx.df, vy.df, vz.df ));
-
-    //Function value
-    float v = vx.f;
+    vec4 data = surf_Data(p);
+    vec3 grad = data.xyz;
+    float val = data.w;
+    float speed = length(grad);
 
     //Compute distance estimate
-    float k = 1.-1./(abs(v)+1.);
-    v=v/(dv+param2*k+.001);
-    return 0.5*v;
+    float k = 1.-1./(abs(val)+1.);
+    float param2 = 3.0;               //a prameter used in the DE formula. The value depends on the function
+    val=val/(speed+param2*k+.001);
+    return 0.5*val;
 }
 
-//----------------------------------------
-
-float DE(vec3 z)
-{
-    float v =Fn_(z); v=abs(v+IntThick)-IntThick;
-
-    v = max(v,length(z)-SphereCutRad);
-
-    return v;
-}
 
 
 //-------------------------------------------------
 // my stuff: building the sextic in our world
 // -------------------------
-
-
 
 struct Sextic{
     vec3 center;
@@ -1592,29 +1363,26 @@ struct Sextic{
 };
 
 
-
-
-
 //overload of distR3: distance in R3 coordinates
 float distR3( vec3 p, Sextic sex ){
+
     //normalize position
     vec3 pos = p - sex.center;
     pos *= sex.size;
 
-    float v =Fn_(p);
-    v=abs(v+sex.inside)-sex.inside-sex.outside;
+    //get the distance estimate
+    float dist = surf_DE(pos);
 
-    v = smax(v,length(p)-sex.boundingSphere,sex.smoothing);
+    //adjust to account for thickness of surface
+    dist=abs(dist+sex.inside)-sex.inside-sex.outside;
+    //adjust for the bounding box
+    dist = smax(dist,length(p)-sex.boundingSphere,sex.smoothing);
 
-        return v;
+    return dist;
 }
-
-
-
 
 //overload of location booleans:
 bool at( Vector tv, Sextic sex){
-
     float d = distR3( tv.pos, sex );
     bool atSurf = ((abs(d) - AT_THRESH)<0.);
     return atSurf;
@@ -1625,24 +1393,29 @@ bool inside( Vector tv, Sextic sex ){
     return (d<0.);
 }
 
-
-
-
 //overload of sdf for a sphere
 float sdf( Vector tv, Sextic sex ){
-
     //distance to closest point on sphere
     return distR3(tv.pos, sex);
-
 }
 
 //overload of normalVec for a sphere
 Vector normalVec( Vector tv, Sextic sex ){
 
-    vec3 pos=tv.pos;
+//    vec3 pos=tv.pos;
+//    vec4 data = surf_Data(pos);
+//    vec3 grad = data.xyz;
+//    vec3 normal = normalize(grad);
+//    return Vector(pos,normal);
 
+
+//    vec3 grad = BarthGrad(pos);
+//    vec3 normal = normalize(grad);
+//    return Vector(pos,normal);
+
+    vec3 pos =tv.pos;
     const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
+    vec2 e = vec2(1.0,-1.0)*0.5773;//this normalization makes exyy etc all unit vectors;
 
     float vxyy=distR3( pos + e.xyy*ep, sex);
     float vyyx=distR3( pos + e.yyx*ep, sex);

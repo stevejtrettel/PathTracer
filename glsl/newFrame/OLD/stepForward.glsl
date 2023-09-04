@@ -1,3 +1,7 @@
+
+
+
+
 //-------------------------------------------------
 // STEP FORWARD
 // this is the basic step in path tracing
@@ -16,6 +20,15 @@ void stepForward(inout Path path){
     //do the raymarching, with threshhold from above
     distance=raymarch( path.tv, distance );
 
+    //trace the varieties, if we are inside a bounding box
+    if(render_Varieties){
+        float varDist=trace_VarietyBBox(path.tv);
+        if (varID!=0){
+            varDist = findRoot(path.tv, varDist);
+        }
+        distance=min(distance, varDist);
+    }
+
     //move to this point of intersection
     path.distance=distance;
     flow(path.tv,distance);
@@ -26,4 +39,3 @@ void stepForward(inout Path path){
     }
 
 }
-

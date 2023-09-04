@@ -10,12 +10,6 @@
 
 
 
-
-
-
-
-
-
 //-------------------------------------------------
 //Building the Scene
 //-------------------------------------------------
@@ -24,7 +18,6 @@ void buildScene(){
     buildWalls();
     buildLights();
     buildObjects();
-    buildVarieties();
 }
 
 
@@ -78,10 +71,6 @@ void setData_Scene(inout Path path){
 
     if(render_Objects){
         setData_Objects(path);
-    }
-
-    if(render_Varieties){
-        setData_Varieties(path);
     }
 
     if(render_Walls){

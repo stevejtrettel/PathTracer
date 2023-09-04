@@ -352,7 +352,7 @@ void buildObjects(){
 
 
 
-    sex.center=vec3(0,0,0);
+    sex.center=vec3(0,0.3,0);
     sex.size=3.;
     sex.inside=5.;
     sex.outside=0.;

@@ -1,7 +1,7 @@
 //-------------------------------------------------
 // SUB SURFACE SCATTERING
 // this function maybe conceptually belongs in the '3Renderer' folder
-// as it updates a path before the next bounce.  But it needs the sdfs
+// as it updates a path before the next bounce.  But it needs the sdfs....
 //-------------------------------------------------
 
 
@@ -35,9 +35,6 @@ void subSurfScatter(inout Path path){
 
     int scatterSteps=500;
     float depth=0.;
-
-    //length of a mean free path in the material:
-    float mfp=0.05;
     float flowDist;
 
     //set the vector we will carry along for the ride
