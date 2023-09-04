@@ -71,9 +71,24 @@ void updateFromSky(inout Path path){
 
 
 void focusCheck(inout Path path){
-    if(abs(path.distance-focalLength)<0.5&&focusHelp){
-        path.pixel+=vec3(1.,0.,0.);
+    if(focusHelp){
+
+        float distToFocalPlane = abs(path.totalDistance-focalLength);
+
+        if(distToFocalPlane<0.03){
+            path.pixel+=vec3(0,1,1);
+        }
+        if(distToFocalPlane<0.12){
+            path.pixel+=vec3(0,1,0);
+        }
+        else if(distToFocalPlane<0.25){
+            path.pixel+=vec3(0.5,0.5,0.);
+        }
+        else if(distToFocalPlane<0.5){
+            path.pixel+=vec3(1.,0.,0.);
+        }
     }
+
 }
 
 

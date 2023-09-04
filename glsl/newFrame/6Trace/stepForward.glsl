@@ -18,6 +18,7 @@ void stepForward(inout Path path){
 
     //move to this point of intersection
     path.distance=distance;
+    path.totalDistance+=distance;
     flow(path.tv,distance);
     path.dat.isSky=(path.distance>maxDist-0.1);
 

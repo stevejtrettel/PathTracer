@@ -1,11 +1,6 @@
 
 
 
-
-
-
-
-
 //reflect the unit tangent vector u off the surface with unit normal n
 Vector vReflect(Vector v, Vector n){
     return add(multiplyScalar(-2.0 * vDot(v, n), n), v);

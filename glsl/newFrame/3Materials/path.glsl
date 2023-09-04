@@ -73,6 +73,7 @@ struct Path{
     vec3 absorb;
     vec3 emit;
     float distance; //distance traveled on a bounce
+    float totalDistance;// accumulated distance traveled along a ray.
     float numScatters;//num of scattering events, when this is the useful metric instead of distance
     localData dat;
 
@@ -95,6 +96,7 @@ Path initializePath(Vector tv){
     path.light=vec3(1.);
     path.numScatters=0.;
     path.distance=0.;
+    path.totalDistance=0.;
     path.keepGoing=true;
     path.subSurface=false;
 
