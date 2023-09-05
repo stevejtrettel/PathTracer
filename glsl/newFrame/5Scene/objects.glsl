@@ -359,7 +359,7 @@ void buildObjects(){
     roughness=0.01;
     //var.mat= makeMetal(color,specularity,roughness);
 
-    var.mat=makeGlass(6.*vec3(0.3,0.05,0.2),1.5,0.95);
+    var.mat=makeGlass(10.*vec3(0.3,0.05,0.2),1.5,0.95);
     //var.mat=makeGlass(5.*vec3(0.7,0.9,0.9),1.6,0.95);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;

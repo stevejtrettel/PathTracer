@@ -12,7 +12,7 @@
 
 float DE(float val, float gradLength){
     float k = 1.-1./(abs(val)+1.);
-    float param = 3.0; // a free parameter we can set to change accuracy/speed (trial and error)
+    float param = 4.0; // a free parameter we can set to change accuracy/speed (trial and error)
     float adjustedSpeed = gradLength+param*k+.001;
 
     //what would happen if it were linear, and we were headed right towards the max decrease?
