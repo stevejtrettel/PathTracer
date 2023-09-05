@@ -4,7 +4,7 @@
 // as it updates a path before the next bounce.  But it needs the sdfs....
 //-------------------------------------------------
 
-float bisect(Vector tv, float dt){
+float bisect_Scatter(Vector tv, float dt){
     float dist=0.;
     //you are inside, but flowing by dt is outside
     float testDist=dt;
@@ -64,7 +64,7 @@ void subSurfScatter(inout Path path){
         if(!inside_Object(temp)){
             //tv is behind it, temp is in front: with distance flowDist
             //find the distance
-            flowDist=bisect(tv,flowDist);
+            flowDist=bisect_Scatter(tv,flowDist);
             //flow slightly farther so you get out
             flow(tv,flowDist-EPSILON/2.);
             //set your new data, right back on the surface

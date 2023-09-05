@@ -348,11 +348,16 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
     var.center=vec3(0,0.5,0);
-    var.size=1.5;
-    var.inside=5.;
-    var.outside=0.;
-    var.boundingSphere=1.75;
-    var.smoothing =0.05;
+    var.size=5.;
+    var.inside=0.01;
+    var.outside=0.0;
+    var.boundingSphere=2.;
+    var.smoothing =0.0;
+
+    color= vec3(0.4,0.3,0.2);
+    specularity=0.5;
+    roughness=0.01;
+    //var.mat= makeMetal(color,specularity,roughness);
 
     var.mat=makeGlass(6.*vec3(0.3,0.05,0.2),1.5,0.95);
     //var.mat=makeGlass(5.*vec3(0.7,0.9,0.9),1.6,0.95);
@@ -360,7 +365,7 @@ void buildObjects(){
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.5*extra2;
     var.mat.isotropicScatter=extra;
-    //var.mat.roughness=0.4;
+    var.mat.roughness=0.4;
 
     Material glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.3,0.95);
     gVar = createGlassVariety(var,glassMat,0.05);
@@ -421,7 +426,7 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, gVar) );
+    dist=min( dist, sdf(tv, var) );
 
     return dist;
 }
@@ -434,7 +439,7 @@ float sdf_Objects( Vector tv ){
 bool inside_Object( Vector tv ){
 
 
-    return inside(tv, gVar.surf);
+    return inside(tv, var);
 
 
 }
@@ -449,7 +454,7 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
 
-    setData(path, gVar);
+    setData(path, var);
 
 }
 

@@ -11,14 +11,16 @@
 // Takes in a value and gradient length, approximated distance to zero level set:
 
 float DE(float val, float gradLength){
-
     float k = 1.-1./(abs(val)+1.);
     float param = 3.0; // a free parameter we can set to change accuracy/speed (trial and error)
     float adjustedSpeed = gradLength+param*k+.001;
 
+    //what would happen if it were linear, and we were headed right towards the max decrease?
     float dist = val/adjustedSpeed;
     return 0.5*dist;
 }
+
+
 
 
 //----------------------------------------------------------------------------------------------
@@ -26,10 +28,10 @@ float DE(float val, float gradLength){
 //----------------------------------------------------------------------------------------------------
 
 T gyroid(T x, T y, T z){
-    T term1 = tmul(tsin(x),cos(y));
+    T term1 = tmul(tsin(x),tcos(y));
     T term2 = tmul(tsin(y), tcos(z));
     T term3 = tmul(tsin(z),tcos(x));
-    return term1 + term2 + term3;
+    return 1.*(term1 + term2 + term3);
 }
 
 T barthSextic(T x, T y, T z){
@@ -50,6 +52,26 @@ T chmutov(T x, T y, T z) {
 }
 
 
+T kummer(T x, T y, T z){
+
+    //moduli for the quartic:
+    float muSqr=0.8;
+    float Lambda = (3.* muSqr - 1.)/(3.-muSqr);
+
+    //working in projective patch where w=1.;
+    T w = T(1,0);
+
+    T p = z - w + x * sqrt(2.);
+    T q = z - w - x * sqrt(2.);
+    T r = z + w + y * sqrt(2.);
+    T s = z + w - y * sqrt(2.);
+
+    T fmu = tsqr(x) + tsqr(y) + tsqr(z) - sqrt(muSqr) * tsqr(w);
+    T prod = tmul(p,q,r,s);
+
+    return tsqr(fmu) - Lambda * prod;
+}
+
 
 
 
@@ -61,7 +83,7 @@ T chmutov(T x, T y, T z) {
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return barthSextic(x,y,z);
+    return gyroid(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -105,7 +127,30 @@ float distR3( vec3 p, Variety surf ){
     //get the distance estimate
     vec4 data = surf_Data(pos);
     float val = data.w;
-    float gradLength = length(data.xyz);
+    float gradLength = length(data.xyz)*surf.size;
+    float dist = DE(val, gradLength);
+
+    //adjust to account for thickness of surface
+    dist=abs(dist+surf.inside)-surf.inside-surf.outside;
+    //adjust for the bounding box
+    dist = smax(dist,rad-surf.boundingSphere,surf.smoothing);
+
+    return dist;
+}
+
+
+
+float distR3( Vector tv, Variety surf ){
+
+    //normalize position
+    vec3 pos = tv.pos - surf.center;
+    float rad = length(pos);
+    pos *= surf.size;
+
+    //get the distance estimate
+    vec4 data = surf_Data(pos);
+    float val = data.w;
+    float gradLength = length(data.xyz)/surf.size;
     float dist = DE(val, gradLength);
 
     //adjust to account for thickness of surface
@@ -136,17 +181,6 @@ float sdf( Vector tv, Variety surf ){
 
 //overload of normalVec for a sphere
 Vector normalVec( Vector tv, Variety surf ){
-
-    //    vec3 pos=tv.pos;
-    //    vec4 data = surf_Data(pos);
-    //    vec3 grad = data.xyz;
-    //    vec3 normal = normalize(grad);
-    //    return Vector(pos,normal);
-
-
-    //    vec3 grad = BarthGrad(pos);
-    //    vec3 normal = normalize(grad);
-    //    return Vector(pos,normal);
 
     vec3 pos =tv.pos;
     const float ep = 0.0001;

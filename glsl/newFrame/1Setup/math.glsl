@@ -105,14 +105,17 @@ T tcheb(T x, int n) {
 }
 
 
-
-
 T tabs( T v){
     if( v.x < 0. ) {
         v.x = -v.x;
         v.y= -v.y;
     }
     return v;
+}
+
+
+    T tpow(in T v, in float p){//v must be positive ! //p is a constant .
+    return pow( v.x , p - 1. ) *T( v.x , p * v.y );
 }
 
 
@@ -125,7 +128,6 @@ T tmax(in T z, in T w){
     if( z.x > w.x ) return z;
     else return w;
 }
-
 
 T texp( T z){
     return exp(z.x)*T(1,z.y);
@@ -140,13 +142,10 @@ T tsqrt( T v){
     return T( r , 0.5 * v.y / r );
 }
 
-T tpow(in T v, in float p){//v must be positive ! //p is a constant .
-    return pow( v.x , p - 1. ) *T( v.x , p * v.y );
-}
 
-T tpow(in T v, in T p){//v.x must be positive ! //p is a constant .
-    return texp( tmul( p , tlog( v ) ) );
-}
+//T tpow(in T v, in T p){//v.x must be positive ! //p is a constant .
+//    return texp( tmul( p , tlog( v ) ) );
+//}
 
 T tcos(in T v){
     return T( cos( v.x ) , - v.y * sin( v.x ) );
@@ -172,4 +171,14 @@ T tacos(in T v){
 T tatan(in T v){
     return T( atan(v.x) , v.y / ( 1. + v.x * v.x ) );
 }
+
+
+
+
+
+
+
+
+
+
 
