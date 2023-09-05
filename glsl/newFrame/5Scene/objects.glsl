@@ -348,9 +348,9 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
     var.center=vec3(0,0.5,0);
-    var.size=5.;
-    var.inside=0.01;
-    var.outside=0.0;
+    var.size=7.;
+    var.inside=0.005;
+    var.outside=0.005;
     var.boundingSphere=2.;
     var.smoothing =0.0;
 
@@ -363,8 +363,8 @@ void buildObjects(){
     //var.mat=makeGlass(5.*vec3(0.7,0.9,0.9),1.6,0.95);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
-    var.mat.meanFreePath=0.5*extra2;
-    var.mat.isotropicScatter=extra;
+    var.mat.meanFreePath=0.1;
+    var.mat.isotropicScatter=0.85;
     var.mat.roughness=0.4;
 
     Material glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.3,0.95);

@@ -17,7 +17,7 @@ float DE(float val, float gradLength){
 
     //what would happen if it were linear, and we were headed right towards the max decrease?
     float dist = val/adjustedSpeed;
-    return 0.5*dist;
+    return 0.4*dist;
 }
 
 

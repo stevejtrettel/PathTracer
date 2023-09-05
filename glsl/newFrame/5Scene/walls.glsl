@@ -34,7 +34,7 @@ void buildWalls(){
     //vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
 
-    color=vec3(0.15);
+    color=vec3(0.1);
     //0.2*vec3(0.8,0.8,0.4);
     //vec3(0.1);
     bottomWall.orientation=orientation;
@@ -68,7 +68,7 @@ void buildWalls(){
     orientation.pos=vec3(0,0,-5);
     orientation.dir=vec3(0,0,1);
 
-    color=vec3(0.15);
+    color=vec3(0.1);
     //0.2*vec3(107,152,250)/255.;
     //=vec3(0.1);
     frontWall.orientation=orientation;
@@ -111,7 +111,7 @@ void buildWalls(){
     orientation.pos=vec3(6,0,0);
     orientation.dir=vec3(-1,0,0);
 
-    color= vec3(0.15);
+    color= vec3(0.1);
     //0.4*vec3(240,126,106)/255.;
    // color=0.2*vec3(107,152,250)/255.;
     //color=0.2*vec3(107,152,250)/255.;
