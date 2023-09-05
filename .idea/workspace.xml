@@ -2,6 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/glsl/total.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/1Setup/math.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/1Setup/math.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/2Space/camera.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/2Space/camera.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/varieties.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" afterDir="false" />
@@ -10,6 +14,9 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExportToHTMLSettings">
+    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/exportToHTML" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -44,11 +51,11 @@
       <recent name="$PROJECT_DIR$/glsl/newFrame/OLD" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/glsl" />
       <recent name="$PROJECT_DIR$/glsl/newFrame/4Objects/compound" />
       <recent name="$PROJECT_DIR$/glsl/newFrame/4Objects/simple" />
       <recent name="$PROJECT_DIR$/glsl/newFrame/3Renderer" />
       <recent name="$PROJECT_DIR$/glsl/newFrame/OLD" />
-      <recent name="C:\Users\steve\Documents\GitHub\PathTracer\glsl\singleFrame" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

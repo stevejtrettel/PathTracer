@@ -75,6 +75,31 @@ T kummer(T x, T y, T z){
 
 
 
+T togliatti(T xorig, T yorig, T zorig){
+
+    //rotate coordinates
+    T x = xorig, y = -zorig, z = yorig;
+    //working in projective patch where w=1.;
+    T w = T(1,0);
+
+    // squaring all the coordinates
+    T x2 = tsqr(x), y2 = tsqr(y), z2 = tsqr(z), w2 = tsqr(w);
+
+    T P1 = (x2 - 4.* tmul(x,w) - 10.*y2 - 4.*w2);
+    T P2 = (16.*w2 - 20.*y2);
+
+    T P = tmul(x2, P1) + tmul(tmul(x,w)+w2, P2) + 5.* tmul(y2, y2);
+    T Q = 4.*(x2+y2-z2)+(1.+3.*sqrt(5.))*w2;
+    T Q2 = tsqr(Q);
+    T Qfin = tmul(2.* z - sqrt(5.-sqrt(5.)) * w,  Q2);
+    T res =  64.*tmul(x-w, P) - 5.*sqrt(5.-sqrt(5.))*Qfin;
+    return -res;
+
+}
+
+
+
+
 
 
 //----------------------------------------------------------------------------------------------
@@ -83,7 +108,7 @@ T kummer(T x, T y, T z){
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return gyroid(x,y,z);
+    return togliatti(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){

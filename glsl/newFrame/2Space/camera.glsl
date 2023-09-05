@@ -13,8 +13,6 @@ struct Camera{
     float focalLength;
 };
 
-
-
 Camera buildCamFromUniforms(){
     Camera cam;
     cam.pos=location;

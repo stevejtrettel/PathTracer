@@ -68,8 +68,7 @@ void buildWalls(){
     orientation.pos=vec3(0,0,-5);
     orientation.dir=vec3(0,0,1);
 
-    color=vec3(0.1);
-    //0.2*vec3(107,152,250)/255.;
+    color=0.1*vec3(107,152,250)/255.;
     //=vec3(0.1);
     frontWall.orientation=orientation;
     //need a "make mirror" command
@@ -111,8 +110,8 @@ void buildWalls(){
     orientation.pos=vec3(6,0,0);
     orientation.dir=vec3(-1,0,0);
 
-    color= vec3(0.1);
-    //0.4*vec3(240,126,106)/255.;
+    color= 0.15*vec3(240,106,86)/255.;
+    //0.2*vec3(240,126,106)/255.;
    // color=0.2*vec3(107,152,250)/255.;
     //color=0.2*vec3(107,152,250)/255.;
     //vec3(0.1);
