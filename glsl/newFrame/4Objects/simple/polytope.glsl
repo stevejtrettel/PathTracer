@@ -34,8 +34,9 @@ float sdHalfSpace(vec3 pos, vec4 halfSpace){
 
 //signed distance in R3 coordinates
 float distR3( vec3 pos, Polytope poly ){
-    float dist;
-    dist = max(sdHalfSpace(pos, poly.hs1), sdHalfSpace(pos, poly.hs2));
+    float dist=-1000.;
+    dist = max(dist, sdHalfSpace(pos, poly.hs1));
+    dist = max(dist, sdHalfSpace(pos, poly.hs2));
     dist = max(dist, sdHalfSpace(pos, poly.hs3));
     dist = max(dist, sdHalfSpace(pos, poly.hs4));
     dist = max(dist, sdHalfSpace(pos, poly.hs5));
@@ -62,7 +63,6 @@ bool inside( Vector tv, Polytope poly ){
 float sdf( Vector tv, Polytope poly ){
     return distR3(tv.pos, poly);
 }
-
 
 ////overload of normalVec for a torus
 //Vector normalVec( Vector tv, Polytope poly ){

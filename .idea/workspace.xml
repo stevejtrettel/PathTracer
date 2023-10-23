@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/polytope.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/scene.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/scene.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/polytope.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/polytope.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,7 +77,7 @@
       <workItem from="1693675419448" duration="6610000" />
       <workItem from="1693710489157" duration="15609000" />
       <workItem from="1694570165379" duration="619000" />
-      <workItem from="1698023193305" duration="5971000" />
+      <workItem from="1698023193305" duration="6326000" />
     </task>
     <servers />
   </component>
