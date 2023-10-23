@@ -44,6 +44,7 @@
                 {file: '../glsl/newFrame/4Objects/simple/shapes.glsl'},
                 {file: '../glsl/newFrame/4Objects/simple/varieties.glsl'},
                 {file: '../glsl/newFrame/4Objects/simple/fractals.glsl'},
+                {file: '../glsl/newFrame/4Objects/simple/polytope.glsl'},
                 {file: '../glsl/newFrame/4Objects/compound/compoundObjects.glsl'},
                 {file: '../glsl/newFrame/4Objects/compound/multiMatObjects.glsl'},
                 {file: '../glsl/newFrame/5Scene/walls.glsl'},

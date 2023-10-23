@@ -31,6 +31,7 @@ Kleinian klein;
 Variety var;
 GlassVariety gVar;
 GlassMarble marble;
+Polytope poly;
 
 //this function constructs the objects
 void buildObjects(){
@@ -373,6 +374,26 @@ void buildObjects(){
 
     Material outerVarMat = makeGlass(5.*vec3(0.05,0.5,0.05),1.4,0.95);
     marble = createGlassMarble(var,outerVarMat, glassMat);
+
+
+
+    poly.hs1=vec4(1,1,1,1);
+    poly.hs2=vec4(-1,1,1,1);
+    poly.hs3=vec4(1,-1,1,1);
+    poly.hs4=vec4(-1,-1,1,1);
+    poly.hs5=vec4(1,1,-1,1);
+    poly.hs6=vec4(-1,1,-1,1);
+    poly.hs7=vec4(1,-1,-1,1);
+    poly.hs8=vec4(-1,-1,-1,1);
+
+    poly.mat=makeGlass(10.*vec3(0.1,0.3,0.05),1.4,0.95);
+    poly.mat.refractionChance=0.;
+    poly.mat.subSurface=true;
+    poly.mat.meanFreePath=0.02;
+    poly.mat.isotropicScatter=0.95;
+    poly.mat.roughness=0.1;
+
+
 }
 
 
@@ -426,7 +447,7 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, gVar) );
+    dist=min( dist, sdf(tv, poly) );
 
     return dist;
 }
@@ -438,9 +459,7 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-
-    return inside(tv, gVar.surf);
-
+    return inside(tv, poly);
 
 }
 
@@ -454,7 +473,7 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
 
-    setData(path, gVar);
+    setData(path, poly);
 
 }
 

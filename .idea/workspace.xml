@@ -2,13 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/glsl/total.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/polytope.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/1Setup/math.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/1Setup/math.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/2Space/camera.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/2Space/camera.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/varieties.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/scene.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/scene.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,15 +35,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/strettel/GitHub/PathTracer/glsl/newFrame/OLD&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Users/strettel/GitHub/PathTracer",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/glsl/newFrame/OLD" />
@@ -81,6 +79,8 @@
       <workItem from="1666145129607" duration="10705000" />
       <workItem from="1693675419448" duration="6610000" />
       <workItem from="1693710489157" duration="15609000" />
+      <workItem from="1694570165379" duration="619000" />
+      <workItem from="1698023193305" duration="5971000" />
     </task>
     <servers />
   </component>
