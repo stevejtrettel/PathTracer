@@ -31,7 +31,7 @@ float apollonian(vec3 p)
     float scale = 1.0;
     vec4 orb = vec4(1000.0);
 
-    for( int i=0; i < 10;  i++ )
+    for( int i=0; i < 15;  i++ )
     {
         p = -1.0 + 2.0*fract(0.5*p+0.5);
         float r2 = dot(p,p);
@@ -42,11 +42,11 @@ float apollonian(vec3 p)
     }
 
     //this adds in balls insteaad
-    float res = abs(p.y);
+    //float res = abs(p.y);
     //
-    //    float  res = min(abs(p.z)+abs(p.x),
-    //    min(abs(p.x)+abs(p.y),
-    //    abs(p.y)+abs(p.z)));
+        float  res = min(abs(p.z)+abs(p.x),
+        min(abs(p.x)+abs(p.y),
+        abs(p.y)+abs(p.z)));
 
     return 0.25/scale*res;
 }
@@ -72,21 +72,21 @@ float distR3( vec3 p, Gasket gasket ){
 
     p /= dot(p,p);
     p += vec3(1.0);
-    p*=5.;
+    p*=3.;
 
 
-
-    //    float scale = 1.;
-    //    float s = 1./3.;
-    //    for( int i=0; i<20;i++ )
-    //    {
-    //        p = triangles(p);
-    //        float r2= dot(p,p);
-    //        float k = s/r2;
-    //        p = p * k;
-    //        scale=scale*k;
-    //    }
-    //    return .3*length(p)/scale -.001/sqrt(scale);
+//
+//        float scale = 1.;
+//        float s = 1./3.;
+//        for( int i=0; i<20;i++ )
+//        {
+//            p = triangles(p);
+//            float r2= dot(p,p);
+//            float k = s/r2;
+//            p = p * k;
+//            scale=scale*k;
+//        }
+//        return .3*length(p)/scale -.001/sqrt(scale);
 
 
     //********************************************************************************
@@ -98,7 +98,7 @@ float distR3( vec3 p, Gasket gasket ){
 
     for( int i=0; i<10;i++ )
     {
-        p = -1.0 + 2.0*fract(0.5*p+0.5);
+        p = -1.0 + 2.0*fract(0.5*p+extra);
 
         float r2 = dot(p,p);
 
@@ -116,19 +116,19 @@ float distR3( vec3 p, Gasket gasket ){
     //********************************************************************************
 
 
-    //    float scale = 6.0;
-    //    vec3 q=p;
-    //    p /= scale;
-    //    float s = 1.0;
-    ////    if (doInversion) {
-    //        s = dot(p,p);
-    //        p /= s;
-    //        p += vec3(1.0);
-    ////    }
-    //    //if (doTranslate) p.y += 0.1*iTime;
-    //    float d0=apollonian(p)*scale;
-    //    float d = d0;
-    //    return d*s;
+//        float scale = 6.0;
+//        vec3 q=p;
+//        p /= scale;
+//        float s = 1.0;
+//    //    if (doInversion) {
+//            s = dot(p,p);
+//            p /= s;
+//            p += vec3(1.0);
+//    //    }
+//        //if (doTranslate) p.y += 0.1*iTime;
+//        float d0=apollonian(p)*scale;
+//        float d = d0;
+//        return d*s;
 }
 
 
@@ -171,7 +171,7 @@ float distR3( vec3 p, Gasket gasket ){
 //    }
 //    return .3*length(p)/scale		-.001/sqrt(scale);
 //}
-//
+
 
 
 //-------------------
@@ -378,12 +378,12 @@ float SeahorseKleinian(vec3 z)
     vec3 lz=z+vec3(1.), llz=z+vec3(-1.);
     float d=0.; float d2=0.;
 
-    if (SI) {
-        z=z-InvCenter;
-        d=length(z);
-        d2=d*d;
-        z=(rad*rad/d2)*z+InvCenter;
-    }
+//    if (SI) {
+//        z=z-InvCenter;
+//        d=length(z);
+//        d2=d*d;
+//        z=(rad*rad/d2)*z+InvCenter;
+//    }
 
     // vec3 orbitTrap = vec3(1e20);
 
@@ -392,7 +392,7 @@ float SeahorseKleinian(vec3 z)
     float a = KleinR;
     float b = KleinI;
     float f = sign(b) * .45;
-    for (int i = 0; i < 80 ; i++)
+    for (int i = 0; i < 50 ; i++)
     {
         z.x += b / a * z.y;
         z.xz = wrap(z.xz, box_size * 2., -box_size);
@@ -416,11 +416,11 @@ float SeahorseKleinian(vec3 z)
 
     float y =  min(z.y, a - z.y);
     DE = min(DE, min(y, .3) / max(DF, 2.));
-    if (SI) {
-        DE = DE * d2 / (rad + d * DE);
-    }
+//    if (SI) {
+//        DE = DE * d2 / (rad + d * DE);
+//    }
 
-    return DE;
+    return 0.75*DE;
     // return vec4(DE, orbitTrap);
 }
 

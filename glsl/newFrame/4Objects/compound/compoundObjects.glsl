@@ -35,8 +35,8 @@ float pintDistance(vec3 pos, Pint pint, out float insideBottle){
 
     //get the second one
     pint.center+=vec3(0,2.*pint.thickness,0);
-    vec3 pIn=pos-pint.center;
-    insideBottle=sdCappedCone(pIn, pint.height, pint.base-pint.thickness, pint.flare*(pint.base-pint.thickness));
+    vec3 pIn=pos-pint.center-vec3(0,0.4,0);
+    insideBottle=sdCappedCone(pIn, pint.height+0.2, pint.base-pint.thickness, pint.flare*(pint.base-pint.thickness));
     //return outerWall;
     return smax(outerWall,-insideBottle,0.1);
 

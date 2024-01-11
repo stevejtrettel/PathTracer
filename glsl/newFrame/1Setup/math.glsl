@@ -54,11 +54,11 @@ float sq(float x){return x*x;}
 
 
 T tfloat(float x) {
-    return vec2(x,0);
+    return T(x,0);
 }
 
 T tmul(T z, T w) {
-    return vec2(z.x*w.x,z.x*w.y+z.y*w.x); // Dual numbers
+    return T(z.x*w.x,z.x*w.y+z.y*w.x); // Dual numbers
 }
 
 T tmul(T z, T w, T v) {

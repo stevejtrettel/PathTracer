@@ -31,7 +31,7 @@ float bisect_Scatter(Vector tv, float dt){
 
 void subSurfScatter(inout Path path){
 
-    int scatterSteps=500;
+    int scatterSteps=1000;
     float depth=0.;
     float flowDist;
 

@@ -16,7 +16,7 @@ Sphere ball1, ball2, ball3;
 Bottle bottle, bottle2;
 CocktailGlass cGlass;
 Cocktail negroni;
-LiquorBottle gin,campari;
+LiquorBottle gin,campari,vermouth;
 Pint pint;
 Beer beer;
 Cone cone,cone2,cone3;
@@ -72,8 +72,8 @@ void buildObjects(){
     ball3.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.5);
 
     //----------- TABLE  -------------------------
-    table.center=vec3(2.,-1.85,0);
-    table.sides=vec3(15,0.5,10);
+    table.center=vec3(-1,-3.35,-2);
+    table.sides=vec3(3,0.25,3);
     table.rounded=0.1;
 
     color= vec3(0.1);
@@ -92,7 +92,7 @@ void buildObjects(){
     bottle.thickness=0.02;
     bottle.rounded=0.1;
     bottle.smoothJoin=0.3;
-    bottle.center=vec3(2,0.45,1);
+    bottle.center=vec3(2,0.48,1);
     bottle.bump=0.5;
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
@@ -122,14 +122,14 @@ void buildObjects(){
     bottle2.bump=0.;
     bottle2.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
-    bottle2.mat.diffuseColor=0.3*vec3(0.5,0.5,0.9);
-    //0.7*vec3(0.3,0.2,0.6);
-    bottle2.mat.absorbColor=2.*vec3(0.5,0.5,0.0);
-    bottle2.mat.refractionChance=0.;
-    bottle2.mat.subSurface=true;
-    bottle2.mat.meanFreePath=0.01;
-    bottle2.mat.isotropicScatter=0.5;
-    bottle2.mat.roughness=0.2;
+//    bottle2.mat.diffuseColor=0.3*vec3(0.5,0.5,0.9);
+//    //0.7*vec3(0.3,0.2,0.6);
+//    bottle2.mat.absorbColor=2.*vec3(0.5,0.5,0.0);
+//    bottle2.mat.refractionChance=0.;
+//    bottle2.mat.subSurface=true;
+//    bottle2.mat.meanFreePath=0.01;
+//    bottle2.mat.isotropicScatter=0.5;
+//    bottle2.mat.roughness=0.2;
 
 
 
@@ -150,20 +150,34 @@ void buildObjects(){
 
 //    //-------- CAMPARI BOTTLE ----------------
 //
-//    campari.glass=bottle;
-//    campari.glass.center.coords=vec3(3,2.25,-9);
-//    campari.glass.baseRadius=1.;
-//    campari.glass.baseHeight=3.5;
-//    campari.glass.neckHeight=0.75;
-//    campari.glass.smoothJoin=0.5;
-//    campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-//    campari.drink=makeGlass(2.5*redAbsorb,1.3,0.99);
-//    campari.fill=0.5;
-//    campari.glass.bump=0.;
-//
-//
-//
-//
+    campari.glass=bottle;
+    campari.glass.center=vec3(3,2.4,-6);
+    campari.glass.baseRadius=1.;
+    campari.glass.baseHeight=3.5;
+    campari.glass.neckHeight=0.75;
+    campari.glass.smoothJoin=0.5;
+    campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    campari.drink=makeGlass(2.5*redAbsorb,1.3,0.99);
+    campari.fill=0.5;
+    campari.glass.bump=0.;
+
+
+    //-------- VERMOUTH BOTTLE ----------------
+    vermouth.glass=bottle;
+    vermouth.glass.center=vec3(5,1.32,-3);
+    vermouth.glass.baseRadius=0.75;
+    vermouth.glass.baseHeight=2.5;
+    vermouth.glass.thickness=0.05;
+    vermouth.glass.neckHeight=2.25;
+    vermouth.glass.smoothJoin=1.5;
+    vermouth.cup=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
+    vermouth.drink=makeGlass(vec3(0.1,0.05,0.),1.3,0.99);
+    //makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
+    vermouth.fill=0.6;
+    vermouth.drink=makeGlass(5.*brownAbsorb,1.3,0.99);
+    vermouth.glass.bump=1.;
+
+
     //-------- COCKTAIL GLASS----------------
 
     cGlass.center=vec3(-1.,-0.15,-1.2);
@@ -186,17 +200,17 @@ void buildObjects(){
 //    negroni.drink.roughness=0.4;
 
     //----------PINT GLASS----------
-    pint.center=vec3(-1,1.2,-2);
+    pint.center=vec3(-1,-0.9,-2);
     pint.height=2.;
-    pint.base=0.5;
+    pint.base=0.75;
     pint.flare=1.5;
-    pint.thickness=0.03;
+    pint.thickness=0.01;
     pint.rounded=0.;
     pint.mat=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
 
     //-------- BEER ----------------
     beer.glass=pint;
-    beer.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+    beer.cup=makeGlass(0.2*vec3(0.3,0.05,0.2),1.5,0.95);
 
 
     //    negroni.drink.diffuseColor=vec3(1.);
@@ -207,7 +221,7 @@ void buildObjects(){
     //    negroni.drink.meanFreePath=0.05;
     //    negroni.drink.roughness=1.;
 
-    beer.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+   // beer.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     //0.5*vec3(0.02,0.02,0.06)
     //beer.drink.refractionChance=0.0;
     //beer.drink.subSurface=true;
@@ -215,15 +229,15 @@ void buildObjects(){
     //beer.drink.roughness=0.5;
 
 
-//    beer.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
-//
-//    beer.drink.diffuseColor=vec3(1);
-//    beer.drink.absorbColor=vec3(0);
-//    //vec3(1)-0.9*vec3(0.3,0.2,0.6);
-//    beer.drink.refractionChance=0.;
-//    beer.drink.subSurface=true;
-//    beer.drink.meanFreePath=0.1;
-//    beer.drink.roughness=0.9;
+    beer.drink=makeGlass(2.5*vec3(0.03,0.15,0.9),1.2,0.99);
+    //beer.drink.diffuseColor=vec3(1);
+    //beer.drink.absorbColor=vec3(0);
+    //vec3(1)-0.9*vec3(0.3,0.2,0.6);
+    beer.drink.refractionChance=0.;
+    beer.drink.subSurface=true;
+    beer.drink.meanFreePath=0.1;
+    beer.drink.isotropicScatter=0.;
+    //beer.drink.roughness=0.9;
 
 
 
@@ -255,12 +269,11 @@ void buildObjects(){
     color= vec3(0.4,0.3,0.2);
     specularity=0.5;
     roughness=0.01;
-    gasket.mat= makeMetal(color,specularity,roughness);
+   // gasket.mat= makeMetal(color,specularity,roughness);
    // makeDielectric(color,specularity,roughness);
   //  gasket.mat.surfaceEmit=0.1*vec3(0.02,0.02,0.04);
 
-  //  gasket.mat=makeGlass(vec3(1)-0.9*vec3(0,0.65,0.35),1.2,0.8);
-
+    gasket.mat=makeGlass(vec3(1)-0.9*vec3(0,0.65,0.35),1.2,0.8);
 
 
     //----------- BOX  -------------------------
@@ -324,13 +337,14 @@ void buildObjects(){
 
 
 
-    klein.center=vec3(-2,0,-3);
+    klein.center=vec3(-3,0,-3);
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;
     //klein.mat=makeDielectric(color,specularity,roughness);
 
-    klein.mat=makeGlass(3.*vec3(0.3,0.05,0.2),1.5,0.95);
+    klein.mat=makeGlass(7.*vec3(0.5,0.1,0.05),1.5,0.95);
+    //makeGlass(3.*vec3(0.3,0.05,0.2),1.5,0.95);
 
     //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
 
@@ -347,29 +361,51 @@ void buildObjects(){
     klein.mat.isotropicScatter=extra;
     klein.mat.roughness=0.04;
 
-    var.center=vec3(0,0.5,0);
-    var.size=4.;
-    var.inside=0.0;
-    var.outside=0.002;
-    var.boundingSphere=2.;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    var.center=vec3(0,1.2,0);
+    var.size=1.3;
+    var.inside=0.3;
+    var.outside=0.00;
+    var.boundingSphere=14.;
     var.smoothing =0.0;
 
-    color= vec3(0.4,0.3,0.2);
-    specularity=0.5;
-    roughness=0.01;
-    //var.mat= makeMetal(color,specularity,roughness);
+    //color= vec3(0.4,0.3,0.2);
+    //specularity=0.5;
+    //roughness=0.01;
 
-    var.mat=makeGlass(10.*vec3(0.1,0.3,0.05),1.4,0.95);
-    //makeGlass(10.*vec3(0.3,0.05,0.2),1.5,0.95);
-    //var.mat=makeGlass(5.*vec3(0.7,0.9,0.9),1.6,0.95);
+//    color = 0.6*vec3(0.3,0.2,0.6);
+//    var.mat= makeMetal(color,specularity,roughness);
+//    var.mat.diffuseColorBack = 0.4*vec3(0.2,0.6,0.3);
+
+    var.mat=makeGlass(10.*vec3(0.05,0.1,0.15),1.4,0.95);
+    //var.mat=makeGlass(10.*vec3(0.3,0.05,0.2),1.5,0.95);
+    //var.mat=makeGlass(8.*vec3(0.3,0.2,0.01),1.6,0.95);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
-    var.mat.meanFreePath=0.1;
-    var.mat.isotropicScatter=0.85;
-    var.mat.roughness=0.4;
+    var.mat.meanFreePath=0.2*extra2;
+    var.mat.isotropicScatter=extra;
+    var.mat.roughness=0.2;
 
-    Material glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.2,0.95);
-    gVar = createGlassVariety(var,glassMat,0.01);
+    Material glassMat = makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);
+    float glassThickness=0.04;
+    gVar = createGlassVariety(var,glassMat,glassThickness);
 
     Material outerVarMat = makeGlass(5.*vec3(0.05,0.5,0.05),1.4,0.95);
     marble = createGlassMarble(var,outerVarMat, glassMat);
@@ -426,8 +462,10 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, gVar) );
-
+    dist=min( dist, sdf(tv, var) );
+   // dist=min( dist, sdf(tv, gin) );
+   // dist=min( dist, sdf(tv, campari) );
+    //dist=min( dist, sdf(tv, vermouth) );
     return dist;
 }
 
@@ -438,8 +476,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-
-    return inside(tv, gVar.surf);
+    //return false;
+    return inside(tv, var);
 
 
 }
@@ -453,8 +491,10 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-
-    setData(path, gVar);
+    setData(path, var);
+    //setData(path, negroni);
+    //setData(path, campari);
+    //setData(path, vermouth);
 
 }
 
