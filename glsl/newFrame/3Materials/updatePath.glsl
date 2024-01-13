@@ -26,10 +26,13 @@ void updateFromSubSurf(inout Path path){
     vec3 beersLaw = path.absorb*path.distance;
     vec3 emitAmt = path.emit*path.distance;
 
-    if(length(beersLaw)>0.0001){
-        emitAmt *= exp( -beersLaw);
-        path.light *= exp( -beersLaw );
-    }
+
+        //if the color is varying then we already did this update inside the subsurface scatter loop
+//        if (length(beersLaw)>0.0001){
+//            emitAmt *= exp(-beersLaw);
+//            path.light *= exp(-beersLaw);
+//        }
+
 
     if(length(emitAmt)>0.0001){
         path.pixel += path.light*emitAmt;

@@ -56,10 +56,10 @@ void buildWalls(){
     //topWall.mat=makeDielectric(color,0.0,roughness);
    /// vec3(1,0.6,0.4)
 
-    //topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
-    color =vec3(1);
-    topWall.mat=makeDielectric(color,0.0,0.5);
-    topWall.mat.specularColor=vec3(0.75);
+    topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
+    //color =vec3(1);
+    //topWall.mat=makeDielectric(color,0.0,0.5);
+    //topWall.mat.specularColor=vec3(0.75);
 //    topWall.mat.specularChance=0.;
 //    0.075;
 //   topWall.mat.refractionChance=0.;

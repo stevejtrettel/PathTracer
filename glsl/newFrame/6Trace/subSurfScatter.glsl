@@ -34,6 +34,7 @@ void subSurfScatter(inout Path path){
     int scatterSteps=1000;
     float depth=0.;
     float flowDist;
+    vec3 col;
 
     //set the vector we will carry along for the ride
     Vector tv=path.tv;
@@ -49,6 +50,7 @@ void subSurfScatter(inout Path path){
     for (int i = 0; i < scatterSteps; i++){
 
         //choose the direction of scatter
+        rough = varyingIsotropicScatter(tv);
         randomDir=randomVector(temp.pos);
         temp=mix(temp,randomDir,rough);
         //update tv's direction
@@ -65,6 +67,11 @@ void subSurfScatter(inout Path path){
             //tv is behind it, temp is in front: with distance flowDist
             //find the distance
             flowDist=bisect_Scatter(tv,flowDist);
+
+                //get variable color at the location:
+                col = varyingColor(tv);
+                path.light *= exp(-col*flowDist);
+
             //flow slightly farther so you get out
             flow(tv,flowDist-EPSILON/2.);
             //set your new data, right back on the surface
@@ -76,8 +83,14 @@ void subSurfScatter(inout Path path){
         }
 
         //if we are inside still:
+
+            //get variable color at the location:
+            col = varyingColor(tv);
+            path.light *= exp(-col*flowDist);
+
         //move ahead to this point:
         tv=temp;
+        //add the distance traveled.
         depth+=flowDist;
 
         //kill off rays

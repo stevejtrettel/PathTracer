@@ -19,6 +19,8 @@ struct Material{
     float IOR;
     float specularChance;
     float refractionChance;
+    bool varyingColor;
+    bool varyingIsotropicScatter;
 };
 
 
@@ -38,7 +40,33 @@ void zeroMat(inout Material mat){
     mat.meanFreePath=1.;
     mat.specularChance=0.;
     mat.refractionChance=0.;
+    mat.varyingColor=false;
+    mat.varyingIsotropicScatter=false;
 }
+
+
+
+
+//------------------
+// The functions varyingColor and varyingIsotropicColor that may be used
+// unfortunately this means that they are set once and for all, for any material with this property
+// cant be changed on an object by object basis:
+//-----------------
+
+vec3 varyingColor(Vector tv){
+    vec3 pos = tv.pos;
+    float val1 = sin(5.*pos.y);
+    float val2 = sin(8.*pos.x*pos.z);
+    return 0.1*(vec3(val1*val1)+0.3*vec3(val2*val2,0,0));
+}
+
+float varyingIsotropicScatter(Vector tv){
+    vec3 pos = tv.pos;
+    float val = sin(3.*pos.y);
+    return val*val*val*val;
+}
+
+
 
 
 
@@ -66,8 +94,6 @@ Material makeMetal(vec3 color, float specularity, float roughness){
     return mat;
 
 }
-
-
 
 
 
