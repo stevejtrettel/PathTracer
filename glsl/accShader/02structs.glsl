@@ -32,7 +32,7 @@ Vector multiplyScalar(float a,Vector v) {
 }
 
 
-Vector normalize(Vector v){
+Vector vNormalize(Vector v){
    return Vector(v.pos,normalize(v.dir));
 }
 
@@ -40,12 +40,12 @@ Vector clone(Vector v){
     return v;
 }
 
-float dot(Vector v, Vector w){
+float vDot(Vector v, Vector w){
     return dot(v.dir,w.dir);
 }
 
 float cosAng(Vector v, Vector w){
-    return dot(normalize(v),normalize(w));
+    return vDot(vNormalize(v),vNormalize(w));
 }
 
 
@@ -107,16 +107,16 @@ Vector mix(Vector v, Vector w, float x){
 
 
 //reflect the unit tangent vector u off the surface with unit normal n
-Vector reflect(Vector v, Vector n){
-    return add(multiplyScalar(-2.0 * dot(v, n), n), v);
+Vector vReflect(Vector v, Vector n){
+    return add(multiplyScalar(-2.0 * vDot(v, n), n), v);
 }
 
 
 //refract the vector v through the surface with normal vector n, coming from a material with refactive index n1 and entering a material with index n2.
-Vector refract(Vector v, Vector n, float IOR){
+Vector vRefract(Vector v, Vector n, float IOR){
    
     float r=IOR;
-    float cosI=-dot(n,v);
+    float cosI=-vDot(n,v);
     float sinT2=r*r* (1.0 - cosI * cosI);
     if(sinT2>1.){return Vector(v.pos,vec3(0.,0.,0.));}//TIR  
     //if we are not in this case, then refraction actually occurs
@@ -134,7 +134,7 @@ float FresnelReflectAmount(float n1, float n2, Vector normal, Vector incident, f
         // Schlick aproximation
         float r0 = (n1-n2) / (n1+n2);
         r0 *= r0;
-        float cosX = -dot(normal, incident);
+        float cosX = -vDot(normal, incident);
         if (n1 > n2)
         {
             float n = n1/n2;

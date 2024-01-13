@@ -148,13 +148,13 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     //----- update the ray direction ----------
     
     // Diffuse uses a normal oriented cosine weighted hemisphere sample.
-    Vector diffuseDir= normalize(add(normal,randomSph));
+    Vector diffuseDir= vNormalize(add(normal,randomSph));
         
     // Perfectly smooth specular uses the reflection ray.
-    Vector specularDir=reflect(path.tv,normal);
+    Vector specularDir=vReflect(path.tv,normal);
     
     // Rough (glossy) specular lerps from the smooth specular to the rough diffuse by the material roughness squared
-    specularDir = normalize(mix(specularDir, diffuseDir, dat.mat.roughness * dat.mat.roughness));
+    specularDir = vNormalize(mix(specularDir, diffuseDir, dat.mat.roughness * dat.mat.roughness));
 
     Vector refractionDir;
     if(inLiquid(path.tv)){
@@ -162,11 +162,11 @@ void updateRay(inout Path path, localData dat, inout uint rngState){
     }
     else{
     //get the refracted ray direction from IOR
-     refractionDir = refract(path.tv, normal, path.inside ? dat.mat.IOR/1.0 : 1.0 / dat.mat.IOR);
+     refractionDir = vRefract(path.tv, normal, path.inside ? dat.mat.IOR/1.0 : 1.0 / dat.mat.IOR);
     }
     
     //update refraction ray based on roughness
-    refractionDir = normalize(mix(refractionDir, negate(diffuseDir), dat.mat.roughness * dat.mat.roughness));
+    refractionDir = vNormalize(mix(refractionDir, negate(diffuseDir), dat.mat.roughness * dat.mat.roughness));
     
     //choose which one of these we will actually be doing
     //this is a weird way of doing it to avoid a 3-way if statement, unsure if this is necessary
