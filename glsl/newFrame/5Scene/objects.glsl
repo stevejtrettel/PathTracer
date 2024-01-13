@@ -379,12 +379,12 @@ void buildObjects(){
 
 
 
-    var.center=vec3(0,1.2,0);
-    var.size=1.3;
-    var.inside=0.3;
-    var.outside=0.00;
-    var.boundingSphere=14.;
-    var.smoothing =0.0;
+    var.center=vec3(-2,1.8,0);
+    var.size=5.;
+    var.inside=0.01;
+    var.outside=0.01;
+    var.boundingSphere=3.1415;
+    var.smoothing =0.075;
 
     //color= vec3(0.4,0.3,0.2);
     //specularity=0.5;
@@ -394,14 +394,16 @@ void buildObjects(){
 //    var.mat= makeMetal(color,specularity,roughness);
 //    var.mat.diffuseColorBack = 0.4*vec3(0.2,0.6,0.3);
 
-    var.mat=makeGlass(10.*vec3(0.05,0.1,0.15),1.4,0.95);
+    //var.mat=makeGlass(10.*vec3(0.05,0.1,0.15),1.4,0.95);
     //var.mat=makeGlass(10.*vec3(0.3,0.05,0.2),1.5,0.95);
     //var.mat=makeGlass(8.*vec3(0.3,0.2,0.01),1.6,0.95);
-    var.mat.refractionChance=0.;
-    var.mat.subSurface=true;
-    var.mat.meanFreePath=0.2*extra2;
-    var.mat.isotropicScatter=extra;
-    var.mat.roughness=0.2;
+    var.mat=makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);
+
+    //var.mat.refractionChance=0.;
+   // var.mat.subSurface=true;
+    //var.mat.meanFreePath=0.2*extra2;
+   // var.mat.isotropicScatter=extra;
+    //var.mat.roughness=0.2;
 
     Material glassMat = makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);
     float glassThickness=0.04;
