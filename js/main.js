@@ -243,9 +243,6 @@
 
         async function main() {
 
-
-
-
             //set the canvas
             canvas = document.querySelector('#c');
 
@@ -264,9 +261,6 @@
             animate();
 
         }
-
-
-
 
 
 
