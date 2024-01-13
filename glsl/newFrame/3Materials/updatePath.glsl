@@ -31,7 +31,9 @@ void updateFromSubSurf(inout Path path){
         path.light *= exp( -beersLaw );
     }
 
-    path.pixel += path.light*emitAmt;
+    if(length(emitAmt)>0.0001){
+        path.pixel += path.light*emitAmt;
+    }
 }
 
 

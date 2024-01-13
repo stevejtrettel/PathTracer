@@ -363,22 +363,6 @@ void buildObjects(){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     var.center=vec3(-2,1.8,0);
     var.size=5.;
     var.inside=0.01;

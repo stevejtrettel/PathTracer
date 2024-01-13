@@ -3,7 +3,6 @@
 //The MATERIAL Struct
 //-------------------------------------------------
 
-
 struct Material{
     bool render;
     bool subSurface;
@@ -20,7 +19,6 @@ struct Material{
     float IOR;
     float specularChance;
     float refractionChance;
-
 };
 
 

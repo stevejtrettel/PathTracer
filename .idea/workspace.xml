@@ -2,11 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/simple/varieties.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Materials/material.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Materials/material.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Materials/updatePath.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Materials/updatePath.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
