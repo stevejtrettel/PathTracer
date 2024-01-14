@@ -2,10 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/glsl/newFrame/4Objects/sample.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/glsl/newFrame/6Trace/sampleLight.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/3Materials/material.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/3Materials/material.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/1Setup/random.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/1Setup/random.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/lights.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/5Scene/walls.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/newFrame/6Trace/pathTrace.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/newFrame/6Trace/pathTrace.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/scene.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/scene.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,11 +52,11 @@
       <recent name="$PROJECT_DIR$/glsl/newFrame/OLD" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/glsl/newFrame/4Objects" />
       <recent name="$PROJECT_DIR$/glsl" />
       <recent name="$PROJECT_DIR$/glsl/newFrame/4Objects/compound" />
       <recent name="$PROJECT_DIR$/glsl/newFrame/4Objects/simple" />
       <recent name="$PROJECT_DIR$/glsl/newFrame/3Renderer" />
-      <recent name="$PROJECT_DIR$/glsl/newFrame/OLD" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

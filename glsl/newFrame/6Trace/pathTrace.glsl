@@ -27,6 +27,9 @@ vec3 pathTrace(Path path){
                 //false=we did not just subsurface scatter
                 scatter(path);
 
+                //go through and sample the lights from this location
+               // sampleLights(path);
+
                 if(path.subSurface){
                        //do the subsurface scattering:
                         //this leaves the ray at a new location and in a new direction,

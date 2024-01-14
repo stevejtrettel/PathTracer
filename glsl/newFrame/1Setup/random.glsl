@@ -47,6 +47,23 @@ float randomFloat(float a,float b){
 
 
 
+vec2 randomDiskPolar(float r){
+    float theta = 2.*PI*randomFloat();
+    float rad = sqrt(randomFloat());
+    rad *= r;
+
+    return vec2(rad, theta);
+}
+
+
+vec2 randomDiskXY( float r){
+    vec2 polar = randomDiskPolar(r);
+    float rad = polar.x;
+    float ang = polar.y;
+    return rad*vec2(cos(ang),sin(ang));
+}
+
+
 
 //random unit vector at origin
 //this is thanks to archimedes sphere and the cylinder

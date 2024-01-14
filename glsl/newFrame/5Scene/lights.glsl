@@ -34,7 +34,7 @@ void buildLights(){
 
     //----------- LIGHT 2 -------------------------
     light2.center=vec3(-10,3,14);
-    light2.radius=2.*extra4;
+    light2.radius=0.75;
 
     color= vec3(1.);
     intensity=205.;
@@ -102,3 +102,14 @@ void setData_Lights(inout Path path){
    // setData(path, light3);
 
 }
+
+
+
+
+
+//-------------------------------------------------
+//Sample the Lights
+//-------------------------------------------------
+
+//this needs to be updated in the sampleLight file
+//UGHHHHHHHHHHHHHHH
