@@ -34,7 +34,8 @@ void buildWalls(){
     //vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
 
-    color= 0.1*vec3(107,152,250)/255.;
+    color= vec3(0.08);
+    //0.1*vec3(107,152,250)/255.;
     //vec3(0.03);
     //0.2*vec3(0.8,0.8,0.4);
     //vec3(0.1);
@@ -56,9 +57,9 @@ void buildWalls(){
     //topWall.mat=makeDielectric(color,0.0,roughness);
    /// vec3(1,0.6,0.4)
 
-    topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
-    //color =vec3(1);
-    //topWall.mat=makeDielectric(color,0.0,0.5);
+   // topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
+    color =vec3(1);
+    topWall.mat=makeDielectric(color,0.0,0.5);
     //topWall.mat.specularColor=vec3(0.75);
 //    topWall.mat.specularChance=0.;
 //    0.075;
@@ -69,7 +70,9 @@ void buildWalls(){
     orientation.pos=vec3(0,0,-12);
     orientation.dir=vec3(0,0,1);
 
-    color= 0.1*vec3(107,152,250)/255.;
+    color=0.2*vec3(0.5,0.5,0.6);
+    //*vec3(240,106,86)/255. ;
+    //0.1*vec3(107,152,250)/255.;
     //0.3*vec3(170,150,80)/255.;
     //0.1*vec3(107,152,250)/255.;
     //=vec3(0.1);
@@ -106,14 +109,15 @@ void buildWalls(){
     leftWall.orientation=orientation;
     leftWall.mat=makeDielectric(color,0.0,roughness);
     leftWall.mat.specularChance=0.5;
-    //leftWall.mat=makeLight(vec3(1,1,1),5.*extra4);
+    leftWall.mat=makeLight(vec3(1,1,1),5.*extra4);
 
 
     //----------- THE RIGHT -------------------------
     orientation.pos=vec3(6.5,0,0);
     orientation.dir=vec3(-1,0,0);
 
-    color= 0.4*vec3(0.8,0.8,0.4);
+    color= 0.2*vec3(0.5,0.6,0.5);
+    //0.4*vec3(0.8,0.8,0.4);
     //0.15*vec3(240,106,86)/255.;
     //0.2*vec3(240,126,106)/255.;
    // color=0.2*vec3(107,152,250)/255.;

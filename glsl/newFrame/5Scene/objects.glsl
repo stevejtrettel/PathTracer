@@ -372,9 +372,9 @@ void buildObjects(){
 
 
     var.center=vec3(-2,1.8,0);
-    var.size=1.;
-    var.inside=0.01;
-    var.outside=0.01;
+    var.size=2.75;
+    var.inside=0.025;
+    var.outside=0.025;
     var.boundingSphere=3.1415;
     var.smoothing =0.075;
 
@@ -387,7 +387,7 @@ void buildObjects(){
 //    var.mat= makeMetal(color,specularity,roughness);
 //    var.mat.diffuseColorBack = 0.4*vec3(0.2,0.6,0.3);
 
-    var.mat=makeGlass(10.*vec3(0.05,0.1,0.15),1.4,0.95);
+    var.mat=makeGlass(10.*vec3(0.05,0.1,0.15),1.4,0.99);
     //var.mat=makeGlass(10.*vec3(0.3,0.05,0.2),1.5,0.95);
     //var.mat=makeGlass(8.*vec3(0.3,0.2,0.01),1.6,0.95);
     //var.mat=makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);
@@ -396,7 +396,7 @@ void buildObjects(){
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.2*extra2;
     var.mat.isotropicScatter=extra;
-    var.mat.roughness=0.2;
+    var.mat.roughness=0.7;
     var.mat.varyingColor=true;
 
     Material glassMat = makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);

@@ -54,16 +54,20 @@ void zeroMat(inout Material mat){
 //-----------------
 
 vec3 varyingColor(Vector tv){
-    vec3 pos = tv.pos;
-    float val1 = sin(5.*pos.y);
-    float val2 = sin(8.*pos.x*pos.z);
-    return 0.1*(vec3(val1*val1)+0.3*vec3(val2*val2,0,0));
+    //return vec3(0.1,0.1,0.1);
+    vec3 pos = normalize(tv.pos);
+    vec3 dir = normalize(tv.dir);
+    vec3 base = vec3(0.2,0.5,0.8);
+    float scale = 2.*extra3;
+    return scale*(base*(vec3(0.5)+0.5*abs(pos))+0.35*sin(5.*pos));
 }
 
 float varyingIsotropicScatter(Vector tv){
+    return extra;
     vec3 pos = tv.pos;
-    float val = sin(3.*pos.y);
-    return val*val*val*val;
+    float val = sin(8.*pos.y+17.*pos.x*pos.z-15.*pos.z);
+    float val2 = +sin(15.*pos.y-25.*pos.x*pos.z);
+    return 0.9*(0.5*val*val+ 0.25*val2*val2 + 0.25);
 }
 
 
