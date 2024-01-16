@@ -14,7 +14,11 @@ class PathTracer{
         //save the canvas
         this.canvas = canvas;
         //build the renderer
-        this.renderer = new WebGLRenderer({canvas: canvas});
+        this.renderer = new WebGLRenderer({
+            canvas: canvas,
+            //this is what lets me screenshot the canvas I guess?
+            preserveDrawingBuffer:true,
+        });
         this.renderer.setSize(res.x,res.y);
 
         //the control system
@@ -69,20 +73,16 @@ class PathTracer{
 
     saveImage(){
 
-        // Grab the canvas element
-        let canvas = document.getElementById("World");
-        // Create a PNG image of the pixels drawn on the canvas using the toDataURL method.
-        let dataURL = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");;
-        // Create a dummy link text
-        let a = document.createElement('a');
-        // Set the link to the image so that when clicked, the image begins downloading
-        a.href = dataURL
-        // Specify the image filename
-        a.download = `${this.tracer.material.uniforms.frameNumber.value}`+'.png';
-        // Click on the link to set off download
-        a.click();
-        //remove this element fromm the doc
-        //document.removeChild(a);
+        const date = new Date();
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+
+        let canvas = document.getElementById('World');
+        let link = document.createElement('a');
+        link.download = `${this.tracer.material.uniforms.frameNumber.value}spp pathtrace ${month}-${day}`+'.png';
+        link.href = canvas.toDataURL("image/png");
+            //.replace("image/png", "image/octet-stream");
+        link.click();
     }
 
     resize(res){

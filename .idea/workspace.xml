@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/glsl/display/postprocess.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/accumulate/accumulate.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/accumulate/accumulate.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/display/display.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/display/display.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/js/PathTracer.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/PathTracer.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +84,7 @@
       <workItem from="1704861169395" duration="3313000" />
       <workItem from="1704916302672" duration="21040000" />
       <workItem from="1705345819132" duration="23451000" />
-      <workItem from="1705434474383" duration="6008000" />
+      <workItem from="1705434474383" duration="7713000" />
     </task>
     <servers />
   </component>
