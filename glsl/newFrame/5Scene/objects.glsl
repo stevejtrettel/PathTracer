@@ -448,7 +448,7 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, var) );
+    dist=min( dist, sdf(tv, negroni) );
    // dist=min( dist, sdf(tv, gin) );
    // dist=min( dist, sdf(tv, campari) );
     //dist=min( dist, sdf(tv, vermouth) );
@@ -462,8 +462,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    //return false;
-    return inside(tv, var);
+    return false;
+    //return inside(tv, var);
 
 
 }
@@ -477,7 +477,7 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-    setData(path, var);
+    setData(path, negroni);
     //setData(path, negroni);
     //setData(path, campari);
     //setData(path, vermouth);
