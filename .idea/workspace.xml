@@ -2,15 +2,63 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/_setup.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/algVariety.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/2Space/_space.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/3Materials/_materials.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/_objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/_scene.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/_trace.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/js/shaders.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/vite.config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/trace/1Setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/trace/1Setup/uniforms.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/trace/2Space/camera.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/trace/2Space/camera.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/trace/6Trace/pathTrace.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/trace/6Trace/pathTrace.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/trace/main.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/trace/main.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/PathTracer.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/PathTracer.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/UI.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/UI.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/buildShaders.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/buildShaders.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/accumulate/accumulate.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/accumulate/accumulate.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/display/display.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/display/display.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/1Setup/alg_var.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/1Setup/math.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/math.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/1Setup/random.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/random.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/1Setup/sky.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/sky.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/1Setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/uniforms.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/2Space/camera.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/2Space/camera.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/2Space/geometry.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/2Space/geometry.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/2Space/physics.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/2Space/physics.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/3Materials/material.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/3Materials/material.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/3Materials/path.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/3Materials/path.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/3Materials/scatterPath.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/3Materials/scatterPath.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/3Materials/setImpactData.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/3Materials/setImpactData.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/3Materials/updatePath.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/3Materials/updatePath.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/4Objects/compound/compoundObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/compoundObjects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/4Objects/compound/multiMatObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/multiMatObjects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/4Objects/computations.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/computations.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/4Objects/simple/fractals.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/fractals.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/4Objects/simple/polytope.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/polytope.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/4Objects/simple/shapes.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/4Objects/simple/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/5Scene/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/lights.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/5Scene/scene.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/scene.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/walls.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/6Trace/pathTrace.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/pathTrace.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/6Trace/raymarch.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/raymarch.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/6Trace/raytrace.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/raytrace.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/6Trace/stepForward.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForward.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/6Trace/subSurfScatter.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/subSurfScatter.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/trace/main.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/tracer.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/ComputeShader.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/ComputeShader.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/KeyControls.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/KeyControls.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/PathTracer.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/PathTracer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/UI.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/UI.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/buildShaders.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/libs/OLDthree.module.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/libs/dat.gui.module.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/libs/stats.module.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/libs/three.module.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/tex/bk.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/tex/bk.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/tex/bk_sm.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/tex/bk_sm.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/tex/glass_hallway.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/tex/glass_hallway.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/tex/office.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/tex/office.jpg" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,25 +87,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/strettel/Code/PathTracer&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Users/strettel/Code/PathTracer",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/glsl/newFrame/OLD" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/js" />
       <recent name="$PROJECT_DIR$/js/NEW" />
       <recent name="$PROJECT_DIR$/glsl" />
       <recent name="$PROJECT_DIR$/glsl/newFrame/4Objects/compound" />
-      <recent name="$PROJECT_DIR$/glsl/newFrame/4Objects/simple" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -89,6 +139,7 @@
       <workItem from="1704861169395" duration="3313000" />
       <workItem from="1704916302672" duration="21040000" />
       <workItem from="1705345819132" duration="23451000" />
+      <workItem from="1705434474383" duration="5700000" />
     </task>
     <servers />
   </component>
