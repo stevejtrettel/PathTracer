@@ -57,11 +57,15 @@ void main() {
 
     vec3 pixel=vec3(0);
     pixel += newFrame(gl_FragCoord.xy,0.);
-//    pixel += newFrame(gl_FragCoord.xy,1239845.);
-//    pixel += newFrame(gl_FragCoord.xy,1573655.);
-//   pixel += newFrame(gl_FragCoord.xy,1241245.);
-//    pixel += newFrame(gl_FragCoord.xy,15738765.);
-//    pixel /= 5.;
+    pixel += newFrame(gl_FragCoord.xy,1239845.);
+    pixel += newFrame(gl_FragCoord.xy,1573655.);
+   pixel += newFrame(gl_FragCoord.xy,1241245.);
+    pixel += newFrame(gl_FragCoord.xy,15738765.);
+    pixel += newFrame(gl_FragCoord.xy,1269845.);
+    pixel += newFrame(gl_FragCoord.xy,1973655.);
+    pixel += newFrame(gl_FragCoord.xy,2241245.);
+    pixel += newFrame(gl_FragCoord.xy,98738765.);
+    pixel /= 10.;
 
         gl_FragColor=vec4(pixel, 1.);
 

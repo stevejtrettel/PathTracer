@@ -133,7 +133,7 @@ async function buildShaders() {
 
     //return the shaders sorted by type, and with their shader text and uniforms ready to go.
     return {
-        trace: {
+        tracer: {
             shader: await buildTraceShader(),
             uniforms: traceUniforms,
         },

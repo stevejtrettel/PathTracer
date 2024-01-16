@@ -15,19 +15,19 @@ class PathTracer{
         this.controls = new KeyControls();
 
         //the shaders
-        this.trace = new ComputeShader(shaders.trace, this.renderer,res);
+        this.tracer = new ComputeShader(shaders.tracer, this.renderer,res);
         this.accumulate = new ComputeShader(shaders.accumulate, this.renderer,res);
         this.display = new ComputeShader(shaders.display, this.renderer,res);
 
     }s
 
     updateUniforms(){
-        this.trace.material.uniforms.frameSeed.value +=1.;
+        this.tracer.material.uniforms.frameSeed.value +=1.;
         this.accumulate.material.uniforms.frameNumber.value += 1.;
 
         if(this.controls.isPressed()){
             this.controls.update();
-            this.trace.updateUniforms({
+            this.tracer.updateUniforms({
                 facing: this.controls.facing,
                 location: this.controls.position,
             });
@@ -42,8 +42,8 @@ class PathTracer{
         this.updateUniforms();
 
         //render a new frame
-        this.trace.render();
-        this.accumulate.updateUniforms({new: this.trace.getData()} );
+        this.tracer.render();
+        this.accumulate.updateUniforms({new: this.tracer.getData()} );
 
         //accumulate it
         this.accumulate.render();
@@ -56,7 +56,7 @@ class PathTracer{
     }
 
     reset(){
-        this.trace.updateUniforms({frameSeed:0});
+        this.tracer.updateUniforms({frameSeed:0});
         this.accumulate.updateUniforms({frameNumber:0});
     }
 
@@ -80,7 +80,7 @@ class PathTracer{
     }
 
     resize(res){
-        this.trace.resize(res);
+        this.tracer.resize(res);
         this.accumulate.resize(res);
         this.display.resize(res);
     }
