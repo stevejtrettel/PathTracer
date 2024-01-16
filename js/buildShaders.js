@@ -84,7 +84,7 @@ let traceUniforms={
     focalLength: {
         value: 5.
     },
-    brightness: {
+    exposure: {
         value: 1.
     },
     focusHelp: {

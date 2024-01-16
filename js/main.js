@@ -40,16 +40,10 @@ let stats = new Stats();
 stats.showPanel(panelType); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
 
-//build the renderer
-let renderer = new WebGLRenderer({
-    canvas: canvas
-});
-
-renderer.setSize(window.innerWidth, window.innerHeight);
 
 //make all the objects
 let shaders = await buildShaders();
-let pathtracer = new PathTracer(shaders, renderer);
+let pathtracer = new PathTracer(shaders, canvas);
 let ui = new UI(pathtracer);
 
 animate();

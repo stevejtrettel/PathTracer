@@ -9,7 +9,7 @@ uniform sampler2D skySM;
 uniform mat3 facing;
 uniform vec3 location;
 uniform float frameSeed;
-uniform float brightness;
+uniform float exposure;
 
 uniform float aperture;
 uniform float focalLength;

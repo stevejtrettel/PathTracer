@@ -7,7 +7,7 @@ class UI extends GUI{
         this.params = {
             aperture: 0.0,
             focalLength:5,
-            brightness:1,
+            exposure:1,
             focusHelp:false,
             fov:50,
             extra:0.5,
@@ -21,6 +21,7 @@ class UI extends GUI{
         //make folders
         const cam = this.addFolder('Camera');
         const params = this.addFolder('Parameters');
+        const ren = this.addFolder('Render');
 
 
         cam.add(this.params, 'aperture',0,2,0.001).name('Aperture').onChange(function(value){
@@ -37,6 +38,10 @@ class UI extends GUI{
         });;
         cam.add(this.params, 'fov',40,140,1).name('FOV').onChange(function(value){
             pathtracer.tracer.updateUniforms({fov: value});
+            pathtracer.reset();
+        });
+        cam.add(this.params, 'exposure',0,2,1).name('Exposure').onChange(function(value){
+            pathtracer.tracer.updateUniforms({exposure: value});
             pathtracer.reset();
         });
 
@@ -58,12 +63,12 @@ class UI extends GUI{
             pathtracer.reset();
         });
 
-        this.add(this.params, 'preview').name('Preview').onChange(function(value){
+        ren.add(this.params, 'preview').name('Preview').onChange(function(value){
             let adjust = 1.;
-            if(value){ adjust =0.125;}
+            if(value){ adjust =1/16;}
             let res = {x: Math.floor(adjust * window.innerWidth), y: Math.floor(adjust * window.innerHeight)};
-            pathtracer.accumulate.resize(res);
-            pathtracer.tracer.resize(res);
+            pathtracer.accumulate.setSize(res);
+            pathtracer.tracer.setSize(res);
             //pathtracer.display.resize(res);
         });
 

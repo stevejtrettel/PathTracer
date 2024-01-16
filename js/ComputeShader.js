@@ -82,7 +82,7 @@ class ComputeShader {
         }
     }
 
-    resize(res){
+    setSize(res){
         this.res=res;
         this.a.setSize(res.x,res.y);
         this.b.setSize(res.x,res.y);
