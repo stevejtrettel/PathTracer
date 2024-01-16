@@ -24,7 +24,6 @@ vec3 pathTrace(Path path){
                 updateFromSky(path);
 
                 //scatter the path off in a new direction
-                //false=we did not just subsurface scatter
                 scatter(path);
 
                 if(path.subSurface){

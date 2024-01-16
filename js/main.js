@@ -8,29 +8,6 @@ import buildShaders from "./buildShaders.js";
 
 
 
-
-function animate() {
-
-    requestAnimationFrame(animate);
-
-    stats.begin();
-
-    pathtracer.newFrame();
-
-    stats.end();
-
-}
-
-
-
-
-
-
-
-//Actually Running Things
-//=============================================
-
-
 //set the canvas
 let canvas = document.querySelector('#World');
 
@@ -41,12 +18,20 @@ stats.showPanel(panelType); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
 
 
-//make all the objects
+//build the path tracer
 let shaders = await buildShaders();
 let pathtracer = new PathTracer(shaders, canvas);
 let ui = new UI(pathtracer);
 
-animate();
 
-// tracer.saveImage();
+//the animation loop
+function animate() {
+    requestAnimationFrame(animate);
+    stats.begin();
+    pathtracer.newFrame();
+    stats.end();
+}
+
+//run the program
+animate();
 

@@ -8,8 +8,9 @@ uniform sampler2D sky;
 uniform sampler2D skySM;
 uniform mat3 facing;
 uniform vec3 location;
-uniform float frameSeed;
+uniform float frameNumber;
 uniform float exposure;
+uniform bool renderBlocks;
 
 uniform float aperture;
 uniform float focalLength;

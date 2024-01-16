@@ -74,7 +74,7 @@ let traceUniforms={
     location: {
         value: new THREE.Vector3(0, 0, 0)
     },
-    frameSeed: {
+    frameNumber: {
         value: 0
     },
 
@@ -92,6 +92,9 @@ let traceUniforms={
     },
     fov: {
         value: 50
+    },
+    renderBlocks: {
+        value: false
     },
     extra: {
         value: 0.5

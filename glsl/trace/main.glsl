@@ -6,25 +6,37 @@
 //-----------------------------------------------------------------------
 
 
-//get the new frame
-vec3 newFrame(vec2 fragCoord, float numRuns){
+
+//decide if a pixel is rendered this round (when using renderblocks)
+bool renderPixel(vec2 fragCoord){
     bool render=true;
-//    float corner = mod(frameSeed,4.);
-//    if(corner == 1.){
-//        render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
-//    }
-//    else if( corner == 2.){
-//        render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
-//    }
-//    else if( corner == 3.){
-//        render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
-//    }
-//    else{
-//        render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
-//    }
-    if(render){
+    if(renderBlocks){
+        float corner = mod(frameNumber, 4.);
+        if (corner == 1.){
+            render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
+        }
+        else if (corner == 2.){
+            render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
+        }
+        else if (corner == 3.){
+            render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
+        }
+        else {
+            render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
+        }
+    }
+    return render;
+}
+
+
+
+//get the new frame
+vec3 newFrame(vec2 fragCoord ){
+
+    if(renderPixel(fragCoord)){
         // initialize a random number seed
-        seed = randomSeed(fragCoord, frameSeed+numRuns);
+        float rand = floor(1000.*randomFloat());
+        seed = randomSeed(fragCoord, frameNumber+rand);
 
         //set up the camera:
         Camera cam=buildCamFromUniforms();
@@ -37,9 +49,15 @@ vec3 newFrame(vec2 fragCoord, float numRuns){
         buildScene();
 
         //do one trace out into the scene
-        return pathTrace(path);
+        vec3 col = pathTrace(path);
+        float adjust = 1.;
+        //if we use renderblocks, need to increase brightness to account for black pixels
+        if(renderBlocks){ adjust = 4.;}
+        //do the adjustments from this and exposure
+        return adjust * exposure * col;
     }
 
+    //if we don't render the pixel; just return black
     return vec3(0);
 }
 
@@ -56,18 +74,10 @@ vec3 newFrame(vec2 fragCoord, float numRuns){
 void main() {
 
     vec3 pixel=vec3(0);
-    pixel += newFrame(gl_FragCoord.xy,0.);
-//    pixel += newFrame(gl_FragCoord.xy,1239845.);
-//    pixel += newFrame(gl_FragCoord.xy,1573655.);
-//   pixel += newFrame(gl_FragCoord.xy,1241245.);
-//    pixel += newFrame(gl_FragCoord.xy,15738765.);
-//    pixel += newFrame(gl_FragCoord.xy,1269845.);
-//    pixel += newFrame(gl_FragCoord.xy,1973655.);
-//    pixel += newFrame(gl_FragCoord.xy,2241245.);
-//    pixel += newFrame(gl_FragCoord.xy,98738765.);
-//    pixel /= 10.;
-
-        gl_FragColor=vec4(pixel, 1.);
-
+    //for(int i =0; i<5; i++){
+        pixel += newFrame(gl_FragCoord.xy);
+   // }
+    //pixel /= 5.;
+    gl_FragColor=vec4(pixel, 1.);
 }
 

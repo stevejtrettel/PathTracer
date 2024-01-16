@@ -16,6 +16,7 @@ class UI extends GUI{
             extra4:0.5,
             saveit: ()=>pathtracer.saveImage(),
             preview: false,
+            renderBlocks:false,
         };
 
         //make folders
@@ -40,7 +41,7 @@ class UI extends GUI{
             pathtracer.tracer.updateUniforms({fov: value});
             pathtracer.reset();
         });
-        cam.add(this.params, 'exposure',0,2,1).name('Exposure').onChange(function(value){
+        cam.add(this.params, 'exposure',0,2,0.01).name('Exposure').onChange(function(value){
             pathtracer.tracer.updateUniforms({exposure: value});
             pathtracer.reset();
         });
@@ -65,14 +66,18 @@ class UI extends GUI{
 
         ren.add(this.params, 'preview').name('Preview').onChange(function(value){
             let adjust = 1.;
-            if(value){ adjust =1/16;}
+            if(value){ adjust =1/4;}
             let res = {x: Math.floor(adjust * window.innerWidth), y: Math.floor(adjust * window.innerHeight)};
             pathtracer.accumulate.setSize(res);
             pathtracer.tracer.setSize(res);
             //pathtracer.display.resize(res);
         });
 
-        // this.add(this.params,'saveit').name('Save Image');
+        ren.add(this.params,'renderBlocks').name('Render Blocks').onChange(function(value){
+            pathtracer.tracer.updateUniforms({renderBlocks:value});
+        });
+
+         this.add(this.params,'saveit').name('Save Image');
 
     }
 

@@ -108,7 +108,6 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
     //update the tangent vector
     tv=Vector(pos,dir);
 
-
     //rotate position to be in the right spot
     //THIS IS A HACK: BASED ON LENS BEING CENTERED AT ORIGIN
     //to be corect should first translate to origin; do this, then translate back
@@ -116,7 +115,6 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
 
     //translate by the right amount
     tv.pos+=cam.pos+startPos;
-
 
     //rotate by facing (a uniform)
     tv=rotateByFacing(tv,cam.facing);

@@ -28,7 +28,7 @@ class PathTracer{
     }
 
     updateUniforms(){
-        this.tracer.material.uniforms.frameSeed.value +=1.;
+        this.tracer.material.uniforms.frameNumber.value +=1.;
         this.accumulate.material.uniforms.frameNumber.value += 1.;
 
         if(this.controls.isPressed()){
@@ -62,27 +62,27 @@ class PathTracer{
     }
 
     reset(){
-        this.tracer.updateUniforms({frameSeed:0});
+        this.tracer.updateUniforms({frameNumber:0});
         this.accumulate.updateUniforms({frameNumber:0});
     }
 
 
     saveImage(){
-        // // Grab the canvas element
-        // let canvas = document.getElementById("World");
-        // console.log(canvas);
-        // // Create a PNG image of the pixels drawn on the canvas using the toDataURL method.
-        // let dataURL = canvas.toDataURL("image/png");
-        // // Create a dummy link text
-        // let a = document.createElement('a');
-        // // Set the link to the image so that when clicked, the image begins downloading
-        // a.href = dataURL
-        // // Specify the image filename
-        // a.download = `${this.compute.material.uniforms.frameSeed.value}`+'.png';
-        // // Click on the link to set off download
-        // a.click();
-        // //remove this element fromm the doc
-        // //document.removeChild(a);
+
+        // Grab the canvas element
+        let canvas = document.getElementById("World");
+        // Create a PNG image of the pixels drawn on the canvas using the toDataURL method.
+        let dataURL = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");;
+        // Create a dummy link text
+        let a = document.createElement('a');
+        // Set the link to the image so that when clicked, the image begins downloading
+        a.href = dataURL
+        // Specify the image filename
+        a.download = `${this.tracer.material.uniforms.frameNumber.value}`+'.png';
+        // Click on the link to set off download
+        a.click();
+        //remove this element fromm the doc
+        //document.removeChild(a);
     }
 
     resize(res){
