@@ -10,13 +10,17 @@ class UI extends GUI{
             exposure:1,
             focusHelp:false,
             fov:50,
+
             extra:0.5,
             extra2:0.5,
             extra3:0.5,
             extra4:0.5,
-            saveit: ()=>pathtracer.saveImage(),
+
             preview: false,
             renderBlocks:false,
+            resize: ()=>pathtracer.resize({x:window.innerWidth,y:window.innerHeight}),
+
+            saveit: ()=>pathtracer.saveImage(),
         };
 
         //make folders
@@ -64,7 +68,9 @@ class UI extends GUI{
             pathtracer.reset();
         });
 
-        ren.add(this.params, 'preview').name('Preview').onChange(function(value){
+        ren.add(this.params,'resize').name('Size to Screen');
+
+        ren.add(this.params, 'preview').name('Preview Quality').onChange(function(value){
             let adjust = 1.;
             if(value){ adjust =1/4;}
             let res = {x: Math.floor(adjust * window.innerWidth), y: Math.floor(adjust * window.innerHeight)};
