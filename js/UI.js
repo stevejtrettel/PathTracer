@@ -14,6 +14,8 @@ class UI extends GUI{
             extra2:0.5,
             extra3:0.5,
             extra4:0.5,
+            saveit: ()=>pathtracer.saveImage(),
+            preview: false,
         };
 
         //make folders
@@ -55,6 +57,15 @@ class UI extends GUI{
             pathtracer.compute.updateUniforms({extra4:value});
             pathtracer.reset();
         });
+
+        this.add(this.params, 'preview').name('Preview').onChange(function(value){
+            let adjust = 1.;
+            if(value){ adjust =0.25;}
+            pathtracer.compute.resize({x: adjust * window.innerWidth, y: adjust * window.innerHeight});
+            pathtracer.accumulate.resize({x: adjust * window.innerWidth, y: adjust * window.innerHeight});
+        })
+
+        // this.add(this.params,'saveit').name('Save Image');
 
     }
 

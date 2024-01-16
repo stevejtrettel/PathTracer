@@ -10,40 +10,40 @@ const skyTexSmall = new THREE.TextureLoader().load('/js/tex/office.jpg');
 
 
 
-async function buildComputeShader() {
+async function buildTraceShader() {
 
     let newShader = '';
 
     const shaders = [] = [
-        {file: '../glsl/compute/1Setup/uniforms.glsl'},
-        {file: '../glsl/compute/1Setup/math.glsl'},
-        {file: '../glsl/compute/1Setup/random.glsl'},
-        {file: '../glsl/compute/1Setup/sky.glsl'},
-        {file: '../glsl/compute/2Space/geometry.glsl'},
-        {file: '../glsl/compute/2Space/physics.glsl'},
-        {file: '../glsl/compute/2Space/camera.glsl'},
-        {file: '../glsl/compute/3Materials/material.glsl'},
-        {file: '../glsl/compute/3Materials/path.glsl'},
-        {file: '../glsl/compute/3Materials/setImpactData.glsl'},
-        {file: '../glsl/compute/3Materials/scatterPath.glsl'},
-        {file: '../glsl/compute/3Materials/updatePath.glsl'},
-        {file: '../glsl/compute/4Objects/computations.glsl'},
-        {file: '../glsl/compute/4Objects/simple/shapes.glsl'},
-        {file: '../glsl/compute/4Objects/simple/varieties.glsl'},
-        {file: '../glsl/compute/4Objects/simple/fractals.glsl'},
-        {file: '../glsl/compute/4Objects/simple/polytope.glsl'},
-        {file: '../glsl/compute/4Objects/compound/compoundObjects.glsl'},
-        {file: '../glsl/compute/4Objects/compound/multiMatObjects.glsl'},
-        {file: '../glsl/compute/5Scene/walls.glsl'},
-        {file: '../glsl/compute/5Scene/lights.glsl'},
-        {file: '../glsl/compute/5Scene/objects.glsl'},
-        {file: '../glsl/compute/5Scene/scene.glsl'},
-        {file: '../glsl/compute/6Trace/raymarch.glsl'},
-        {file: '../glsl/compute/6Trace/raytrace.glsl'},
-        {file: '../glsl/compute/6Trace/subSurfScatter.glsl'},
-        {file: '../glsl/compute/6Trace/stepForward.glsl'},
-        {file: '../glsl/compute/6Trace/pathTrace.glsl'},
-        {file: '../glsl/compute/main.glsl'},
+        {file: '../glsl/trace/1Setup/uniforms.glsl'},
+        {file: '../glsl/trace/1Setup/math.glsl'},
+        {file: '../glsl/trace/1Setup/random.glsl'},
+        {file: '../glsl/trace/1Setup/sky.glsl'},
+        {file: '../glsl/trace/2Space/geometry.glsl'},
+        {file: '../glsl/trace/2Space/physics.glsl'},
+        {file: '../glsl/trace/2Space/camera.glsl'},
+        {file: '../glsl/trace/3Materials/material.glsl'},
+        {file: '../glsl/trace/3Materials/path.glsl'},
+        {file: '../glsl/trace/3Materials/setImpactData.glsl'},
+        {file: '../glsl/trace/3Materials/scatterPath.glsl'},
+        {file: '../glsl/trace/3Materials/updatePath.glsl'},
+        {file: '../glsl/trace/4Objects/computations.glsl'},
+        {file: '../glsl/trace/4Objects/simple/shapes.glsl'},
+        {file: '../glsl/trace/4Objects/simple/varieties.glsl'},
+        {file: '../glsl/trace/4Objects/simple/fractals.glsl'},
+        {file: '../glsl/trace/4Objects/simple/polytope.glsl'},
+        {file: '../glsl/trace/4Objects/compound/compoundObjects.glsl'},
+        {file: '../glsl/trace/4Objects/compound/multiMatObjects.glsl'},
+        {file: '../glsl/trace/5Scene/walls.glsl'},
+        {file: '../glsl/trace/5Scene/lights.glsl'},
+        {file: '../glsl/trace/5Scene/objects.glsl'},
+        {file: '../glsl/trace/5Scene/scene.glsl'},
+        {file: '../glsl/trace/6Trace/raymarch.glsl'},
+        {file: '../glsl/trace/6Trace/raytrace.glsl'},
+        {file: '../glsl/trace/6Trace/subSurfScatter.glsl'},
+        {file: '../glsl/trace/6Trace/stepForward.glsl'},
+        {file: '../glsl/trace/6Trace/pathTrace.glsl'},
+        {file: '../glsl/trace/main.glsl'},
     ];
 
     //loop over the list of files
@@ -58,7 +58,7 @@ async function buildComputeShader() {
 }
 
 
-let computeUniforms={
+let traceUniforms={
     iResolution: {
         value: new THREE.Vector3(window.innerWidth, window.innerHeight, 0.)
     },
@@ -133,9 +133,9 @@ async function buildShaders() {
 
     //return the shaders sorted by type, and with their shader text and uniforms ready to go.
     return {
-        compute: {
-            shader: await buildComputeShader(),
-            uniforms: computeUniforms,
+        trace: {
+            shader: await buildTraceShader(),
+            uniforms: traceUniforms,
         },
 
         accumulate: {

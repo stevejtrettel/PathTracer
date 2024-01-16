@@ -15,7 +15,7 @@ function animate() {
 
     stats.begin();
 
-    tracer.newFrame();
+    pathtracer.newFrame();
 
     stats.end();
 
@@ -42,18 +42,17 @@ document.body.appendChild(stats.dom);
 
 //build the renderer
 let renderer = new WebGLRenderer({
-    canvas,
-    alpha: true,
-    depth: false,
-    stencil: false,
+    canvas: canvas
 });
+
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 //make all the objects
 let shaders = await buildShaders();
-let tracer = new PathTracer(shaders, renderer);
-let ui = new UI(tracer);
+let pathtracer = new PathTracer(shaders, renderer);
+let ui = new UI(pathtracer);
 
 animate();
 
+// tracer.saveImage();
 
