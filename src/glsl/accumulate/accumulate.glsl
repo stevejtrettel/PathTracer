@@ -3,7 +3,6 @@
 //Uniforms
 //-------------------------------------------------
 
-
 uniform float frameNumber;
 uniform vec3 iResolution;
 uniform sampler2D newTex;
@@ -46,8 +45,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord )
     // output the result
     fragColor = vec4(color, blend);
 }
-
-
 
 
 
