@@ -113,7 +113,7 @@ let traceUniforms={
 
 
 async function buildAccumulateShader() {
-    let response = await fetch('../glsl/accumulate/combine.glsl');
+    let response = await fetch('../glsl/accumulate/accumulate.glsl');
     let text = await response.text();
     return text;
 }
