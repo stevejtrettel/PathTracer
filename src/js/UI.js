@@ -76,7 +76,6 @@ class UI extends GUI{
             let res = {x: Math.floor(adjust * window.innerWidth), y: Math.floor(adjust * window.innerHeight)};
             pathtracer.accumulate.setSize(res);
             pathtracer.tracer.setSize(res);
-            //pathtracer.display.resize(res);
         });
 
         ren.add(this.params,'renderBlocks').name('Render Blocks').onChange(function(value){

@@ -8,7 +8,7 @@ import shaders from "./shaders.js";
 
 
 //set the canvas
-let canvas = document.querySelector('#World');
+// let canvas = document.querySelector('#World');
 
 //build up stats
 let panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;
@@ -18,7 +18,7 @@ document.body.appendChild(stats.dom);
 
 
 //build the path tracer
-let pathtracer = new PathTracer(shaders, canvas);
+let pathtracer = new PathTracer(shaders);
 let ui = new UI(pathtracer);
 
 

@@ -9,16 +9,17 @@ import KeyControls from "./KeyControls.js";
 
 //class to run the path tracer from
 class PathTracer{
-    constructor(shaders, canvas, res={x:window.innerWidth,y:window.innerHeight}) {
+    constructor(shaders, res={x:window.innerWidth,y:window.innerHeight}) {
 
         //save the canvas
-        this.canvas = canvas;
+       // this.canvas = canvas;
         //build the renderer
         this.renderer = new WebGLRenderer({
-            canvas: canvas,
             //this is what lets me screenshot the canvas I guess?
             preserveDrawingBuffer:true,
         });
+        this.canvas = this.renderer.domElement;
+        document.body.appendChild(this.canvas);
         this.renderer.setSize(res.x,res.y);
 
         //the control system
@@ -77,7 +78,7 @@ class PathTracer{
         let day = date.getDate();
         let month = date.getMonth() + 1;
 
-        let canvas = document.getElementById('World');
+        let canvas = this.canvas;
         let link = document.createElement('a');
         link.download = `${this.tracer.material.uniforms.frameNumber.value}spp pathtrace ${month}-${day}`+'.png';
         link.href = canvas.toDataURL("image/png");
