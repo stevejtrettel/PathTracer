@@ -213,6 +213,10 @@ float distR3( vec3 pos, HypDod dod ){
     float dist12 = length(pos - dod.d*v12)-dod.r;
     dist = max(dist, -dist12);
 
+
+    //cut out the inside sphere
+    //dist = max(dist, 0.45-length(pos));
+
     return dist;
 }
 

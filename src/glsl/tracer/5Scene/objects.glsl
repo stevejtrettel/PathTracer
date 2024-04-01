@@ -400,9 +400,16 @@ void buildObjects(){
 
 
     dod = buildHypDod();
-    dod.mat=makeMetal(color,specularity,roughness);
-    //makeGlass(1.*vec3(0.3,0.05,0.05),1.5,0.5);
+    //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     //makeMetal(color,specularity,roughness);
+    //makeGlass(1.*vec3(0.3,0.05,0.05),1.5,0.5);
+
+    dod.mat=makeGlass(3.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
+    dod.mat.refractionChance=0.;
+    dod.mat.subSurface=true;
+    dod.mat.meanFreePath=0.5*extra2;
+    dod.mat.isotropicScatter=extra;
+    dod.mat.roughness=0.04;
     //
 }
 
@@ -471,8 +478,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    return false;
-   // return inside(tv, var);
+    //return false;
+    return inside(tv, dod);
 
 
 }

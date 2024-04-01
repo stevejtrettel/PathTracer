@@ -6362,6 +6362,9 @@ float distR3( vec3 pos, HypDod dod ){
     float dist12 = length(pos - dod.d*v12)-dod.r;
     dist = max(dist, -dist12);
 
+    
+    
+
     return dist;
 }
 
@@ -7575,7 +7578,8 @@ void buildWalls(){
     
     orientation.dir=vec3(0,1,0);
 
-    color= 0.1*vec3(107,152,250)/255.;
+    color= vec3(0.3);
+    
     
     
     
@@ -7605,7 +7609,8 @@ void buildWalls(){
     orientation.pos=vec3(0,0,-12);
     orientation.dir=vec3(0,0,1);
 
-    color= 0.1*vec3(107,152,250)/255.;
+    color= vec3(0.3);
+    
     
     
     
@@ -7622,7 +7627,8 @@ void buildWalls(){
     orientation.pos=vec3(0,0,30);
     orientation.dir=vec3(0,0,-1);
 
-    color=vec3(1,.9,0.7);
+    color=vec3(0.3);
+    
     
     backWall.orientation=orientation;
     backWall.mat=makeDielectric(color,0.0,roughness);
@@ -7636,7 +7642,8 @@ void buildWalls(){
     orientation.pos=vec3(-20,0,0);
     orientation.dir=vec3(1,0,0);
 
-    color=0.1*vec3(107,152,250)/255.;
+    color=vec3(0.3);
+    
     
     leftWall.orientation=orientation;
     leftWall.mat=makeDielectric(color,0.0,roughness);
@@ -8028,9 +8035,16 @@ void buildObjects(){
     marble = createGlassMarble(var,outerVarMat, glassMat);
 
     dod = buildHypDod();
-    dod.mat=makeMetal(color,specularity,roughness);
     
     
+    
+
+    dod.mat=makeGlass(3.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
+    dod.mat.refractionChance=0.;
+    dod.mat.subSurface=true;
+    dod.mat.meanFreePath=0.5*extra2;
+    dod.mat.isotropicScatter=extra;
+    dod.mat.roughness=0.04;
     
 }
 
@@ -8057,8 +8071,8 @@ float sdf_Objects( Vector tv ){
 
 bool inside_Object( Vector tv ){
 
-    return false;
-   
+    
+    return inside(tv, dod);
 
 }
 
