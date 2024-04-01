@@ -8039,7 +8039,7 @@ void buildObjects(){
     
     
 
-    dod.mat=makeGlass(3.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
+    dod.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
     dod.mat.refractionChance=0.;
     dod.mat.subSurface=true;
     dod.mat.meanFreePath=0.5*extra2;

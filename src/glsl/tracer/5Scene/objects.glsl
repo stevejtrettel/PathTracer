@@ -404,7 +404,7 @@ void buildObjects(){
     //makeMetal(color,specularity,roughness);
     //makeGlass(1.*vec3(0.3,0.05,0.05),1.5,0.5);
 
-    dod.mat=makeGlass(3.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
+    dod.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
     dod.mat.refractionChance=0.;
     dod.mat.subSurface=true;
     dod.mat.meanFreePath=0.5*extra2;
