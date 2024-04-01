@@ -3,12 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_741a45d9/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/js/PathTracer.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/PathTracer.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/js/UI.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/UI.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/1Setup/algVariety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/algVariety.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/polytope.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/polytope.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +89,11 @@
       <workItem from="1705345819132" duration="23451000" />
       <workItem from="1705434474383" duration="11194000" />
       <workItem from="1705468503651" duration="139000" />
-      <workItem from="1705601858652" duration="187000" />
+      <workItem from="1705601858652" duration="1666000" />
+      <workItem from="1705813546618" duration="17000" />
+      <workItem from="1708801005052" duration="2102000" />
+      <workItem from="1709177584437" duration="599000" />
+      <workItem from="1711948118048" duration="1361000" />
     </task>
     <servers />
   </component>

@@ -197,7 +197,10 @@ T barthSextic(T x, T y, T z){
 }
 
 
-T barthSextic(T x, T y, T z, T w){
+
+
+
+    T barthSextic(T x, T y, T z, T w){
 
     T x2 = tsqr(x);
     T y2 = tsqr(y);
@@ -382,6 +385,23 @@ T decicStereo(T x, T y, T z){
 }
 
 
+    T clebschCubic(T x, T y, T z ){
+
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T x3 = tmul(x, x2);
+    T y3 = tmul(y, y2);
+    T z3 = tmul(z, z2);
+
+    T term1 = 81.*(x3+y3+z3);
+    T term2 = -189.*(tmul(x2, y)+tmul(x2, z)+tmul(y2, x)+tmul(y2, z)+tmul(z2, x)+tmul(z2, y));
+    T term3 = 54.*tmul(x, y, z)+126.*(tmul(x, y)+tmul(x, z)+tmul(y, z));
+    T term4 = -9.*(x+y+z);
+
+    return term1 + term2 + term3 + term4 + T(1, 0);
+
+}
 
 
 

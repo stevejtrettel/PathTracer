@@ -31,6 +31,7 @@ Kleinian klein;
 Variety var;
 GlassVariety gVar;
 GlassMarble marble;
+HypDod dod;
 
 //this function constructs the objects
 void buildObjects(){
@@ -381,8 +382,8 @@ void buildObjects(){
     //var.mat=makeGlass(10.*vec3(0.05,0.1,0.15),1.4,0.95);
     //var.mat=makeGlass(10.*vec3(0.3,0.05,0.2),1.5,0.95);
     //var.mat=makeGlass(8.*vec3(0.3,0.2,0.01),1.6,0.95);
-    var.mat=makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);
-
+   // var.mat=makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);
+    var.mat= makeMetal(color,specularity,roughness);
     //var.mat.refractionChance=0.;
    // var.mat.subSurface=true;
     //var.mat.meanFreePath=0.2*extra2;
@@ -395,6 +396,12 @@ void buildObjects(){
 
     Material outerVarMat = makeGlass(5.*vec3(0.05,0.5,0.05),1.4,0.95);
     marble = createGlassMarble(var,outerVarMat, glassMat);
+
+
+
+    dod = buildHypDod();
+    dod.mat=makeMetal(color,specularity,roughness);
+    //makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
 }
 
 
@@ -448,7 +455,7 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, negroni) );
+    dist=min( dist, sdf(tv, dod) );
    // dist=min( dist, sdf(tv, gin) );
    // dist=min( dist, sdf(tv, campari) );
     //dist=min( dist, sdf(tv, vermouth) );
@@ -477,7 +484,7 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-    setData(path, negroni);
+    setData(path, dod);
     //setData(path, negroni);
     //setData(path, campari);
     //setData(path, vermouth);
