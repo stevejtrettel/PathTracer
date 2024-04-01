@@ -8128,11 +8128,17 @@ void buildObjects(){
     
     
 
-    Material dodMat = makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),2.,0.95);
+    Material dodMat = makeDielectric(color,specularity,roughness);
     
-    
-    glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.2,0.95);
+    glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
     poin = createPoincareMarble(dodMat, glassMat);
+
+    poin.dod.mat=makeGlass(20.*(vec3(1)-vec3(0.6,0.1,0.5)),1.5,0.95);
+    poin.dod.mat.refractionChance=0.;
+    poin.dod.mat.subSurface=true;
+    poin.dod.mat.meanFreePath=0.5*extra2;
+    poin.dod.mat.isotropicScatter=extra;
+    poin.dod.mat.roughness=0.04;
 
 }
 
@@ -8159,8 +8165,8 @@ float sdf_Objects( Vector tv ){
 
 bool inside_Object( Vector tv ){
 
-    return false;
-   
+    
+    return inside(tv, poin.dod);
 
 }
 
@@ -8492,9 +8498,9 @@ vec3 newFrame(vec2 fragCoord ){
 void main() {
 
     vec3 pixel=vec3(0);
-    for(int i =0; i<5; i++){
+  
         pixel += newFrame(gl_FragCoord.xy);
-    }
-    pixel /= 5.;
+    
+   
     gl_FragColor=vec4(pixel, 1.);
 }`;const qf=new co().load("src/js/tex/office.jpg"),Yf=new co().load("src/js/tex/office.jpg");let $f={iResolution:{value:new L(window.innerWidth,window.innerHeight,0)},sky:{value:qf},skySM:{value:Yf},facing:{value:new Ct().identity()},location:{value:new L(0,0,0)},frameNumber:{value:0},aperture:{value:0},focalLength:{value:5},exposure:{value:1},focusHelp:{value:!1},fov:{value:50},renderBlocks:{value:!1},extra:{value:.5},extra2:{value:.5},extra3:{value:.5},extra4:{value:.5}};const jf={tracer:{shader:Xf,uniforms:$f},accumulate:{shader:Gf,uniforms:{frameNumber:{value:0},iResolution:{value:new L(window.innerWidth,window.innerHeight,0)},accTex:{value:null},newTex:{value:null}}},display:{shader:Wf,uniforms:{iResolution:{value:new L(window.innerWidth,window.innerHeight,0)},accTex:{value:null}}}};let Kf=typeof type<"u"&&type&&!isNaN(type)?parseInt(type):0,Xi=new ri;Xi.showPanel(Kf);document.body.appendChild(Xi.dom);let uo=new Df(jf);new Hf(uo);function ho(){requestAnimationFrame(ho),Xi.begin(),uo.newFrame(),Xi.end()}ho();

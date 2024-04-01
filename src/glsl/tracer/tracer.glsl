@@ -85,10 +85,10 @@ vec3 newFrame(vec2 fragCoord ){
 void main() {
 
     vec3 pixel=vec3(0);
-    for(int i =0; i<5; i++){
+  //  for(int i =0; i<5; i++){
         pixel += newFrame(gl_FragCoord.xy);
-    }
-    pixel /= 5.;
+    //}
+   // pixel /= 5.;
     gl_FragColor=vec4(pixel, 1.);
 }
 

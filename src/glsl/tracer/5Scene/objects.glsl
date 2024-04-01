@@ -415,11 +415,17 @@ void buildObjects(){
 
 
 
-    Material dodMat = makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),2.,0.95);
-    //makeDielectric(color,specularity,roughness);
+    Material dodMat = makeDielectric(color,specularity,roughness);
     //makeGlass(1.*vec3(0.3,0.05,0.05),1.5,0.4);
-    glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.2,0.95);
+    glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
     poin = createPoincareMarble(dodMat, glassMat);
+
+    poin.dod.mat=makeGlass(20.*(vec3(1)-vec3(0.6,0.1,0.5)),1.5,0.95);
+    poin.dod.mat.refractionChance=0.;
+    poin.dod.mat.subSurface=true;
+    poin.dod.mat.meanFreePath=0.5*extra2;
+    poin.dod.mat.isotropicScatter=extra;
+    poin.dod.mat.roughness=0.04;
 
 }
 
@@ -488,8 +494,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    return false;
-   // return inside(tv, dod);
+    //return false;
+    return inside(tv, poin.dod);
 
 
 }
