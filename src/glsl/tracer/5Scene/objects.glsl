@@ -401,7 +401,9 @@ void buildObjects(){
 
     dod = buildHypDod();
     dod.mat=makeMetal(color,specularity,roughness);
-    //makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
+    //makeGlass(1.*vec3(0.3,0.05,0.05),1.5,0.5);
+    //makeMetal(color,specularity,roughness);
+    //
 }
 
 
