@@ -34,8 +34,7 @@ void buildWalls(){
     //vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
 
-    color= vec3(0.3);
-    //0.1*vec3(107,152,250)/255.;
+    color= 0.1*vec3(107,152,250)/255.;
     //vec3(0.03);
     //0.2*vec3(0.8,0.8,0.4);
     //vec3(0.1);
@@ -70,8 +69,7 @@ void buildWalls(){
     orientation.pos=vec3(0,0,-12);
     orientation.dir=vec3(0,0,1);
 
-    color= vec3(0.3);
-    //0.1*vec3(107,152,250)/255.;
+    color= 0.1*vec3(107,152,250)/255.;
     //0.3*vec3(170,150,80)/255.;
     //0.1*vec3(107,152,250)/255.;
     //=vec3(0.1);
@@ -89,8 +87,7 @@ void buildWalls(){
     orientation.pos=vec3(0,0,30);
     orientation.dir=vec3(0,0,-1);
 
-    color=vec3(0.3);
-    //vec3(1,.9,0.7);
+    color=vec3(1,.9,0.7);
     //=vec3(107,152,250)/255.;
     backWall.orientation=orientation;
     backWall.mat=makeDielectric(color,0.0,roughness);
@@ -104,8 +101,7 @@ void buildWalls(){
     orientation.pos=vec3(-20,0,0);
     orientation.dir=vec3(1,0,0);
 
-    color=vec3(0.3);
-    //0.1*vec3(107,152,250)/255.;
+    color=0.1*vec3(107,152,250)/255.;
     //0.5*vec3(250,229,147)/255.;
     leftWall.orientation=orientation;
     leftWall.mat=makeDielectric(color,0.0,roughness);

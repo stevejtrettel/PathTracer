@@ -32,6 +32,7 @@ Variety var;
 GlassVariety gVar;
 GlassMarble marble;
 HypDod dod;
+PoincareMarble poin;
 
 //this function constructs the objects
 void buildObjects(){
@@ -402,15 +403,24 @@ void buildObjects(){
     dod = buildHypDod();
     //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     //makeMetal(color,specularity,roughness);
-    //makeGlass(1.*vec3(0.3,0.05,0.05),1.5,0.5);
+    dod.mat = makeGlass(1.*vec3(0.3,0.05,0.05),1.5,0.4);
 
-    dod.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
-    dod.mat.refractionChance=0.;
-    dod.mat.subSurface=true;
-    dod.mat.meanFreePath=0.5*extra2;
-    dod.mat.isotropicScatter=extra;
-    dod.mat.roughness=0.04;
+    //dod.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
+    //dod.mat.refractionChance=0.;
+    //dod.mat.subSurface=true;
+    //dod.mat.meanFreePath=0.5*extra2;
+    //dod.mat.isotropicScatter=extra;
+    //dod.mat.roughness=0.04;
     //
+
+
+
+    Material dodMat = makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),2.,0.95);
+    //makeDielectric(color,specularity,roughness);
+    //makeGlass(1.*vec3(0.3,0.05,0.05),1.5,0.4);
+    glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.2,0.95);
+    poin = createPoincareMarble(dodMat, glassMat);
+
 }
 
 
@@ -464,7 +474,7 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, dod) );
+    dist=min( dist, sdf(tv, poin) );
    // dist=min( dist, sdf(tv, gin) );
    // dist=min( dist, sdf(tv, campari) );
     //dist=min( dist, sdf(tv, vermouth) );
@@ -478,8 +488,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    //return false;
-    return inside(tv, dod);
+    return false;
+   // return inside(tv, dod);
 
 
 }
@@ -493,7 +503,7 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-    setData(path, dod);
+    setData(path, poin);
     //setData(path, negroni);
     //setData(path, campari);
     //setData(path, vermouth);
