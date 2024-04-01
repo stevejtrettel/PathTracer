@@ -7707,7 +7707,8 @@ void buildWalls(){
     orientation.pos=vec3(0,0,30);
     orientation.dir=vec3(0,0,-1);
 
-    color=vec3(1,.9,0.7);
+    color= vec3(0.75);
+    
     
     backWall.orientation=orientation;
     backWall.mat=makeDielectric(color,0.0,roughness);
@@ -7732,7 +7733,8 @@ void buildWalls(){
     orientation.pos=vec3(6.5,0,0);
     orientation.dir=vec3(-1,0,0);
 
-    color= 0.4*vec3(0.8,0.8,0.4);
+    color= 0.15*vec3(240,106,86)/255.;
+    
     
     
    
