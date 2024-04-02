@@ -6493,7 +6493,7 @@ float distR3( vec3 pos, HypDodEdges dod ){
     dist = max(dist, -dist12);
 
     
-    dist = max(dist, 0.2-length(pos));
+    
 
     return dist;
 }
@@ -8251,7 +8251,7 @@ void buildObjects(){
     dod = buildHypDod();
     
     
-    dod.mat = makeGlass(0.1*vec3(0.3,0.05,0.05),1.1,0.5);
+    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),3.*extra,extra2);
 
     dodE = buildHypDodEdges();
     
@@ -8300,7 +8300,7 @@ float sdf_Objects( Vector tv ){
    float dist=maxDist;
 
     
-    dist=min( dist, sdf(tv, dodE) );
+    dist=min( dist, sdf(tv, dod) );
    
     
     return dist;
@@ -8309,13 +8309,13 @@ float sdf_Objects( Vector tv ){
 bool inside_Object( Vector tv ){
 
     
-    return inside(tv, dodE);
+    return inside(tv, dod);
 
 }
 
 void setData_Objects(inout Path path){
    
-    setData(path, dodE);
+    setData(path, dod);
     
     
 

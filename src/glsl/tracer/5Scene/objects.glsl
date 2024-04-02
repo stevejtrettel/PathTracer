@@ -404,7 +404,10 @@ void buildObjects(){
     dod = buildHypDod();
     //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     //makeMetal(color,specularity,roughness);
-    dod.mat = makeGlass(0.1*vec3(0.3,0.05,0.05),1.1,0.5);
+    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),3.*extra,extra2);
+
+
+
 
     dodE = buildHypDodEdges();
     //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
@@ -492,7 +495,7 @@ float sdf_Objects( Vector tv ){
    float dist=maxDist;
 
     //dist=min( dist, sdf(tv, dod) );
-    dist=min( dist, sdf(tv, dodE) );
+    dist=min( dist, sdf(tv, dod) );
    // dist=min( dist, sdf(tv, campari) );
     //dist=min( dist, sdf(tv, vermouth) );
     return dist;
@@ -506,7 +509,7 @@ float sdf_Objects( Vector tv ){
 bool inside_Object( Vector tv ){
 
     //return false;
-    return inside(tv, dodE);
+    return inside(tv, dod);
 
 }
 
@@ -520,7 +523,7 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
    // setData(path, dod);
-    setData(path, dodE);
+    setData(path, dod);
     //setData(path, campari);
     //setData(path, vermouth);
 

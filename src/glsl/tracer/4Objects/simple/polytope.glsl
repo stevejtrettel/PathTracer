@@ -301,6 +301,8 @@ HypDodEdges buildHypDodEdges(){
     dod.r = sqrt(c);
     dod.d = sqrt(c+1.);
 
+
+
     return dod;
 }
 
@@ -368,7 +370,7 @@ float distR3( vec3 pos, HypDodEdges dod ){
 
 
     //cut out the inside sphere
-    dist = max(dist, 0.2-length(pos));
+    //dist = max(dist, 0.2-length(pos));
 
     return dist;
 }
