@@ -491,7 +491,7 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, dod) );
+    //dist=min( dist, sdf(tv, dod) );
     dist=min( dist, sdf(tv, dodE) );
    // dist=min( dist, sdf(tv, campari) );
     //dist=min( dist, sdf(tv, vermouth) );
@@ -519,7 +519,7 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-    setData(path, dod);
+   // setData(path, dod);
     setData(path, dodE);
     //setData(path, campari);
     //setData(path, vermouth);

@@ -6493,7 +6493,7 @@ float distR3( vec3 pos, HypDodEdges dod ){
     dist = max(dist, -dist12);
 
     
-    dist = max(dist, 0.45-length(pos));
+    dist = max(dist, 0.2-length(pos));
 
     return dist;
 }
@@ -8299,7 +8299,7 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, dod) );
+    
     dist=min( dist, sdf(tv, dodE) );
    
     
@@ -8314,7 +8314,7 @@ bool inside_Object( Vector tv ){
 }
 
 void setData_Objects(inout Path path){
-    setData(path, dod);
+   
     setData(path, dodE);
     
     

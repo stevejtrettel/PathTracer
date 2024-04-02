@@ -368,7 +368,7 @@ float distR3( vec3 pos, HypDodEdges dod ){
 
 
     //cut out the inside sphere
-    dist = max(dist, 0.45-length(pos));
+    dist = max(dist, 0.2-length(pos));
 
     return dist;
 }
