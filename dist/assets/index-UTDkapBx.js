@@ -7865,7 +7865,8 @@ void buildWalls(){
     orientation.pos=vec3(6.5,0,0);
     orientation.dir=vec3(-1,0,0);
 
-    color= 0.15*vec3(240,106,86)/255.;
+    color= 0.3*vec3(107,152,250)/255.;
+    
     
     
     
