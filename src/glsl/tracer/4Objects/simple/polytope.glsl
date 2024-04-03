@@ -130,6 +130,7 @@ void setData( inout Path path, Polytope poly ){
 
 //the data of a hyperbolic dodecahedron is:
 // 1) a hyperbolic radius from center to face midpoint (these are d and r)
+// 2) a size of sphere to delete from the center
 // this is converted into a distance in the ball model, and then the 12 spheres
 // describing its faces are computed
 //RIGHT NOW JUST GIVING D AND R DIRECTLY: NEED TO CHANGE THIS!
@@ -137,6 +138,8 @@ void setData( inout Path path, Polytope poly ){
 struct HypDod{
     float d;
     float r;
+    bool centerSphere;
+    float rCent;
     Material mat;
 };
 
@@ -147,9 +150,24 @@ HypDod buildHypDod(){
 
     dod.r = sqrt(c);
     dod.d = sqrt(c+1.);
+    dod.centerSphere=false;
 
     return dod;
 }
+
+HypDod buildHypDod( float rCent){
+    HypDod dod;
+    float Phi = (1.+sqrt(5.))/2.;
+    float c = 2./Phi;
+
+    dod.r = sqrt(c);
+    dod.d = sqrt(c+1.);
+    dod.centerSphere=true;
+    dod.rCent = rCent;
+
+    return dod;
+}
+
 
 //signed distance in R3 coordinates
 float distR3( vec3 pos, HypDod dod ){
@@ -213,9 +231,10 @@ float distR3( vec3 pos, HypDod dod ){
     float dist12 = length(pos - dod.d*v12)-dod.r;
     dist = max(dist, -dist12);
 
-
     //cut out the inside sphere
-    //dist = max(dist, 0.45-length(pos));
+    if(dod.centerSphere){
+        dist = max(dist, dod.rCent-length(pos));
+    }
 
     return dist;
 }
@@ -277,135 +296,140 @@ void setData( inout Path path, HypDod dod ){
 
 
 
+
+
+
+
 //-------------------------------------------------
-//The Hyperbolic Dodecahedron sdf
+//The Hyperbolic Coxeter Cube sdf
 //-------------------------------------------------
 
-//the data of a hyperbolic dodecahedron is:
-// 1) a hyperbolic radius from center to face midpoint (these are d and r)
-// this is converted into a distance in the ball model, and then the 12 spheres
+//the data of a hyperbolic coxeter cube is:
+// 1) a dihedral angle (number of cubes fiting around a vertex)
+// 2) a size of sphere to delete from the center
+// this is converted into a distance in the ball model, for the center of spheres and then the radius of the 6 spheres
 // describing its faces are computed
 //RIGHT NOW JUST GIVING D AND R DIRECTLY: NEED TO CHANGE THIS!
 
-struct HypDodEdges{
+struct CoxCube{
     float d;
     float r;
+    bool centerSphere;
+    float rCent;
     Material mat;
 };
 
-HypDodEdges buildHypDodEdges(){
-    HypDodEdges dod;
-    float Phi = (1.+sqrt(5.))/2.;
-    float c = 2./Phi;
+CoxCube buildCoxCube(float dihedral ){
+    CoxCube cube;
 
-    dod.r = sqrt(c);
-    dod.d = sqrt(c+1.);
+    //half the dihedral angle theta
+    float theta2 = 3.14159/(dihedral);
+    //I THINK IT SHOULD BE THIS?!
+    //float theta2 = 3.14159/dihedral;
 
+    float denom = 2.*sin(theta2)*sin(theta2);
+    cube.d = 1./sqrt(1.-1./denom);
+    cube.r = sqrt(cube.d*cube.d - 1.);
 
+    cube.centerSphere=false;
 
-    return dod;
+    return cube;
 }
 
+CoxCube buildCoxCube( float dihedral, float rCent){
+    CoxCube cube;
+
+    //half the dihedral angle theta
+    float theta2 = 3.14159/dihedral;
+
+    float denom = 2.*sin(theta2)*sin(theta2);
+    cube.d = 1./sqrt(1.-1./denom);
+    cube.r = sqrt(cube.d*cube.d -1.);
+
+    cube.centerSphere=true;
+    cube.rCent = rCent;
+
+    return cube;
+}
+
+
 //signed distance in R3 coordinates
-float distR3( vec3 pos, HypDodEdges dod ){
+float distR3( vec3 pos, CoxCube cube ){
 
     //start with the distance to the unit sphere
     float dist = length(pos)-1.;
 
     //for each sphere, find the SDF for the outside
     //then, intersect them.
-    float r = dod.r;
-    float d = dod.d;
+    float r = cube.r;
+    float d = cube.d;
 
     //these are the unit directions
-    vec3 v1 = normalize(vec3(0.,1.,1.618));
-    vec3 v2 = normalize(vec3(1.618,0.,1.));
-    vec3 v3 = normalize(vec3(1.,1.618,0.));
-    vec3 v4 = normalize(vec3(0.,-1.,1.618));
-    vec3 v5 = normalize(vec3(1.618,0.,-1.));
-    vec3 v6 = normalize(vec3(-1.,1.618,0.));
-    //and their negatives
-    vec3 v7 = normalize(-vec3(0.,1.,1.618));
-    vec3 v8 = normalize(-vec3(1.618,0.,1.));
-    vec3 v9 = normalize(-vec3(1.,1.618,0.));
-    vec3 v10 = normalize(-vec3(0.,-1.,1.618));
-    vec3 v11 = normalize(-vec3(1.618,0.,-1.));
-    vec3 v12 = normalize(-vec3(-1.,1.618,0.));
+    vec3 v1 = vec3(1,0,0);
+    vec3 v2 = vec3(0,1,0);
+    vec3 v3 = vec3(0,0,1);
+    vec3 v4 = vec3(-1,0,0);
+    vec3 v5 = vec3(0,-1,0);
+    vec3 v6 = vec3(0,0,-1);
 
-    float dist1 = length(pos - dod.d*v1)-dod.r;
+
+    float dist1 = length(pos - cube.d*v1)-cube.r;
     dist = max(dist, -dist1);
 
-    float dist2 = length(pos - dod.d*v2)-dod.r;
+    float dist2 = length(pos - cube.d*v2)-cube.r;
     dist = max(dist, -dist2);
 
-    float dist3 = length(pos - dod.d*v3)-dod.r;
+    float dist3 = length(pos - cube.d*v3)-cube.r;
     dist = max(dist, -dist3);
 
-    float dist4 = length(pos - dod.d*v4)-dod.r;
+    float dist4 = length(pos - cube.d*v4)-cube.r;
     dist = max(dist, -dist4);
 
-    float dist5 = length(pos - dod.d*v5)-dod.r;
+    float dist5 = length(pos - cube.d*v5)-cube.r;
     dist = max(dist, -dist5);
 
-    float dist6 = length(pos - dod.d*v6)-dod.r;
+    float dist6 = length(pos - cube.d*v6)-cube.r;
     dist = max(dist, -dist6);
 
-    float dist7 = length(pos - dod.d*v7)-dod.r;
-    dist = max(dist, -dist7);
-
-    float dist8 = length(pos - dod.d*v8)-dod.r;
-    dist = max(dist, -dist8);
-
-    float dist9 = length(pos - dod.d*v9)-dod.r;
-    dist = max(dist, -dist9);
-
-    float dist10 = length(pos - dod.d*v10)-dod.r;
-    dist = max(dist, -dist10);
-
-    float dist11 = length(pos - dod.d*v11)-dod.r;
-    dist = max(dist, -dist11);
-
-    float dist12 = length(pos - dod.d*v12)-dod.r;
-    dist = max(dist, -dist12);
-
-
     //cut out the inside sphere
-    //dist = max(dist, 0.2-length(pos));
+    if(cube.centerSphere){
+        dist = max(dist, cube.rCent-length(pos));
+    }
 
     return dist;
 }
 
 
 //location booleans
-bool at( Vector tv, HypDodEdges dod){
-    float d = distR3( tv.pos, dod );
+bool at( Vector tv, CoxCube cube){
+    float d = distR3( tv.pos, cube );
     bool atSurf = ((abs(d) - AT_THRESH)<0.);
     return atSurf;
 }
 
 
-bool inside( Vector tv, HypDodEdges dod ){
-    float d = distR3( tv.pos, dod );
+bool inside( Vector tv, CoxCube cube ){
+    float d = distR3( tv.pos, cube );
     return (d<0.);
 }
 
 //overload of sdf for a polytope
-float sdf( Vector tv, HypDodEdges dod ){
-    return distR3(tv.pos, dod);
+float sdf( Vector tv, CoxCube cube ){
+    return distR3(tv.pos, cube);
 }
 
 ////overload of normalVec for a sphere
-Vector normalVec( Vector tv, HypDodEdges dod ){
+Vector normalVec( Vector tv, CoxCube cube ){
 
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
 
     vec3 pos = tv.pos;
 
-    float vxyy=distR3( pos + e.xyy*ep, dod);
-    float vyyx=distR3( pos + e.yyx*ep, dod);
-    float vyxy=distR3( pos + e.yxy*ep, dod);
-    float vxxx=distR3( pos + e.xxx*ep, dod);
+    float vxyy=distR3( pos + e.xyy*ep, cube);
+    float vyyx=distR3( pos + e.yyx*ep, cube);
+    float vyxy=distR3( pos + e.yxy*ep, cube);
+    float vxxx=distR3( pos + e.xxx*ep, cube);
 
     vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
 
@@ -416,14 +440,18 @@ Vector normalVec( Vector tv, HypDodEdges dod ){
 
 
 //overload of setData for a torus
-void setData( inout Path path, HypDodEdges dod ){
+void setData( inout Path path, CoxCube cube ){
 
     //if we are at the surface
-    if(at(path.tv, dod)){
+    if(at(path.tv, cube)){
         //compute the normal
-        Vector normal=normalVec(path.tv, dod);
-        bool side = inside(path.tv, dod);
+        Vector normal=normalVec(path.tv, cube);
+        bool side = inside(path.tv, cube);
         //set the material
-        setObjectInAir(path.dat, side, normal, dod.mat);
+        setObjectInAir(path.dat, side, normal, cube.mat);
     }
 }
+
+
+
+

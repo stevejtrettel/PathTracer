@@ -31,9 +31,9 @@ Kleinian klein;
 Variety var;
 GlassVariety gVar;
 GlassMarble marble;
-HypDod dod,dod2;
-HypDodEdges dodE;
+HypDod dod,dodE;
 PoincareMarble poin;
+CoxCube cube5,cube6;
 
 //this function constructs the objects
 void buildObjects(){
@@ -409,7 +409,7 @@ void buildObjects(){
 
 
 
-    dodE = buildHypDodEdges();
+    dodE = buildHypDod(0.45);
     //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     dodE.mat =makeDielectric(vec3(0.5,0.2,0.4),specularity,roughness);
     dodE.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
@@ -440,6 +440,14 @@ void buildObjects(){
     poin.dod.mat.meanFreePath=0.5*extra2;
     poin.dod.mat.isotropicScatter=extra;
     poin.dod.mat.roughness=0.04;
+
+
+
+
+    cube5 = buildCoxCube(3.);
+    //makeMetal(color,specularity,roughness);
+    cube5.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
+
 
 }
 
@@ -495,7 +503,7 @@ float sdf_Objects( Vector tv ){
    float dist=maxDist;
 
     //dist=min( dist, sdf(tv, dod) );
-    dist=min( dist, sdf(tv, dod) );
+    dist=min( dist, sdf(tv, cube5) );
     //dist=min( dist, sdf(tv, vermouth) );
     return dist;
 }
@@ -508,7 +516,7 @@ float sdf_Objects( Vector tv ){
 bool inside_Object( Vector tv ){
 
     return false;
-    //return inside(tv, dod);
+    //return inside(tv, cube5);
 
 }
 
@@ -522,7 +530,7 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
    // setData(path, dod);
-    setData(path, dod);
+    setData(path, cube5);
     //setData(path, vermouth);
 
 }

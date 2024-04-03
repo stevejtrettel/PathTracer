@@ -30,7 +30,7 @@ void buildWalls(){
 
 
     //----------- THE FLOOR -------------------------
-    orientation.pos=vec3(0,-0.6,0);
+    orientation.pos=vec3(0,-0.75,0);
     //vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
 
