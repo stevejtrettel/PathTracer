@@ -31,7 +31,7 @@ Kleinian klein;
 Variety var;
 GlassVariety gVar;
 GlassMarble marble;
-HypDod dod;
+HypDod dod,dod2;
 HypDodEdges dodE;
 PoincareMarble poin;
 
@@ -404,7 +404,7 @@ void buildObjects(){
     dod = buildHypDod();
     //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     //makeMetal(color,specularity,roughness);
-    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),3.*extra,extra2);
+    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
 
 
 
@@ -496,7 +496,6 @@ float sdf_Objects( Vector tv ){
 
     //dist=min( dist, sdf(tv, dod) );
     dist=min( dist, sdf(tv, dod) );
-   // dist=min( dist, sdf(tv, campari) );
     //dist=min( dist, sdf(tv, vermouth) );
     return dist;
 }
@@ -508,8 +507,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    //return false;
-    return inside(tv, dod);
+    return false;
+    //return inside(tv, dod);
 
 }
 
@@ -524,7 +523,6 @@ bool inside_Object( Vector tv ){
 void setData_Objects(inout Path path){
    // setData(path, dod);
     setData(path, dod);
-    //setData(path, campari);
     //setData(path, vermouth);
 
 }

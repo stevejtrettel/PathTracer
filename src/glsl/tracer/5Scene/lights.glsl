@@ -44,10 +44,10 @@ void buildLights(){
 
 
     //----------- LIGHT 3 -------------------------
-    light3.center=vec3(0);
+    light3.center=vec3(-1,3,1);
     //vec3(-3.,6.,8);
 
-    light3.radius=0.03;
+    light3.radius=0.3;
     //2.*extra4;
 
     //vec3(1.,0.8,0.6);
@@ -82,7 +82,7 @@ float trace_Lights( Vector tv ){
 
     dist=min(dist, trace(tv, light2));
 
-   // dist=min(dist, trace(tv, light3));
+    dist=min(dist, trace(tv, light3));
 
     return dist;
 
@@ -101,6 +101,6 @@ void setData_Lights(inout Path path){
 
     setData(path, light2);
 
-   // setData(path, light3);
+    setData(path, light3);
 
 }

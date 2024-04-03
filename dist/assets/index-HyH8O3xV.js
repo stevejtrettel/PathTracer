@@ -7733,10 +7733,10 @@ void buildLights(){
     light2.mat=makeLight(color,intensity);
 
     
-    light3.center=vec3(0);
+    light3.center=vec3(-1,3,1);
     
 
-    light3.radius=0.03;
+    light3.radius=0.3;
     
 
     
@@ -7757,7 +7757,7 @@ float trace_Lights( Vector tv ){
 
     dist=min(dist, trace(tv, light2));
 
-   
+    dist=min(dist, trace(tv, light3));
 
     return dist;
 
@@ -7769,7 +7769,7 @@ void setData_Lights(inout Path path){
 
     setData(path, light2);
 
-   
+    setData(path, light3);
 
 }
 Plane bottomWall,topWall,leftWall,rightWall,backWall,frontWall;
@@ -7788,7 +7788,7 @@ void buildWalls(){
     roughness=0.1;
 
     
-    orientation.pos=vec3(0,-1.25,0);
+    orientation.pos=vec3(0,-0.6,0);
     
     orientation.dir=vec3(0,1,0);
 
@@ -7939,7 +7939,7 @@ Kleinian klein;
 Variety var;
 GlassVariety gVar;
 GlassMarble marble;
-HypDod dod;
+HypDod dod,dod2;
 HypDodEdges dodE;
 PoincareMarble poin;
 
@@ -8252,7 +8252,7 @@ void buildObjects(){
     dod = buildHypDod();
     
     
-    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),3.*extra,extra2);
+    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
 
     dodE = buildHypDodEdges();
     
@@ -8302,22 +8302,20 @@ float sdf_Objects( Vector tv ){
 
     
     dist=min( dist, sdf(tv, dod) );
-   
     
     return dist;
 }
 
 bool inside_Object( Vector tv ){
 
+    return false;
     
-    return inside(tv, dod);
 
 }
 
 void setData_Objects(inout Path path){
    
     setData(path, dod);
-    
     
 
 }
