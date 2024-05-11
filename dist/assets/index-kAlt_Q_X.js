@@ -7804,7 +7804,7 @@ void buildWalls(){
     float specularity, roughness, offset;
 
     
-    color=vec3(0.1);
+    color=vec3(0.4);
     
     
     specularity=0.;
@@ -7815,7 +7815,7 @@ void buildWalls(){
     
     orientation.dir=vec3(0,1,0);
 
-    color= 0.1*vec3(107,152,250)/255.;
+    
     
     
     
@@ -7836,8 +7836,8 @@ void buildWalls(){
     
    
 
+    topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
     
-    color =vec3(1);
     topWall.mat=makeDielectric(color,0.0,0.5);
     topWall.mat.specularColor=vec3(0.75);
 
@@ -7845,7 +7845,7 @@ void buildWalls(){
     orientation.pos=vec3(0,0,-12);
     orientation.dir=vec3(0,0,1);
 
-    color= 0.1*vec3(107,152,250)/255.;
+   
     
     
     
@@ -7862,7 +7862,7 @@ void buildWalls(){
     orientation.pos=vec3(0,0,30);
     orientation.dir=vec3(0,0,-1);
 
-    color= vec3(0.75);
+   
     
     
     backWall.orientation=orientation;
@@ -7877,7 +7877,7 @@ void buildWalls(){
     orientation.pos=vec3(-20,0,0);
     orientation.dir=vec3(1,0,0);
 
-    color=0.1*vec3(107,152,250)/255.;
+  
     
     leftWall.orientation=orientation;
     leftWall.mat=makeDielectric(color,0.0,roughness);
@@ -7888,7 +7888,7 @@ void buildWalls(){
     orientation.pos=vec3(6.5,0,0);
     orientation.dir=vec3(-1,0,0);
 
-    color= 0.3*vec3(107,152,250)/255.;
+   
     
     
     
@@ -8257,7 +8257,7 @@ void buildObjects(){
     
     
     
-    var.mat=makeGlass(1.75*vec3(0.3,0.05,0.2),1.2,0.95);
+    var.mat=makeGlass(3.75*vec3(0.3,0.05,0.2),1.5,0.95);
 
     
     var.mat.refractionChance=0.;
