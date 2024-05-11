@@ -368,8 +368,8 @@ void buildObjects(){
 
     var.center=vec3(-2,1.8,0);
     var.size=5.;
-    var.inside=0.01;
-    var.outside=0.01;
+    var.inside=0.02;
+    var.outside=0.0;
     var.boundingSphere=3.1415;
     var.smoothing =0.075;
 
@@ -384,13 +384,14 @@ void buildObjects(){
     //var.mat=makeGlass(10.*vec3(0.05,0.1,0.15),1.4,0.95);
     //var.mat=makeGlass(10.*vec3(0.3,0.05,0.2),1.5,0.95);
     //var.mat=makeGlass(8.*vec3(0.3,0.2,0.01),1.6,0.95);
-   // var.mat=makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);
-    var.mat= makeMetal(color,specularity,roughness);
-    //var.mat.refractionChance=0.;
-   // var.mat.subSurface=true;
-    //var.mat.meanFreePath=0.2*extra2;
-   // var.mat.isotropicScatter=extra;
-    //var.mat.roughness=0.2;
+    var.mat=makeGlass(1.75*vec3(0.3,0.05,0.2),1.2,0.95);
+
+    //var.mat= makeMetal(color,specularity,roughness);
+    var.mat.refractionChance=0.;
+    var.mat.subSurface=true;
+    var.mat.meanFreePath=0.2*extra2;
+    var.mat.isotropicScatter=extra;
+    var.mat.roughness=0.2;
 
     Material glassMat = makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);
     float glassThickness=0.04;
@@ -446,7 +447,13 @@ void buildObjects(){
 
     cube5 = buildCoxCube(3.);
     //makeMetal(color,specularity,roughness);
-    cube5.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
+    //cube5.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
+    cube5.mat=makeGlass(20.*(vec3(1)-vec3(0.6,0.1,0.5)),1.5,0.95);
+    cube5.mat.refractionChance=0.;
+    cube5.mat.subSurface=true;
+    cube5.mat.meanFreePath=0.5*extra2;
+    cube5.mat.isotropicScatter=extra;
+    cube5.mat.roughness=0.04;
 
 
 }
@@ -487,8 +494,7 @@ bool render_Objects=true;
 float trace_Objects( Vector tv ){
 
     float dist=maxDist;
-
-//    dist=min(dist, trace(tv, ball1));
+    //dist=min(dist, trace(tv, ball1));
 
     return dist;
 
@@ -503,7 +509,7 @@ float sdf_Objects( Vector tv ){
    float dist=maxDist;
 
     //dist=min( dist, sdf(tv, dod) );
-    dist=min( dist, sdf(tv, cube5) );
+    dist=min( dist, sdf(tv, var) );
     //dist=min( dist, sdf(tv, vermouth) );
     return dist;
 }
@@ -515,8 +521,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    return false;
-    //return inside(tv, cube5);
+    //return false;
+    return inside(tv, var);
 
 }
 
@@ -530,7 +536,7 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
    // setData(path, dod);
-    setData(path, cube5);
+    setData(path, var);
     //setData(path, vermouth);
 
 }

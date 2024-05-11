@@ -295,6 +295,11 @@ T togliatti(T xorig, T yorig, T zorig, T w){
 }
 
 
+T togliatti(T xorig, T yorig, T zorig){
+    return togliatti( xorig,  yorig,  zorig, T(1,0));
+}
+
+
 T endrassOctic( T x, T y, T z, T w){
 
     T x2 = tsqr(x);

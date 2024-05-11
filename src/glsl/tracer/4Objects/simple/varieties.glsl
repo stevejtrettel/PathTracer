@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return clebschCubic(x,y,z);
+    return togliatti(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){
