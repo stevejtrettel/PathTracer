@@ -44,7 +44,7 @@ void buildLights(){
 
 
     //----------- LIGHT 3 -------------------------
-    light3.center=vec3(-3,6,1);
+    light3.center=vec3(-3,4,8);
     //vec3(-3.,6.,8);
 
     light3.radius=0.3;

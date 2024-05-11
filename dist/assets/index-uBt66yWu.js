@@ -7756,7 +7756,7 @@ void buildLights(){
     light2.mat=makeLight(color,intensity);
 
     
-    light3.center=vec3(-3,6,1);
+    light3.center=vec3(-3,4,8);
     
 
     light3.radius=0.3;
@@ -7838,8 +7838,8 @@ void buildWalls(){
 
     topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
     
-    topWall.mat=makeDielectric(color,0.0,0.5);
-    topWall.mat.specularColor=vec3(0.75);
+   
+   
 
     
     orientation.pos=vec3(0,0,-12);
