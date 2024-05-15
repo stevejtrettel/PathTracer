@@ -5754,6 +5754,12 @@ struct Variety{
     Material mat;
 };
 
+float checkerBox( vec3 p, vec3 b )
+{
+    vec3 q = abs(p) - b;
+    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
+
 float distR3( vec3 p, Variety surf ){
 
     
@@ -5779,26 +5785,14 @@ float distR3( vec3 p, Variety surf ){
     
     dist = smax(dist,bboxDist,surf.smoothing);
 
-    return dist;
+    
+
+    return dist+0.001;
 }
 
 float distR3( Vector tv, Variety surf ){
 
-    
-    vec3 pos = tv.pos - surf.center;
-    float rad = length(pos);
-    pos *= surf.size;
-
-    
-    vec4 data = surf_Data(pos);
-    float val = data.w;
-    float gradLength = length(data.xyz)/surf.size;
-    float dist = DE(val, gradLength);
-
-    
-    dist=abs(dist+surf.inside)-surf.inside-surf.outside;
-    
-    dist = smax(dist,rad-surf.boundingSphere,surf.smoothing);
+    float dist = distR3(tv.pos,surf);
 
     return dist;
 }
@@ -7738,20 +7732,20 @@ void buildLights(){
     float intensity;
 
     
-    light1.center=vec3(7,0,12);
+    light1.center=vec3(7,5,10);
     light1.radius=0.75;
 
     color= vec3(0.5);
-    intensity=150.;
+    intensity=100.;
 
     light1.mat=makeLight(color,intensity);
 
     
-    light2.center=vec3(-10,3,14);
+    light2.center=vec3(-10,3,10);
     light2.radius=2.*extra4;
 
     color= vec3(1.);
-    intensity=205.;
+    intensity=100.;
 
     light2.mat=makeLight(color,intensity);
 
@@ -7764,7 +7758,7 @@ void buildLights(){
 
     
     color= vec3(1.);
-    intensity=10.;
+    intensity=100.;
 
     light3.mat=makeLight(color,intensity);
 
@@ -7804,7 +7798,7 @@ void buildWalls(){
     float specularity, roughness, offset;
 
     
-    color=vec3(0.05);
+    color=vec3(0.02);
     
     
     specularity=0.;

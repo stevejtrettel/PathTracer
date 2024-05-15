@@ -40,6 +40,13 @@ struct Variety{
 };
 
 
+float checkerBox( vec3 p, vec3 b )
+{
+    vec3 q = abs(p) - b;
+    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
+
+
 //overload of distR3: distance in R3 coordinates
 float distR3( vec3 p, Variety surf ){
 
@@ -68,28 +75,39 @@ float distR3( vec3 p, Variety surf ){
     //adjust for the bounding box
     dist = smax(dist,bboxDist,surf.smoothing);
 
-    return dist;
+
+
+    //if we are inside the variety now, we compute the checkerboard pattern:
+//    float checkerdist;
+//        vec3 modpos=20.*pos;
+//        checkerdist = sin(modpos.x)*sin(modpos.y)*sin(modpos.z)-0.7;
+//        return max(dist,checkerdist);
+
+
+    return dist+0.001;
 }
 
 
 
 float distR3( Vector tv, Variety surf ){
 
-    //normalize position
-    vec3 pos = tv.pos - surf.center;
-    float rad = length(pos);
-    pos *= surf.size;
+    float dist = distR3(tv.pos,surf);
 
-    //get the distance estimate
-    vec4 data = surf_Data(pos);
-    float val = data.w;
-    float gradLength = length(data.xyz)/surf.size;
-    float dist = DE(val, gradLength);
-
-    //adjust to account for thickness of surface
-    dist=abs(dist+surf.inside)-surf.inside-surf.outside;
-    //adjust for the bounding box
-    dist = smax(dist,rad-surf.boundingSphere,surf.smoothing);
+//    //normalize position
+//    vec3 pos = tv.pos - surf.center;
+//    float rad = length(pos);
+//    pos *= surf.size;
+//
+//    //get the distance estimate
+//    vec4 data = surf_Data(pos);
+//    float val = data.w;
+//    float gradLength = length(data.xyz)/surf.size;
+//    float dist = DE(val, gradLength);
+//
+//    //adjust to account for thickness of surface
+//    dist=abs(dist+surf.inside)-surf.inside-surf.outside;
+//    //adjust for the bounding box
+//    dist = smax(dist,rad-surf.boundingSphere,surf.smoothing);
 
     return dist;
 }
