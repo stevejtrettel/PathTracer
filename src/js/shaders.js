@@ -91,7 +91,7 @@ let traceUniforms={
         value: 1,
     },
     panelToRender: {
-        value: 1,
+        value: 0,
     }
 
 };

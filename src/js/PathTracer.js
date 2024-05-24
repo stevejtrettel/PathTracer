@@ -14,6 +14,10 @@ class PathTracer{
             preserveDrawingBuffer:true,
         });
 
+        //set up for autosave
+        this.autoSaveFreq = 100000;
+        this.autosave = false;
+
         this.canvas = this.renderer.domElement;
         document.body.appendChild(this.canvas);
         this.renderer.setSize(res.x,res.y);
@@ -60,6 +64,13 @@ class PathTracer{
         //display it
          this.display.renderToScreen();
 
+         //if autosave is enabled: save when asked
+        if(this.autosave){
+            if(this.tracer.material.uniforms.frameNumber.value % this.autoSaveFreq == 0){
+                this.saveImage();
+            }
+        }
+
     }
 
     reset(){
@@ -73,10 +84,12 @@ class PathTracer{
         const date = new Date();
         let day = date.getDate();
         let month = date.getMonth() + 1;
+        let hour = date.getHours();
+        let minute = date.getMinutes();
 
         let canvas = this.canvas;
         let link = document.createElement('a');
-        link.download = `${this.tracer.material.uniforms.frameNumber.value}spp pathtrace ${month}-${day}`+'.png';
+        link.download = `${this.tracer.material.uniforms.frameNumber.value}spp pathtrace ${month}-${day}-${hour}${minute}`+'.png';
         link.href = canvas.toDataURL("image/png");
             //.replace("image/png", "image/octet-stream");
         link.click();
@@ -92,6 +105,8 @@ class PathTracer{
     printLocation(){
         return this.controls.printLocation();
     }
+
+
 
 }
 

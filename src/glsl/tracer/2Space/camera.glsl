@@ -89,18 +89,26 @@ vec2 sampleAperture(Camera cam){
 
 //for working with panels
 vec2 panelFragCoord(vec2 fragCoord, float nPanels, float panelToRender){
-    float resize = sqrt(nPanels);
 
-    //get the vector location of the chosen panel (like (0,0), or (1,2) etc)
-    vec2 chosenPanel;
-    chosenPanel.x = mod(panelToRender,resize)-1.;
-    chosenPanel.y = floor(panelToRender/resize);
+    //if we have a valid panel to render chosen:
+   if(panelToRender<nPanels){
+       float resize = sqrt(nPanels);
+       float panelFraction = panelToRender/resize;
 
-    //move the fragcoord appropriately so its focused just on this panel
-    vec2 newFragCoord = fragCoord/resize;
-    vec2 offset = chosenPanel * iResolution.xy/resize;
-    newFragCoord += offset;
-    return newFragCoord;
+       //get the panel we are on
+       float panelRow = floor(panelFraction);
+       float panelColumn = floor(fract(panelFraction)*resize);
+       vec2 chosenPanel=vec2(panelRow, panelColumn);
+
+       //move the fragcoord appropriately so its focused just on this panel
+       vec2 newFragCoord = fragCoord/resize;
+       vec2 offset = chosenPanel * iResolution.xy/resize;
+       newFragCoord += offset;
+       return newFragCoord;
+   }
+
+    //otherwise do nothing
+    return fragCoord;
 }
 
 
@@ -115,10 +123,12 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
     //SET THE POSITION THE CAMERA STARTS AT REL THE ORIGIN
     vec3 startPos=vec3(-2,0,6);
 
-    //set up pinhole camera at origin
+    //if we are rendering by panels, set the correct panel
     if(cam.renderPanels){
-        fragCoord = panelFragCoord(fragCoord,cam.numPanels,cam.panelToRender);
+        fragCoord = panelFragCoord(fragCoord, cam.numPanels, cam.panelToRender);
     }
+
+    //set up pinhole camera at origin
     Vector tv=initializeRay(fragCoord,cam.fov);
 
     //find the focal point for the ray tv:

@@ -3,10 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/1Setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/uniforms.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/glsl/tracer/2Space/camera.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/2Space/camera.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/tracer.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/tracer.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/js/KeyControls.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/KeyControls.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/js/PathTracer.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/PathTracer.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/js/UI.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/UI.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/js/shaders.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/shaders.js" afterDir="false" />
     </list>
@@ -98,7 +96,7 @@
       <workItem from="1711948118048" duration="18988000" />
       <workItem from="1712122561033" duration="4665000" />
       <workItem from="1715401885843" duration="6019000" />
-      <workItem from="1715738283998" duration="24973000" />
+      <workItem from="1715738283998" duration="27796000" />
     </task>
     <servers />
   </component>
@@ -126,7 +124,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/js/PathTracer.js</url>
-          <line>34</line>
+          <line>38</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="4" />
         </line-breakpoint>

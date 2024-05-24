@@ -24,11 +24,13 @@ class UI extends GUI{
 
             renderPanels: false,
             numPanels: 1,
-            panelToRender:1,
+            panelToRender:0,
             panelWidth: window.innerWidth,
             panelHeight: window.innerHeight,
 
             saveit: ()=>pathtracer.saveImage(),
+
+            autosave: false,
 
             printSettings: ()=> {
 
@@ -178,13 +180,11 @@ class UI extends GUI{
         //     pathtracer.resize({x:xRes,y: yRes});
         // });
 
-
-
-
+        this.add(this.params,'autosave').name('Auto Save @ 100k spp').onChange(function(value){
+            pathtracer.autosave=value;
+        });
         this.add(this.params,'printSettings').name('Download Settings');
-
-         this.add(this.params,'saveit').name('Save Image');
-
+        this.add(this.params,'saveit').name('Save Image');
 
     }
 
