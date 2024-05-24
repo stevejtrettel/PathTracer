@@ -22,15 +22,14 @@ void buildWalls(){
     float specularity, roughness, offset;
 
     //-----------GENERAL FOR THE WALLS -------------------------
-    color=vec3(0.02);
-    //0.4*vec3(171,203,240)/255.;
+    color=0.4*vec3(171,203,240)/255.;
     //vec3(0.4);
     specularity=0.;
     roughness=0.1;
 
 
     //----------- THE FLOOR -------------------------
-    orientation.pos=vec3(0,-0.75,0);
+    orientation.pos=vec3(0,-1.1,0);
     //vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
 
@@ -56,13 +55,13 @@ void buildWalls(){
     //topWall.mat=makeDielectric(color,0.0,roughness);
    /// vec3(1,0.6,0.4)
 
-    topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
+    //topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
     //color =vec3(1);
-   // topWall.mat=makeDielectric(color,0.0,0.5);
-   // topWall.mat.specularColor=vec3(0.75);
-//    topWall.mat.specularChance=0.;
-//    0.075;
-//   topWall.mat.refractionChance=0.;
+    topWall.mat=makeDielectric(color,0.0,0.5);
+    topWall.mat.specularColor=vec3(0.75);
+    topWall.mat.specularChance=0.;
+    //0.075;
+   topWall.mat.refractionChance=0.;
 
 
     //----------- THE FRONT -------------------------
@@ -106,8 +105,8 @@ void buildWalls(){
     //0.5*vec3(250,229,147)/255.;
     leftWall.orientation=orientation;
     leftWall.mat=makeDielectric(color,0.0,roughness);
-    leftWall.mat.specularChance=0.5;
-    //leftWall.mat=makeLight(vec3(1,1,1),5.*extra4);
+    leftWall.mat.specularChance=0.;
+    leftWall.mat=makeLight(vec3(1,1,1),5.*extra4);
 
 
     //----------- THE RIGHT -------------------------

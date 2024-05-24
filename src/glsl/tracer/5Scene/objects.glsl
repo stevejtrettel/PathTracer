@@ -403,16 +403,25 @@ void buildObjects(){
 
 
     dod = buildHypDod();
+
+    dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
+    dod.center = vec3(1,-0.5,2.25);
+    //dod.mat = makeMetal(color,specularity,roughness);
+//    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
+//    dod.mat.refractionChance=0.;
+//    dod.mat.subSurface=true;
+//    dod.mat.meanFreePath=0.5*extra2;
+//    dod.mat.isotropicScatter=extra;
+//    dod.mat.roughness=0.04;
+
+
+
+
+
+    dodE = buildHypDod(0.4);
+    dodE.center = vec3(-2,-0.5,2);
     //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
-    //makeMetal(color,specularity,roughness);
-    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
-
-
-
-
-    dodE = buildHypDod(0.45);
-    //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
-    dodE.mat =makeDielectric(vec3(0.5,0.2,0.4),specularity,roughness);
+    dodE.mat = makeDielectric(vec3(0.5,0.2,0.4),specularity,roughness);
     dodE.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
     dodE.mat.refractionChance=0.;
     dodE.mat.subSurface=true;
@@ -430,17 +439,15 @@ void buildObjects(){
 
 
 
-    Material dodMat = makeDielectric(color,specularity,roughness);
-    //makeGlass(1.*vec3(0.3,0.05,0.05),1.5,0.4);
-    glassMat = makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+    Material dodMat = makeGlass(30.*(brownAbsorb+0.25*redAbsorb),2.5,0.95);
+    glassMat = makeGlass(0.2*vec3(0.3,0.05,0.2),1.5,0.99);
     poin = createPoincareMarble(dodMat, glassMat);
 
-    poin.dod.mat=makeGlass(20.*(vec3(1)-vec3(0.6,0.1,0.5)),1.5,0.95);
-    poin.dod.mat.refractionChance=0.;
-    poin.dod.mat.subSurface=true;
-    poin.dod.mat.meanFreePath=0.5*extra2;
-    poin.dod.mat.isotropicScatter=extra;
-    poin.dod.mat.roughness=0.04;
+//    poin.dod.mat.refractionChance=0.;
+//    poin.dod.mat.subSurface=true;
+//    poin.dod.mat.meanFreePath=0.5*extra2;
+//    poin.dod.mat.isotropicScatter=extra;
+//    poin.dod.mat.roughness=0.04;
 
 
 
@@ -508,9 +515,9 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    //dist=min( dist, sdf(tv, dod) );
-    dist=min( dist, sdf(tv, var) );
-    //dist=min( dist, sdf(tv, vermouth) );
+    dist=min( dist, sdf(tv, poin) );
+    dist=min( dist, sdf(tv, dod) );
+
     return dist;
 }
 
@@ -521,9 +528,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    //return false;
-    return inside(tv, var);
-
+    return false;
+    //return  inside(tv, poin.dod);
 }
 
 
@@ -535,10 +541,8 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-   // setData(path, dod);
-    setData(path, var);
-    //setData(path, vermouth);
-
+    setData(path, poin);
+    setData(path, dod);
 }
 
 

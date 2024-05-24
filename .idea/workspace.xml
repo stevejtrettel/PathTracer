@@ -3,8 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-DIBcOf61.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/assets/index-ps9alE7W.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/assets/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/assets/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/multiMatObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/multiMatObjects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/polytope.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/polytope.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/lights.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/walls.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/glsl/tracer/tracer.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/tracer.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/js/UI.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/UI.js" afterDir="false" />
     </list>
@@ -96,7 +101,7 @@
       <workItem from="1711948118048" duration="18988000" />
       <workItem from="1712122561033" duration="4665000" />
       <workItem from="1715401885843" duration="6019000" />
-      <workItem from="1715738283998" duration="1297000" />
+      <workItem from="1715738283998" duration="9200000" />
     </task>
     <servers />
   </component>
@@ -121,6 +126,12 @@
           <url>file://$USER_HOME$/Drive/threeJS/ComplexExp_Parametric/js/main.js</url>
           <line>25</line>
           <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/js/PathTracer.js</url>
+          <line>38</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

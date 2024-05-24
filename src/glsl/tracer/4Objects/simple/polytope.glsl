@@ -138,6 +138,7 @@ void setData( inout Path path, Polytope poly ){
 struct HypDod{
     float d;
     float r;
+    vec3 center;
     bool centerSphere;
     float rCent;
     Material mat;
@@ -148,6 +149,7 @@ HypDod buildHypDod(){
     float Phi = (1.+sqrt(5.))/2.;
     float c = 2./Phi;
 
+    dod.center = vec3(0,0,0);
     dod.r = sqrt(c);
     dod.d = sqrt(c+1.);
     dod.centerSphere=false;
@@ -160,6 +162,7 @@ HypDod buildHypDod( float rCent){
     float Phi = (1.+sqrt(5.))/2.;
     float c = 2./Phi;
 
+    dod.center=vec3(0,0,0);
     dod.r = sqrt(c);
     dod.d = sqrt(c+1.);
     dod.centerSphere=true;
@@ -171,6 +174,8 @@ HypDod buildHypDod( float rCent){
 
 //signed distance in R3 coordinates
 float distR3( vec3 pos, HypDod dod ){
+
+    pos = pos - dod.center;
 
     //start with the distance to the unit sphere
     float dist = length(pos)-1.;
@@ -233,7 +238,7 @@ float distR3( vec3 pos, HypDod dod ){
 
     //cut out the inside sphere
     if(dod.centerSphere){
-        dist = max(dist, dod.rCent-length(pos));
+        dist = smax(dist, dod.rCent-length(pos),0.1);
     }
 
     return dist;

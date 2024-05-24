@@ -999,7 +999,8 @@ PoincareMarble createPoincareMarble(Material dodMat, Material glassMat ){
     float thickness = 0.04;
 
     PoincareMarble obj;
-    obj.dod = buildHypDod();
+    //obj.dod = buildHypDod();
+    obj.dod = buildHypDod(0.4);
     obj.dod.mat = dodMat;
 
     obj.glass = Sphere(vec3(0,0,0), 1.,glassMat);
