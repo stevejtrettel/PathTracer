@@ -405,7 +405,7 @@ void buildObjects(){
     dod = buildHypDod();
 
     dod.mat=makeGlass(10.*(brownAbsorb+0.25*redAbsorb),1.5,0.97);
-    dod.center = vec3(1,-0.5,2.25);
+    dod.center = vec3(1.5,-0.5,2.25);
     //dod.mat = makeMetal(color,specularity,roughness);
 //    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
 //    dod.mat.refractionChance=0.;

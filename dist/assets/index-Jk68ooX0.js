@@ -8278,7 +8278,7 @@ void buildObjects(){
     dod = buildHypDod();
 
     dod.mat=makeGlass(10.*(brownAbsorb+0.25*redAbsorb),1.5,0.97);
-    dod.center = vec3(1,-0.5,2.25);
+    dod.center = vec3(1.5,-0.5,2.25);
     
 
     dodE = buildHypDod(0.4);
