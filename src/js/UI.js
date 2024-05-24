@@ -140,6 +140,10 @@ class UI extends GUI{
             pathtracer.tracer.setSize(res);
         });
 
+        ren.add(this.params,'autosave').name('Auto Save @ 100k spp').onChange(function(value){
+            pathtracer.autosave=value;
+        });
+
         // ren.add(this.params,'renderBlocks').name('Render Blocks').onChange(function(value){
         //     pathtracer.tracer.updateUniforms({renderBlocks:value});
         // });
@@ -180,9 +184,7 @@ class UI extends GUI{
         //     pathtracer.resize({x:xRes,y: yRes});
         // });
 
-        this.add(this.params,'autosave').name('Auto Save @ 100k spp').onChange(function(value){
-            pathtracer.autosave=value;
-        });
+
         this.add(this.params,'printSettings').name('Download Settings');
         this.add(this.params,'saveit').name('Save Image');
 

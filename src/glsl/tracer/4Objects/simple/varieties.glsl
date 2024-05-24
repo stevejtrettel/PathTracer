@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return endrassOctic(x,y,z);
+    return kummer(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){

@@ -367,14 +367,13 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
 
-
     var.center=vec3(0,0.5,0);
     var.size=3.;
-    var.inside=0.2;
-    var.outside=0.0;
+    var.inside=0.205;
+    var.outside=0.005;
     var.boundingSphere=2.;
     //3.1415;
-    var.smoothing =0.075;
+    var.smoothing =0.0;
 
     //color= vec3(0.4,0.3,0.2);
     //specularity=0.5;
@@ -440,8 +439,6 @@ void buildObjects(){
     //dod.mat.isotropicScatter=extra;
     //dod.mat.roughness=0.04;
     //
-
-
 
     Material dodMat = makeGlass(30.*(brownAbsorb+0.25*redAbsorb),2.5,0.95);
     glassMat = makeGlass(0.2*vec3(0.3,0.05,0.2),1.5,0.99);

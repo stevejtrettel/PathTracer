@@ -257,7 +257,7 @@ T chmutov(T x, T y, T z) {
 T kummer(T x, T y, T z, T w){
 
     //moduli for the quartic:
-    float muSqr=0.8;
+    float muSqr=0.7;
     float Lambda = (3.* muSqr - 1.)/(3.-muSqr);
 
     T p = z - w + x * sqrt(2.);
@@ -271,6 +271,9 @@ T kummer(T x, T y, T z, T w){
     return tsqr(fmu) - Lambda * prod;
 }
 
+T kummer(T x, T y, T z){
+    return kummer(x,y,z,T(1,0));
+}
 
 T togliatti(T xorig, T yorig, T zorig, T w){
 
