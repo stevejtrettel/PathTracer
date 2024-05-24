@@ -4,6 +4,9 @@ import accumulate from '/src/glsl/accumulate/accumulate.glsl';
 import display from '/src/glsl/display/display.glsl';
 import tracer from '/src/glsl/tracer/tracer.glsl';
 
+import {uiParams,location} from "./settings.js";
+
+
 //Uniforms for the tracer
 //=============================================
 
@@ -24,44 +27,50 @@ let traceUniforms={
         value: skyTexSmall
     },
     facing: {
-        value: new Matrix3().identity()
+        value: new Matrix3().set(
+            location.facing[0],location.facing[1],location.facing[2],
+            location.facing[3],location.facing[4],location.facing[5],
+            location.facing[6],location.facing[7],location.facing[8]
+            )
     },
     location: {
-        value: new Vector3(0, 0, 0)
+        value: new Vector3(
+            location.position[0], location.position[1], location.position[2]
+        )
     },
     frameNumber: {
         value: 0
     },
 
     aperture: {
-        value: 0.0
+        value: uiParams.aperture
     },
     focalLength: {
-        value: 5.
+        value: uiParams.focalLength
     },
     exposure: {
-        value: 1.
+        value: uiParams.exposure
     },
     focusHelp: {
         value: false
     },
     fov: {
-        value: 50
+        value: uiParams.fov
     },
     renderBlocks: {
         value: false
     },
     extra: {
-        value: 0.5
+        value: uiParams.extra
     },
     extra2: {
-        value: 0.5
+        value: uiParams.extra2
     },
     extra3: {
-        value: 0.5
+        value: uiParams.extra2
     },
     extra4: {
-        value: 0.5
+        value: uiParams.extra2
     },
 };
 

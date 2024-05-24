@@ -1,5 +1,5 @@
 import {Vector3,Matrix3,Matrix4} from "three";
-
+import {location} from "./settings.js";
 
 class KeyControls{
     constructor() {
@@ -79,9 +79,13 @@ class KeyControls{
             },
         }
 
-        this.position = new Vector3();
-        this.facing = new Matrix3();
-
+        //set the original position and facing from the settings file
+        this.position = new Vector3(location.position[0], location.position[1], location.position[2]);
+        this.facing = new Matrix3().set(
+            location.facing[0],location.facing[1],location.facing[2],
+            location.facing[3],location.facing[4],location.facing[5],
+            location.facing[6],location.facing[7],location.facing[8]
+        );
 
     }
 
@@ -142,6 +146,20 @@ class KeyControls{
             }
         }
 
+    }
+
+
+    printLocation(){
+        let origFacing = this.facing.invert();
+        let str = ``;
+        str += `let position = [${this.position.x},${this.position.y},${this.position.z}];\n\n`;
+        str += `let facing = [${origFacing.elements}]; \n\n`;
+        str += `let location = {
+position: position,
+facing: facing
+};\n\n`;
+        str += `export {location};`;
+        return str;
     }
 
 }

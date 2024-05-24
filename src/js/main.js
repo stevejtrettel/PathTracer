@@ -5,8 +5,6 @@ import UI from "./UI.js";
 import shaders from "./shaders.js";
 
 
-
-
 //set the canvas
 // let canvas = document.querySelector('#World');
 

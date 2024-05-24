@@ -1,20 +1,22 @@
 import {GUI} from "three/addons/libs/lil-gui.module.min";
 
+import {uiParams} from "./settings.js";
+
 class UI extends GUI{
     constructor(pathtracer) {
         super();
 
         this.params = {
-            aperture: 0.0,
-            focalLength:5,
-            exposure:1,
+            aperture: uiParams.aperture,
+            focalLength: uiParams.focalLength,
+            exposure: uiParams.exposure,
             focusHelp:false,
-            fov:50,
+            fov: uiParams.fov,
 
-            extra:0.5,
-            extra2:0.5,
-            extra3:0.5,
-            extra4:0.5,
+            extra: uiParams.extra,
+            extra2: uiParams.extra2,
+            extra3: uiParams.extra3,
+            extra4: uiParams.extra4,
 
             preview: false,
             renderBlocks:false,
@@ -25,10 +27,58 @@ class UI extends GUI{
 
             saveit: ()=>pathtracer.saveImage(),
 
-            printsettings: ()=> {
 
+            printSettings: ()=> {
+
+                //assemble all the contents of the file here
+                let contents = ``;
+                contents += this.printParams();
+                contents += `\n\n\n`;
+                contents += pathtracer.printLocation();
+
+                const file = new File([contents], `settingsNew.js`, {
+                    type: 'javascript',
+                });
+
+                //a function which allows the browser to automatically downlaod the file created
+                //(a hack from online: it makes a download link, artificially clicks it, and removes the link)
+                //https://javascript.plainenglish.io/javascript-create-file-c36f8bccb3be
+                function download() {
+                    const link = document.createElement('a')
+                    const url = URL.createObjectURL(file)
+
+                    link.href = url
+                    link.download = file.name
+                    document.body.appendChild(link)
+                    link.click()
+
+                    document.body.removeChild(link)
+                    window.URL.revokeObjectURL(url)
+                }
+
+                download();
             }
+
+
         };
+
+
+        this.printParams = () => {
+                let str = `let uiParams = {\n`;
+                str += `aperture: ${this.params.aperture},\n`;
+                str += `focalLength: ${this.params.focalLength},\n`;
+                str += `exposure: ${this.params.exposure},\n`;
+                str += `focusHelp: ${this.params.focusHelp},\n`;
+                str += `fov: ${this.params.fov},\n`;
+                str += `extra: ${this.params.extra},\n`;
+                str += `extra2: ${this.params.extra2},\n`;
+                str += `extra3: ${this.params.extra3},\n`;
+                str += `extra4: ${this.params.extra4},\n`;
+                str += `}`;
+                str += `\n\n`;
+                str += `export {uiParams};`;
+                return str;
+        }
 
         //make folders
         const cam = this.addFolder('Camera');
@@ -75,16 +125,17 @@ class UI extends GUI{
             pathtracer.reset();
         });
 
-        ren.add(this.params,'resize').name('Size to Screen');
 
-        ren.add(this.params, 'customSize').onFinishChange(function(value){
+        ren.add(this.params, 'customSize').name('Custom Width (px)').onFinishChange(function(value){
             let aspect = window.innerHeight/window.innerWidth;
             let xRes = value;
             let yRes = aspect*value;
             pathtracer.resize({x:xRes,y: yRes});
         });
 
-        ren.add(this.params, 'preview').name('Preview Quality').onChange(function(value){
+        ren.add(this.params,'resize').name('Size to Screen');
+
+        ren.add(this.params, 'preview').name('Preview Quality (Pixelated)').onChange(function(value){
             let adjust = 1.;
             if(value){ adjust =1/4;}
             let res = {x: Math.floor(adjust * window.innerWidth), y: Math.floor(adjust * window.innerHeight)};
@@ -96,7 +147,10 @@ class UI extends GUI{
             pathtracer.tracer.updateUniforms({renderBlocks:value});
         });
 
+        this.add(this.params,'printSettings').name('Download Settings');
+
          this.add(this.params,'saveit').name('Save Image');
+
 
     }
 

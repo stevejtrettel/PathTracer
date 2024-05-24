@@ -1,10 +1,7 @@
 import {WebGLRenderer} from "three";
 
-
 import ComputeShader from "./ComputeShader.js";
 import KeyControls from "./KeyControls.js";
-
-
 
 
 //class to run the path tracer from
@@ -90,6 +87,10 @@ class PathTracer{
         this.accumulate.setSize(res);
         this.display.setSize(res);
         this.renderer.setSize(res.x,res.y);
+    }
+
+    printLocation(){
+        return this.controls.printLocation();
     }
 
 }
