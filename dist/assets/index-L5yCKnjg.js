@@ -6061,6 +6061,13 @@ float SeahorseKleinian(vec3 z)
     vec3 lz=z+vec3(1.), llz=z+vec3(-1.);
     float d=0.; float d2=0.;
 
+    if (SI) {
+        z=z-InvCenter;
+        d=length(z);
+        d2=d*d;
+        z=(rad*rad/d2)*z+InvCenter;
+    }
+
     
 
     float DE = 1e12;
@@ -8221,13 +8228,15 @@ void buildObjects(){
    
     
 
-    klein.center=vec3(-3,0,-3);
+    klein.center=vec3(0,0,-3);
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;
     
 
-    klein.mat=makeGlass(7.*vec3(0.5,0.1,0.05),1.5,0.95);
+    klein.mat=makeGlass(7.*vec3(0.4,0.25,0.05),1.5,0.95);
+    
+    
     
 
     
@@ -8331,21 +8340,21 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, poin) );
-    dist=min( dist, sdf(tv, dod) );
+    
+    dist=min( dist, sdf(tv, klein) );
 
     return dist;
 }
 
 bool inside_Object( Vector tv ){
 
-    return false;
     
+    return  inside(tv, klein);
 }
 
 void setData_Objects(inout Path path){
-    setData(path, poin);
-    setData(path, dod);
+    setData(path, klein);
+    
 }
 void buildScene(){
     buildWalls();

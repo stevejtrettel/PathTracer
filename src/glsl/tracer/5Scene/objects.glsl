@@ -340,13 +340,15 @@ void buildObjects(){
 
 
 
-    klein.center=vec3(-3,0,-3);
+    klein.center=vec3(0,0,-3);
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;
     //klein.mat=makeDielectric(color,specularity,roughness);
 
-    klein.mat=makeGlass(7.*vec3(0.5,0.1,0.05),1.5,0.95);
+    klein.mat=makeGlass(7.*vec3(0.4,0.25,0.05),1.5,0.95);
+    //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+    //makeGlass(7.*vec3(0.5,0.1,0.05),1.5,0.95);
     //makeGlass(3.*vec3(0.3,0.05,0.2),1.5,0.95);
 
     //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
@@ -515,8 +517,8 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, poin) );
-    dist=min( dist, sdf(tv, dod) );
+    //dist=min( dist, sdf(tv, poin) );
+    dist=min( dist, sdf(tv, klein) );
 
     return dist;
 }
@@ -528,8 +530,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    return false;
-    //return  inside(tv, poin.dod);
+    //return false;
+    return  inside(tv, klein);
 }
 
 
@@ -541,8 +543,8 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-    setData(path, poin);
-    setData(path, dod);
+    setData(path, klein);
+    //setData(path, dod);
 }
 
 

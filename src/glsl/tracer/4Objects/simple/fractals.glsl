@@ -378,12 +378,12 @@ float SeahorseKleinian(vec3 z)
     vec3 lz=z+vec3(1.), llz=z+vec3(-1.);
     float d=0.; float d2=0.;
 
-//    if (SI) {
-//        z=z-InvCenter;
-//        d=length(z);
-//        d2=d*d;
-//        z=(rad*rad/d2)*z+InvCenter;
-//    }
+    if (SI) {
+        z=z-InvCenter;
+        d=length(z);
+        d2=d*d;
+        z=(rad*rad/d2)*z+InvCenter;
+    }
 
     // vec3 orbitTrap = vec3(1e20);
 
