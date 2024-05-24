@@ -18,9 +18,16 @@ class UI extends GUI{
 
             preview: false,
             renderBlocks:false,
+
+            customSize: window.innerWidth,
+
             resize: ()=>pathtracer.resize({x:window.innerWidth,y:window.innerHeight}),
 
             saveit: ()=>pathtracer.saveImage(),
+
+            printsettings: ()=> {
+
+            }
         };
 
         //make folders
@@ -69,6 +76,13 @@ class UI extends GUI{
         });
 
         ren.add(this.params,'resize').name('Size to Screen');
+
+        ren.add(this.params, 'customSize').onFinishChange(function(value){
+            let aspect = window.innerHeight/window.innerWidth;
+            let xRes = value;
+            let yRes = aspect*value;
+            pathtracer.resize({x:xRes,y: yRes});
+        });
 
         ren.add(this.params, 'preview').name('Preview Quality').onChange(function(value){
             let adjust = 1.;

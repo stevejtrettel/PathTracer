@@ -11,13 +11,12 @@ import KeyControls from "./KeyControls.js";
 class PathTracer{
     constructor(shaders, res={x:window.innerWidth,y:window.innerHeight}) {
 
-        //save the canvas
-       // this.canvas = canvas;
         //build the renderer
         this.renderer = new WebGLRenderer({
             //this is what lets me screenshot the canvas I guess?
             preserveDrawingBuffer:true,
         });
+
         this.canvas = this.renderer.domElement;
         document.body.appendChild(this.canvas);
         this.renderer.setSize(res.x,res.y);

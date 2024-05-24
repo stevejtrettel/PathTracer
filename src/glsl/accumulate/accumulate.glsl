@@ -12,15 +12,15 @@ uniform sampler2D accTex;
 //Read in the Data
 //-------------------------------------------------
 
-vec4 newFrame(vec2 fragCoord){
-    return texture(newTex, fragCoord / iResolution.xy);
+vec4 newFrame(ivec2 pixelCoord){
+    return texelFetch(newTex, pixelCoord,0);
+    //return texture(newTex, fragCoord / iResolution.xy);
 }
 
-vec4 accFrame(vec2 fragCoord){
-    return texture(accTex, fragCoord / iResolution.xy);
+vec4 accFrame(ivec2 pixelCoord){
+    return texelFetch(accTex, pixelCoord, 0);
+    //return texture(accTex, fragCoord / iResolution.xy);
 }
-
-
 
 
 
@@ -29,11 +29,11 @@ vec4 accFrame(vec2 fragCoord){
 //Do the Accumulation
 //-------------------------------------------------
 
-void mainImage(out vec4 fragColor, in vec2 fragCoord )
+void mainImage(out vec4 fragColor, in ivec2 pixelCoord )
 {
     //get new and old frames
-    vec4 new = newFrame(fragCoord);
-    vec4 prev = accFrame(fragCoord);
+    vec4 new = newFrame(pixelCoord);
+    vec4 prev = accFrame(pixelCoord);
 
     //discard a pixel if it has 'nan' values in the new frame
     new = isnan(length(new)) ? vec4(0,0,0,1) : new;
@@ -52,5 +52,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord )
 
 
 void main() {
-    mainImage(gl_FragColor, gl_FragCoord.xy);
+    mainImage(gl_FragColor, ivec2(gl_FragCoord.xy));
 }
