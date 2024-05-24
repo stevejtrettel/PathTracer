@@ -5727,7 +5727,7 @@ void setData( inout Path path, Bunny bunny ){
 
 }
 T surf(T x, T y, T z){
-    return togliatti(x,y,z);
+    return endrassOctic(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -5776,12 +5776,13 @@ float distR3( vec3 p, Variety surf ){
     
     dist=abs(dist+surf.inside)-surf.inside-surf.outside;
 
+    vec3 q = abs(pos) - vec3(20,8,20);
+    float bboxDist = length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+
     
-   
 
-   
+    
 
-    float bboxDist = rad-surf.boundingSphere;
     
     dist = smax(dist,bboxDist,surf.smoothing);
 
@@ -7842,13 +7843,8 @@ void buildWalls(){
     
    
 
+    topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
     
-    
-    topWall.mat=makeDielectric(color,0.0,0.5);
-    topWall.mat.specularColor=vec3(0.75);
-    topWall.mat.specularChance=0.;
-    
-   topWall.mat.refractionChance=0.;
 
     
     orientation.pos=vec3(0,0,-12);
@@ -8254,11 +8250,12 @@ void buildObjects(){
     klein.mat.isotropicScatter=extra;
     klein.mat.roughness=0.04;
 
-    var.center=vec3(-2,1.8,0);
-    var.size=5.;
-    var.inside=0.02;
+    var.center=vec3(0,0.5,0);
+    var.size=3.;
+    var.inside=0.2;
     var.outside=0.0;
-    var.boundingSphere=3.1415;
+    var.boundingSphere=2.;
+    
     var.smoothing =0.075;
 
     
@@ -8268,16 +8265,17 @@ void buildObjects(){
     
     
     
-    var.mat=makeGlass(3.75*vec3(0.3,0.05,0.2),1.5,0.95);
+    var.mat=makeGlass(30.*(brownAbsorb+0.25*redAbsorb),1.5,0.97);
+    
 
     
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.2*extra2;
     var.mat.isotropicScatter=extra;
-    var.mat.roughness=0.2;
+    var.mat.roughness=0.7;
 
-    Material glassMat = makeGlass(0.75*vec3(0.3,0.05,0.2),1.2,0.95);
+    Material glassMat = makeGlass(0.75*vec3(0.3,0.05,0.2),1.6,0.95);
     float glassThickness=0.04;
     gVar = createGlassVariety(var,glassMat,glassThickness);
 
@@ -8341,7 +8339,8 @@ float sdf_Objects( Vector tv ){
    float dist=maxDist;
 
     
-    dist=min( dist, sdf(tv, klein) );
+   
+    dist=min( dist, sdf(tv, var) );
 
     return dist;
 }
@@ -8349,11 +8348,13 @@ float sdf_Objects( Vector tv ){
 bool inside_Object( Vector tv ){
 
     
-    return  inside(tv, klein);
+    return  inside(tv, var);
 }
 
 void setData_Objects(inout Path path){
-    setData(path, klein);
+   
+    setData(path, var);
+
     
 }
 void buildScene(){

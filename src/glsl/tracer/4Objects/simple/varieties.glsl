@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return togliatti(x,y,z);
+    return endrassOctic(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -66,12 +66,14 @@ float distR3( vec3 p, Variety surf ){
 
 
 
-    //vec3 q = abs(pos) - vec3(20,8,20);
-   // float bboxDist = length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+    vec3 q = abs(pos) - vec3(20,8,20);
+    float bboxDist = length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 
-   // float bboxDist = abs(pos.y)-4.;
+    //float bboxDist = abs(pos.y)-4.;
 
-    float bboxDist = rad-surf.boundingSphere;
+    //float bboxDist = rad-surf.boundingSphere;
+
+
     //adjust for the bounding box
     dist = smax(dist,bboxDist,surf.smoothing);
 
