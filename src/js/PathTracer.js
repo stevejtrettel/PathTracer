@@ -15,8 +15,12 @@ class PathTracer{
         });
 
         //set up for autosave
-        this.autoSaveFreq = 100000;
-        this.autosave = false;
+        this.autoSave = false;
+        this.autoSaveSPP = 100000;
+
+        this.autoSavePanels = false;
+        this.autoSavePanelsSPP = 100000;
+
 
         this.canvas = this.renderer.domElement;
         document.body.appendChild(this.canvas);
@@ -65,12 +69,22 @@ class PathTracer{
          this.display.renderToScreen();
 
          //if autosave is enabled: save when asked
-        if(this.autosave){
-            if(this.tracer.material.uniforms.frameNumber.value % this.autoSaveFreq == 0){
+        if(this.autoSave){
+            if(this.tracer.material.uniforms.frameNumber.value % this.autoSaveSPP == 0){
                 this.saveImage();
             }
         }
 
+        if(this.autoSavePanels){
+
+            if(this.tracer.material.uniforms.panelToRender.value<this.tracer.material.uniforms.numPanels.value) {
+                if (this.tracer.material.uniforms.frameNumber.value == this.autoSavePanelsSPP) {
+                    this.saveImage();
+                    this.tracer.material.uniforms.panelToRender.value += 1;
+                    this.reset();
+                }
+            }
+        }
     }
 
     reset(){

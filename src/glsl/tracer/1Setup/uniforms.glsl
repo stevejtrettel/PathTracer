@@ -10,7 +10,7 @@ uniform mat3 facing;
 uniform vec3 location;
 uniform float frameNumber;
 uniform float exposure;
-uniform bool renderBlocks;
+//uniform bool renderBlocks;
 
 uniform float aperture;
 uniform float focalLength;
@@ -21,7 +21,7 @@ uniform float extra2;
 uniform float extra3;
 uniform float extra4;
 
-uniform bool renderPanels;
+uniform bool renderPanel;
 uniform float numPanels;
 uniform float panelToRender;
 

@@ -19,10 +19,17 @@ class UI extends GUI{
             extra4: uiParams.extra4,
 
             preview: false,
-            renderBlocks:false,
+            // renderBlocks:false,
             resize: ()=>pathtracer.resize({x:window.innerWidth,y:window.innerHeight}),
 
-            renderPanels: false,
+
+            autoSave: false,
+            autoSavePanels: false,
+            renderPanel: false,
+
+            autoSaveSPP:pathtracer.autoSaveSPP,
+            autoSavePanelsSPP:pathtracer.autoSavePanelsSPP,
+
             numPanels: 1,
             panelToRender:0,
             panelWidth: window.innerWidth,
@@ -30,7 +37,7 @@ class UI extends GUI{
 
             saveit: ()=>pathtracer.saveImage(),
 
-            autosave: false,
+
 
             printSettings: ()=> {
 
@@ -98,12 +105,12 @@ class UI extends GUI{
         cam.add(this.params, 'focalLength',0,40,0.01).name('Focal Length').onChange(function(value){
             pathtracer.tracer.updateUniforms({focalLength: value});
             pathtracer.reset();
-        });;
+        });
         cam.add(this.params, 'focusHelp').name('Focus Help').onChange(function(value){
             pathtracer.tracer.updateUniforms({focusHelp: value});
             pathtracer.reset();
         });;
-        cam.add(this.params, 'fov',40,140,1).name('FOV').onChange(function(value){
+        cam.add(this.params, 'fov',15,140,1).name('FOV').onChange(function(value){
             pathtracer.tracer.updateUniforms({fov: value});
             pathtracer.reset();
         });
@@ -140,34 +147,17 @@ class UI extends GUI{
             pathtracer.tracer.setSize(res);
         });
 
-        ren.add(this.params,'autosave').name('Auto Save @ 100k spp').onChange(function(value){
-            pathtracer.autosave=value;
+        ren.add(this.params, 'autoSaveSPP').name('Auto Save At').onChange(function(value){
+            pathtracer.autoSaveSPP = value;
         });
-
-        // ren.add(this.params,'renderBlocks').name('Render Blocks').onChange(function(value){
-        //     pathtracer.tracer.updateUniforms({renderBlocks:value});
-        // });
-        //
+        ren.add(this.params,'autoSave').name('Auto Save').onChange(function(value){
+            pathtracer.autoSave=value;
+        });
 
         //THE PANEL FOR HD RENDERING
 
         const HD = ren.addFolder('HD');
         HD.close();
-
-        HD.add(this.params,'renderPanels').onChange(function(value){
-            pathtracer.tracer.updateUniforms({renderPanels:value});
-            pathtracer.reset();
-        });
-
-        HD.add(this.params,'numPanels',{1:1,4:4,9:9}).onFinishChange(function(value){
-            pathtracer.tracer.updateUniforms({numPanels:value});
-            pathtracer.reset();
-        });
-
-        HD.add(this.params,'panelToRender').onFinishChange(function(value){
-            pathtracer.tracer.updateUniforms({panelToRender:value});
-            pathtracer.reset();
-        });
 
         HD.add(this.params, 'panelWidth').name('Panel Width (px)').onFinishChange(function(value){
             pathtracer.resize({x:value,y: theParams.panelHeight});
@@ -175,6 +165,43 @@ class UI extends GUI{
         HD.add(this.params, 'panelHeight').name('Panel Height (px)').onFinishChange(function(value){
             pathtracer.resize({x:theParams.panelWidth,y: value});
         });
+
+        HD.add(this.params,'numPanels',{1:1,4:4,9:9,16:16,25:25}).onFinishChange(function(value){
+            pathtracer.tracer.updateUniforms({numPanels:value});
+            pathtracer.reset();
+        });
+        HD.add(this.params, 'autoSavePanelsSPP').name('Auto Save At').onChange(function(value){
+            pathtracer.autoSavePanelsSPP = value;
+        });
+        HD.add(this.params,'autoSavePanels').onChange(function(value){
+            //turn on auto-rendering:
+            pathtracer.autoSavePanels=value;
+            //let the camera know we are rendering panel-by-panel
+            pathtracer.tracer.updateUniforms({renderPanel:value});
+            //make sure we start with the first panel
+            pathtracer.tracer.updateUniforms({panelToRender:0});
+            //reset the frame
+            pathtracer.reset();
+        });
+
+        const indi = HD.addFolder('Individual Panel');
+        indi.close();
+
+        indi.add(this.params,'panelToRender').name('Current Panel').onFinishChange(function(value){
+            pathtracer.tracer.updateUniforms({panelToRender:value});
+            pathtracer.reset();
+        });
+
+        indi.add(this.params,'renderPanel').name('Render This Panel').onChange(function(value){
+            pathtracer.tracer.updateUniforms({renderPanel:value});
+            pathtracer.reset();
+        });
+
+
+
+
+
+
 
         //
         // HD.add(this.params, 'customWidth').name('Width (px)').onFinishChange(function(value){

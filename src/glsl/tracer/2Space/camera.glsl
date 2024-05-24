@@ -11,7 +11,7 @@ struct Camera{
     float fov;
     float aperture;
     float focalLength;
-    bool renderPanels;
+    bool renderPanel;
     float numPanels;
     float panelToRender;
 };
@@ -23,7 +23,7 @@ Camera buildCamFromUniforms(){
     cam.fov=fov;
     cam.aperture=aperture;
     cam.focalLength=focalLength;
-    cam.renderPanels = renderPanels;
+    cam.renderPanel = renderPanel;
     cam.numPanels = numPanels;
     cam.panelToRender = panelToRender;
     return cam;
@@ -124,7 +124,7 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
     vec3 startPos=vec3(-2,0,6);
 
     //if we are rendering by panels, set the correct panel
-    if(cam.renderPanels){
+    if(cam.renderPanel){
         fragCoord = panelFragCoord(fragCoord, cam.numPanels, cam.panelToRender);
     }
 

@@ -66,9 +66,9 @@ let traceUniforms={
     fov: {
         value: uiParams.fov
     },
-    renderBlocks: {
-        value: false
-    },
+    // renderBlocks: {
+    //     value: false
+    // },
     extra: {
         value: uiParams.extra
     },
@@ -84,7 +84,7 @@ let traceUniforms={
 
 
     //HD Rendering Default = disabled
-    renderPanels: {
+    renderPanel: {
         value: false,
     },
     numPanels: {

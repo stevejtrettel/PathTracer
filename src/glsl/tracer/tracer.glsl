@@ -18,28 +18,6 @@
 // it takes in a pixel coordinate, traces the scene and returns a color
 //-----------------------------------------------------------------------
 
-// //decide if a pixel is rendered this round (when using renderblocks)
-// //we would then encase the inside of newFrame with an if(renderPixel(fragCoord)){} conditional
-//bool renderPixel(vec2 fragCoord){
-//    bool render=true;
-//    if(renderBlocks){
-//        float corner = mod(frameNumber, 4.);
-//        if (corner == 1.){
-//            render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
-//        }
-//        else if (corner == 2.){
-//            render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
-//        }
-//        else if (corner == 3.){
-//            render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
-//        }
-//        else {
-//            render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
-//        }
-//    }
-//    return render;
-//}
-
 
 
 //get the new frame
@@ -63,8 +41,6 @@ vec3 newFrame(vec2 fragCoord ){
         //do one trace out into the scene
         vec3 col = pathTrace(path);
         float adjust = 1.;
-        //if we use renderblocks, need to increase brightness to account for black pixels
-        if(renderBlocks){ adjust = 4.;}
         //do the adjustments from this and exposure
         return adjust * exposure * col;
 
