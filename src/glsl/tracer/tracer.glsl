@@ -18,39 +18,40 @@
 // it takes in a pixel coordinate, traces the scene and returns a color
 //-----------------------------------------------------------------------
 
-//decide if a pixel is rendered this round (when using renderblocks)
-bool renderPixel(vec2 fragCoord){
-    bool render=true;
-    if(renderBlocks){
-        float corner = mod(frameNumber, 4.);
-        if (corner == 1.){
-            render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
-        }
-        else if (corner == 2.){
-            render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
-        }
-        else if (corner == 3.){
-            render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
-        }
-        else {
-            render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
-        }
-    }
-    return render;
-}
+// //decide if a pixel is rendered this round (when using renderblocks)
+// //we would then encase the inside of newFrame with an if(renderPixel(fragCoord)){} conditional
+//bool renderPixel(vec2 fragCoord){
+//    bool render=true;
+//    if(renderBlocks){
+//        float corner = mod(frameNumber, 4.);
+//        if (corner == 1.){
+//            render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
+//        }
+//        else if (corner == 2.){
+//            render = (fragCoord.x<iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
+//        }
+//        else if (corner == 3.){
+//            render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y<iResolution.y/2.);
+//        }
+//        else {
+//            render = (fragCoord.x>iResolution.x/2.)&&(fragCoord.y>iResolution.y/2.);
+//        }
+//    }
+//    return render;
+//}
 
 
 
 //get the new frame
 vec3 newFrame(vec2 fragCoord ){
 
-    if(renderPixel(fragCoord)){
         // initialize a random number seed
         float rand = floor(1000.*randomFloat());
         seed = randomSeed(fragCoord, frameNumber+rand);
 
         //set up the camera:
         Camera cam=buildCamFromUniforms();
+
 
         //get the initial path at camera
         Vector tv=cameraRay(fragCoord, cam);
@@ -66,10 +67,7 @@ vec3 newFrame(vec2 fragCoord ){
         if(renderBlocks){ adjust = 4.;}
         //do the adjustments from this and exposure
         return adjust * exposure * col;
-    }
 
-    //if we don't render the pixel; just return black
-    return vec3(0);
 }
 
 

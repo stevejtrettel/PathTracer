@@ -11,6 +11,9 @@ struct Camera{
     float fov;
     float aperture;
     float focalLength;
+    bool renderPanels;
+    float numPanels;
+    float panelToRender;
 };
 
 Camera buildCamFromUniforms(){
@@ -20,6 +23,9 @@ Camera buildCamFromUniforms(){
     cam.fov=fov;
     cam.aperture=aperture;
     cam.focalLength=focalLength;
+    cam.renderPanels = renderPanels;
+    cam.numPanels = numPanels;
+    cam.panelToRender = panelToRender;
     return cam;
 }
 
@@ -32,7 +38,7 @@ Camera buildCamFromUniforms(){
 //-------------------------------------------------
 
 //pinhole camera setup
-Vector initializeRay(vec2 fragCoord,float FOV){
+Vector initializeRay(vec2 fragCoord, float FOV){
 
     // The ray starts at the camera position (a uniform)
     vec3 rayPosition = ORIGIN;
@@ -67,6 +73,7 @@ Vector initializeRay(vec2 fragCoord,float FOV){
 
 
 
+
 vec2 sampleAperture(Camera cam){
 
     float theta=2.*PI*randomFloat();
@@ -78,6 +85,23 @@ vec2 sampleAperture(Camera cam){
 
 
 
+
+
+//for working with panels
+vec2 panelFragCoord(vec2 fragCoord, float nPanels, float panelToRender){
+    float resize = sqrt(nPanels);
+
+    //get the vector location of the chosen panel (like (0,0), or (1,2) etc)
+    vec2 chosenPanel;
+    chosenPanel.x = mod(panelToRender,resize)-1.;
+    chosenPanel.y = floor(panelToRender/resize);
+
+    //move the fragcoord appropriately so its focused just on this panel
+    vec2 newFragCoord = fragCoord/resize;
+    vec2 offset = chosenPanel * iResolution.xy/resize;
+    newFragCoord += offset;
+    return newFragCoord;
+}
 
 
 
@@ -92,6 +116,9 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
     vec3 startPos=vec3(-2,0,6);
 
     //set up pinhole camera at origin
+    if(cam.renderPanels){
+        fragCoord = panelFragCoord(fragCoord,cam.numPanels,cam.panelToRender);
+    }
     Vector tv=initializeRay(fragCoord,cam.fov);
 
     //find the focal point for the ray tv:

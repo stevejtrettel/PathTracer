@@ -20,6 +20,12 @@ uniform float extra;
 uniform float extra2;
 uniform float extra3;
 uniform float extra4;
+
+uniform bool renderPanels;
+uniform float numPanels;
+uniform float panelToRender;
+
+
 //-------------------------------------------------
 //Constants
 //-------------------------------------------------

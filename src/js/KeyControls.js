@@ -150,7 +150,11 @@ class KeyControls{
 
 
     printLocation(){
-        let origFacing = this.facing.invert();
+
+        //internally things are stored column-major, but are entered row-major
+        //so, to save the correct matrix as output, we transpose it
+        let origFacing = this.facing.transpose();
+
         let str = ``;
         str += `let position = [${this.position.x},${this.position.y},${this.position.z}];\n\n`;
         str += `let facing = [${origFacing.elements}]; \n\n`;

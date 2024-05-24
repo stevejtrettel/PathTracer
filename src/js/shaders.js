@@ -17,15 +17,25 @@ const skyTexSmall = new TextureLoader().load('src/js/tex/office.jpg');
 
 
 let traceUniforms={
+
+    //default resultion and framenumber
     iResolution: {
         value: new Vector3(window.innerWidth, window.innerHeight, 0.)
     },
+    frameNumber: {
+        value: 0
+    },
+
+    //loaded directly above: skybox images
     sky: {
         value: skyTex
     },
     skySM: {
         value: skyTexSmall
     },
+
+
+    //imported from settings: location
     facing: {
         value: new Matrix3().set(
             location.facing[0],location.facing[1],location.facing[2],
@@ -38,10 +48,9 @@ let traceUniforms={
             location.position[0], location.position[1], location.position[2]
         )
     },
-    frameNumber: {
-        value: 0
-    },
 
+
+    //imported from settings: uiParams
     aperture: {
         value: uiParams.aperture
     },
@@ -72,6 +81,19 @@ let traceUniforms={
     extra4: {
         value: uiParams.extra2
     },
+
+
+    //HD Rendering Default = disabled
+    renderPanels: {
+        value: false,
+    },
+    numPanels: {
+        value: 1,
+    },
+    panelToRender: {
+        value: 1,
+    }
+
 };
 
 
