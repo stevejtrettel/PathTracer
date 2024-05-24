@@ -72,7 +72,7 @@ class UI extends GUI{
 
         ren.add(this.params, 'preview').name('Preview Quality').onChange(function(value){
             let adjust = 1.;
-            if(value){ adjust =1/4;}
+            if(value){ adjust =1/20;}
             let res = {x: Math.floor(adjust * window.innerWidth), y: Math.floor(adjust * window.innerHeight)};
             pathtracer.accumulate.setSize(res);
             pathtracer.tracer.setSize(res);
