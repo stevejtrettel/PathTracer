@@ -367,7 +367,7 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
 
-    var.center=vec3(0,0.5,0);
+    var.center=vec3(0,2.,0);
     var.size=3.;
     var.inside=0.02;
     var.outside=0.001;
