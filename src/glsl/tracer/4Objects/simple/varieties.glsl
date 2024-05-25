@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return sexticStereo(z,y,x);
+    return kummerStereo(z,y,x);
 }
 
 vec4 surf_Data( vec3 p ){
