@@ -5798,7 +5798,7 @@ void setData( inout Path path, Bunny bunny ){
 
 }
 T surf(T x, T y, T z){
-    return chmutov(x,y,z);
+    return sexticStereo(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -8324,7 +8324,7 @@ void buildObjects(){
     var.center=vec3(0,0.5,0);
     var.size=3.;
     var.inside=0.02;
-    var.outside=0.015;
+    var.outside=0.001;
     var.boundingSphere=2.;
     
     var.smoothing =0.0;

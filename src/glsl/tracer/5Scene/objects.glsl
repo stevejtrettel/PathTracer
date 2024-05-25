@@ -370,7 +370,7 @@ void buildObjects(){
     var.center=vec3(0,0.5,0);
     var.size=3.;
     var.inside=0.02;
-    var.outside=0.015;
+    var.outside=0.001;
     var.boundingSphere=2.;
     //3.1415;
     var.smoothing =0.0;

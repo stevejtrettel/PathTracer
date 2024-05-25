@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return chmutov(x,y,z);
+    return sexticStereo(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){
