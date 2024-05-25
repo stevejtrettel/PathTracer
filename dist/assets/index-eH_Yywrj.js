@@ -4028,7 +4028,7 @@ T barthSextic(T x, T y, T z){
     return -(term1-term2);
 }
 
-    T barthSextic(T x, T y, T z, T w){
+T barthSextic(T x, T y, T z, T w){
 
     T x2 = tsqr(x);
     T y2 = tsqr(y);
@@ -4090,7 +4090,8 @@ T kummer(T x, T y, T z, T w){
     T s = z + w - y * sqrt(2.);
 
     
-    T fmu = tsqr(x) + tsqr(y) + tsqr(z) - muSqr * tsqr(w);
+    float coef = 1.;
+    T fmu = tsqr(x) + tsqr(y) + tsqr(z) - coef * muSqr * tsqr(w);
     T prod = tmul(p,q,r,s);
 
     return tsqr(fmu) - Lambda * prod;
@@ -5812,7 +5813,7 @@ void setData( inout Path path, Bunny bunny ){
 
 }
 T surf(T x, T y, T z){
-    return clebschCubic(z,y,x);
+    return sexticStereo(z,y,x);
 }
 
 vec4 surf_Data( vec3 p ){

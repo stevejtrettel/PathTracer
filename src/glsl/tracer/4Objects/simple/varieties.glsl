@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return clebschCubic(z,y,x);
+    return sexticStereo(z,y,x);
 }
 
 vec4 surf_Data( vec3 p ){

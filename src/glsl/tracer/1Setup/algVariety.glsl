@@ -200,7 +200,7 @@ T barthSextic(T x, T y, T z){
 
 
 
-    T barthSextic(T x, T y, T z, T w){
+T barthSextic(T x, T y, T z, T w){
 
     T x2 = tsqr(x);
     T y2 = tsqr(y);
@@ -267,7 +267,8 @@ T kummer(T x, T y, T z, T w){
     T s = z + w - y * sqrt(2.);
 
     //put a larger multiple of muSqr as the coefficient to get nice genus 3 surfaces for musqr<1
-    T fmu = tsqr(x) + tsqr(y) + tsqr(z) - muSqr * tsqr(w);
+    float coef = 1.;
+    T fmu = tsqr(x) + tsqr(y) + tsqr(z) - coef * muSqr * tsqr(w);
     T prod = tmul(p,q,r,s);
 
     return tsqr(fmu) - Lambda * prod;
@@ -424,9 +425,6 @@ T clebschCubic(T x, T y, T z ){
     return term1 + term2 + term3 + term4 + T(1, 0);
 
 }
-
-
-
 
 
 
