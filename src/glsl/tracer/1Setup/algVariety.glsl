@@ -249,7 +249,7 @@ T barthDecic(T x, T y, T z){
 
 
 T chmutov(T x, T y, T z) {
-    int n = 4;
+    int n = 2;
     return tcheb(x,n)+tcheb(y,n)+tcheb(z,n)+tfloat(1.0);
 }
 
