@@ -8340,7 +8340,7 @@ void buildObjects(){
     var.size=1.8;
     var.inside=0.02;
     var.outside=0.00;
-    var.boundingSphere=1.;
+    var.boundingSphere=3.;
     
     var.smoothing =0.0;
 
