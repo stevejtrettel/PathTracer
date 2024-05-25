@@ -257,7 +257,8 @@ T chmutov(T x, T y, T z) {
 T kummer(T x, T y, T z, T w){
 
     //moduli for the quartic:
-    float muSqr=0.7;
+    float muSqr=1.5;
+    //0.7;
     float Lambda = (3.* muSqr - 1.)/(3.-muSqr);
 
     T p = z - w + x * sqrt(2.);
@@ -265,7 +266,8 @@ T kummer(T x, T y, T z, T w){
     T r = z + w + y * sqrt(2.);
     T s = z + w - y * sqrt(2.);
 
-    T fmu = tsqr(x) + tsqr(y) + tsqr(z) - sqrt(muSqr) * tsqr(w);
+    //put a larger multiple of muSqr as the coefficient to get nice genus 3 surfaces for musqr<1
+    T fmu = tsqr(x) + tsqr(y) + tsqr(z) - muSqr * tsqr(w);
     T prod = tmul(p,q,r,s);
 
     return tsqr(fmu) - Lambda * prod;
@@ -380,10 +382,22 @@ T sartiStereo(T x, T y, T z){
     return sarti12(X,Y,Z,W);
 }
 
-T sexticStereo(T x, T y, T z){
+T togliattiStereo(T x, T y, T z){
     T X, Y, Z, W;
     invStereo(x,y,z,X,Y,Z,W);
     return togliatti(X,Y,Z,W);
+}
+
+T kummerStereo(T x, T y, T z){
+    T X, Y, Z, W;
+    invStereo(x,y,z,X,Y,Z,W);
+    return kummer(X,Y,Z,W);
+}
+
+T sexticStereo(T x, T y, T z){
+    T X, Y, Z, W;
+    invStereo(x,y,z,X,Y,Z,W);
+    return barthSextic(X,Y,Z,W);
 }
 
 T decicStereo(T x, T y, T z){
@@ -393,7 +407,7 @@ T decicStereo(T x, T y, T z){
 }
 
 
-    T clebschCubic(T x, T y, T z ){
+T clebschCubic(T x, T y, T z ){
 
     T x2 = tsqr(x);
     T y2 = tsqr(y);

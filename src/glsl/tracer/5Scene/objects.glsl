@@ -367,11 +367,11 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
 
-    var.center=vec3(0,2.,0);
-    var.size=3.;
+    var.center=vec3(0,0.3,0);
+    var.size=1.8;
     var.inside=0.02;
-    var.outside=0.001;
-    var.boundingSphere=2.;
+    var.outside=0.00;
+    var.boundingSphere=1.;
     //3.1415;
     var.smoothing =0.0;
 
