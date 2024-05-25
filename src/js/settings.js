@@ -6,7 +6,7 @@ let uiParams = {
     fov: 26,
     extra: 0.73,
     extra2: 0.84,
-    extra3: 0.5,
+    extra3: 0.534,
     extra4: 0.5,
 }
 

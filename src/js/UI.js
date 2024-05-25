@@ -120,19 +120,19 @@ class UI extends GUI{
         });
 
 
-        params.add(this.params, 'extra',0,1,0.01).onChange(function(value){
+        params.add(this.params, 'extra',0,1,0.001).onChange(function(value){
             pathtracer.tracer.updateUniforms({extra:value});
             pathtracer.reset();
         });
-        params.add(this.params, 'extra2',0,1,0.01).onChange(function(value){
+        params.add(this.params, 'extra2',0,1,0.001).onChange(function(value){
             pathtracer.tracer.updateUniforms({extra2:value});
             pathtracer.reset();
         });
-        params.add(this.params, 'extra3',0,1,0.01).onChange(function(value){
+        params.add(this.params, 'extra3',0,1,0.001).onChange(function(value){
             pathtracer.tracer.updateUniforms({extra3:value});
             pathtracer.reset();
         });
-        params.add(this.params, 'extra4',0,1,0.01).onChange(function(value){
+        params.add(this.params, 'extra4',0,1,0.001).onChange(function(value){
             pathtracer.tracer.updateUniforms({extra4:value});
             pathtracer.reset();
         });
