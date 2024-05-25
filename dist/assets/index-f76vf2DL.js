@@ -8338,8 +8338,8 @@ void buildObjects(){
 
     var.center=vec3(0,0.3,0);
     var.size=1.8;
-    var.inside=0.0;
-    var.outside=0.01;
+    var.inside=0.02;
+    var.outside=0.0;
     var.boundingSphere=5.*extra3;
     
     var.smoothing =0.0;
