@@ -33,7 +33,7 @@ void buildLights(){
 
 
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(-8,0,1);
+    light2.center=vec3(-8,2,0);
     light2.radius=0.5;
 
     color= vec3(1.);

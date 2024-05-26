@@ -367,13 +367,13 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
 
-    var.center=vec3(0,0.3,0);
-    var.size=1.8;
-    var.inside=0.02;
+    var.center=vec3(0,0.2,0);
+    var.size=1.;
+    var.inside=0.01;
     var.outside=0.0;
-    var.boundingSphere=5.*extra3;
+    var.boundingSphere=2.25;
     //3.1415;
-    var.smoothing =0.0;
+    var.smoothing =0.1;
 
     //color= vec3(0.4,0.3,0.2);
     //specularity=0.5;

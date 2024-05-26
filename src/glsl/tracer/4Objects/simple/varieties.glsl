@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return kummerStereo(z,y,x);
+    return herzVar(z,x,y);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -80,9 +80,9 @@ float distR3( vec3 p, Variety surf ){
 
     //if we are inside the variety now, we compute the checkerboard pattern:
 //    float checkerdist;
-//        vec3 modpos=20.*pos;
-//        checkerdist = sin(modpos.x)*sin(modpos.y)*sin(modpos.z)-0.7;
-//        return max(dist,checkerdist);
+//        vec3 modpos=50.*pos;
+//        checkerdist = sin(modpos.x)*sin(modpos.y)*sin(modpos.z)-0.2;
+//        return max(dist,checkerdist)+0.001;
 
 
     return dist+0.001;
