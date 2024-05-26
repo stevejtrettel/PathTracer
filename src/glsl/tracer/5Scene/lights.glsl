@@ -22,7 +22,7 @@ void buildLights(){
     float intensity;
 
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(7,5,10);
+    light1.center=vec3(8,5,3);
     light1.radius=0.75;
 
     color= vec3(0.5);
@@ -33,7 +33,7 @@ void buildLights(){
 
 
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(-8,2,0);
+    light2.center=vec3(-8,5,-8);
     light2.radius=0.5;
 
     color= vec3(1.);
@@ -78,7 +78,7 @@ float trace_Lights( Vector tv ){
 
     float dist=maxDist;
 
-   dist=min(dist, trace(tv, light1));
+    dist=min(dist, trace(tv, light1));
 
     dist=min(dist, trace(tv, light2));
 

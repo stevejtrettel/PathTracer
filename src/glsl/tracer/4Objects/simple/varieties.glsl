@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return herzVar(z,x,y);
+    return cayleyNodalCubicStereo(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){

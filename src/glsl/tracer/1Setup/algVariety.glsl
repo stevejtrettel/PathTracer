@@ -426,11 +426,27 @@ T clebschCubic(T x, T y, T z ){
 
 }
 
+ T cayleyNodalCubic(T x, T y, T z, T w){
+    // return dot(z.xyz,z.xyz) * z.w + 2. * z.x * z.y * z.z - z.w*z.w*z.w;
+    //https://en.wikipedia.org/wiki/Cayley%27s_nodal_cubic_surface
 
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T w2 = tsqr(w);
 
+    return tmul(x2 + y2 + z2,w)+2.*tmul(x,y,z)-tmul(w,w,w);
+ }
 
+    T cayleyNodalCubic(T x, T y, T z){
+    return cayleyNodalCubic(x,y,z,T(1,0));
+}
 
-
+T cayleyNodalCubicStereo(T x, T y, T z){
+    T X, Y, Z, W;
+    invStereo(x,y,z,X,Y,Z,W);
+    return cayleyNodalCubic(X,Y,Z,W);
+}
 
 
 
@@ -483,7 +499,7 @@ T sauermann2(T x, T y, T z){
 
 
 
-T nodalVar(T x, T y, T z){
+T sauermann3(T x, T y, T z){
     //PROBLEM NAME: NOT A CUBIC! THERE"S A Z4 IN THERE
     //x^3+3*x^2*(-1+y)-3*y^2-3*x* y^2-y^3+(1+z)*(1+2*z-4*z^2)^2
     //sauerman nodal cubic
