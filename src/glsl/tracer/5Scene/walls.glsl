@@ -106,7 +106,7 @@ void buildWalls(){
     leftWall.orientation=orientation;
     leftWall.mat=makeDielectric(color,0.0,roughness);
     leftWall.mat.specularChance=0.;
-    leftWall.mat=makeLight(vec3(1,1,1),5.*extra4);
+   // leftWall.mat=makeLight(vec3(1,1,1),5.*extra4);
 
 
     //----------- THE RIGHT -------------------------

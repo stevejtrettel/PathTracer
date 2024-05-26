@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return cayleyNodalCubicStereo(x,y,z);
+    return ellipticFibration(-y,x,z);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -47,16 +47,18 @@ float checkerBox( vec3 p, vec3 b )
 }
 
 
+
+
 //overload of distR3: distance in R3 coordinates
 float distR3( vec3 p, Variety surf ){
 
     //normalize position
     vec3 pos = p - surf.center;
     float rad = length(pos);
-    pos *= surf.size;
+    vec3 scaledPos = surf.size*pos;
 
     //get the distance estimate
-    vec4 data = surf_Data(pos);
+    vec4 data = surf_Data(scaledPos);
     float val = data.w;
     float gradLength = length(data.xyz)*surf.size;
     float dist = DE(val, gradLength);
@@ -66,23 +68,35 @@ float distR3( vec3 p, Variety surf ){
 
 
 
+////    stuff for slicing into bits:
+//    float sliceThickness=0.2;
+//    float sliceGap = 0.61;
+//    float height = pos.z+2.49;
+//    float sphDist = abs(height)-sliceThickness;
+//    for(int i=0; i<40; i++){
+//        height -= sliceGap;
+//        sphDist = min(sphDist, abs(height)-sliceThickness);
+//    }
+//
+//    //cut with slices
+//    dist = smax(dist,sphDist,surf.smoothing);
+//
+//
+
+
+
+
     //vec3 q = abs(pos) - vec3(20,8,20);
     //float bboxDist = length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 
-    //float bboxDist = abs(pos.y)-1.;
-
-    float bboxDist = rad-surf.boundingSphere;
-
+    //float bboxDist = abs(pos.z)-1.;
+    //float bboxDist = pos.y-extra3;
+  //  float bboxDist = rad-surf.boundingSphere;
+    float bboxDist = length(pos.xy)-surf.boundingSphere;
+    bboxDist = max(bboxDist, abs(pos.z)-4.2);
     //adjust for the bounding box
     dist = smax(dist,bboxDist,surf.smoothing);
 
-
-
-    //if we are inside the variety now, we compute the checkerboard pattern:
-//    float checkerdist;
-//        vec3 modpos=50.*pos;
-//        checkerdist = sin(modpos.x)*sin(modpos.y)*sin(modpos.z)-0.2;
-//        return max(dist,checkerdist)+0.001;
 
 
     return dist+0.001;

@@ -408,46 +408,6 @@ T decicStereo(T x, T y, T z){
 }
 
 
-T clebschCubic(T x, T y, T z ){
-
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T x3 = tmul(x, x2);
-    T y3 = tmul(y, y2);
-    T z3 = tmul(z, z2);
-
-    T term1 = 81.*(x3+y3+z3);
-    T term2 = -189.*(tmul(x2, y)+tmul(x2, z)+tmul(y2, x)+tmul(y2, z)+tmul(z2, x)+tmul(z2, y));
-    T term3 = 54.*tmul(x, y, z)+126.*(tmul(x, y)+tmul(x, z)+tmul(y, z));
-    T term4 = -9.*(x+y+z);
-
-    return term1 + term2 + term3 + term4 + T(1, 0);
-
-}
-
- T cayleyNodalCubic(T x, T y, T z, T w){
-    // return dot(z.xyz,z.xyz) * z.w + 2. * z.x * z.y * z.z - z.w*z.w*z.w;
-    //https://en.wikipedia.org/wiki/Cayley%27s_nodal_cubic_surface
-
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T w2 = tsqr(w);
-
-    return tmul(x2 + y2 + z2,w)+2.*tmul(x,y,z)-tmul(w,w,w);
- }
-
-    T cayleyNodalCubic(T x, T y, T z){
-    return cayleyNodalCubic(x,y,z,T(1,0));
-}
-
-T cayleyNodalCubicStereo(T x, T y, T z){
-    T X, Y, Z, W;
-    invStereo(x,y,z,X,Y,Z,W);
-    return cayleyNodalCubic(X,Y,Z,W);
-}
-
 
 
 T sauermann(T x, T y, T z){
@@ -535,9 +495,32 @@ T visavisVar(T x, T y, T z){
 
 
 T kolibriVar(T x, T y, T z){
-    // y2z2 +z3-x^2
+    // y2 = x2z2 + x3
     //https://www.imaginary.org/gallery/herwig-hauser-classic
-    return tmul(tsqr(y),tsqr(z))+tmul(z,z,z)-tsqr(x);
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T y3 = tmul(y2,y);
+
+    return x2 - tmul(y2,z2)+ y3;
+}
+
+T whitneyUmbrella(T x, T y, T z){
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+
+    return x2 - tmul(z2,y);
+}
+
+
+T irisVar(T x, T y, T z){
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T z4 = tsqr(z2);
+
+    return tmul(x2,y) - tmul(y2,z) + z4;
 }
 
 
@@ -624,6 +607,131 @@ T herzVar(T x, T y, T z){
 }
 
 
+T kleinBottleVariety(T x, T y, T z){
+    //ian stewart
+   // (x^2+y^2+z^2+2*y-1)*((x^2+y^2+z^2-2*y-1)^2-8*z^2) +16*x*z*(x^2+y^2+z^2-2*y-1)=0
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T r2 =  x2 + y2 + z2;
+    T term1 = r2 + 2.*y - T(1,0);
+    T term2 = r2 - 2.*y - T(1,0);
+
+    return tmul(term1, tsqr(term2) - 8.*z2) + 16.*tmul(x,z,term2);
+}
+
+
+
+T cubicTrivial(T x, T y, T z){
+    //a  cubic with no genus: singlular point without offset
+    // x^2*y+y^2*z+z^2*x=0.1
+
+    float offset = 0.1;
+
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+
+    return tmul(x2,y) + tmul(y2,z) + tmul(z2,x) - T(offset,0);
+
+}
+
+
+T cubicGenus(T x, T y, T z){
+    //x^3+y^3+z^3=x+y+z
+    T x3 = tmul(x,x,x);
+    T y3 = tmul(y,y,y);
+    T z3 = tmul(z,z,z);
+
+    return x3 + y3 + z3 - (x+y+z);
+}
+
+
+
+
+    T clebschCubic(T x, T y, T z ){
+
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T x3 = tmul(x, x2);
+    T y3 = tmul(y, y2);
+    T z3 = tmul(z, z2);
+
+    T term1 = 81.*(x3+y3+z3);
+    T term2 = -189.*(tmul(x2, y)+tmul(x2, z)+tmul(y2, x)+tmul(y2, z)+tmul(z2, x)+tmul(z2, y));
+    T term3 = 54.*tmul(x, y, z)+126.*(tmul(x, y)+tmul(x, z)+tmul(y, z));
+    T term4 = -9.*(x+y+z);
+
+    return term1 + term2 + term3 + term4 + T(1, 0);
+
+}
+
+    T cayleyNodalCubic(T x, T y, T z, T w){
+    // return dot(z.xyz,z.xyz) * z.w + 2. * z.x * z.y * z.z - z.w*z.w*z.w;
+    //https://en.wikipedia.org/wiki/Cayley%27s_nodal_cubic_surface
+
+    //offset to make nonsingular surface:
+    float offset =0.;
+
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T w2 = tsqr(w);
+
+    return tmul(x2 + y2 + z2,w)+2.*tmul(x,y,z)-tmul(w,w,w)-T(offset,0);
+}
+
+    T cayleyNodalCubic(T x, T y, T z){
+    return cayleyNodalCubic(x,y,z,T(1,0));
+}
+
+
+T riemannTwoBranch(T x, T y, T z){
+    //z^2*x^2+(z^2+1)*y^2=5*(z^4+z^2)
+
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T z4 = tsqr(z2);
+
+    return tmul(z2,x2) + tmul(z2+T(1,0), y2) - 5.*(z4+z2);
+}
+
+
+T ellipticFibration(T x, T y, T t){
+    //from nadir, universial family over X15
+    //t x^2 - x^3 - t y + (1 - t) x y + y^2 = 0
+    //t = t/2.;
+
+
+    //do a mobius transformation to t:
+//    t = t-T(5.5,0);
+
+    //map xy into a disk:
+    float lengthScale = 3.5;
+    T r = tsqrt(tsqr(x)+tsqr(y));
+    T scalingFactor = tsqr(texp(r/lengthScale))+tsqr(texp(-r/lengthScale));
+    scalingFactor -= T(2,0);
+    x = tmul(x,scalingFactor);
+    y = tmul(y,scalingFactor);
+
+
+    t = tmul(t,t,t);
+    t = t/10.;
+    //t = -t;
+    //t = tdiv(T(1,0)+t,-9./11.*t+T(1,0));
+
+//    x = tmul(x,tsqr(t)/20.+T(1,0));
+//    y = tmul(y,tsqr(t)/20.+T(1,0));
+
+
+    T x2 = tsqr(x);
+    T x3 = tmul(x,x2);
+    T y2 = tsqr(y);
+
+    return tmul(t, x2) - x3 - tmul(t,y) + tmul(T(1,0)-t,x,y) + y2;
+}
 
 //
 ////-------------ALGEBRAIC VARIETIES---------------------
