@@ -370,7 +370,7 @@ void buildObjects(){
     var.center=vec3(0,3,0);
     var.size=1.;
     var.inside=0.02;
-    var.outside=0.00;
+    var.outside=0.0;
     var.boundingSphere=4.005;
     //3.1415;
     var.smoothing =0.05;
@@ -380,7 +380,7 @@ void buildObjects(){
     //roughness=0.01;
 
 //    color = 0.6*vec3(0.3,0.2,0.6);
-//    var.mat= makeMetal(color,specularity,roughness);
+    //var.mat= makeMetal(color,specularity,roughness);
 //    var.mat.diffuseColorBack = 0.4*vec3(0.2,0.6,0.3);
 
     //var.mat=makeGlass(10.*vec3(0.05,0.1,0.15),1.4,0.95);
@@ -390,11 +390,11 @@ void buildObjects(){
    // var.mat= makeGlass(0.75*vec3(0.3,0.05,0.2),1.5,0.995);
    // var.mat=makeGlass(40.*vec3(0.2,0.4,0.05),1.5,0.99);
     var.mat=makeGlass(30.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
-//    var.mat.refractionChance=0.;
-//    var.mat.subSurface=true;
-//    var.mat.meanFreePath=0.2*extra2;
-//    var.mat.isotropicScatter=extra;
-//    var.mat.roughness=0.7;
+    var.mat.refractionChance=0.;
+    var.mat.subSurface=true;
+    var.mat.meanFreePath=0.2*extra2;
+    var.mat.isotropicScatter=extra;
+    var.mat.roughness=0.7;
 
     Material glassMat = makeGlass(0.75*vec3(0.3,0.05,0.2),1.6,0.95);
     float glassThickness=0.04;
@@ -531,8 +531,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    return false;
-   // return  inside(tv, var);
+    //return false;
+    return  inside(tv, var);
 }
 
 

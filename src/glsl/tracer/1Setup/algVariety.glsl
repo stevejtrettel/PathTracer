@@ -289,6 +289,55 @@ T kummer(T x, T y, T z){
     return kummer(x,y,z,T(1,0));
 }
 
+
+T mobiusStripVariety(T x, T y, T z){
+
+    //https://www.imaginary.org/sites/default/files/moebiusband.pdf
+
+    float a = 0.02;
+    float b = 1.;
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T t2 = x2+y2;
+
+    T term1 = (a-b)*(tmul(x,t2-z2+T(1,0))-2.*tmul(y,z));
+    T term2 = (2.*a + 2.*b + a*b)*t2;
+    T term3 = (a+b)*(t2+z2+T(1,0));
+    T term4 = 2.*(a-b)*(tmul(y,z)-x);
+
+    T side1 = term1-term2;
+    T side2 = (term3+term4);
+
+    return -tsqr(side1)+tmul(t2,tsqr(side2));
+
+}
+
+
+T mobiusStrip3TwistVariety(T x, T y, T z){
+
+    //https://www.imaginary.org/sites/default/files/moebiusband.pdf
+
+    float a = 0.02;
+    float b = 0.66;
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T t2 = x2+y2;
+    T t4 = tsqr(t2);
+
+    T comp1 = 3.*tmul(x2,y)-tmul(y2,y);
+    T comp2 = tmul(x,x2)-3.*tmul(x,y2);
+
+    T term1 = -2.*(a+b)*t4+(a-b)*(tmul(comp1, t2-z2+T(1,0))-2.*tmul(comp2,z));
+    T term2 = (a+b)*tmul(t2, (t2+z2+T(1,0))) - 2.*(a-b)*(comp1 - tmul(z,comp2)) - 2.*a*b*t2;
+
+    return - tsqr(term1) + tmul(t2,tsqr(term2));
+
+}
+
+
+
 T togliatti(T xorig, T yorig, T zorig, T w){
 
     //rotate coordinates
@@ -712,7 +761,26 @@ T riemannTwoBranch(T x, T y, T z){
 
 
 
+T enneper(T x, T y, T z){
 
+    //have to get rid of the plane passing throug the center!
+    //maybe, simplify the equation?
+
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+
+    T term0 = tdiv(y2-x2, 2.*z);
+    T term1 = term0 + 2./9.*z2 + 2./3.;
+    T term2 = term0/2. - 0.25*( x2 + y2 + 8./9.*z2 ) + 2./9.;
+    return tmul(term1, term1, term1) - 6.*tmul(term2, term2);
+
+//    T term1 = (y2-x2)/2. + 2./9.*tmul(z2,z) + 2./3.*z;
+//    T term2 = (y2-x2)/4. + 1./4.*tmul(z, x2 + y2 + 8./9.*z2) + 2./9.*z;
+//    return tmul(term1, term1, term1) - 6.*tmul(z,term2,term2);
+//
+//
+}
 
 
 

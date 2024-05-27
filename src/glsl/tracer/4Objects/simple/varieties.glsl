@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return kleinBottleVariety(y,x,z);
+    return mobiusStrip3TwistVariety(z,x,-y);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -68,19 +68,19 @@ float distR3( vec3 p, Variety surf ){
 
 
 //    stuff for slicing into bits:
-    float sliceThickness=0.05;
-    float sliceGap = 0.2;
-    float height = pos.z+3.68;
-    float sphDist = abs(height)-sliceThickness;
-    for(int i=0; i<40; i++){
-        height -= sliceGap;
-        sphDist = min(sphDist, abs(height)-sliceThickness);
-    }
-
-    //cut with slices
-    dist = smax(dist,sphDist,surf.smoothing);
-
-
+//    float sliceThickness=0.05;
+//    float sliceGap = 0.2;
+//    float height = pos.z+3.68;
+//    float sphDist = abs(height)-sliceThickness;
+//    for(int i=0; i<40; i++){
+//        height -= sliceGap;
+//        sphDist = min(sphDist, abs(height)-sliceThickness);
+//    }
+//
+//    //cut with slices
+//    dist = smax(dist,sphDist,surf.smoothing);
+//
+//
 
 
 
@@ -92,11 +92,11 @@ float distR3( vec3 p, Variety surf ){
     //float bboxDist = pos.y-extra3;
 
     // //bounding sphere
-    //float bboxDist = rad-surf.boundingSphere;
+    float bboxDist = rad-surf.boundingSphere;
 
     // //bounding cylinder
-    float bboxDist = length(pos.xy)-surf.boundingSphere;
-    bboxDist = max(bboxDist, abs(pos.z)-4.5);
+//    float bboxDist = length(pos.xy)-surf.boundingSphere;
+//    bboxDist = max(bboxDist, abs(pos.z)-4.5);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,surf.smoothing);
