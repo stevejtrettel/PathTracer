@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return cubicGenus(x,y,z);
+    return kleinBottleVariety(y,x,z);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -70,9 +70,9 @@ float distR3( vec3 p, Variety surf ){
 //    stuff for slicing into bits:
     float sliceThickness=0.05;
     float sliceGap = 0.2;
-    float height = pos.z+2.38;
+    float height = pos.z+3.68;
     float sphDist = abs(height)-sliceThickness;
-    for(int i=0; i<30; i++){
+    for(int i=0; i<40; i++){
         height -= sliceGap;
         sphDist = min(sphDist, abs(height)-sliceThickness);
     }
@@ -96,7 +96,7 @@ float distR3( vec3 p, Variety surf ){
 
     // //bounding cylinder
     float bboxDist = length(pos.xy)-surf.boundingSphere;
-    bboxDist = max(bboxDist, abs(pos.z)-2.1);
+    bboxDist = max(bboxDist, abs(pos.z)-4.5);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,surf.smoothing);

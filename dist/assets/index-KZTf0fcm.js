@@ -6138,7 +6138,7 @@ void setData( inout Path path, Bunny bunny ){
 
 }
 T surf(T x, T y, T z){
-    return cubicGenus(-x,y,z);
+    return kleinBottleVariety(y,x,z);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -6189,9 +6189,9 @@ float distR3( vec3 p, Variety surf ){
 
     float sliceThickness=0.05;
     float sliceGap = 0.2;
-    float height = pos.z+2.38;
+    float height = pos.z+3.68;
     float sphDist = abs(height)-sliceThickness;
-    for(int i=0; i<30; i++){
+    for(int i=0; i<40; i++){
         height -= sliceGap;
         sphDist = min(sphDist, abs(height)-sliceThickness);
     }
@@ -6210,7 +6210,7 @@ float distR3( vec3 p, Variety surf ){
 
     
     float bboxDist = length(pos.xy)-surf.boundingSphere;
-    bboxDist = max(bboxDist, abs(pos.z)-2.1);
+    bboxDist = max(bboxDist, abs(pos.z)-4.5);
 
     
     dist = smax(dist,bboxDist,surf.smoothing);
@@ -8677,13 +8677,13 @@ void buildObjects(){
     klein.mat.isotropicScatter=extra;
     klein.mat.roughness=0.04;
 
-    var.center=vec3(0,1.2,0);
+    var.center=vec3(0,3,0);
     var.size=1.;
-    var.inside=0.01;
+    var.inside=0.02;
     var.outside=0.00;
-    var.boundingSphere=3.005;
+    var.boundingSphere=4.005;
     
-    var.smoothing =0.02;
+    var.smoothing =0.05;
 
     
     
@@ -8694,13 +8694,8 @@ void buildObjects(){
     
     
    
-
+   
     var.mat=makeGlass(30.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
-    var.mat.refractionChance=0.;
-    var.mat.subSurface=true;
-    var.mat.meanFreePath=0.2*extra2;
-    var.mat.isotropicScatter=extra;
-    var.mat.roughness=0.7;
 
     Material glassMat = makeGlass(0.75*vec3(0.3,0.05,0.2),1.6,0.95);
     float glassThickness=0.04;
@@ -8774,8 +8769,8 @@ float sdf_Objects( Vector tv ){
 
 bool inside_Object( Vector tv ){
 
-    
-    return  inside(tv, var);
+    return false;
+   
 }
 
 void setData_Objects(inout Path path){

@@ -1,0 +1,27 @@
+{
+  "hash": "b64a3b16",
+  "configHash": "ed25f48f",
+  "lockfileHash": "1d7e874e",
+  "browserHash": "823af7e1",
+  "optimized": {
+    "three/addons/libs/stats.module": {
+      "src": "../../node_modules/three/examples/jsm/libs/stats.module.js",
+      "file": "three_addons_libs_stats__module.js",
+      "fileHash": "5bfb2051",
+      "needsInterop": false
+    },
+    "three": {
+      "src": "../../node_modules/three/build/three.module.js",
+      "file": "three.js",
+      "fileHash": "34c61801",
+      "needsInterop": false
+    },
+    "three/addons/libs/lil-gui.module.min": {
+      "src": "../../node_modules/three/examples/jsm/libs/lil-gui.module.min.js",
+      "file": "three_addons_libs_lil-gui__module__min.js",
+      "fileHash": "73e2507d",
+      "needsInterop": false
+    }
+  },
+  "chunks": {}
+}
