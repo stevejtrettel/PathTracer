@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T y, T z){
-    return ellipticFibration(-y,x,z);
+    return cubicGenus(x,y,z);
 }
 
 vec4 surf_Data( vec3 p ){
@@ -67,21 +67,20 @@ float distR3( vec3 p, Variety surf ){
     dist=abs(dist+surf.inside)-surf.inside-surf.outside;
 
 
+//    stuff for slicing into bits:
+    float sliceThickness=0.05;
+    float sliceGap = 0.2;
+    float height = pos.z+2.38;
+    float sphDist = abs(height)-sliceThickness;
+    for(int i=0; i<30; i++){
+        height -= sliceGap;
+        sphDist = min(sphDist, abs(height)-sliceThickness);
+    }
 
-////    stuff for slicing into bits:
-//    float sliceThickness=0.2;
-//    float sliceGap = 0.61;
-//    float height = pos.z+2.49;
-//    float sphDist = abs(height)-sliceThickness;
-//    for(int i=0; i<40; i++){
-//        height -= sliceGap;
-//        sphDist = min(sphDist, abs(height)-sliceThickness);
-//    }
-//
-//    //cut with slices
-//    dist = smax(dist,sphDist,surf.smoothing);
-//
-//
+    //cut with slices
+    dist = smax(dist,sphDist,surf.smoothing);
+
+
 
 
 
@@ -91,9 +90,14 @@ float distR3( vec3 p, Variety surf ){
 
     //float bboxDist = abs(pos.z)-1.;
     //float bboxDist = pos.y-extra3;
-  //  float bboxDist = rad-surf.boundingSphere;
+
+    // //bounding sphere
+    //float bboxDist = rad-surf.boundingSphere;
+
+    // //bounding cylinder
     float bboxDist = length(pos.xy)-surf.boundingSphere;
-    bboxDist = max(bboxDist, abs(pos.z)-4.2);
+    bboxDist = max(bboxDist, abs(pos.z)-2.1);
+
     //adjust for the bounding box
     dist = smax(dist,bboxDist,surf.smoothing);
 

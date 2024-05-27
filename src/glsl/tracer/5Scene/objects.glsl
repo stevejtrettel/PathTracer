@@ -367,11 +367,11 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
 
-    var.center=vec3(0,1.,0);
-    var.size=3.;
-    var.inside=0.015;
+    var.center=vec3(0,1.1,0);
+    var.size=1.;
+    var.inside=0.011;
     var.outside=0.00;
-    var.boundingSphere=2.25;
+    var.boundingSphere=3.005;
     //3.1415;
     var.smoothing =0.02;
 
@@ -387,9 +387,9 @@ void buildObjects(){
     //var.mat=makeGlass(10.*vec3(0.3,0.05,0.2),1.5,0.95);
     //var.mat=makeGlass(8.*vec3(0.3,0.2,0.01),1.6,0.95);
     //var.mat= makeMetal(color,specularity,roughness);
-    //var.mat= makeGlass(2.75*vec3(0.3,0.05,0.2),1.5,0.95);
+   // var.mat= makeGlass(0.75*vec3(0.3,0.05,0.2),1.5,0.995);
 
-    var.mat=makeGlass(30.*(brownAbsorb+0.25*redAbsorb),1.5,0.97);
+    var.mat=makeGlass(30.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.2*extra2;

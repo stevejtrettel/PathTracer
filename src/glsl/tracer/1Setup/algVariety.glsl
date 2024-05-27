@@ -176,6 +176,20 @@ void invStereo( in T x, in T y, in T z, out T X, out T Y, out T Z, out T W){
 }
 
 
+void invStereo( in T x, in T y, out T X, out T Y, out T Z){
+    //takes in x y in R2
+    // returns XYZ in R3
+
+    T denom = tsqr(x) + tsqr(y)+ T(1,0); // 1+x^2+y^2
+    T zNum = tsqr(x) + tsqr(y) - T(1,0); // x^2+y^2-1
+
+    X = tdiv(2.*x,denom);
+    Y = tdiv(2.*y,denom);
+    Z = tdiv(zNum, denom);
+
+}
+
+
 T gyroid(T x, T y, T z){
     T term1 = tmul(tsin(x),tcos(y));
     T term2 = tmul(tsin(y), tcos(z));
@@ -195,9 +209,6 @@ T barthSextic(T x, T y, T z){
 
     return -(term1-term2);
 }
-
-
-
 
 
 T barthSextic(T x, T y, T z, T w){
@@ -608,6 +619,7 @@ T herzVar(T x, T y, T z){
 
 
 T kleinBottleVariety(T x, T y, T z){
+    //order of input variables should be y,x,z for it laying on its side
     //ian stewart
    // (x^2+y^2+z^2+2*y-1)*((x^2+y^2+z^2-2*y-1)^2-8*z^2) +16*x*z*(x^2+y^2+z^2-2*y-1)=0
     T x2 = tsqr(x);
@@ -699,6 +711,19 @@ T riemannTwoBranch(T x, T y, T z){
 }
 
 
+
+
+
+
+
+
+
+
+
+    //================================
+    // Elliptic Curve Experiments
+    //================================
+
 T ellipticFibration(T x, T y, T t){
     //from nadir, universial family over X15
     //t x^2 - x^3 - t y + (1 - t) x y + y^2 = 0
@@ -732,6 +757,43 @@ T ellipticFibration(T x, T y, T t){
 
     return tmul(t, x2) - x3 - tmul(t,y) + tmul(T(1,0)-t,x,y) + y2;
 }
+
+
+
+
+T elliptic(T x, T y, T t){
+    //from nadir, universial family over X15
+    //t x^2z - x^3 - t yz^2 + (1 - t) x yz + y^2z = 0
+
+    //expand out the t-axis, shrinking the importance of larger values
+    //T newT = tmul(t,t,t);
+   // newT *= 10.;
+
+    //shrink in the t axis from infinity: for t betwen -pi/2 and pi/2 shows whole line
+    T newT = ttan(t);
+
+    //use inverse stereographic projection to draw double cover
+    //then, see only one piece by drawing only the lower hemisphere: where (x,y) is in the unit disk
+    //for this to work both scale and bounding box shoulld be set to size 1
+    T X, Y, Z;
+    invStereo(x,y,X,Y,Z);
+
+    T X2 = tsqr(X);
+    T Y2 = tsqr(Y);
+    T Z2 = tsqr(Z);
+    T X3 = tmul(X,X2);
+
+
+    // // a test: a trivial family of ellptic curves
+    // // and its inverse stereographic projection
+    //return tsqr(y) - tmul(x,x,x)-tmul(x,x);
+    //return -(tmul(Y2, Z) - X3 - tmul(X2,Z));
+
+    //nadir's family
+    return -(tmul(newT,X2,Z) - X3 - tmul(newT, Y, Z2) + tmul(T(1,0)-newT,tmul(X,Y,Z)) + tmul(Y2,Z));
+}
+
+
 
 //
 ////-------------ALGEBRAIC VARIETIES---------------------
