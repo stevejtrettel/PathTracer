@@ -22,11 +22,11 @@ void buildLights(){
     float intensity;
 
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(8,10,3);
+    light1.center=vec3(-3,1,8);
     light1.radius=0.75;
 
     color= vec3(0.5);
-    intensity=100.;
+    intensity=60.;
 
     light1.mat=makeLight(color,intensity);
 
@@ -37,7 +37,7 @@ void buildLights(){
     light2.radius=0.5;
 
     color= vec3(1.);
-    intensity=200.;
+    intensity=100.;
 
     light2.mat=makeLight(color,intensity);
 

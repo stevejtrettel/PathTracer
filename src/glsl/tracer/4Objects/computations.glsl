@@ -83,7 +83,18 @@ vec3 opTwist( vec3 p )
 
 
 
+// IQ's extrusion formula.
+float opExtrusion(in float sdf, in float pz, in float h){
 
+    //vec2 w = vec2( sdf, abs(pz) - h );
+    //return min(max(w.x, w.y), 0.) + length(max(w, 0.));
+
+    // Slight rounding. A little nicer, but slower.
+    const float sf = .028;
+    vec2 w = vec2( sdf, abs(pz) - h ) + sf;
+    return min(max(w.x, w.y), 0.) + length(max(w, 0.)) - sf;
+
+}
 
 
 
@@ -118,6 +129,9 @@ vec3 sdgBox( in vec2 p, in vec2 b )
     return vec3(   (g>0.0)?l  :g,
     s*((g>0.0)?q/l:((w.x>w.y)?vec2(1,0):vec2(0,1))));
 }
+
+
+
 
 
 

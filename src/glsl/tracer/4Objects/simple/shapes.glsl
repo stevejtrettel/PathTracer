@@ -724,19 +724,3 @@ void setData( inout Path path, Bunny bunny ){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

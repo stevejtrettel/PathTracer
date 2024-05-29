@@ -34,6 +34,7 @@ GlassMarble marble;
 HypDod dod,dodE;
 PoincareMarble poin;
 CoxCube cube5,cube6;
+Mobius mobius;
 
 //this function constructs the objects
 void buildObjects(){
@@ -367,13 +368,13 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
 
-    var.center=vec3(0,3,0);
-    var.size=1.;
-    var.inside=0.02;
-    var.outside=0.0;
-    var.boundingSphere=4.005;
+    var.center=vec3(-2,-0.05,-2);
+    var.size=0.525;
+    var.inside=0.005;
+    var.outside=0.002;
+    var.boundingSphere=1.;
     //3.1415;
-    var.smoothing =0.05;
+    var.smoothing =0.065;
 
     //color= vec3(0.4,0.3,0.2);
     //specularity=0.5;
@@ -386,9 +387,12 @@ void buildObjects(){
     //var.mat=makeGlass(10.*vec3(0.05,0.1,0.15),1.4,0.95);
     //var.mat=makeGlass(10.*vec3(0.3,0.05,0.2),1.5,0.95);
     //var.mat=makeGlass(8.*vec3(0.3,0.2,0.01),1.6,0.95);
-    //var.mat= makeMetal(color,specularity,roughness);
-   // var.mat= makeGlass(0.75*vec3(0.3,0.05,0.2),1.5,0.995);
-   // var.mat=makeGlass(40.*vec3(0.2,0.4,0.05),1.5,0.99);
+
+//    var.mat= makeMetal(color,specularity,roughness);
+//    var.mat.diffuseColorBack=vec3(1,0,0);
+
+//    var.mat= makeGlass(0.75*vec3(0.3,0.05,0.2),1.5,0.995);
+//    var.mat=makeGlass(40.*vec3(0.2,0.4,0.05),1.5,0.99);
     var.mat=makeGlass(30.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
@@ -396,8 +400,12 @@ void buildObjects(){
     var.mat.isotropicScatter=extra;
     var.mat.roughness=0.7;
 
-    Material glassMat = makeGlass(0.75*vec3(0.3,0.05,0.2),1.6,0.95);
-    float glassThickness=0.04;
+
+
+
+
+    Material glassMat = makeGlass(0.25*vec3(0.3,0.05,0.2),1.1,0.99);
+    float glassThickness=0.005;
     gVar = createGlassVariety(var,glassMat,glassThickness);
 
     Material outerVarMat = makeGlass(5.*vec3(0.05,0.5,0.05),1.4,0.95);
@@ -464,6 +472,28 @@ void buildObjects(){
     cube5.mat.roughness=0.04;
 
 
+    mobius.center=vec3(-2,0,-2);
+    mobius.twists=11.;
+    mobius.size=2.;
+    mobius.radius=1.5;
+    mobius.borderMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
+
+
+    mobius.bandMat=makeGlass(30.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
+    mobius.bandMat.refractionChance=0.;
+    mobius.bandMat.subSurface=true;
+    mobius.bandMat.meanFreePath=0.2*extra2;
+    mobius.bandMat.isotropicScatter=extra;
+    mobius.bandMat.roughness=0.7;
+
+    mobius.borderMat=makeMetal(vec3(0.02),specularity,0.4);
+    //makeGlass(5.75*vec3(0.3,0.05,0.2),1.5,0.95);
+    //makeGlass(vec3(10,8,7),1.5,0.99);
+//    mobius.borderMat.refractionChance=0.;
+//    mobius.borderMat.subSurface=true;
+//    mobius.borderMat.meanFreePath=0.3;
+//    mobius.borderMat.isotropicScatter=0.2;
+//    mobius.borderMat.roughness=0.7;
 }
 
 
@@ -518,7 +548,7 @@ float sdf_Objects( Vector tv ){
 
     //dist=min( dist, sdf(tv, poin) );
    // dist=min( dist, sdf(tv, var) );
-    dist=min( dist, sdf(tv, var) );
+    dist=min( dist, sdf(tv, mobius) );
 //    dist=min( dist, sdf(tv, campari) );
 //    dist=min( dist, sdf(tv, vermouth) );
     return dist;
@@ -532,7 +562,7 @@ float sdf_Objects( Vector tv ){
 bool inside_Object( Vector tv ){
 
     //return false;
-    return  inside(tv, var);
+    return  inside(tv, mobius);
 }
 
 
@@ -545,7 +575,7 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
    // setData(path, var);
-    setData(path, var);
+    setData(path, mobius);
 //    setData(path, campari);
 //    setData(path, vermouth);
     //setData(path, dod);

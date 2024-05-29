@@ -22,7 +22,7 @@ void buildWalls(){
     float specularity, roughness, offset;
 
     //-----------GENERAL FOR THE WALLS -------------------------
-    color=0.2*vec3(171,203,240)/255.;
+    color=0.1*vec3(171,203,240)/255.;
     //vec3(0.4);
     specularity=0.;
     roughness=0.1;
@@ -65,7 +65,7 @@ void buildWalls(){
 
 
     //----------- THE FRONT -------------------------
-    orientation.pos=vec3(0,0,-12);
+    orientation.pos=vec3(0,0,-20);
     orientation.dir=vec3(0,0,1);
 
    // color= 0.1*vec3(107,152,250)/255.;
@@ -83,7 +83,7 @@ void buildWalls(){
 
 
     //----------- THE BACK -------------------------
-    orientation.pos=vec3(0,0,30);
+    orientation.pos=vec3(0,0,10);
     orientation.dir=vec3(0,0,-1);
 
    // color= vec3(0.75);

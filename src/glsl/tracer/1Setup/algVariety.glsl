@@ -290,52 +290,6 @@ T kummer(T x, T y, T z){
 }
 
 
-T mobiusStripVariety(T x, T y, T z){
-
-    //https://www.imaginary.org/sites/default/files/moebiusband.pdf
-
-    float a = 0.02;
-    float b = 1.;
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T t2 = x2+y2;
-
-    T term1 = (a-b)*(tmul(x,t2-z2+T(1,0))-2.*tmul(y,z));
-    T term2 = (2.*a + 2.*b + a*b)*t2;
-    T term3 = (a+b)*(t2+z2+T(1,0));
-    T term4 = 2.*(a-b)*(tmul(y,z)-x);
-
-    T side1 = term1-term2;
-    T side2 = (term3+term4);
-
-    return -tsqr(side1)+tmul(t2,tsqr(side2));
-
-}
-
-
-T mobiusStrip3TwistVariety(T x, T y, T z){
-
-    //https://www.imaginary.org/sites/default/files/moebiusband.pdf
-
-    float a = 0.02;
-    float b = 0.66;
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T t2 = x2+y2;
-    T t4 = tsqr(t2);
-
-    T comp1 = 3.*tmul(x2,y)-tmul(y2,y);
-    T comp2 = tmul(x,x2)-3.*tmul(x,y2);
-
-    T term1 = -2.*(a+b)*t4+(a-b)*(tmul(comp1, t2-z2+T(1,0))-2.*tmul(comp2,z));
-    T term2 = (a+b)*tmul(t2, (t2+z2+T(1,0))) - 2.*(a-b)*(comp1 - tmul(z,comp2)) - 2.*a*b*t2;
-
-    return - tsqr(term1) + tmul(t2,tsqr(term2));
-
-}
-
 
 
 T togliatti(T xorig, T yorig, T zorig, T w){
@@ -562,7 +516,7 @@ T kolibriVar(T x, T y, T z){
     T z2 = tsqr(z);
     T y3 = tmul(y2,y);
 
-    return x2 - tmul(y2,z2)+ y3;
+    return x2 - tmul(y2,z2) - y3;
 }
 
 T whitneyUmbrella(T x, T y, T z){
@@ -682,6 +636,46 @@ T kleinBottleVariety(T x, T y, T z){
 }
 
 
+//------Classification of singularities
+    //https://www-sop.inria.fr/galaad/surface/
+    //need to make these
+//---------------
+
+
+
+T crossCapVar(T x, T y, T z){
+    //https://www-sop.inria.fr/galaad/surface/steiner/index.html
+    //https://virtualmathmuseum.org/Surface/cross-cap/cross-cap.html
+
+    //x = x/1.5;
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    float a2 =0.5;
+    float b2 =1.;
+
+    T term1 =  x2/a2+y2/b2;
+    T term2 = x2 + y2 + z2;
+    T term3 = 2.*tmul(z,x2+y2);
+
+    return tmul(term1, term2) - term3;
+}
+
+
+
+
+T romanSurfaceVar(T x, T y, T z){
+    //{\displaystyle x^{2}y^{2}+y^{2}z^{2}+z^{2}x^{2}-r^{2}xyz=0.\,}
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    float r2=1.;
+
+    return tmul(x2,y2)+ tmul(y2,z2) + tmul(z2,x2) - r2*tmul(x,y,z);
+
+}
+
+
 
 T cubicTrivial(T x, T y, T z){
     //a  cubic with no genus: singlular point without offset
@@ -760,26 +754,76 @@ T riemannTwoBranch(T x, T y, T z){
 }
 
 
-
 T enneper(T x, T y, T z){
 
-    //have to get rid of the plane passing throug the center!
-    //maybe, simplify the equation?
+        //doesn't work well as a thickened surface, if we use the variety to thicken it
+        //it gets unnaturally thick near the xy plane
+        float a = 1.;
+        float a2 = a*a;
+        float a3 = a*a*a;
+        T x2 = tsqr(x);
+        T y2 = tsqr(y);
+        T z2 = tsqr(z);
+        T z3 = tmul(z2,z);
 
+    T term1 = a/2.*(y2-x2) + 2./9.* z3 + 2./3.*a2*z;
+    T term2 = a/4.*(y2-x2) - 1./4.*tmul(z,x2+y2+8./9.*z2) + 2./9.*a2*z;
+
+    return -tmul(term1,term1,term1) + 6.*a3*tmul(z,term2,term2);
+
+}
+
+
+
+    //================================
+    // MOBIUS BANDS
+    //================================
+
+
+    T mobiusStripVariety(T x, T y, T z){
+
+    //https://www.imaginary.org/sites/default/files/moebiusband.pdf
+
+    float a = 0.02;
+    float b = 0.6;
     T x2 = tsqr(x);
     T y2 = tsqr(y);
     T z2 = tsqr(z);
+    T t2 = x2+y2;
 
-    T term0 = tdiv(y2-x2, 2.*z);
-    T term1 = term0 + 2./9.*z2 + 2./3.;
-    T term2 = term0/2. - 0.25*( x2 + y2 + 8./9.*z2 ) + 2./9.;
-    return tmul(term1, term1, term1) - 6.*tmul(term2, term2);
+    T term1 = (a-b)*(tmul(x,t2-z2+T(1,0))-2.*tmul(y,z));
+    T term2 = (2.*a + 2.*b + a*b)*t2;
+    T term3 = (a+b)*(t2+z2+T(1,0));
+    T term4 = 2.*(a-b)*(tmul(y,z)-x);
 
-//    T term1 = (y2-x2)/2. + 2./9.*tmul(z2,z) + 2./3.*z;
-//    T term2 = (y2-x2)/4. + 1./4.*tmul(z, x2 + y2 + 8./9.*z2) + 2./9.*z;
-//    return tmul(term1, term1, term1) - 6.*tmul(z,term2,term2);
-//
-//
+    T side1 = term1-term2;
+    T side2 = (term3+term4);
+
+    return -tsqr(side1)+tmul(t2,tsqr(side2));
+
+}
+
+
+    T mobiusStrip3TwistVariety(T x, T y, T z){
+
+    //https://www.imaginary.org/sites/default/files/moebiusband.pdf
+
+    float a = 0.01;
+    float b = 0.33;
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T t2 = x2+y2;
+    T t4 = tsqr(t2);
+
+    T comp1 = 3.*tmul(x2,y)-tmul(y2,y);
+    T comp2 = tmul(x,x2)-3.*tmul(x,y2);
+
+    T term1 = -2.*(a+b)*t4+(a-b)*(tmul(comp1, t2-z2+T(1,0))-2.*tmul(comp2,z));
+    T term2 = (a+b)*tmul(t2, (t2+z2+T(1,0))) - 2.*(a-b)*(comp1 - tmul(z,comp2)) - 2.*a*b*t2;
+
+    return - tsqr(term1) + tmul(t2,tsqr(term2));
+
 }
 
 
@@ -788,9 +832,6 @@ T enneper(T x, T y, T z){
 
 
 
-    //================================
-    // Elliptic Curve Experiments
-    //================================
 
 T ellipticFibration(T x, T y, T t){
     //from nadir, universial family over X15
