@@ -1127,7 +1127,7 @@ vec2 sdMobius(vec3 rP, float radius, float width, float thickness, float twists,
     vec2 tc = vec2(length(q.xz) - r, rP.y);
 
     //num of holes
-    float aN = 15.;
+    float aN = 25.;
 
     // Disc holes.
     vec3 q2 = rP;
@@ -1141,9 +1141,10 @@ vec2 sdMobius(vec3 rP, float radius, float width, float thickness, float twists,
 
     q2.xy *= rot2(a*twists/2.); // Twisting the toroidal plane objects.
     // Producing the holes.
-    //float hole = sBoxS(q2.xz, vec2(1., 1)*r*6.2831/aN/2.*.65, .05); // X-axis holes.
+
     vec2 holeInput = offset ? q2.yz : q2.xz;//choose original or offset
-    float hole = length(holeInput) - r*6.2831/aN/2.*.7; // X-axis holes.
+    float hole = sBoxS(holeInput, vec2(1, 1)*r*6.2831/aN/2.*.65, .05); // square holes
+    //float hole = length(holeInput) - r*6.2831/aN/2.*.7; // X-axis holes.
 
     tc *= rot2(a*twists/2.); // Twisting the toroidal plane itself.
     float taperInput = offset ? tc.y : tc.x;//choose original or offset

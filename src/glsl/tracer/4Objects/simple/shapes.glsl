@@ -746,33 +746,41 @@ struct KleinBottle{
 
 float sdKlein(vec3 p, float thickness){
 
-    // thickness
-    float t = thickness;
+    //from https://www.shadertoy.com/view/4ltSW8
+
     float d = maxDist;
 
     p.y += .5;
-    p.xy *= rot2(3.14159/2.);
+    p.xy *= rot2(PI/2.);
 
     vec3  q = p + vec3(1.-cos((1.-p.y)/3.*PI),0,0);
     float y = pow(sin((1.-p.y)/3.*PI/2.),2.);
 
-    float tube_hollow = max(max(abs(length(q.xz)-0.5+0.25*y)-t,q.y-1.0),-q.y-2.0);
-    float tube_solid  = max(max(length(q.xz)-0.5+0.25*y,q.y-1.0),-q.y-2.0);
+    // SIDE HANDLE (stretched XZ cylinder)
+    float sideHandle_hollow = max(max(abs(length(q.xz)-0.5+0.25*y)-thickness,q.y-1.0),-q.y-2.0);
+    //only if we are cutting a hole later
+    //float sideHandle_solid  = max(max(length(q.xz)-0.5+0.25*y,q.y-1.0),-q.y-2.0);
+    //union with the side handle
+    d = min(d,sideHandle_hollow);
 
-    // opening (half XZ torus)
+    // LOWER BASE: opening (half XZ torus)
     q = p - vec3(0,1,0);
-    d = min(d,max(abs(length(vec2(length(q.xz)-1.0,q.y))-0.5)-t,-q.y));
+    float lowerBase = max(abs(length(vec2(length(q.xz)-1.0,q.y))-0.5)-thickness,-q.y);
+    d = min(d,lowerBase);
 
-    // body (stretched XZ torus)
+    // MID BASE: (stretched XZ torus)
     q = p;
-    d = min(d,max(max(max(abs(length(q.xz)-1.5+1.25*y),q.y-1.0),-q.y-2.0)-t,-tube_solid));
-
-    // tube (stretched XZ cylinder)
-    d = min(d,tube_hollow);
-
-    // handle (half XY torus)
+    float midBase = max(max(abs(length(q.xz)-1.5+1.25*y),q.y-1.0),-q.y-2.0)-thickness;
+    //newTube = max(newTube, -sideHandle_solid);//cut out a disk for the entry tube
+    //union with the base
+    d = min(d,midBase);
+    
+    // UPPER HANDLE (half XY torus)
     q = p + vec3(1,2,0);
-    d = min(d,max(abs(length(vec2(length(q.xy)-1.0,q.z))-0.25)-t,q.y));
+    float upperHandle = abs(length(vec2(length(q.xy)-1.0,q.z))-0.25)-thickness;
+    upperHandle = max(upperHandle,q.y);//cut it off at a fixed height
+    //union with the upperhandle
+    d = min(d,upperHandle);
 
     return 0.8*d;
 }

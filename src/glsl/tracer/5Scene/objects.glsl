@@ -475,14 +475,14 @@ void buildObjects(){
 
 
     mobius.center=vec3(-5,1,-2);
-    mobius.twists=3.;
+    mobius.twists=1.;
     mobius.radius=1.;
     mobius.width =0.4;
     mobius.thickness=0.04;
     mobius.offset=false;
     //mobius.borderMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
 
-    mobius.bandMat=makeGlass(30.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
+    mobius.bandMat=makeGlass(30.*(0.75*brownAbsorb+0.5*redAbsorb),1.5,0.99);
     mobius.bandMat.refractionChance=0.;
     mobius.bandMat.subSurface=true;
     mobius.bandMat.meanFreePath=0.2*extra2;
@@ -490,16 +490,16 @@ void buildObjects(){
     mobius.bandMat.roughness=0.7;
 
     //mobius.borderMat=makeMetal(vec3(0.02),specularity,0.4);
-    mobius.borderMat=makeGlass(vec3(5),1.5,0.99);
+    mobius.borderMat=makeGlass(10.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
     mobius.borderMat.refractionChance=0.;
     mobius.borderMat.subSurface=true;
-    mobius.borderMat.meanFreePath=0.1;
+    mobius.borderMat.meanFreePath=0.05;
     mobius.borderMat.isotropicScatter=0.4;
     mobius.borderMat.roughness=0.3;
 
 
     mobius2.center=vec3(-5,1,-2);
-    mobius2.twists=3.;
+    mobius2.twists=1.;
     mobius2.radius=1.;
     mobius2.width =0.4;
     mobius2.thickness=0.04;
@@ -513,7 +513,7 @@ void buildObjects(){
     mobius2.bandMat.isotropicScatter=extra;
     mobius2.bandMat.roughness=0.7;
 
-    mobius2.borderMat=makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,0.99);
+    mobius2.borderMat=makeGlass(0.5*vec3(1,0.6,0.3),1.5,0.99);
     mobius2.borderMat.refractionChance=0.;
     mobius2.borderMat.subSurface=true;
     mobius2.borderMat.meanFreePath=0.1;
@@ -579,10 +579,10 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    dist=min( dist, sdf(tv, kB) );
+    //dist=min( dist, sdf(tv, kB) );
    // dist=min( dist, sdf(tv, var) );
-  // dist=min( dist, sdf(tv, mobius) );
-    //dist=min( dist, sdf(tv, mobius2) );
+   dist=min( dist, sdf(tv, mobius) );
+    dist=min( dist, sdf(tv, mobius2) );
 //    dist=min( dist, sdf(tv, campari) );
 //    dist=min( dist, sdf(tv, vermouth) );
     return dist;
@@ -595,8 +595,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    return false;
-    //return  inside(tv, mobius) || inside(tv, mobius2);
+    //return false;
+    return  inside(tv, mobius) || inside(tv, mobius2);
 }
 
 
@@ -609,9 +609,9 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
    // setData(path, var);
-   // setData(path, mobius);
-    //setData(path, mobius2);
-     setData(path, kB);
+    setData(path, mobius);
+    setData(path, mobius2);
+    // setData(path, kB);
 //    setData(path, vermouth);
     //setData(path, dod);
 }
