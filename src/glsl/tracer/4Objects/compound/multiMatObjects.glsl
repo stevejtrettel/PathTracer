@@ -1098,16 +1098,17 @@ void setData(inout Path path, PoincareMarble marble){
 
 struct Mobius{
     vec3 center;
-    float size;
     float radius;
+    float width;
+    float thickness;
     float twists;
+    bool offset;//is it the regular, or the offset one?
     Material bandMat;
     Material borderMat;
 };
 
 
-// Standard 2D rotation formula.
-mat2 rot2(in float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
+
 // IQ's box routine.
 float sBoxS(in vec2 p, in vec2 b, float r){
     vec2 d = abs(p) - b + r;
@@ -1115,21 +1116,22 @@ float sBoxS(in vec2 p, in vec2 b, float r){
 }
 
 
-vec2 sdMobius(vec3 rP, float radius, float twists){
+vec2 sdMobius(vec3 rP, float radius, float width, float thickness, float twists, bool offset){
 
     // Toroidal strip dimensions.
-    vec2 dim = vec2(.1, .02);
-    float r = .38*radius; // Toroidal radius.
+    vec2 dim = vec2(width, thickness);
+    float r = radius; // Toroidal radius.
 
     // Disc coordinates.
     vec3 q = rP;
     vec2 tc = vec2(length(q.xz) - r, rP.y);
 
     //num of holes
-    float aN = 14.;
+    float aN = 15.;
 
     // Disc holes.
     vec3 q2 = rP;
+    if(offset){q2.xz *= rot2(3.14159/aN);}
     float a = mod(atan(q2.z, q2.x), 6.2831);
     float na = (floor(a*aN/6.2831) + .5)/aN;
 
@@ -1140,50 +1142,60 @@ vec2 sdMobius(vec3 rP, float radius, float twists){
     q2.xy *= rot2(a*twists/2.); // Twisting the toroidal plane objects.
     // Producing the holes.
     //float hole = sBoxS(q2.xz, vec2(1., 1)*r*6.2831/aN/2.*.65, .05); // X-axis holes.
-    float hole = length(q2.xz) - r*6.2831/aN/2.*.7; // X-axis holes.
+    vec2 holeInput = offset ? q2.yz : q2.xz;//choose original or offset
+    float hole = length(holeInput) - r*6.2831/aN/2.*.7; // X-axis holes.
 
     tc *= rot2(a*twists/2.); // Twisting the toroidal plane itself.
-    float taper = smoothstep(0., 1., abs(tc.x)/dim.x)*.5 + .5; // Holowing out the center.
-    float tor = sBoxS(tc, dim*vec2(1, taper), .01); // Creating the central strip.
-    //tor = smax(tor, -hole, .01); // Boring out the wholes.
+    float taperInput = offset ? tc.y : tc.x;//choose original or offset
+    float taper = smoothstep(0., 1., abs(taperInput)/dim.x)*.5 + .5; // Holowing out the center.
+    vec2 torInput = offset ? dim.yx : dim;
+    float tor = sBoxS(tc, torInput*vec2(1, taper), .01); // Creating the central strip.
+    tor = smax(tor, -hole, .01); // Boring out the wholes.
 
     // Outer band coordinates.
-    vec2 btc = tc; btc.x = abs(btc.x) - dim.x - dim.y;
-    float bands = sBoxS(btc, vec2(1, 1.5)*dim.y, .01);
+    if(offset){tc.y = abs(tc.y) - dim.x - dim.y;}
+    else{tc.x = abs(tc.x) - dim.x - dim.y;}
+    vec2 bandsInput = offset ? vec2(1.5,1) : vec2(1,1.5);
+    float bands = sBoxS(tc, bandsInput*dim.y, .01);
     // Band ridges... Interesting, but not for this example.
     //bands += smoothstep(0., 1., sin(a*aN*6.))*.001;
 
     return vec2(tor, bands);
-
 }
+
 
 
 
 float distR3Band(vec3 p, Mobius mobius){
     vec3 pos = p-mobius.center;
-    pos/=mobius.size;
-    vec2 dat = sdMobius(pos, mobius.radius, mobius.twists);
+    pos/=2.;
+    vec2 dat = sdMobius(pos, mobius.radius, mobius.width, mobius.thickness, mobius.twists,mobius.offset);
     return dat.x;
 }
 
 float distR3Border(vec3 p, Mobius mobius){
     vec3 pos = p-mobius.center;
-    pos/=mobius.size;
-    vec2 dat = sdMobius(pos, mobius.radius, mobius.twists);
+    pos/=2.;
+    vec2 dat = sdMobius(pos, mobius.radius, mobius.width, mobius.thickness, mobius.twists,mobius.offset);
     return dat.y;
 }
-
-
 
 //overload of sdf
 float sdf( Vector tv, Mobius mobius){
     vec3 pos = tv.pos-mobius.center;
-    pos/=mobius.size;
-    vec2 dat = sdMobius(pos, mobius.radius, mobius.twists);
+    pos/=2.;
+    vec2 dat = sdMobius(pos, mobius.radius, mobius.width, mobius.thickness,  mobius.twists,mobius.offset);
     //make the total distance:
     float dist = min( dat.x, dat.y );
     return dist;
 }
+
+
+
+
+
+
+
 
 //overload of location booleans:
 bool atBand( Vector tv,Mobius mobius){
@@ -1263,7 +1275,7 @@ Vector normalVecBorder( Vector tv, Mobius mobius ){
 
 
 
-//overload of setData for a sphere
+//overload of setData
 void setData( inout Path path, Mobius mobius){
 
     //if we are at the surface of the band
@@ -1276,7 +1288,7 @@ void setData( inout Path path, Mobius mobius){
     }
 
 
-    //if we are at the surface of the band
+    //if we are at the surface of the border
     if(atBorder(path.tv, mobius)){
         //compute the normal
         Vector normal=normalVecBorder(path.tv,mobius);
@@ -1284,6 +1296,9 @@ void setData( inout Path path, Mobius mobius){
         //set the material
         setObjectInAir(path.dat, side, normal, mobius.borderMat);
     }
+
+
+    //PROBABLY NEED TO DO A BETTER JOB HERE AND DEAL WITH THE SEPARATE
 
 }
 

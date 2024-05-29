@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T surf(T x, T z, T y){
-    return romanSurfaceVar(x,y,z);
+    return kleinBottleVariety(y,x,z);
     //return enneper(z,x,-y);
     //return mobiusStripVariety(z,-x,-y);
 }

@@ -262,8 +262,6 @@ void setData( inout Path path, Box box){
 
 
 
-
-
 //-------------------------------------------------
 //The PLANE sdf
 //-------------------------------------------------
@@ -723,4 +721,132 @@ void setData( inout Path path, Bunny bunny ){
 }
 
 
+
+
+
+
+
+
+
+
+
+//------------------------
+// The Klein Bottle SDF
+//------------------------
+
+
+
+struct KleinBottle{
+    vec3 center;
+    float size;
+    float thickness;
+    Material mat;
+};
+
+
+float sdKlein(vec3 p, float thickness){
+
+    // thickness
+    float t = thickness;
+    float d = maxDist;
+
+    p.y += .5;
+    p.xy *= rot2(3.14159/2.);
+
+    vec3  q = p + vec3(1.-cos((1.-p.y)/3.*PI),0,0);
+    float y = pow(sin((1.-p.y)/3.*PI/2.),2.);
+
+    float tube_hollow = max(max(abs(length(q.xz)-0.5+0.25*y)-t,q.y-1.0),-q.y-2.0);
+    float tube_solid  = max(max(length(q.xz)-0.5+0.25*y,q.y-1.0),-q.y-2.0);
+
+    // opening (half XZ torus)
+    q = p - vec3(0,1,0);
+    d = min(d,max(abs(length(vec2(length(q.xz)-1.0,q.y))-0.5)-t,-q.y));
+
+    // body (stretched XZ torus)
+    q = p;
+    d = min(d,max(max(max(abs(length(q.xz)-1.5+1.25*y),q.y-1.0),-q.y-2.0)-t,-tube_solid));
+
+    // tube (stretched XZ cylinder)
+    d = min(d,tube_hollow);
+
+    // handle (half XY torus)
+    q = p + vec3(1,2,0);
+    d = min(d,max(abs(length(vec2(length(q.xy)-1.0,q.z))-0.25)-t,q.y));
+
+    return 0.8*d;
+}
+
+
+//overload of distR3: distance in R3 coordinates
+float distR3( vec3 p, KleinBottle klein ){
+    //normalize position
+    vec3 pos = p - klein.center;
+    pos /= klein.size;
+    pos = vec3(-pos.y,pos.z,pos.x);
+    return sdKlein(pos,klein.thickness);
+}
+
+//overload of location booleans:
+bool at( Vector tv,KleinBottle klein){
+
+    float d = distR3( tv.pos, klein );
+    bool atSurf = ((abs(d) - AT_THRESH)<0.);
+    return atSurf;
+}
+
+bool inside( Vector tv, KleinBottle klein ){
+    float d = distR3( tv.pos, klein );
+    return (d<0.);
+}
+
+
+
+
+//overload of sdf for a sphere
+float sdf( Vector tv, KleinBottle klein ){
+
+    //distance to closest point on sphere
+    float d=distR3(tv.pos, klein);
+    //return the actual distance
+    return d;
+}
+
+
+//overload of normalVec for a sphere
+Vector normalVec( Vector tv, KleinBottle klein ){
+
+    vec3 pos=tv.pos;
+
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0,-1.0)*0.5773;
+
+    float vxyy=distR3( pos + e.xyy*ep, klein);
+    float vyyx=distR3( pos + e.yyx*ep, klein);
+    float vyxy=distR3( pos + e.yxy*ep, klein);
+    float vxxx=distR3( pos + e.xxx*ep, klein);
+
+    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+
+    dir=normalize(dir);
+
+    return Vector(tv.pos,dir);
+
+}
+
+
+
+//overload of setData for a sphere
+void setData( inout Path path, KleinBottle klein){
+
+    //if we are at the surface
+    if(at(path.tv, klein)){
+        //compute the normal
+        Vector normal=normalVec(path.tv,klein);
+        bool side = inside(path.tv, klein);
+        //set the material
+        setObjectInAir(path.dat, side, normal, klein.mat);
+    }
+
+}
 

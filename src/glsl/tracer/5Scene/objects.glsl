@@ -35,6 +35,8 @@ HypDod dod,dodE;
 PoincareMarble poin;
 CoxCube cube5,cube6;
 Mobius mobius;
+Mobius mobius2;
+KleinBottle kB;
 
 //this function constructs the objects
 void buildObjects(){
@@ -368,11 +370,11 @@ void buildObjects(){
     klein.mat.roughness=0.04;
 
 
-    var.center=vec3(-2,-0.05,-2);
-    var.size=0.525;
-    var.inside=0.005;
-    var.outside=0.002;
-    var.boundingSphere=1.;
+    var.center=vec3(-2,1.5,-2);
+    var.size=2.;
+    var.inside=0.0075;
+    var.outside=0.00;
+    var.boundingSphere=2.;
     //3.1415;
     var.smoothing =0.065;
 
@@ -472,12 +474,13 @@ void buildObjects(){
     cube5.mat.roughness=0.04;
 
 
-    mobius.center=vec3(-2,0,-2);
-    mobius.twists=11.;
-    mobius.size=2.;
-    mobius.radius=1.5;
-    mobius.borderMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
-
+    mobius.center=vec3(-5,1,-2);
+    mobius.twists=3.;
+    mobius.radius=1.;
+    mobius.width =0.4;
+    mobius.thickness=0.04;
+    mobius.offset=false;
+    //mobius.borderMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
 
     mobius.bandMat=makeGlass(30.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
     mobius.bandMat.refractionChance=0.;
@@ -486,14 +489,44 @@ void buildObjects(){
     mobius.bandMat.isotropicScatter=extra;
     mobius.bandMat.roughness=0.7;
 
-    mobius.borderMat=makeMetal(vec3(0.02),specularity,0.4);
-    //makeGlass(5.75*vec3(0.3,0.05,0.2),1.5,0.95);
-    //makeGlass(vec3(10,8,7),1.5,0.99);
-//    mobius.borderMat.refractionChance=0.;
-//    mobius.borderMat.subSurface=true;
-//    mobius.borderMat.meanFreePath=0.3;
-//    mobius.borderMat.isotropicScatter=0.2;
-//    mobius.borderMat.roughness=0.7;
+    //mobius.borderMat=makeMetal(vec3(0.02),specularity,0.4);
+    mobius.borderMat=makeGlass(vec3(5),1.5,0.99);
+    mobius.borderMat.refractionChance=0.;
+    mobius.borderMat.subSurface=true;
+    mobius.borderMat.meanFreePath=0.1;
+    mobius.borderMat.isotropicScatter=0.4;
+    mobius.borderMat.roughness=0.3;
+
+
+    mobius2.center=vec3(-5,1,-2);
+    mobius2.twists=3.;
+    mobius2.radius=1.;
+    mobius2.width =0.4;
+    mobius2.thickness=0.04;
+    mobius2.offset=true;
+
+    //mobius2.bandMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.1,extra2);
+    mobius2.bandMat=makeGlass(20.*vec3(1,0.6,0.3),1.5,0.99);
+    mobius2.bandMat.refractionChance=0.;
+    mobius2.bandMat.subSurface=true;
+    mobius2.bandMat.meanFreePath=0.2*extra2;
+    mobius2.bandMat.isotropicScatter=extra;
+    mobius2.bandMat.roughness=0.7;
+
+    mobius2.borderMat=makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,0.99);
+    mobius2.borderMat.refractionChance=0.;
+    mobius2.borderMat.subSurface=true;
+    mobius2.borderMat.meanFreePath=0.1;
+    mobius2.borderMat.isotropicScatter=0.6;
+    mobius2.borderMat.roughness=0.3;
+    //makeMetal(vec3(0.2),specularity,0.4);
+
+
+
+    kB.center=vec3(-2,1,-2);
+    kB.size=1.;
+    kB.thickness=0.05;
+    kB.mat = makeGlass(2.5*vec3(0.3,0.05,0.05),1.5,0.95);
 }
 
 
@@ -546,9 +579,10 @@ float sdf_Objects( Vector tv ){
 
    float dist=maxDist;
 
-    //dist=min( dist, sdf(tv, poin) );
+    dist=min( dist, sdf(tv, kB) );
    // dist=min( dist, sdf(tv, var) );
-    dist=min( dist, sdf(tv, mobius) );
+  // dist=min( dist, sdf(tv, mobius) );
+    //dist=min( dist, sdf(tv, mobius2) );
 //    dist=min( dist, sdf(tv, campari) );
 //    dist=min( dist, sdf(tv, vermouth) );
     return dist;
@@ -561,8 +595,8 @@ float sdf_Objects( Vector tv ){
 //PROBLEM: RIGHT NOW DON'T NECESSARILY HAVE A GOOD WAY TO HAVE TWO SCATTERING MATERIALS IN CONTACT?
 bool inside_Object( Vector tv ){
 
-    //return false;
-    return  inside(tv, mobius);
+    return false;
+    //return  inside(tv, mobius) || inside(tv, mobius2);
 }
 
 
@@ -575,8 +609,9 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
    // setData(path, var);
-    setData(path, mobius);
-//    setData(path, campari);
+   // setData(path, mobius);
+    //setData(path, mobius2);
+     setData(path, kB);
 //    setData(path, vermouth);
     //setData(path, dod);
 }

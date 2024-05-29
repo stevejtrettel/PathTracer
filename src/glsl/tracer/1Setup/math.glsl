@@ -38,6 +38,9 @@ float sq(float x){return x*x;}
 
 
 
+// Standard 2D rotation formula.
+mat2 rot2(in float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
+
 
 
 

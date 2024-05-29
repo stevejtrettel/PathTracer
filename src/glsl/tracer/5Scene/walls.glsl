@@ -22,7 +22,8 @@ void buildWalls(){
     float specularity, roughness, offset;
 
     //-----------GENERAL FOR THE WALLS -------------------------
-    color=0.1*vec3(171,203,240)/255.;
+    color=0.2*vec3(144, 125, 150)/255.;
+    //0.1*vec3(171,203,240)/255.;
     //vec3(0.4);
     specularity=0.;
     roughness=0.1;
