@@ -59,9 +59,9 @@ float sdf_Objects( Vector tv ){
    float dist=maxDist;
 
     //dist=min( dist, sdf(tv, kB) );
-   // dist=min( dist, sdf(tv, var) );
-   dist=min( dist, sdf(tv, mobius) );
-    dist=min( dist, sdf(tv, mobius2) );
+    dist=min( dist, sdf(tv, var) );
+   //dist=min( dist, sdf(tv, mobius) );
+  // dist=min( dist, sdf(tv, mobius2) );
 //    dist=min( dist, sdf(tv, campari) );
 //    dist=min( dist, sdf(tv, vermouth) );
     return dist;
@@ -75,7 +75,8 @@ float sdf_Objects( Vector tv ){
 bool inside_Object( Vector tv ){
 
     //return false;
-    return  inside(tv, mobius) || inside(tv, mobius2);
+    return inside(tv,var);
+   // return  inside(tv, mobius) || inside(tv, mobius2);
 }
 
 
@@ -87,9 +88,9 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-   // setData(path, var);
-    setData(path, mobius);
-    setData(path, mobius2);
+    setData(path, var);
+    //setData(path, mobius);
+    //setData(path, mobius2);
     // setData(path, kB);
 //    setData(path, vermouth);
     //setData(path, dod);

@@ -1,3 +1,3 @@
-#include sVariety.glsl
-#include bVariety.glsl
-#include cVariety.glsl
+#include variety.glsl
+#include varietySurface.glsl
+#include varietyStriped.glsl
