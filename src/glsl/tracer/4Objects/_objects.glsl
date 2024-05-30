@@ -1,9 +1,6 @@
 #include computations.glsl
 
-#include simple/shapes.glsl
-#include simple/varieties.glsl
-#include simple/fractals.glsl
-#include simple/polytope.glsl
+#include simple/_simple.glsl
+#include compound/_compound.glsl
+#include multiMaterial/_multiMaterial.glsl
 
-#include compound/compoundObjects.glsl
-#include compound/multiMatObjects.glsl

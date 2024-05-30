@@ -2,14 +2,58 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/_compound.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/bottle.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/cocktailGlass.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/donutBottle.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/pint.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/_multiMaterial.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/beer.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/cocktail.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/glassMarble.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/glassVariety.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/layerDonutBottle.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/liquorBottle.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/mobius.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/poincareMarble.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/_simple.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/fractals/_fractals.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/fractals/apolonianGasket.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/fractals/kleinian.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/_shapes.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/box.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/bunny.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/hypCoxCube.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/hypDod.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/kleinBottle.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/plane.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/sphere.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/torus.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/truncated_cone.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/_varieties.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/bVariety.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/cVariety.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/sVariety.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects/basicShapes.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects/bottles.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects/fractals.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects/glasses.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects/hypGeo.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects/misc.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects/topology.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects/varieties.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/OLD/objects.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-N7iwjDQS.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/assets/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/multiMatObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/multiMatObjects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/lights.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/_objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/_objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/compoundObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/OLD/compound/compoundObjects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/multiMatObjects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/OLD/compound/multiMatObjects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/fractals.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/OLD/simple/fractals.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/polytope.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/OLD/simple/polytope.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/OLD/simple/shapes.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/OLD/simple/varieties.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/walls.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/pathTrace.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/pathTrace.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/subSurfScatter.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/subSurfScatter.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,27 +82,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/strettel/Code/PathTracer&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Users/strettel/Code/PathTracer/src/glsl/tracer/OLD",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/glsl/tracer/OLD" />
       <recent name="$PROJECT_DIR$/glsl/newFrame/OLD" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple" />
+      <recent name="$PROJECT_DIR$/src/glsl/tracer/OLD" />
       <recent name="$PROJECT_DIR$/dist/assets" />
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/js" />
-      <recent name="$PROJECT_DIR$/js/NEW" />
-      <recent name="$PROJECT_DIR$/glsl" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -100,7 +145,7 @@
       <workItem from="1712122561033" duration="4665000" />
       <workItem from="1715401885843" duration="6019000" />
       <workItem from="1715738283998" duration="90480000" />
-      <workItem from="1716965388509" duration="15030000" />
+      <workItem from="1716965388509" duration="20680000" />
     </task>
     <servers />
   </component>

@@ -56,7 +56,6 @@ void subSurfScatter(inout Path path){
         //choose the distance to flow: exponential dist with mean free path mfp
         flowDist=randomExponential(mfp);
 
-
         //to a trial flow of this distance, in given direction
         flow(temp,flowDist);
 

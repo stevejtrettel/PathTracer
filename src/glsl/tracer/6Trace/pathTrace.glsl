@@ -40,16 +40,12 @@ vec3 pathTrace(Path path){
 
                         //OPTION 1: JUST FLOW FORWARDS
                         //step forward a bit to get off the surface
-                        flow(path.tv,5.*EPSILON);
+                        //flow(path.tv,5.*EPSILON);
 
                         //OPTION 2: USE NORMAL TO PUSH OFF
-                        //setData_Scene(path);
-                        //nudge(path.tv, path.dat.normal,8.*EPSILON);
+                        setData_Scene(path);
+                        nudge(path.tv, path.dat.normal,-5.*EPSILON);
 
-                        //OPTION 3: DECIDE WHAT TO DO BY RE-SCATTERING
-                        //need the new normal vector
-                        //setData_Scene(path);
-                       // scatter(path);
                 }
                 else{
                         //pick up any color from the reflection off surface
