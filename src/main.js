@@ -1,12 +1,20 @@
 import Stats from "three/addons/libs/stats.module";
 
-import PathTracer from "./PathTracer.js";
-import UI from "./UI.js";
-import shaders from "./shaders.js";
+import PathTracer from "./js/PathTracer.js";
+import UI from "./js/UI.js";
+import shaders from "./js/shaders.js";
 
 
-//set the canvas
-// let canvas = document.querySelector('#World');
+
+//---------------------------------
+// The scene we are rendering
+//---------------------------------
+const sceneName = 'test';
+//----------------------------------
+export {sceneName};
+//----------------------------------
+
+
 
 //build up stats
 let panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;

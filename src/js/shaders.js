@@ -6,7 +6,6 @@ import tracer from '/src/glsl/tracer/tracer.glsl';
 
 import {uiParams,location} from "./settings.js";
 
-
 //Uniforms for the tracer
 //=============================================
 

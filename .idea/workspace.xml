@@ -2,12 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/scenes/test/_scene.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/test/lights.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/test/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/test/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/test/walls.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/toRender.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/_varieties.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/_varieties.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/bVariety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/varietyStriped.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/cVariety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/varietySurface.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/sVariety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/variety.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/js/shaders.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/shaders.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,10 +57,10 @@
       <recent name="$PROJECT_DIR$/glsl/newFrame/OLD" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple" />
       <recent name="$PROJECT_DIR$/src/glsl/tracer/OLD" />
       <recent name="$PROJECT_DIR$/dist/assets" />
-      <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/js" />
     </key>
   </component>
@@ -99,7 +103,7 @@
       <workItem from="1712122561033" duration="4665000" />
       <workItem from="1715401885843" duration="6019000" />
       <workItem from="1715738283998" duration="90480000" />
-      <workItem from="1716965388509" duration="22145000" />
+      <workItem from="1716965388509" duration="39777000" />
     </task>
     <servers />
   </component>
