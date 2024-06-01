@@ -11,16 +11,16 @@
 // The LAYEERDONUT sdf
 //-------------------------------------------------
 
-struct LayerDonutBottle{
-    DonutBottle inner;
-    DonutBottle outer;
+struct CoatedTorusBottle{
+    TorusBottle inner;
+    TorusBottle outer;
 //Sphere outer;
 };
 
 
 
 //overload of sdf for the cocktail struct
-float sdf( Vector tv, LayerDonutBottle donut){
+float sdf( Vector tv, CoatedTorusBottle donut){
 
     float innerDist = sdf(tv, donut.inner);
     float outerDist = sdf(tv, donut.outer);
@@ -34,7 +34,7 @@ float sdf( Vector tv, LayerDonutBottle donut){
 
 
 //overload of set data
-void setData(inout Path path, LayerDonutBottle donut){
+void setData(inout Path path, CoatedTorusBottle donut){
 
     Vector normal;
 

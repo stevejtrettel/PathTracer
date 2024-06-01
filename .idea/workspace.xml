@@ -2,39 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/scenes/beer/_scene.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/beer/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/beer/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/beer/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/beer/walls.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bottle/_scene.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bottle/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bottle/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bottle/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bottle/walls.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bunny/_scene.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bunny/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bunny/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bunny/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/bunny/walls.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/cocktail/_scene.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/cocktail/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/cocktail/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/cocktail/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/cocktail/walls.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/mobius/_scene.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/mobius/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/mobius/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/mobius/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/mobius/walls.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/variety/_scene.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/variety/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/variety/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/variety/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/variety/walls.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/negroniForOne/_scene.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/negroniForOne/lights.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/negroniForOne/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/negroniForOne/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/negroniForOne/walls.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/torusBottle/_scene.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/torusBottle/lights.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/torusBottle/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/torusBottle/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/torusBottle/walls.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyGlass/_scene.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyGlass/lights.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyGlass/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyGlass/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyGlass/walls.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyMarble/_scene.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyMarble/lights.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyMarble/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyMarble/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/varietyMarble/walls.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/beer.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/beer.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/liquorBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/liquorBottle.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/_compound.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/_compound.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/donutBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/torusBottle.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/_multiMaterial.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/_multiMaterial.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/layerDonutBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/coatedTorusBottle.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scenes/sceneSettings.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneSettings.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" afterDir="false" />
     </list>
@@ -131,7 +123,7 @@
       <workItem from="1715738283998" duration="90480000" />
       <workItem from="1716965388509" duration="39777000" />
       <workItem from="1717257176914" duration="5519000" />
-      <workItem from="1717262730973" duration="2178000" />
+      <workItem from="1717262730973" duration="5572000" />
     </task>
     <servers />
   </component>

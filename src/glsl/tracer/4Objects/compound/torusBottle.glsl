@@ -7,7 +7,7 @@
 
 //a donut bottle is a smooth union of a truncated cone and a torus:
 
-struct DonutBottle{
+struct TorusBottle{
 //need a position, a height, base/top sizes, and glass thickness
     vec3 center;
     float outer;
@@ -21,7 +21,7 @@ struct DonutBottle{
 };
 
 
-float donutBottleDistance(vec3 pos, DonutBottle donut, out float insideBottle){
+float torusBottleDistance(vec3 pos, TorusBottle donut, out float insideBottle){
 
     //get position relative center
     vec3 torusPos = pos - donut.center;
@@ -59,22 +59,22 @@ float donutBottleDistance(vec3 pos, DonutBottle donut, out float insideBottle){
 
 
 //overload of distR3
-float distR3( vec3 pos, DonutBottle donut ){
+float distR3( vec3 pos, TorusBottle donut ){
 
-    return donutBottleDistance(pos, donut, trashFloat);
+    return torusBottleDistance(pos, donut, trashFloat);
 
 }
 
 
 //overload of location booleans:
-bool at( Vector tv, DonutBottle donut){
+bool at( Vector tv, TorusBottle donut){
 
     float d = distR3( tv.pos, donut );
     return  (abs(d) < AT_THRESH);
 
 }
 
-bool inside( Vector tv, DonutBottle donut ){
+bool inside( Vector tv, TorusBottle donut ){
     float d = distR3( tv.pos, donut );
     return (d < 0.);
 }
@@ -82,13 +82,13 @@ bool inside( Vector tv, DonutBottle donut ){
 
 
 //overload of sdf
-float sdf( Vector tv, DonutBottle donut ){
+float sdf( Vector tv, TorusBottle donut ){
 
     return distR3(tv.pos, donut);
 }
 
 //overload of normalVec
-Vector normalVec( Vector tv, DonutBottle donut ){
+Vector normalVec( Vector tv, TorusBottle donut ){
     vec3 pos=tv.pos;
 
     const float ep = 0.0001;
@@ -109,7 +109,7 @@ Vector normalVec( Vector tv, DonutBottle donut ){
 
 
 //overload of setData for a sphere
-void setData( inout Path path, DonutBottle donut ){
+void setData( inout Path path, TorusBottle donut ){
 
     //if we are at the surface
     if(at(path.tv, donut)){

@@ -1,4 +1,4 @@
 
-import settings from "./beer/settings.js";
+import settings from "./negroniForOne/settings.js";
 
 export default settings;
