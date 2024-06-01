@@ -194,15 +194,15 @@ void setData(inout Path path, Beer beer){
     //distance to the top of the drink
     //right now direcly in the center of the cup
     float drinkTop=path.tv.pos.y-beer.glass.center.y-beer.glass.height/beerHeightInCup;
-    float foamThickness = 1.3;
+    float foamThickness = 0.4;
 
 
 
     //compute the new isotropic scattering coefficient depending on point of entry:
     //its going to be the original, plus an exponentially decreasing term with characeterist width
     float scatterDifference = 1.-beer.drink.isotropicScatter;
-    float foamScatter = beer.drink.isotropicScatter + scatterDifference * exp(-pow(abs(drinkTop/foamThickness),3.));
-    float foamFreePath = beer.drink.meanFreePath*(1.+3.*exp(-pow(abs(drinkTop/foamThickness),3.)));
+    float foamScatter = beer.drink.isotropicScatter + scatterDifference * exp(-pow(abs(drinkTop/foamThickness),5.));
+    float foamFreePath = beer.drink.meanFreePath*(1.+3.*exp(-pow(abs(drinkTop/foamThickness),10.)));
     // float beerTop = path.tv.pos.y-beer.glass.center.y-beer.glass.height/2.+0.2;
 
     //distance to drink is intersection of inside dist and this top

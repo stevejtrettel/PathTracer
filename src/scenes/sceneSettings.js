@@ -1,4 +1,4 @@
 
-import settings from "./test/settings.js";
+import settings from "./beer/settings.js";
 
 export default settings;

@@ -5,7 +5,7 @@
 //-------------------------------------------------
 
 struct LiquorBottle{
-    Bottle glass;
+    Bottle glass;//we don't use the material; just the shape
     Material cup;
     Material drink;
     float fill;
