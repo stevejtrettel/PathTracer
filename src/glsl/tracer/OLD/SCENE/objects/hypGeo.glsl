@@ -13,8 +13,6 @@ void buildHypGeo(){
 
 
 
-
-
     dod = buildHypDod();
 
     dod.mat=makeGlass(6.*(brownAbsorb+0.25*redAbsorb),1.5,0.97);

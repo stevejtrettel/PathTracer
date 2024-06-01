@@ -8,7 +8,7 @@
 #include 2Space/_space.glsl
 #include 3Materials/_materials.glsl
 #include 4Objects/_objects.glsl
-#include 5Scene/_scene.glsl
+#include 5Scene/scene.glsl
 #include 6Trace/_trace.glsl
 
 

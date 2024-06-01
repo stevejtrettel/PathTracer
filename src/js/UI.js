@@ -46,6 +46,8 @@ class UI extends GUI{
                 contents += this.printParams();
                 contents += `\n\n\n`;
                 contents += pathtracer.printLocation();
+                contents += `\n\n`;
+                contents += `export default {uiParams: uiParams, location:location};`
 
                 const file = new File([contents], `settingsNew.js`, {
                     type: 'javascript',

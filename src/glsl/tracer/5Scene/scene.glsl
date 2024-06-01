@@ -5,6 +5,8 @@
 //-------------------------------------------------
 
 
+//include the scene we are currently drawing:
+#include ../../../scenes/sceneShader.glsl
 
 //-------------------------------------------------
 //Building the Scene
