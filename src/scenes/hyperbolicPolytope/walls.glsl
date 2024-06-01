@@ -10,12 +10,12 @@ Plane bottomWall, topWall, leftWall, rightWall, backWall, frontWall;
 void buildWalls(){
 
     Vector orientation;
-    vec3 color=0.1*vec3(171,203,240)/255.;//sky blue
+    vec3 color=0.15*vec3(171,203,240)/255.;//sky blue
     float specularity=0.;
     float roughness=0.1;
 
     //----------- THE FLOOR -------------------------
-    orientation.pos=vec3(0,-2.5,0);
+    orientation.pos=vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
     bottomWall.orientation=orientation;
     bottomWall.mat=makeDielectric(color,0.0,roughness);
@@ -25,7 +25,7 @@ void buildWalls(){
     orientation.pos=vec3(0,14,0);
     orientation.dir=vec3(0,-1,0);
     topWall.orientation=orientation;
-    topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
+    topWall.mat=makeLight(vec3(1,1,1),1.*extra4);
 
 
     //----------- THE FRONT -------------------------

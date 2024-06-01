@@ -1,4 +1,4 @@
 
-import settings from "./negroniForOne/settings.js";
+import settings from "./kleinBottle/settings.js";
 
 export default settings;

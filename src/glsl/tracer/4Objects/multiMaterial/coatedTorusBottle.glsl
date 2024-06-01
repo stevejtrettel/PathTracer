@@ -31,6 +31,9 @@ float sdf( Vector tv, CoatedTorusBottle donut){
     return dist;
 }
 
+bool inside(Vector tv, CoatedTorusBottle donut){
+    return inside(tv, donut.inner);
+}
 
 
 //overload of set data
