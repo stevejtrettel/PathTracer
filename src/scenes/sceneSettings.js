@@ -1,4 +1,4 @@
 
-import settings from "./torusBottle/settings.js";
+import settings from "./variety/settings.js";
 
 export default settings;

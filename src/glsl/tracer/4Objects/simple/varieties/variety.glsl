@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T varEqn(T x, T z, T y){
-    return kummer(y,x,z);
+    return endrassOctic(y,x,z);
     //return enneper(z,x,-y);
     //return mobiusStripVariety(z,-x,-y);
 }

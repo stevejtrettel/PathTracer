@@ -2,17 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/scenes/apollonian/_scene.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/apollonian/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/apollonian/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/apollonian/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/apollonian/walls.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/kleinianLimit/_scene.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/kleinianLimit/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/kleinianLimit/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/kleinianLimit/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/kleinianLimit/walls.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/assets/index-2_PCL58B.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/assets/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/variety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/variety.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scenes/sceneSettings.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneSettings.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" afterDir="false" />
     </list>
@@ -61,11 +54,11 @@
       <recent name="$PROJECT_DIR$/glsl/newFrame/OLD" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/dist/assets" />
       <recent name="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/done" />
       <recent name="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE" />
       <recent name="$PROJECT_DIR$/src/scenes" />
       <recent name="$PROJECT_DIR$/src" />
-      <recent name="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -111,7 +104,7 @@
       <workItem from="1717257176914" duration="5519000" />
       <workItem from="1717262730973" duration="5572000" />
       <workItem from="1717271249180" duration="1717000" />
-      <workItem from="1717299578692" duration="3717000" />
+      <workItem from="1717299578692" duration="4869000" />
     </task>
     <servers />
   </component>
