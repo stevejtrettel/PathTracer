@@ -1,4 +1,4 @@
 
-import settings from "./kleinBottle/settings.js";
+import settings from "./torusBottle/settings.js";
 
 export default settings;
