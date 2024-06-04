@@ -9,10 +9,10 @@ Variety var;
 void buildObjects(){
 
     var.center=vec3(-2,1.8,0);
-    var.size=2.5;
+    var.size=5.;
     var.inside=0.02;
     var.outside=0.0;
-    var.boundingSphere=3.1415;
+    var.boundingSphere=1.8;
     var.smoothing =0.075;
 
     var.mat=makeGlass(3.75*vec3(0.3,0.05,0.2),1.5,0.95);
@@ -20,7 +20,7 @@ void buildObjects(){
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.2*extra2;
     var.mat.isotropicScatter=extra;
-    var.mat.roughness=0.7;
+    var.mat.roughness=0.2;
 
 }
 

@@ -22,7 +22,7 @@ vec4 var_Data( vec3 p ){
     //the value of the function is automatically computed in each of the above:
     float val = vx.x;
 
-    return vec4(0.9*grad,val);
+    return vec4(grad,val);
 }
 
 
@@ -99,15 +99,16 @@ float distR3( vec3 p, Variety var ){
 
 
     // //bounding sphere
-    float bboxDist = rad-var.boundingSphere;
+    //float bboxDist = rad-var.boundingSphere;
 
     // //bounding cylinder
-    //    float bboxDist = length(pos.xy)-var.boundingSphere;
-    //    bboxDist = max(bboxDist, abs(pos.z)-4.5);
+       // float bboxDist = length(pos.xz)-var.boundingSphere;
+        //bboxDist = max(bboxDist, abs(pos.z)-4.5);
 
     //bounding box
     //vec3 q = abs(pos) - vec3(var.boundingSphere);
-    //float bboxDist =  length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+    vec3 q = abs(pos-vec3(0,0,2)) - vec3(2,3,3);
+    float bboxDist =  length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
