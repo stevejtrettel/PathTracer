@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T varEqn(T x, T z, T y){
-    return endrassOctic(y,x,z);
+    return togliatti(x,z,y);
     //return enneper(z,x,-y);
     //return mobiusStripVariety(z,-x,-y);
 }
@@ -99,15 +99,15 @@ float distR3( vec3 p, Variety var ){
 
 
     // //bounding sphere
-    //float bboxDist = rad-var.boundingSphere;
+    float bboxDist = rad-var.boundingSphere;
 
     // //bounding cylinder
     //    float bboxDist = length(pos.xy)-var.boundingSphere;
     //    bboxDist = max(bboxDist, abs(pos.z)-4.5);
 
     //bounding box
-    vec3 q = abs(pos) - vec3(var.boundingSphere);
-    float bboxDist =  length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+    //vec3 q = abs(pos) - vec3(var.boundingSphere);
+    //float bboxDist =  length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
