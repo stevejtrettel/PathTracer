@@ -8,16 +8,14 @@ Variety var;
 
 void buildObjects(){
 
-    vec3 pinkScatter = vec3(0.25,0.65,0.7);
+    var.center=vec3(-2,1.8,0);
+    var.size=2.5;
+    var.inside=0.02;
+    var.outside=0.0;
+    var.boundingSphere=3.1415;
+    var.smoothing =0.075;
 
-    var.center=vec3(-2,1.5,-2);
-    var.size=2.;
-    var.inside=0.0075;
-    var.outside=0.00;
-    var.boundingSphere=2.;
-    var.smoothing =0.065;
-
-    var.mat=makeGlass(30.*pinkScatter,1.5,0.99);
+    var.mat=makeGlass(3.75*vec3(0.3,0.05,0.2),1.5,0.95);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.2*extra2;

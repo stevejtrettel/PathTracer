@@ -22,7 +22,7 @@ vec4 var_Data( vec3 p ){
     //the value of the function is automatically computed in each of the above:
     float val = vx.x;
 
-    return vec4(grad,val);
+    return vec4(0.9*grad,val);
 }
 
 
@@ -112,7 +112,7 @@ float distR3( vec3 p, Variety var ){
     //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
 
-
+    //return dist;
     return dist+0.001;
 }
 

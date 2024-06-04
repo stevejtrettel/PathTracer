@@ -9,9 +9,8 @@ Plane bottomWall, topWall, leftWall, rightWall, backWall, frontWall;
 
 void buildWalls(){
 
-    Vector orientation;
-    vec3 color=vec3(0.05);
-    //0.1*vec3(171,203,240)/255.;//sky blue
+    Vector orientation;//dark gray
+    vec3 color=vec3(0.02);
     float specularity=0.;
     float roughness=0.1;
 

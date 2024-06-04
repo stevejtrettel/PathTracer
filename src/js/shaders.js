@@ -75,10 +75,10 @@ let traceUniforms={
         value: uiParams.extra2
     },
     extra3: {
-        value: uiParams.extra2
+        value: uiParams.extra3
     },
     extra4: {
-        value: uiParams.extra2
+        value: uiParams.extra4
     },
 
 
