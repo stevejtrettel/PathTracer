@@ -11,7 +11,7 @@ void buildObjects(){
     vec3 pinkScatter = vec3(0.25,0.65,0.7);
 
     var.center=vec3(-2,1.5,-2);
-    var.size=2.;
+    var.size=3.;
     var.inside=0.0075;
     var.outside=0.00;
     var.boundingSphere=2.;

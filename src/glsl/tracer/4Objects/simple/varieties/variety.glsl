@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T varEqn(T x, T z, T y){
-    return cayleyNodalCubic(x,z,y);
+    return Labs7(x,y,z);
     //return enneper(z,x,-y);
     //return mobiusStripVariety(z,-x,-y);
 }
@@ -106,15 +106,15 @@ float distR3( vec3 p, Variety var ){
         //bboxDist = max(bboxDist, abs(pos.z)-4.5);
 
     //bounding box
-    //vec3 q = abs(pos) - vec3(var.boundingSphere);
-    vec3 q = abs(pos-vec3(0,0,2)) - vec3(2,3,3);
+   // vec3 q = abs(pos) - vec3(var.boundingSphere);
+    vec3 q = abs(pos-vec3(0,0,0)) - vec3(5,4,5);
     float bboxDist =  length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
 
     //return dist;
-    return dist+0.001;
+    return dist;
 }
 
 

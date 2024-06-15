@@ -3,13 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-dRKRUTW1.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/assets/index-1Q797VE7.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/assets/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/assets/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_4a9e7fd6/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/1Setup/algVariety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/algVariety.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/variety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/variety.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/sceneSettings.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneSettings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/varietyJeremy/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/varietyJeremy/settings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scenes/variety/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/variety/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scenes/variety/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/variety/settings.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +107,7 @@
       <workItem from="1717271249180" duration="1717000" />
       <workItem from="1717299578692" duration="5665000" />
       <workItem from="1718219909991" duration="795000" />
-      <workItem from="1718429352810" duration="344000" />
+      <workItem from="1718429352810" duration="4947000" />
     </task>
     <servers />
   </component>
