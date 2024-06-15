@@ -1,1 +1,1 @@
-#include ./varietyJeremy/_scene.glsl
+#include ./variety/_scene.glsl

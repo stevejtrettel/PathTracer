@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 T varEqn(T x, T z, T y){
-    return togliatti(x,z,y);
+    return cayleyNodalCubic(x,z,y);
     //return enneper(z,x,-y);
     //return mobiusStripVariety(z,-x,-y);
 }
