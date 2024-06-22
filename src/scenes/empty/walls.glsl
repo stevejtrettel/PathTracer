@@ -26,6 +26,7 @@ void buildWalls(){
     orientation.pos=vec3(0,15,0);
     orientation.dir=vec3(0,-1,0);
     topWall.orientation=orientation;
+   // topWall.mat=makeDielectric(vec3(0.75),0.0,0.0);
     topWall.mat=makeLight(vec3(1,1,1),1.*extra4);
 
 

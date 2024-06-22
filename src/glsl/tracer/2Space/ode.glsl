@@ -36,17 +36,19 @@ vec3 acceleration(Vector tv){
 
 bool stopODE(Vector tv){
     //return false;
-    return length(tv.pos)<1.;
+    return length(tv.pos)<0.3;
 }
 
 float setDT(Vector tv, float dt){
 
-    return 0.1;
-//    float mag = length(acceleration(tv));
-//    if(mag>0.1){
-//        return dt/mag;
-//    }
-//    return 1.;
+//    float R = length(tv.pos)-1.;
+//    return min(R/2.+0.005,1.);
+
+    float mag = length(acceleration(tv));
+    if(mag>0.1){
+        return dt/mag;
+    }
+    return 1.;
 }
 
 
@@ -181,5 +183,5 @@ void rk4(inout Vector tv, float dt){
 
 //choose the numerical scheme:
 void odeStep(inout Vector tv, float dt){
-    euler(tv, dt);
+    rk4(tv, dt);
 }

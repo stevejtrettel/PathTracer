@@ -13,14 +13,13 @@ void buildLights(){
     float intensity;
 
     //----------- LIGHT 1 -------------------------
-    light.center=vec3(0,8,0);
-    light.radius=1.5;
+    light.center=vec3(-7,5,0);
+    light.radius=1.;
 
     color= vec3(0.9);
-    intensity=100.;
+    intensity=150.;
 
     light.mat=makeLight(color,intensity);
-
 }
 
 
@@ -28,24 +27,20 @@ void buildLights(){
 //-------------------------------------------------
 //DO WE RENDER THEM?
 //-------------------------------------------------
-bool render_Lights=true;
+bool render_Lights=false;
 
 
 //-------------------------------------------------
 //Finding the Lights
 //-------------------------------------------------
 
-float trace_Lights( Vector tv ){
 
+//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
+float sdf_Lights( Vector tv ){
     float dist=maxDist;
-
-    dist=min(dist, trace(tv, light));
-
+    dist=min(dist, sdf(tv, light));
     return dist;
-
 }
-
-
 
 
 //-------------------------------------------------
@@ -53,7 +48,5 @@ float trace_Lights( Vector tv ){
 //-------------------------------------------------
 
 void setData_Lights(inout Path path){
-
     setData(path, light);
-
 }

@@ -60,69 +60,137 @@ void binarySearch( inout Vector tv, inout float dt){
 
 
 
-void stepAlong(inout Vector tv, out float distance){
+//void stepAlong(inout Vector tv, out float distance, out bool eventHorizon){
+//
+//    distance = 0.;
+//
+//    //get the sign (+ or -) of the scene distance where you start.
+//    float origSgn = sdf_Scene( tv );
+//    float dt;
+//    float defaultDT = 0.1;
+//    Vector temp = tv;
+//    trashBool=false;
+//    for (int i = 0; i < maxMarchSteps; i++){
+//
+//        //start marching along:
+//        dt = setDT(temp, defaultDT);
+//        dt = min(dt, sdf_Scene(temp)+0.01);
+//        odeStep(temp, dt);
+//
+//        //if we hit the event horizon, stop:
+//        if(stopODE(temp)){
+//            eventHorizon=true;
+//            return;
+//        }
+//
+//        //see if we went inside an object: if so, do a binary search
+//        //this moves tv to the correct location and resets dt accordingly
+//        if(origSgn*sdf_Scene(temp)<0.){
+//            binarySearch(tv, dt);
+//            distance += dt;
+//            return;
+//        }
+//
+//        //if we did not, then its safe to keep moving: so set tv to new location, update distance
+//        distance += dt;
+//        tv = temp;
+//    }
+//
+//    //if you hit nothing
+//    eventHorizon=false;
+//    distance = maxDist;
+//}
 
-    distance = 0.;
 
-    //get the sign (+ or -) of the scene distance where you start.
-    float origSgn = sdf_Scene( tv );
-    float dt;
-    float defaultDT = 0.1;
-    Vector temp = tv;
-    trashBool=false;
-    for (int i = 0; i < maxMarchSteps; i++){
 
-        //start marching along using euler and our dt step size:
-        dt = setDT(temp, defaultDT);
-        odeStep(temp, dt);
-
-        //if we hit the event horizon, stop:
-        if(stopODE(temp)){
-            return;
-        }
-
-        //see if we went inside an object: if so, do a binary search
-        //this moves tv to the correct location and resets dt accordingly
-        if(origSgn*sdf_Scene(temp)<0.){
-            binarySearch(tv, dt);
-            distance += dt;
-            return;
-        }
-
-        //if we did not, then its safe to keep moving: so set tv to new location, update distance
-        distance += dt;
-        tv = temp;
-    }
-
-    //if you hit nothing
-    distance = maxDist;
-}
 
 
 
 void stepForward(inout Path path){
 
-    float distance;
-    //do the raymarching, move to the next point of intersection
-    stepAlong( path.tv, distance);
+    //get the sign (+ or -) of the scene distance where you start.
+    float origSgn = sdf_Scene(path.tv);
+    path.distance=0.;
 
-//    float testDist = sdf_Scene(path.tv);
-//    if(testDist<0.){
-//        path.pixel = vec3(0,0,100.*testDist);
-//    }
-//    else{
-//        path.pixel= vec3(100.*testDist,0,0);
-//    }
-//    path.keepGoing=false;
+    float dt;
+    float defaultDT = 0.1;
+    Vector temp = path.tv;
 
-    //update the distance traveled
-    path.distance=distance;
-    path.totalDistance+=distance;
+    for (int i = 0; i < maxMarchSteps; i++){
+
+        //start marching along:
+        dt = setDT(temp, defaultDT);
+        dt = min(dt, sdf_Scene(temp)+0.01);
+        odeStep(temp, dt);
+
+        //if we hit the event horizon, stop:
+        if (stopODE(temp)){
+            path.keepGoing=false;
+            path.pixel=vec3(0);
+            break;
+        }
+
+        //see if we went inside an object: if so, do a binary search
+        //this moves tv to the correct location and resets dt accordingly
+        if (origSgn*sdf_Scene(temp)<0.){
+            binarySearch(path.tv, dt);
+            path.distance += dt;
+            break;
+        }
+
+        //if we did not, then its safe to keep moving: so set tv to new location, update distance
+        path.distance += dt;
+        path.tv = temp;
+    }
+
+    //add to the toal distance traveled
+    path.totalDistance+=path.distance;
 
     //check if we hit the sky: if not, set the data from our intersection point.
     path.dat.isSky=(path.distance>maxDist-0.1);
-    if(!path.dat.isSky){
+    if (!path.dat.isSky){
         setData_Scene(path);
     }
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//    float distance;
+//    //do the raymarching, move to the next point of intersection
+//    stepAlong( path.tv, distance );
+//
+////    float testDist = sdf_Scene(path.tv);
+////    if(testDist<0.){
+////        path.pixel = vec3(0,0,100.*testDist);
+////    }
+////    else{
+////        path.pixel= vec3(100.*testDist,0,0);
+////    }
+////    path.keepGoing=false;
+//
+//    //update the distance traveled
+//    path.distance=distance;
+//    path.totalDistance+=distance;
+//
+//    //check if we hit the sky: if not, set the data from our intersection point.
+//    path.dat.isSky=(path.distance>maxDist-0.1);
+//    if(!path.dat.isSky){
+//        setData_Scene(path);
+//    }
+//
+//}

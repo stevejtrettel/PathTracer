@@ -11,8 +11,8 @@ void buildObjects(){
     vec3 pinkScatter = vec3(0.25,0.65,0.7);
     vec3 greenGlass = vec3(0.3,0.05,0.2);
 
-    bunny.center=vec3(0,0,0);
-    bunny.scale=2.;
+    bunny.center=vec3(-10,4,0);
+    bunny.scale=1.;
 
     bunny.mat=makeGlass(greenGlass,1.5,0.95);
 
@@ -22,11 +22,11 @@ void buildObjects(){
     bunny.mat.isotropicScatter=extra;
     bunny.mat.roughness=0.0;
 
-//    //make the bunny glow
-//    bunny.mat.diffuseColor=vec3(1);
-//    bunny.mat.absorbColor=vec3(0.1);
-//    bunny.mat.emitColor =  0.4*extra2*vec3(1.,0.15,0.);
-//    bunny.mat.surfaceEmit =  0.1*extra3*vec3(0.75,0.25,0.);
+    //make the bunny glow
+    bunny.mat.diffuseColor=vec3(1);
+    bunny.mat.absorbColor=vec3(0.1);
+    bunny.mat.emitColor =  10.*extra2*vec3(1.,0.15,0.);
+    bunny.mat.surfaceEmit =  10.*extra3*vec3(0.75,0.25,0.);
 
 }
 
@@ -74,7 +74,17 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
+
+    if(length(path.tv.pos)<1.){
+        path.keepGoing=false;
+        path.light=vec3(0);
+        path.pixel=vec3(0);
+        return;
+    }
+
     setData(path, bunny);
+
+
 }
 
 
