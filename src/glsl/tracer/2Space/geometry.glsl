@@ -105,13 +105,20 @@ float cosAng(Vector v, Vector w){
 //-------------------------------------------------
 
 
-//actually flowing along a geodesic
-void flow(inout Vector tv, float t){
+//flowing along a Euclidean geodesic
+void flowEuc(inout Vector tv, float t){
     //flow distance t in direction tv
     tv.pos += t*tv.dir;
 }
 
 
+#include flowODE.glsl
+
+
+//CHOOSE WHICH ONE WE DO
+void flow(inout Vector tv, float t){
+    flowODE(tv, t);
+}
 
 
 

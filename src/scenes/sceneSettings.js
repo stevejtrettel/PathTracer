@@ -1,4 +1,4 @@
 
-import settings from "./variety/settings.js";
+import settings from "./empty/settings.js";
 
 export default settings;

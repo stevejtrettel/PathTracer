@@ -2,13 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/2Space/flowODE.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/empty/_scene.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/empty/lights.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/empty/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/empty/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/scenes/empty/walls.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-1Q797VE7.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/assets/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/1Setup/algVariety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/algVariety.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/variety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/variety.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/variety/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/variety/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/variety/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/variety/settings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/2Space/geometry.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/2Space/geometry.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/scene.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/scene.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/_trace.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/_trace.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/raymarch.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/raymarch.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/raytrace.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForward.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForward.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scenes/sceneSettings.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneSettings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,17 +45,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/strettel/Code/PathTracer&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Users/strettel/Code/PathTracer/src/scenes",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/scenes" />
@@ -107,7 +115,9 @@
       <workItem from="1717271249180" duration="1717000" />
       <workItem from="1717299578692" duration="5665000" />
       <workItem from="1718219909991" duration="795000" />
-      <workItem from="1718429352810" duration="4947000" />
+      <workItem from="1718429352810" duration="8121000" />
+      <workItem from="1719019507501" duration="2113000" />
+      <workItem from="1719021647407" duration="13276000" />
     </task>
     <servers />
   </component>

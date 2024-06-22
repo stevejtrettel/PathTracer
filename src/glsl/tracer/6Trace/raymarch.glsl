@@ -4,7 +4,7 @@
 // this does NOT update the path, and just gives the distance to an object
 //-------------------------------------------------
 
-float raymarch(Vector tv, float stopDist){
+void raymarch(inout Vector tv, out float distance){
 
     float totalDist=0.;
     float distToScene=0.;
@@ -15,24 +15,20 @@ float raymarch(Vector tv, float stopDist){
         distToScene = abs(sdf_Scene( tv ));
 
         if (distToScene< EPSILON){
-            return totalDist+distToScene;
+            distance = totalDist+distToScene;
+            return;
         }
 
         //slow down the march as it is not exact
         distToScene *= marchFactor;
         totalDist += distToScene;
 
-        if(totalDist>stopDist){
-            //break out of loop
-            return stopDist;
-        }
-
         //otherwise keep going
         flow(tv, distToScene);
     }
 
     //if you hit nothing
-    return stopDist;
+    distance = maxDist;
 }
 
 

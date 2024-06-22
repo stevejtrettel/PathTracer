@@ -29,36 +29,17 @@ float sdf_Scene( Vector tv ){
     if(render_Objects){
         dist=min(dist, sdf_Objects( tv ));
     }
-    //if we had to march walls or lights; would add them here
-    // but right now all those are simple objects: we trace them
-
-    return dist;
-
-}
-
-
-
-//-------------------------------------------------
-//Setting Up the RayTrace
-//-------------------------------------------------
-
-float trace_Scene( Vector tv ){
-
-    float dist=maxDist;
 
     if(render_Lights){
-        dist = min(dist, trace_Lights(tv));
+        dist=min(dist, sdf_Lights( tv ));
     }
 
     if(render_Walls){
-        dist = min(dist, trace_Walls(tv));
-    }
-
-    if(render_Objects){
-        dist = min( dist, trace_Objects(tv) );
+        dist=min(dist, sdf_Walls( tv ));
     }
 
     return dist;
+
 }
 
 
@@ -81,7 +62,5 @@ void setData_Scene(inout Path path){
     if(render_Walls){
         setData_Walls(path);
     }
-
-
 
 }
