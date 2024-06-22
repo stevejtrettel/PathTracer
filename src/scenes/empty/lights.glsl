@@ -13,7 +13,7 @@ void buildLights(){
     float intensity;
 
     //----------- LIGHT 1 -------------------------
-    light.center=vec3(-2,5,0);
+    light.center=vec3(-7,5,0);
     light.radius=1.;
 
     color= vec3(0.9);
@@ -27,7 +27,7 @@ void buildLights(){
 //-------------------------------------------------
 //DO WE RENDER THEM?
 //-------------------------------------------------
-bool render_Lights=false;
+bool render_Lights=true;
 
 
 //-------------------------------------------------
