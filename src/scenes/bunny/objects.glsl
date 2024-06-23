@@ -25,8 +25,8 @@ void buildObjects(){
     //make the bunny glow
     bunny.mat.diffuseColor=vec3(1);
     bunny.mat.absorbColor=vec3(0.1);
-    bunny.mat.emitColor =  10.*extra2*vec3(1.,0.15,0.);
-    bunny.mat.surfaceEmit =  10.*extra3*vec3(0.75,0.25,0.);
+    bunny.mat.emitColor =  1.*extra2*vec3(1.,0.15,0.);
+    bunny.mat.surfaceEmit =  1.*extra3*vec3(0.75,0.25,0.);
 
 }
 

@@ -56,12 +56,12 @@ void stepForward(inout Path path){
 
         //start marching along:
         dt = 1.;
-        //dt = setDT(temp, defaultDT);
+        dt = setDT(temp, defaultDT);
         dt = min(dt, sdf_Scene(temp));
-        //odeStep(temp, dt);
-        flow(temp,dt);
+        odeStep(temp, dt);
+        //flow(temp,dt);
 
-        float torusSize = 10.;
+        float torusSize = 8.;
         if(temp.pos.x>torusSize){temp.pos.x -= 2.*torusSize;}
         if(temp.pos.y>torusSize){temp.pos.y -= 2.*torusSize;}
         if(temp.pos.z>torusSize){temp.pos.z -= 2.*torusSize;}
