@@ -70,11 +70,11 @@ void stepForward(inout Path path){
         if(temp.pos.z<-torusSize){temp.pos.z += 2.*torusSize;}
 
         //if we hit the event horizon, stop:
-        if (stopODE(temp)){
-            path.keepGoing=false;
-            path.pixel=vec3(0);
-            break;
-        }
+//        if (stopODE(temp)){
+//            path.keepGoing=false;
+//            path.pixel=vec3(0);
+//            break;
+//        }
 
         //see if we went inside an object: if so, do a binary search
         //this moves tv to the correct location and resets dt accordingly

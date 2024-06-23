@@ -8946,8 +8946,8 @@ void buildObjects(){
     box.sides = vec3(2.);
 
     vec3 color= vec3(0.9,0.9,0.5);
-    float specularity=0.8;
-    float roughness=0.3;
+    float specularity=0.5;
+    float roughness=0.2;
     box.mat= makeMetal(color,specularity,roughness);
 
 }
@@ -9074,11 +9074,6 @@ void stepForward(inout Path path){
         if(temp.pos.z<-torusSize){temp.pos.z += 2.*torusSize;}
 
         
-        if (stopODE(temp)){
-            path.keepGoing=false;
-            path.pixel=vec3(0);
-            break;
-        }
 
         
         

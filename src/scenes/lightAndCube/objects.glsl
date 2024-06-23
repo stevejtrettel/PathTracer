@@ -11,8 +11,8 @@ void buildObjects(){
     box.sides = vec3(2.);
 
     vec3 color= vec3(0.9,0.9,0.5);
-    float specularity=0.8;
-    float roughness=0.3;
+    float specularity=0.5;
+    float roughness=0.2;
     box.mat= makeMetal(color,specularity,roughness);
 
 }
