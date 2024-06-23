@@ -1,3 +1,3 @@
-#include stepForward.glsl
+#include stepForwardTorus.glsl
 #include subSurfScatter.glsl
 #include pathTrace.glsl

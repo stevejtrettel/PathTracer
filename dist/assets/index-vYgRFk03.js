@@ -3842,7 +3842,7 @@ float PI=3.1415926;
 float EPSILON=0.001;
 float AT_THRESH=0.002;
 int maxMarchSteps=2000;
-float maxDist=55.;
+float maxDist=600.;
 int maxBounces=50;
 
 bool trashBool;
@@ -5752,8 +5752,8 @@ void updateFromSurface(inout Path path){
 
 void updateFromSky(inout Path path){
     if(path.dat.isSky){
-        vec3 skyColor = skyTex(path.tv.dir);
         
+        vec3 skyColor=vec3(0.1);
         path.pixel += path.light*skyColor;
         path.keepGoing = false;
     }
@@ -8830,7 +8830,7 @@ void buildWalls(){
 
     Vector orientation;
     vec3 color=0.5*vec3(171,203,240)/255.;
-    float specularity=0.;
+    float specularity=0.01;
     float roughness=0.1;
 
     
@@ -8838,7 +8838,7 @@ void buildWalls(){
     orientation.dir=vec3(0,1,0);
     bottomWall.orientation=orientation;
     color =0.5*vec3(171,203,240)/255.;
-    bottomWall.mat=makeDielectric(color,0.0,roughness);
+    bottomWall.mat=makeDielectric(color,specularity,roughness);
 
     
     orientation.pos=vec3(0,15,0);
@@ -8852,32 +8852,32 @@ void buildWalls(){
     orientation.dir=vec3(0,0,1);
     frontWall.orientation=orientation;
     color=0.5*vec3(77, 143, 74)/255.;
-    frontWall.mat=makeDielectric(color,0.0,roughness);
+    frontWall.mat=makeDielectric(color,specularity,roughness);
 
     
     orientation.pos=vec3(0,0,15);
     orientation.dir=vec3(0,0,-1);
     backWall.orientation=orientation;
     color=0.5*vec3(168, 58, 50)/255.;
-    backWall.mat=makeDielectric(color,0.0,roughness);
+    backWall.mat=makeDielectric(color,specularity,roughness);
 
     
     orientation.pos=vec3(-15,0,0);
     orientation.dir=vec3(1,0,0);
     leftWall.orientation=orientation;
     color=0.5*vec3(209, 163, 56)/255.;
-    leftWall.mat=makeDielectric(color,0.0,roughness);
+    leftWall.mat=makeDielectric(color,specularity,roughness);
 
     
     orientation.pos=vec3(15,0,0);
     orientation.dir=vec3(-1,0,0);
     rightWall.orientation=orientation;
     color=0.5*vec3(116, 66, 138)/255.;
-    rightWall.mat=makeDielectric(color,0.0,roughness);
+    rightWall.mat=makeDielectric(color,specularity,roughness);
 
 }
 
-bool render_Walls=true;
+bool render_Walls=false;
 
 float sdf_Walls(Vector tv ){
 
@@ -8915,24 +8915,13 @@ void buildLights(){
     vec3 color;
     float intensity;
     intensity=150.;
+    color = vec3(1);
 
     
-    light1.center=vec3(-7,5,0);
+    light1.center=vec3(1,2,0);
     light1.radius=0.3;
     color= vec3(0.9,0.2,0.2);
     light1.mat=makeLight(color,intensity);
-
-    
-    light2.center=vec3(0,5,0);
-    light2.radius=0.3;
-    color= vec3(0.2,0.9,0.2);
-    light2.mat=makeLight(color,intensity);
-
-    
-    light3.center=vec3(0,5,3);
-    light3.radius=0.3;
-    color= vec3(0.2,0.2,0.9);
-    light3.mat=makeLight(color,intensity);
 
 }
 
@@ -8941,31 +8930,24 @@ bool render_Lights=true;
 float sdf_Lights( Vector tv ){
     float dist=maxDist;
     dist=min(dist, sdf(tv, light1));
-    dist=min(dist, sdf(tv, light2));
-    dist=min(dist, sdf(tv, light3));
     return dist;
 
 }
 
 void setData_Lights(inout Path path){
     setData(path, light1);
-    setData(path, light2);
-    setData(path, light3);
 }
 Sphere EH;
 Box box;
 
 void buildObjects(){
 
-    EH.center=vec3(0);
-    EH.radius=1.;
-
-    box.center = vec3(-3,3,0);
-    box.sides = vec3(0.5);
+    box.center = vec3(5,-2,3);
+    box.sides = vec3(2.);
 
     vec3 color= vec3(0.9,0.9,0.5);
     float specularity=0.8;
-    float roughness=0.;
+    float roughness=0.3;
     box.mat= makeMetal(color,specularity,roughness);
 
 }
@@ -8975,7 +8957,7 @@ bool render_Objects=true;
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
-   
+    dist=min( dist, sdf(tv, box) );
     return dist;
 
 }
@@ -8987,8 +8969,12 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
 
-   
-
+    setData(path, box);
+    if(length(path.tv.pos)<1.){
+        path.keepGoing=false;
+        path.light=vec3(0);
+        path.pixel=vec3(0);
+    }
 }
 
 void buildScene(){
@@ -9077,9 +9063,19 @@ void stepForward(inout Path path){
     for (int i = 0; i < maxMarchSteps; i++){
 
         
-        dt = setDT(temp, defaultDT);
-        dt = min(dt, sdf_Scene(temp)+0.01);
-        odeStep(temp, dt);
+        dt = 1.;
+        
+        dt = min(dt, sdf_Scene(temp));
+        
+        flow(temp,dt);
+
+        float torusSize = 10.;
+        if(temp.pos.x>torusSize){temp.pos.x -= 2.*torusSize;}
+        if(temp.pos.y>torusSize){temp.pos.y -= 2.*torusSize;}
+        if(temp.pos.z>torusSize){temp.pos.z -= 2.*torusSize;}
+        if(temp.pos.x<-torusSize){temp.pos.x += 2.*torusSize;}
+        if(temp.pos.y<-torusSize){temp.pos.y += 2.*torusSize;}
+        if(temp.pos.z<-torusSize){temp.pos.z += 2.*torusSize;}
 
         
         if (stopODE(temp)){
@@ -9099,10 +9095,17 @@ void stepForward(inout Path path){
         
         path.distance += dt;
         path.tv = temp;
+
     }
 
     
     path.totalDistance+=path.distance;
+
+    
+    vec3 beersLaw = vec3(0.01)*path.distance;
+    if(length(beersLaw)>0.0001){
+        path.light *= exp( -beersLaw );
+    }
 
     
     path.dat.isSky=(path.distance>maxDist-0.1);

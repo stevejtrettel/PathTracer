@@ -1,4 +1,4 @@
 
-import settings from "./empty/settings.js";
+import settings from "./lightAndCube/settings.js";
 
 export default settings;

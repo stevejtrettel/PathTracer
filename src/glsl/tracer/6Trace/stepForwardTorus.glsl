@@ -55,9 +55,19 @@ void stepForward(inout Path path){
     for (int i = 0; i < maxMarchSteps; i++){
 
         //start marching along:
-        dt = setDT(temp, defaultDT);
-        dt = min(dt, sdf_Scene(temp)+0.01);
-        odeStep(temp, dt);
+        dt = 1.;
+        //dt = setDT(temp, defaultDT);
+        dt = min(dt, sdf_Scene(temp));
+        //odeStep(temp, dt);
+        flow(temp,dt);
+
+        float torusSize = 10.;
+        if(temp.pos.x>torusSize){temp.pos.x -= 2.*torusSize;}
+        if(temp.pos.y>torusSize){temp.pos.y -= 2.*torusSize;}
+        if(temp.pos.z>torusSize){temp.pos.z -= 2.*torusSize;}
+        if(temp.pos.x<-torusSize){temp.pos.x += 2.*torusSize;}
+        if(temp.pos.y<-torusSize){temp.pos.y += 2.*torusSize;}
+        if(temp.pos.z<-torusSize){temp.pos.z += 2.*torusSize;}
 
         //if we hit the event horizon, stop:
         if (stopODE(temp)){
@@ -77,10 +87,18 @@ void stepForward(inout Path path){
         //if we did not, then its safe to keep moving: so set tv to new location, update distance
         path.distance += dt;
         path.tv = temp;
+
     }
 
     //add to the toal distance traveled
     path.totalDistance+=path.distance;
+
+
+    //FOG ATTENUATION
+    vec3 beersLaw = vec3(0.01)*path.distance;
+    if(length(beersLaw)>0.0001){
+        path.light *= exp( -beersLaw );
+    }
 
     //check if we hit the sky: if not, set the data from our intersection point.
     path.dat.isSky=(path.distance>maxDist-0.1);
