@@ -95,7 +95,7 @@ void stepForward(inout Path path){
 
 
     //FOG ATTENUATION
-    vec3 beersLaw = vec3(0.01)*path.distance;
+    vec3 beersLaw = vec3(0.025)*path.distance;
     if(length(beersLaw)>0.0001){
         path.light *= exp( -beersLaw );
     }

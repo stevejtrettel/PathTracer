@@ -8919,7 +8919,7 @@ void buildLights(){
 
     
     light1.center=vec3(1,2,0);
-    light1.radius=0.3;
+    light1.radius=0.4;
     color= vec3(0.9,0.2,0.2);
     light1.mat=makeLight(color,intensity);
 
@@ -8970,11 +8970,7 @@ bool inside_Object( Vector tv ){
 void setData_Objects(inout Path path){
 
     setData(path, box);
-    if(length(path.tv.pos)<1.){
-        path.keepGoing=false;
-        path.light=vec3(0);
-        path.pixel=vec3(0);
-    }
+
 }
 
 void buildScene(){
@@ -9102,7 +9098,7 @@ void stepForward(inout Path path){
     path.totalDistance+=path.distance;
 
     
-    vec3 beersLaw = vec3(0.01)*path.distance;
+    vec3 beersLaw = vec3(0.025)*path.distance;
     if(length(beersLaw)>0.0001){
         path.light *= exp( -beersLaw );
     }

@@ -16,7 +16,7 @@ void buildLights(){
 
     //----------- LIGHT 1 -------------------------
     light1.center=vec3(1,2,0);
-    light1.radius=0.3;
+    light1.radius=0.4;
     color= vec3(0.9,0.2,0.2);
     light1.mat=makeLight(color,intensity);
 

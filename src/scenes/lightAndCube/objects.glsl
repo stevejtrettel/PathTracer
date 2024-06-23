@@ -57,11 +57,11 @@ bool inside_Object( Vector tv ){
 void setData_Objects(inout Path path){
 
     setData(path, box);
-    if(length(path.tv.pos)<1.){
-        path.keepGoing=false;
-        path.light=vec3(0);
-        path.pixel=vec3(0);
-    }
+//    if(length(path.tv.pos)<1.){
+//        path.keepGoing=false;
+//        path.light=vec3(0);
+//        path.pixel=vec3(0);
+//    }
 }
 
 

@@ -2,22 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForwardTorus.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/lightAndCube/_scene.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/lightAndCube/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/lightAndCube/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/lightAndCube/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/scenes/lightAndCube/walls.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-77uPxHFf.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/assets/index-vYgRFk03.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/assets/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/assets/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/1Setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/1Setup/uniforms.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/3Materials/updatePath.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/3Materials/updatePath.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/_trace.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/_trace.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForward.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForward.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/empty/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/empty/walls.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/sceneSettings.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneSettings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/sceneShader.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForwardTorus.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForwardTorus.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scenes/lightAndCube/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/lightAndCube/lights.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scenes/lightAndCube/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/lightAndCube/objects.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +111,7 @@
       <workItem from="1719019507501" duration="2113000" />
       <workItem from="1719021647407" duration="14334000" />
       <workItem from="1719074197911" duration="8959000" />
-      <workItem from="1719084178942" duration="6312000" />
+      <workItem from="1719084178942" duration="6549000" />
     </task>
     <servers />
   </component>
