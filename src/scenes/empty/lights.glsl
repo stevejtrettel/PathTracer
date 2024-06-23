@@ -12,6 +12,7 @@ void buildLights(){
     vec3 color;
     float intensity;
     intensity=150.;
+    color = vec3(1);
 
     //----------- LIGHT 1 -------------------------
     light1.center=vec3(-7,5,0);

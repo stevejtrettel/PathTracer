@@ -11,7 +11,7 @@ void buildWalls(){
 
     Vector orientation;
     vec3 color=0.5*vec3(171,203,240)/255.;//sky blue
-    float specularity=0.;
+    float specularity=0.01;
     float roughness=0.1;
 
     //----------- THE FLOOR -------------------------
@@ -19,7 +19,7 @@ void buildWalls(){
     orientation.dir=vec3(0,1,0);
     bottomWall.orientation=orientation;
     color =0.5*vec3(171,203,240)/255.;//sky blue
-    bottomWall.mat=makeDielectric(color,0.0,roughness);
+    bottomWall.mat=makeDielectric(color,specularity,roughness);
 
 
     //----------- THE CEILING -------------------------
@@ -35,7 +35,7 @@ void buildWalls(){
     orientation.dir=vec3(0,0,1);
     frontWall.orientation=orientation;
     color=0.5*vec3(77, 143, 74)/255.;//greenish
-    frontWall.mat=makeDielectric(color,0.0,roughness);
+    frontWall.mat=makeDielectric(color,specularity,roughness);
 
 
     //----------- THE BACK -------------------------
@@ -43,7 +43,7 @@ void buildWalls(){
     orientation.dir=vec3(0,0,-1);
     backWall.orientation=orientation;
     color=0.5*vec3(168, 58, 50)/255.;//reddish
-    backWall.mat=makeDielectric(color,0.0,roughness);
+    backWall.mat=makeDielectric(color,specularity,roughness);
 
 
     //----------- THE LEFT -------------------------
@@ -51,7 +51,7 @@ void buildWalls(){
     orientation.dir=vec3(1,0,0);
     leftWall.orientation=orientation;
     color=0.5*vec3(209, 163, 56)/255.;//yellowish
-    leftWall.mat=makeDielectric(color,0.0,roughness);
+    leftWall.mat=makeDielectric(color,specularity,roughness);
 
 
 
@@ -60,7 +60,7 @@ void buildWalls(){
     orientation.dir=vec3(-1,0,0);
     rightWall.orientation=orientation;
     color=0.5*vec3(116, 66, 138)/255.;//purpleish
-    rightWall.mat=makeDielectric(color,0.0,roughness);
+    rightWall.mat=makeDielectric(color,specularity,roughness);
 
 }
 

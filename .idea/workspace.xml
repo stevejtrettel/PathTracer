@@ -3,16 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-qKgznnw2.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/assets/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/2Space/ode.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/2Space/ode.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForward.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/6Trace/stepForward.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/bunny/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/bunny/lights.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/bunny/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/bunny/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/bunny/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/bunny/walls.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scenes/empty/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/empty/lights.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/empty/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/empty/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/empty/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/empty/settings.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/scenes/empty/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/scenes/empty/walls.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -116,7 +107,7 @@
       <workItem from="1719019507501" duration="2113000" />
       <workItem from="1719021647407" duration="14334000" />
       <workItem from="1719074197911" duration="8959000" />
-      <workItem from="1719084178942" duration="2813000" />
+      <workItem from="1719084178942" duration="4123000" />
     </task>
     <servers />
   </component>
