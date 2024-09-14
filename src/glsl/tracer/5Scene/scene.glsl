@@ -4,7 +4,6 @@
 // this contains buildScene, sceneSDF, sceneTrace, and setDataScene
 //-------------------------------------------------
 
-
 //include the scene we are currently drawing:
 #include ../../../scenes/sceneShader.glsl
 

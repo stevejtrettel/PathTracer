@@ -1,8 +1,8 @@
 import {Vector3, Matrix3, TextureLoader} from "three";
 
-import accumulate from '/src/glsl/accumulate/accumulate.glsl';
-import display from '/src/glsl/display/display.glsl';
-import tracer from '/src/glsl/tracer/tracer.glsl';
+import accumulate from '../glsl/accumulate/accumulate.glsl';
+import display from '../glsl/display/display.glsl';
+import tracer from '../glsl/tracer/tracer.glsl';
 
 import {uiParams,location} from "./settings.js";
 

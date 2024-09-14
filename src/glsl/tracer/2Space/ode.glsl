@@ -20,7 +20,7 @@
 //this ficticious force whose trajectories have the same paths in space as the projection of schwarzchild geodesics.
 vec3 acceleration(Vector tv){
 //return vec3(0);
-    float m = 1.;
+    float EH = 2.*extra;
     vec3 r=tv.pos;
     vec3 v=tv.dir;
     float R=length(r);
@@ -28,15 +28,16 @@ vec3 acceleration(Vector tv){
     vec3 l=cross(r,v);
     float L=length(l);
 
-    float mag=  1.5*L*L/(R*R*R*R*R*R);
-    vec3 acc=-m*mag*r;
+    float mag=  1.5*EH*L*L/(R*R*R*R);
+    vec3 dir = r/R;
+    vec3 acc = - mag*dir;
     return acc;
 }
 
-
 bool stopODE(Vector tv){
     //return false;
-    return length(tv.pos)<0.3;
+    float EH = 2.*extra;
+    return length(tv.pos)<0.5*EH;
 }
 
 float setDT(Vector tv, float dt){

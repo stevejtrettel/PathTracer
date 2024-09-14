@@ -8,7 +8,7 @@ Box box;
 void buildObjects(){
 
     EH.center=vec3(0);
-    EH.radius=1.;
+    EH.radius=2.*extra;
 
     box.center = vec3(-3,3,0);
     box.sides = vec3(0.5);
@@ -60,11 +60,11 @@ bool inside_Object( Vector tv ){
 void setData_Objects(inout Path path){
 
    // setData(path, box);
-//    if(length(path.tv.pos)<EH.radius){
-//        path.keepGoing=false;
-//        path.light=vec3(0);
-//        path.pixel=vec3(0);
-//    }
+    if(length(path.tv.pos)<EH.radius){
+        path.keepGoing=false;
+        path.light=vec3(0);
+        path.pixel=vec3(0);
+    }
 }
 
 

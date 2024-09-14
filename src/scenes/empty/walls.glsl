@@ -70,7 +70,7 @@ void buildWalls(){
 //DO WE RENDER THEM?
 //-------------------------------------------------
 
-bool render_Walls=false;
+bool render_Walls=true;
 
 
 //-------------------------------------------------

@@ -49,7 +49,7 @@ void stepForward(inout Path path){
     path.distance=0.;
 
     float dt;
-    float defaultDT = 0.1;
+    float defaultDT = 0.05;
     Vector temp = path.tv;
 
     for (int i = 0; i < maxMarchSteps; i++){
