@@ -2,45 +2,90 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/bunny/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/bunny/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/bunny/src/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/bunny/src/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/bunny/src/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/bunny/src/walls.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/bunny/vite.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/test/src/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/test/src/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/test/src/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/test/src/walls.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/test/vite.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/lights.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/walls.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/readme.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/setupShader.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/traceShader.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/js/accShaderData.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/js/buildTraceShader.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/js/displayShaderData.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scenes/negroniForOne/src/environment.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scenes/negroniForOne/src/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scenes/negroniForOne/src/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scenes/torusBottle/src/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/objects/readme.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/environment.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/imports.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-T_ZhUbMD.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index-lBh0JkGX.css" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/bunny/dist/assets/index-lBh0JkGX.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/assets/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/bunny/dist/assets/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/test/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/three.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/three.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/three_addons_libs_lil-gui__module__min.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/three_addons_libs_lil-gui__module__min.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/three_addons_libs_stats__module.js" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/three_addons_libs_stats__module.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/bunny/dist/assets/index-lBh0JkGX.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/bunny/dist/assets/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/bunny/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/negroniForOne/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/bunny/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/negroniForOne/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/bunny/src/lights.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/bunny/src/objects.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/bunny/src/settings.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/bunny/src/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/torusBottle/src/environment.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/bunny/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/negroniForOne/vite.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/test/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/torusBottle/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/test/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/torusBottle/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/test/src/lights.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/test/src/objects.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/test/src/settings.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/test/src/walls.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/test/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/torusBottle/vite.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/_objects.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/_compound.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/bottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/compound/bottle.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/cocktailGlass.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/compound/cocktailGlass.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/pint.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/compound/pint.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/compound/torusBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/compound/torusBottle.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/computations.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/computations.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/_multiMaterial.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/beer.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/multiMaterial/beer.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/coatedTorusBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/multiMaterial/coatedTorusBottle.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/cocktail.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/multiMaterial/cocktail.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/glassMarble.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/multiMaterial/glassMarble.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/glassVariety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/multiMaterial/glassVariety.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/liquorBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/multiMaterial/liquorBottle.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/mobius.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/multiMaterial/mobius.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/multiMaterial/poincareMarble.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/multiMaterial/poincareMarble.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/_simple.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/fractals/_fractals.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/fractals/apolonianGasket.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/fractals/apolonianGasket.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/fractals/kleinian.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/fractals/kleinian.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/_shapes.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/basic/_basic.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/box.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/basic/box.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/bunny.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/shapes/bunny.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/hypCoxCube.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/shapes/hypCoxCube.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/hypDod.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/shapes/hypDod.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/kleinBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/shapes/kleinBottle.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/plane.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/basic/plane.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/sphere.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/basic/sphere.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/torus.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/basic/torus.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/shapes/truncated_cone.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/basic/truncated_cone.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/_varieties.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/variety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/varieties/variety.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/varietyStriped.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/varieties/varietyStriped.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/4Objects/simple/varieties/varietySurface.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/objects/varieties/varietySurface.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/lights.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/lights.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/example/walls.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/glsl/tracer/5Scene/scene.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/5Scene/scene.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/js/KeyControls.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/KeyControls.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/js/PathTracer.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/PathTracer.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/js/UI.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/UI.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/js/settings.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/js/shaders.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/test/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/_scene.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/lights.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/done/basicShapes.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/done/bottles.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/done/glasses.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/done/hypGeo.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/done/misc.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/done/topology.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/done/varieties.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/fractals.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/walls.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/compound/compoundObjects.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/compound/multiMatObjects.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/objects.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/simple/fractals.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/simple/polytope.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/simple/shapes.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/OLD/simple/varieties.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/glsl/tracer/setupShader.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/src/glsl/tracer/setupShader.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/js/buildTraceShader.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/js/buildTraceShader.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,7 +119,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/strettel/Code/PathTracer/scenes/bunny/src",
+    "last_opened_file_path": "/Users/strettel/Code/PathTracer/scenes/torusBottle/src",
     "nodejs_package_manager_path": "npm",
     "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
@@ -82,18 +127,18 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/scenes/bunny/src" />
+      <recent name="$PROJECT_DIR$/scenes/torusBottle/src" />
+      <recent name="$PROJECT_DIR$/src/glsl/objects" />
+      <recent name="$PROJECT_DIR$/src/glsl/tracer/4Objects/basicShapes" />
       <recent name="$PROJECT_DIR$/scenes" />
-      <recent name="$PROJECT_DIR$/src/glsl/tracer/5Scene/example" />
-      <recent name="$PROJECT_DIR$/scenes/test/src" />
-      <recent name="$PROJECT_DIR$/scenes/test" />
+      <recent name="$PROJECT_DIR$/scenes/negroniForOne/src" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/scenes/negroniForOne/dist/assets" />
+      <recent name="$PROJECT_DIR$/src/glsl/objects" />
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/scenes/bunny/dist/assets" />
       <recent name="$PROJECT_DIR$/scenes/test/dist/assets" />
-      <recent name="$PROJECT_DIR$/dist/assets" />
-      <recent name="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE/objects/done" />
-      <recent name="$PROJECT_DIR$/src/glsl/tracer/OLD/SCENE" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -171,6 +216,12 @@
           <url>file://$PROJECT_DIR$/src/js/PathTracer.js</url>
           <line>44</line>
           <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/scenes/torusBottle/main.js</url>
+          <line>7</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
