@@ -1,4 +1,4 @@
 
-import settings from "../scenes/bunny/settings.js";
+import settings from "../scenes/lightAndCube/settings.js";
 
 export default settings;
