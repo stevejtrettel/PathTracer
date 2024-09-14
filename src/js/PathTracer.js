@@ -6,7 +6,9 @@ import KeyControls from "./KeyControls.js";
 
 //class to run the path tracer from
 class PathTracer{
-    constructor(shaders, res={x:window.innerWidth,y:window.innerHeight}) {
+    constructor(shaders, settings, res={x:window.innerWidth,y:window.innerHeight}) {
+
+        this.settings = settings;
 
         //build the renderer
         this.renderer = new WebGLRenderer({
@@ -27,7 +29,7 @@ class PathTracer{
         this.renderer.setSize(res.x,res.y);
 
         //the control system
-        this.controls = new KeyControls();
+        this.controls = new KeyControls(this.settings.location);
 
         //the shaders
         this.tracer = new ComputeShader(shaders.tracer, this.renderer,res);

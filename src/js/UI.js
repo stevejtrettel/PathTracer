@@ -1,22 +1,21 @@
 import {GUI} from "three/addons/libs/lil-gui.module.min";
 
-import {uiParams} from "./settings.js";
 
 class UI extends GUI{
     constructor(pathtracer) {
         super();
 
         this.params = {
-            aperture: uiParams.aperture,
-            focalLength: uiParams.focalLength,
-            exposure: uiParams.exposure,
+            aperture: pathtracer.settings.uiParams.aperture,
+            focalLength: pathtracer.settings.uiParams.focalLength,
+            exposure: pathtracer.settings.uiParams.exposure,
             focusHelp:false,
-            fov: uiParams.fov,
+            fov: pathtracer.settings.uiParams.fov,
 
-            extra: uiParams.extra,
-            extra2: uiParams.extra2,
-            extra3: uiParams.extra3,
-            extra4: uiParams.extra4,
+            extra: pathtracer.settings.uiParams.extra,
+            extra2: pathtracer.settings.uiParams.extra2,
+            extra3: pathtracer.settings.uiParams.extra3,
+            extra4: pathtracer.settings.uiParams.extra4,
 
             preview: false,
             // renderBlocks:false,

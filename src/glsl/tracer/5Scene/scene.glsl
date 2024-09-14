@@ -1,12 +1,9 @@
 //-------------------------------------------------
 // THE SCENE
-// collects all the pieces of the scene from other files to combine
-// this contains buildScene, sceneSDF, sceneTrace, and setDataScene
+// this assumes we've already included walls, lights and floor
 //-------------------------------------------------
 
 
-//include the scene we are currently drawing:
-#include ../../../scenes/sceneShader.glsl
 
 //-------------------------------------------------
 //Building the Scene

@@ -1,8 +1,8 @@
 import {Vector3,Matrix3,Matrix4} from "three";
-import {location} from "./settings.js";
+
 
 class KeyControls{
-    constructor() {
+    constructor(location) {
 
         //execute update when a key is pressed automatically!
         document.addEventListener('keydown', e => this.down(e));
