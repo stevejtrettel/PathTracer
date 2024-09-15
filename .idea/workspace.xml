@@ -2,52 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/glsl/objects/multiMaterial/varSphereGlass.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/sphere/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/sphere/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/sphere/src/environment.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/sphere/src/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/sphere/src/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/sphere/vite.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/varSphereGlass/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/varSphereGlass/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/varSphereGlass/src/environment.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/varSphereGlass/src/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/varSphereGlass/src/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/varSphereGlass/vite.config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/multiMaterial/coatedTorusBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/multiMaterial/coatedTorusBottle.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/multiMaterial/glassMarble.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/multiMaterial/OLD/glassMarble.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/multiMaterial/glassVariety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/multiMaterial/OLD/glassVariety.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/tracer/1Setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/tracer/1Setup/uniforms.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/accShaderData.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/shaderData/accShaderData.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/buildTraceShader.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/shaderData/buildTraceShader.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/displayShaderData.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/shaderData/displayShaderData.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/tex/bk.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/bk.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/tex/bk_sm.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/bk_sm.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/tex/glass_hallway.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/glass_hallway.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/js/tex/office.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/assets/office.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/_test/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/_test/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/apollonian_broken/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/apollonian_broken/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/beer/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/beer/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/bottle/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/bottle/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/bunny/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/bunny/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/cocktail/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/cocktail/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/hyperbolicPolytope/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/hyperbolicPolytope/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/kleinBottle/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/kleinBottle/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/kleinianLimit/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/kleinianLimit/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/mobius/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/mobius/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/negroniForOne/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/negroniForOne/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/surfBox/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/surfBox/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/surfCyl/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/surfCyl/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/surfSphere/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/surfSphere/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/surface/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/surface/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/torusBottle/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/torusBottle/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/varBox/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/varBox/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/varCyl/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/varCyl/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/varSphere/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/varSphere/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/variety/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/variety/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/objects/basic/sphere.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/basic/sphere.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/objects/multiMaterial/varSphereGlass.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/multiMaterial/varSphereGlass.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,17 +33,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/strettel/Code/PathTracer/scenes",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/strettel/Code/PathTracer/scenes&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/scenes" />
@@ -182,7 +139,6 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/scenes/torusBottle/main.js</url>
           <line>7</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>

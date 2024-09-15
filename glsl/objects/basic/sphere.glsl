@@ -55,7 +55,7 @@ float sdf( Vector tv, Sphere sphere ){
     float d=distR3(tv.pos, sphere);
 
     //if you are looking away from the sphere, stop
-    if(d>0.&&dot(tv.dir,tv.pos)>0.){return maxDist;}
+    //if(d>0.&&dot(tv.dir,tv.pos)>0.){return maxDist;}
 
     //otherwise return the actual distance
     return d;
