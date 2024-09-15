@@ -2,21 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/glsl/tracer/2Space/sdfs.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/_test/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/final/negroniForOne/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/_test/main.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/_test/src/environment.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/_test/src/objects.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/_test/src/settings.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/_test/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/final/negroniForOne/vite.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/negroniForOne/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/negroniForOne/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/final/negroniForOne/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/negroniForOne/src/environment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/final/negroniForOne/src/environment.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/negroniForOne/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/final/negroniForOne/src/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/negroniForOne/src/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/final/negroniForOne/src/settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/negroniForOne/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/tracer/2Space/_space.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/tracer/2Space/_space.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/torusBottle/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottleTorus/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/torusBottle/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottleTorus/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/torusBottle/src/environment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottleTorus/src/environment.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/torusBottle/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottleTorus/src/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/torusBottle/src/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottleTorus/src/settings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/torusBottle/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottleTorus/vite.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/objects/multiMaterial/coatedTorusBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/multiMaterial/bottleTorusClearcoat.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/objects/shapes/torusBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/shapes/bottleTorus.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -149,7 +144,7 @@
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/example/torusBottle/main.js</url>
+          <url>file://$PROJECT_DIR$/example/bottleTorus/main.js</url>
           <line>7</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>

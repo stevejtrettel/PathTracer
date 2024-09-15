@@ -2,12 +2,12 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../src/glsl/objects/shapes/torusBottle.glsl
-#include ../../../src/glsl/objects/multiMaterial/coatedTorusBottle.glsl
+#include ../../../src/glsl/objects/shapes/bottleTorus.glsl
+#include ../../../src/glsl/objects/multiMaterial/bottleTorusClearcoat.glsl
 
 //set the names of objects contained in the scene
-TorusBottle donut;
-CoatedTorusBottle layerDonut;
+BottleTorus donut;
+BottleTorusClearcoat layerDonut;
 
 void buildObjects(){
 
