@@ -35,7 +35,7 @@ void buildEnvironment(){
     float roughness=0.1;
 
     //----------- THE FLOOR -------------------------
-    orientation.pos=vec3(0,-1.15,0);
+    orientation.pos=vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
     bottomWall.orientation=orientation;
     bottomWall.mat=makeDielectric(color,0.0,roughness);

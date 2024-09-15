@@ -4,7 +4,7 @@
 // The LIQUOR BOTTLE sdf
 //-------------------------------------------------
 
-struct LiquorBottle{
+struct BottleLiquid{
     Bottle glass;//we don't use the material; just the shape
     Material cup;
     Material drink;
@@ -18,7 +18,7 @@ struct LiquorBottle{
 
 
 
-void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout localData dat,LiquorBottle cocktail){
+void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout localData dat,BottleLiquid cocktail){
 
     float eps=2.*EPSILON;
     float drink=max(drinkSide,drinkTop);
@@ -130,13 +130,12 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
 
 
 
-float sdf(Vector tv, LiquorBottle gin){
+float sdf(Vector tv, BottleLiquid gin){
 
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
     float cup=bottleDistance(tv.pos,gin.glass,drinkSide);
-
 
     //distance to the top of the drink
     //right now no fill=exactly bottom of the glass
@@ -155,9 +154,12 @@ float sdf(Vector tv, LiquorBottle gin){
 }
 
 
+bool inside(Vector tv,BottleLiquid gin){
+    return inside(tv,gin.glass);
+}
 
 
-void setData(inout Path path, LiquorBottle gin){
+void setData(inout Path path, BottleLiquid gin){
 
     float drinkSide;
 
