@@ -21,7 +21,7 @@ void buildObjects(){
     var.center=vec3(-2,1.5,-2);
     var.box = vec3(1,1,1);
     var.smoothing =0.065;
-    var.scale=10.;
+    var.scale=5.;
     var.thickness = vec2(0.0075,0.0);
 
     var.mat=makeGlass(30.*pinkScatter,1.5,0.99);

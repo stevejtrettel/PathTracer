@@ -5,7 +5,7 @@
 
 //need to choose a variety equation from our list!
 T varSphere_Eqn(T x, T y, T z){
-    return gyroid(x,y,z);
+    return barthSextic(x,y,z);
 }
 
 //now that we have chosen an equation, can build the variety struct with it
@@ -24,7 +24,7 @@ void buildObjects(){
     var.center=vec3(-2,1.5,-2);
     var.radius = 2.;
     var.smoothing =0.065;
-    var.scale=3.;
+    var.scale = 0.9;
     var.thickness = vec2(0.0075,0.0);
 
     var.mat=makeGlass(30.*pinkScatter,1.5,0.99);

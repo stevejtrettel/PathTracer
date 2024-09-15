@@ -70,7 +70,7 @@ float distR3( vec3 p, VarCyl var ){
     dist=abs(dist+var.thickness.x)-var.thickness.x-var.thickness.y;
 
     // //bounding box
-    float bboxDist = bCyl(p,var.cyl);
+    float bboxDist = bCyl(pos,var.cyl);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);

@@ -50,9 +50,8 @@ bool inside( Vector tv, Box box ){
 //overload of sdf for a sphere
 float sdf( Vector tv, Box box ){
 
-    //distance to closest point on sphere
+    //distance to closest point on box
     float d=distR3(tv.pos, box);
-    //return the actual distance
     return d;
 }
 

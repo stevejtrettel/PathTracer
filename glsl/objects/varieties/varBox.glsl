@@ -44,10 +44,12 @@ struct VarBox{
 
 //dist to bounding box
 float bBox(vec3 pos, vec3 box){
-    vec3 q = abs(pos) -box;
+    vec3 q = abs(pos) - box;
     float bboxDist =  length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
     return bboxDist;
 }
+
+
 
 //overload of distR3: distance in R3 coordinates
 float distR3( vec3 p, VarBox var ){
@@ -67,7 +69,7 @@ float distR3( vec3 p, VarBox var ){
     dist=abs(dist+var.thickness.x)-var.thickness.x-var.thickness.y;
 
     // //bounding box
-    float bboxDist = bBox(p,var.box);
+    float bboxDist = bBox(pos,var.box);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
