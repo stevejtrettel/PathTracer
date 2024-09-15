@@ -2,25 +2,43 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-//set the names of objects contained in the scene
-Variety var;
 
+//need to choose a variety equation from our list!
+T varBox_Eqn(T x, T y, T z){
+    return gyroid(x,y,z);
+}
+
+//now that we have chosen an equation, can build the variety struct with it
+#include ../../../glsl/objects/varieties/varBox.glsl
+#include ../../../glsl/objects/multiMaterial/varBoxClearcoat.glsl
+
+//set the names of objects contained in the scene
+VarBox var;
+VarBoxClearcoat sculpture;
 
 void buildObjects(){
 
-    var.center=vec3(-2,1.8,0);
-    var.size=5.;
-    var.inside=0.02;
-    var.outside=0.0;
-    var.boundingSphere=1.8;
-    var.smoothing =0.075;
+    vec3 pinkScatter = vec3(0.25,0.65,0.7);
+    vec3 greenGlass = vec3(0.3,0.05,0.2);
 
-    var.mat=makeGlass(3.75*vec3(0.3,0.05,0.2),1.5,0.95);
+    var.center=vec3(-2,1.5,-2);
+    var.box = vec3(1,1,1);
+    var.smoothing =0.065;
+    var.scale = 3.;
+    var.thickness = vec2(0.0075,0.0);
+
+    var.mat=makeGlass(30.*pinkScatter,1.5,0.99);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.2*extra2;
     var.mat.isotropicScatter=extra;
-    var.mat.roughness=0.2;
+    var.mat.roughness=0.7;
+
+    //make a glass material:
+    Material glassMat = makeGlass(0.2*greenGlass,1.25,0.98);
+
+    //now that we've created the variety, make the sculpture with clearcoat
+    sculpture = createVarBoxClearcoat(var, glassMat,0.02);
 
 }
 
@@ -46,7 +64,7 @@ float trace_Objects( Vector tv ){
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
-    dist=min( dist, sdf(tv, var) );
+    dist=min( dist, sdf(tv, sculpture) );
 
     return dist;
 }
@@ -67,7 +85,7 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-    setData(path, var);
+    setData(path, sculpture);
 }
 
 
