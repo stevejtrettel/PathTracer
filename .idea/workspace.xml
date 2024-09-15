@@ -1,25 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/example/bottleLiquid/src/environment.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/bottleLiquid/src/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/bottleLiquid/src/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/final/seifertWeber/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/final/seifertWeber/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/final/seifertWeber/vite.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottle/src/environment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottle/src/environment.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottle/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottle/src/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottle/src/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottle/src/settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/hyperbolicPolytope/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottleLiquid/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/hyperbolicPolytope/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottleLiquid/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/hyperbolicPolytope/src/environment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/final/seifertWeber/src/environment.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/hyperbolicPolytope/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/final/seifertWeber/src/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/hyperbolicPolytope/src/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/final/seifertWeber/src/settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/hyperbolicPolytope/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/example/bottleLiquid/vite.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/multiMaterial/liquorBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/multiMaterial/bottleLiquid.glsl" afterDir="false" />
-    </list>
+    <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
