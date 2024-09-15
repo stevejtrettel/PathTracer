@@ -1,6 +1,6 @@
 import {Vector3} from "three";
 
-import accumulate from '../glsl/accumulate/accumulate.glsl';
+import accumulate from '../../glsl/accumulate/accumulate.glsl';
 
 
 let  accShaderData =  {

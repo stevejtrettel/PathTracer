@@ -5,9 +5,9 @@ import PathTracer from "../../js/PathTracer.js";
 import UI from "../../js/UI.js";
 
 //the shaders
-import accShaderData from "../../js/accShaderData.js";
-import displayShaderData from "../../js/displayShaderData.js";
-import buildTraceShader from "../../js/buildTraceShader.js";
+import accShaderData from "../../js/shaderData/accShaderData.js";
+import displayShaderData from "../../js/shaderData/displayShaderData.js";
+import buildTraceShader from "../../js/shaderData/buildTraceShader.js";
 
 //the pieces specific to this scene
 import environment from "./src/environment.glsl";

@@ -36,7 +36,7 @@ float PI=3.1415926;
 float EPSILON=0.001;
 float AT_THRESH=0.002;
 int maxMarchSteps=2000;
-float maxDist=55.;
+float maxDist=100.;
 int maxBounces=50;
 
 //======trash constants:

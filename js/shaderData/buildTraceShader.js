@@ -5,12 +5,12 @@
 //background sky texture
 import {Matrix3, TextureLoader, Vector3} from "three";
 
-const skyTex = new TextureLoader().load('src/js/tex/office.jpg');
+const skyTex = new TextureLoader().load('/assets/office.jpg');
 //background sky texture
-const skyTexSmall = new TextureLoader().load('src/js/tex/office.jpg');
+const skyTexSmall = new TextureLoader().load('/assets/office.jpg');
 
-import setupShaderChunk from "../glsl/tracer/setupShader.glsl"
-import traceShaderChunk from "../glsl/tracer/traceShader.glsl"
+import setupShaderChunk from "../../glsl/tracer/setupShader.glsl"
+import traceShaderChunk from "../../glsl/tracer/traceShader.glsl"
 
 
 let buildTraceShader= function(sceneData, settings){

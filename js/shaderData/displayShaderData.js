@@ -1,6 +1,6 @@
 import {Vector3} from "three";
 
-import display from '../glsl/display/display.glsl';
+import display from '../../glsl/display/display.glsl';
 
 let  displayShaderData = {
     shader: display,
