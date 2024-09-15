@@ -2,7 +2,7 @@
 
 
 //-------------------------------------------------
-//The DONUT BOTTLE sdf
+//The BOTTLE TORUS sdf
 //-------------------------------------------------
 
 //a donut bottle is a smooth union of a truncated cone and a torus:

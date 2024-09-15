@@ -3,9 +3,11 @@
 //-------------------------------------------------
 
 #include ../../../glsl/objects/shapes/bottleTorus.glsl
+#include ../../../glsl/objects/multiMaterial/bottleTorusClearcoat.glsl
 
 //set the names of objects contained in the scene
 BottleTorus donut;
+BottleTorusClearcoat layerDonut;
 
 void buildObjects(){
 
@@ -34,6 +36,18 @@ void buildObjects(){
     donut.mat.isotropicScatter=extra3;
     donut.mat.roughness=0.0;
 
+
+
+
+
+
+    layerDonut.inner=donut;
+    layerDonut.outer=donut;
+
+    layerDonut.outer.thickness=0.3;
+    layerDonut.outer.mat=makeGlass(vec3(0.),1.4);
+    layerDonut.outer.mat.specularChance=0.05;
+
 }
 
 
@@ -58,7 +72,7 @@ float trace_Objects( Vector tv ){
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
-    dist=min( dist, sdf(tv, donut) );
+    dist=min( dist, sdf(tv, layerDonut) );
 
     return dist;
 }
@@ -67,7 +81,7 @@ float sdf_Objects( Vector tv ){
 
 //used in subsurface scattering: right now we keep scattering if we are inside of this object!
 bool inside_Object( Vector tv ){
-    return inside(tv,donut);
+    return inside(tv,layerDonut);
 }
 
 
@@ -79,7 +93,7 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-    setData(path, donut);
+    setData(path, layerDonut);
 }
 
 
