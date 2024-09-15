@@ -2,8 +2,8 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/compound/CocktailGlass.glsl
-#include ../../../glsl/objects/compound/Bottle.glsl
+#include ../../../glsl/objects/shapes/CocktailGlass.glsl
+#include ../../../glsl/objects/shapes/Bottle.glsl
 #include ../../../glsl/objects/multiMaterial/Cocktail.glsl
 #include ../../../glsl/objects/multiMaterial/LiquorBottle.glsl
 

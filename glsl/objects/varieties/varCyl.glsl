@@ -1,20 +1,19 @@
 
 //----------------------------------------------------------------------------------------------
-// ADJUSTABLE VARIETY IN SPHERICAL BOUNDING BOX:
-// before including this file need to provide TWO functions:
-// T var_Eqn(T x, T y, T z)
-// float var_bBox( vec3 pos )
+// ADJUSTABLE VARIETY IN RECTANGULAR BOUNDING BOX:
+// before including this file need to provide the function:
+// T varEqn(T x, T y, T z)
 //----------------------------------------------------------------------------------------------------
 
 
 //use the variety equation to compute gradient and value
 //for use in the raymarch
-vec4 var_Data( vec3 p ){
+vec4 varCyl_Data( vec3 p ){
 
     //Compute gradient.
-    T vx = var_Eqn( T(p.x, 1.), T(p.y, 0.), T(p.z, 0.) );
-    T vy = var_Eqn( T(p.x, 0.), T(p.y, 1.), T(p.z, 0.) );
-    T vz = var_Eqn( T(p.x, 0.), T(p.y, 0.), T(p.z, 1.) );
+    T vx = varCyl_Eqn( T(p.x, 1.), T(p.y, 0.), T(p.z, 0.) );
+    T vy = varCyl_Eqn( T(p.x, 0.), T(p.y, 1.), T(p.z, 0.) );
+    T vz = varCyl_Eqn( T(p.x, 0.), T(p.y, 0.), T(p.z, 1.) );
     vec3 grad = vec3(vx.y,vy.y,vz.y);
 
     //the value of the function is automatically computed in each of the above:
@@ -27,29 +26,41 @@ vec4 var_Data( vec3 p ){
 // Building a variety that is thick
 // ------------------------------------------------
 
-struct Variety{
-    //the bounding sphere
+struct VarCyl{
+//the bounding cylinder
     vec3 center;
-    //smoothing between bounding box and variety
+    vec2 cyl;//dims.x=rad, dims.y=height
+//smoothing between bounding sphere and variety
     float smoothing;
-    //scale of the variety on the inside
+//scale of the variety on the inside
     float scale;
-    //thickness.x = inside thickness, thickness.y = outside thickness
+//thickness.x = inside thickness, thickness.y = outside thickness
     vec2 thickness;
-    //the material
+//the material
     Material mat;
 };
 
 
+
+//dist to bounding box
+float bCyl(vec3 pos, vec2 cyl){
+
+    float r = length(pos.xz)-cyl.x;
+    float h = abs(pos.y)-cyl.y;
+    float bboxDist = max(r,h);
+
+    return bboxDist;
+}
+
 //overload of distR3: distance in R3 coordinates
-float distR3( vec3 p, Variety var ){
+float distR3( vec3 p, VarCyl var ){
 
     //normalize position
     vec3 pos = p - var.center;
     vec3 scaledPos = var.scale * pos;
 
     //get the distance estimate
-    vec4 data = var_Data(scaledPos);
+    vec4 data = varCyl_Data(scaledPos);
     float val = data.w;
     float gradLength = length(data.xyz) * var.scale;
     float dist = DE(val, gradLength);
@@ -58,8 +69,8 @@ float distR3( vec3 p, Variety var ){
     //thickness.x = inside, thickness.y = outisde
     dist=abs(dist+var.thickness.x)-var.thickness.x-var.thickness.y;
 
-    // //bounding sphere
-    float bboxDist = var_bBox(pos);
+    // //bounding box
+    float bboxDist = bCyl(p,var.cyl);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
@@ -70,31 +81,31 @@ float distR3( vec3 p, Variety var ){
 
 
 
-float distR3( Vector tv, Variety var ){
+float distR3( Vector tv, VarCyl var ){
     float dist = distR3(tv.pos,var);
     return dist;
 }
 
 //overload of location booleans:
-bool at( Vector tv, Variety var){
+bool at( Vector tv, VarCyl var){
     float d = distR3( tv.pos, var );
     bool atSurf = ((abs(d) - AT_THRESH)<0.);
     return atSurf;
 }
 
-bool inside( Vector tv, Variety var ){
+bool inside( Vector tv, VarCyl var ){
     float d = distR3( tv.pos, var );
     return (d<0.);
 }
 
 //overload of sdf for a sphere
-float sdf( Vector tv, Variety var ){
+float sdf( Vector tv, VarCyl var ){
     //distance to closest point on sphere
     return distR3(tv.pos, var);
 }
 
 //overload of normalVec for a sphere
-Vector normalVec( Vector tv, Variety var ){
+Vector normalVec( Vector tv, VarCyl var ){
 
     vec3 pos =tv.pos;
     const float ep = 0.0001;
@@ -116,7 +127,7 @@ Vector normalVec( Vector tv, Variety var ){
 
 
 //setData for a single sided, volume material
-void setData( inout Path path, Variety var ){
+void setData( inout Path path, VarCyl var ){
 
     //if we are at the surface
     if(at(path.tv, var)){

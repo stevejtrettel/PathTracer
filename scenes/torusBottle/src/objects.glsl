@@ -2,7 +2,7 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../src/glsl/objects/compound/torusBottle.glsl
+#include ../../../src/glsl/objects/shapes/torusBottle.glsl
 #include ../../../src/glsl/objects/multiMaterial/coatedTorusBottle.glsl
 
 //set the names of objects contained in the scene

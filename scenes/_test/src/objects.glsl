@@ -2,37 +2,30 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/shapes/bottle.glsl;
-#include ../../../glsl/objects/multiMaterial/liquorBottle.glsl;
+#include ../../../glsl/objects/compound/cocktailGlass.glsl
+#include ../../../glsl/objects/multiMaterial/cocktail.glsl
 
 //set the names of objects contained in the scene
-Bottle bottle;
-LiquorBottle gin;
+CocktailGlass cGlass;
+Cocktail negroni;
+
 
 void buildObjects(){
 
-    bottle.center=vec3(1,0.48,2);
-    bottle.baseHeight=1.5;
-    bottle.baseRadius=1.25;
-    bottle.neckHeight=1.;
-    bottle.neckRadius=0.3;
-    bottle.thickness=0.1;
-    bottle.rounded=0.1;
-    bottle.smoothJoin=0.3;
-    bottle.bump=1.;
-    bottle.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
-    //makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
+    vec3 brownAbsorb=(vec3(1.)-vec3(204./255.,142./255.,105./255.));
+    vec3 redAbsorb=vec3(0.2,1.,0.6);
+    vec3 clearGlass = vec3(0.3,0.05,0.05);
 
-    //set up the bounding sphere
-    bottle.boundingBox.center=bottle.center;
-    bottle.boundingBox.radius=bottle.baseHeight+bottle.neckHeight+0.5;
+    cGlass.center=vec3(-1.,-0.15,-1.2);
+    cGlass.radius=1.;
+    cGlass.height=1.;
+    cGlass.thickness=0.1;
+    cGlass.base=0.3;
+    cGlass.mat=makeGlass(0.1*clearGlass,1.5,0.99);
 
-
-    //-------- GIN BOTTLE ----------------
-    gin.glass=bottle;
-    gin.cup = bottle.mat;
-    gin.drink=makeGlass(vec3(0.1,0.05,0.),1.3,0.99);
-    gin.fill=0.6;
+    negroni.glass=cGlass;
+    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
+    negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
 
 }
 
@@ -58,7 +51,7 @@ float trace_Objects( Vector tv ){
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
-    dist=min( dist, sdf(tv, gin) );
+    dist=min( dist, sdf(tv, negroni) );
 
     return dist;
 }
@@ -68,7 +61,7 @@ float sdf_Objects( Vector tv ){
 //used in subsurface scattering: right now we keep scattering if we are inside of this object!
 bool inside_Object( Vector tv ){
     return false;
-    //return inside(tv,bottle);
+    //return inside(tv,bunny);
 }
 
 
@@ -80,7 +73,7 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-    setData(path, gin);
+    setData(path, negroni);
 }
 
 

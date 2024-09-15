@@ -8,6 +8,10 @@ vec3 LessThan(vec3 f, float value)
 }
 
 
+vec3 gammaCorrect(vec3 color){
+    return pow(color, vec3(0.4545));
+}
+
 vec3 LinearToSRGB(vec3 rgb)
 {
     rgb = clamp(rgb, 0.0f, 1.0f);
@@ -40,4 +44,18 @@ vec3 ACESFilm(vec3 x)
     float d = 0.59f;
     float e = 0.14f;
     return clamp((x*(a*x + b)) / (x*(c*x + d) + e), 0.0f, 1.0f);
+}
+
+vec3 Uncharted2(in vec3 color) {
+    color *= 2.0;
+
+    float A = 0.15, B = 0.50, C = 0.10;
+    float D = 0.20, E = 0.02, F = 0.30;
+    color = (((A * color + C * B) * color + D * E) / ((A * color + B) * color + D * F)) - E / F;
+
+    //float whiteMax = 4.0;
+    //color /= (((A * whiteMax + C * B) * whiteMax + D * E) / ((A * whiteMax + B) * whiteMax + D * F)) - E / F;
+    color *= 1.9335;
+
+    return color;
 }

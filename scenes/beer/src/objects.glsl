@@ -2,7 +2,7 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/compound/pint.glsl;
+#include ../../../glsl/objects/shapes/pint.glsl;
 #include ../../../glsl/objects/multiMaterial/beer.glsl;
 
 //set the names of objects contained in the scene

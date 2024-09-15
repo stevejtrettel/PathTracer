@@ -2,7 +2,7 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/compound/cocktailGlass.glsl
+#include ../../../glsl/objects/shapes/cocktailGlass.glsl
 #include ../../../glsl/objects/multiMaterial/cocktail.glsl
 
 //set the names of objects contained in the scene

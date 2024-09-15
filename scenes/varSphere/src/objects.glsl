@@ -2,37 +2,35 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/shapes/bottle.glsl;
-#include ../../../glsl/objects/multiMaterial/liquorBottle.glsl;
+
+//need to choose a variety equation from our list!
+T varSphere_Eqn(T x, T y, T z){
+    return gyroid(x,y,z);
+}
+
+//now that we have chosen an equation, can build the variety struct with it
+#include ../../../glsl/objects/varieties/varSphere.glsl
+
 
 //set the names of objects contained in the scene
-Bottle bottle;
-LiquorBottle gin;
+VarSphere var;
 
 void buildObjects(){
 
-    bottle.center=vec3(1,0.48,2);
-    bottle.baseHeight=1.5;
-    bottle.baseRadius=1.25;
-    bottle.neckHeight=1.;
-    bottle.neckRadius=0.3;
-    bottle.thickness=0.1;
-    bottle.rounded=0.1;
-    bottle.smoothJoin=0.3;
-    bottle.bump=1.;
-    bottle.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
-    //makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
+    vec3 pinkScatter = vec3(0.25,0.65,0.7);
 
-    //set up the bounding sphere
-    bottle.boundingBox.center=bottle.center;
-    bottle.boundingBox.radius=bottle.baseHeight+bottle.neckHeight+0.5;
+    var.center=vec3(-2,1.5,-2);
+    var.radius = 2.;
+    var.smoothing =0.065;
+    var.scale=10.;
+    var.thickness = vec2(0.0075,0.0);
 
-
-    //-------- GIN BOTTLE ----------------
-    gin.glass=bottle;
-    gin.cup = bottle.mat;
-    gin.drink=makeGlass(vec3(0.1,0.05,0.),1.3,0.99);
-    gin.fill=0.6;
+    var.mat=makeGlass(30.*pinkScatter,1.5,0.99);
+    var.mat.refractionChance=0.;
+    var.mat.subSurface=true;
+    var.mat.meanFreePath=0.2*extra2;
+    var.mat.isotropicScatter=extra;
+    var.mat.roughness=0.7;
 
 }
 
@@ -58,7 +56,7 @@ float trace_Objects( Vector tv ){
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
-    dist=min( dist, sdf(tv, gin) );
+    dist=min( dist, sdf(tv, var) );
 
     return dist;
 }
@@ -67,8 +65,7 @@ float sdf_Objects( Vector tv ){
 
 //used in subsurface scattering: right now we keep scattering if we are inside of this object!
 bool inside_Object( Vector tv ){
-    return false;
-    //return inside(tv,bottle);
+    return inside(tv,var);
 }
 
 
@@ -80,7 +77,7 @@ bool inside_Object( Vector tv ){
 //put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
-    setData(path, gin);
+    setData(path, var);
 }
 
 
