@@ -2,29 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/glsl/objects/multiMaterial/varBoxGlass.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/varBoxGlass/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/varBoxGlass/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scenes/varBoxGlass/vite.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/basic/box.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/basic/box.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/basic/sphere.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/basic/sphere.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/multiMaterial/OLD/glassMarble.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/varieties/varBox.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/varieties/varBox.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/varieties/varCyl.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/varieties/varCyl.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/varBox/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/varBox/src/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenes/varSphereGlass/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/varSphereGlass/src/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/variety/_scene.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/variety/lights.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/variety/objects.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/variety/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/varBoxGlass/src/settings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/variety/walls.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/varietyMarble/_scene.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/varietyMarble/lights.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/varietyMarble/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/varBoxGlass/src/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/varietyMarble/settings.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scenes/varietyMarble/walls.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/varBoxGlass/src/environment.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,17 +31,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/strettel/Code/PathTracer/scenes",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/strettel/Code/PathTracer/scenes&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/scenes" />
