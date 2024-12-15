@@ -10,7 +10,7 @@ T var_Eqn(T x, T y, T z){
 
 float var_bBox(vec3 pos){
     //pos is already centered at origin
-    return length(pos)-2.;
+    return length(pos)-5.;
 }
 
 //now that we have chosen an equation, can build the variety struct with it
@@ -26,7 +26,7 @@ void buildObjects(){
 
     var.center=vec3(-2,1.5,-2);
     var.smoothing =0.065;
-    var.scale=10.;
+    var.scale=1.;
     var.thickness = vec2(0.0075,0.0);
 
     var.mat=makeGlass(30.*pinkScatter,1.5,0.99);

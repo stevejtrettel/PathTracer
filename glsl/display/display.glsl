@@ -15,13 +15,14 @@ void mainImage( out vec4 fragColor, in ivec2 pixelCoord )
 
     // convert unbounded HDR color range to SDR color range
     color = ACESFilm(color);
-   // color = Uncharted2(color);
+    //color = Uncharted2(color);
 
     // convert from linear to sRGB for display
-    color = LinearToSRGB(color);
-    //color = gammaCorrect(color);
+    //color = LinearToSRGB(color);
+    color = gammaCorrect(color);
 
     fragColor = vec4(color, 1.0f);
+
 }
 
 

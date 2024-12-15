@@ -1,7 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="" />
+    <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/final/steinerRP2/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/final/steinerRP2/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/final/steinerRP2/src/environment.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/final/steinerRP2/src/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/final/steinerRP2/src/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/final/steinerRP2/vite.config.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/bottle/compile/assets/index-EoH-pDW7.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/bottle/compile/assets/index-lBh0JkGX.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/bottle/compile/assets/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/sphere/src/settings.js" beforeDir="false" afterPath="$PROJECT_DIR$/example/sphere/src/settings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/variety/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/variety/src/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/display/display.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/display/display.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_258585b2/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_8db0ff29/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_8db0ff29/three.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_8db0ff29/three.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_8db0ff29/three_addons_libs_lil-gui__module__min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_8db0ff29/three_addons_libs_lil-gui__module__min.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_8db0ff29/three_addons_libs_stats__module.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_8db0ff29/three_addons_libs_stats__module.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_959fe787/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_9ac967d5/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_a1560901/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_b98bc5a1/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_b98bc5a1/three.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_b98bc5a1/three.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_b98bc5a1/three_addons_libs_lil-gui__module__min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_b98bc5a1/three_addons_libs_lil-gui__module__min.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_b98bc5a1/three_addons_libs_stats__module.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_b98bc5a1/three_addons_libs_stats__module.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_cc86a777/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d1e9dfb8/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d1e9dfb8/three.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d1e9dfb8/three.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d1e9dfb8/three_addons_libs_lil-gui__module__min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d1e9dfb8/three_addons_libs_lil-gui__module__min.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d1e9dfb8/three_addons_libs_stats__module.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d1e9dfb8/three_addons_libs_stats__module.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d8973c0c/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d8973c0c/three.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d8973c0c/three.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d8973c0c/three_addons_libs_lil-gui__module__min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d8973c0c/three_addons_libs_lil-gui__module__min.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d8973c0c/three_addons_libs_stats__module.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps_temp_d8973c0c/three_addons_libs_stats__module.js.map" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -29,24 +78,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/strettel/Code/PathTracer/example&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Users/strettel/Code/PathTracer/final",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/final" />
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/example" />
       <recent name="$PROJECT_DIR$/glsl/objects/multiMaterial" />
       <recent name="$PROJECT_DIR$/scenes" />
-      <recent name="$PROJECT_DIR$/assets" />
-      <recent name="$PROJECT_DIR$/glsl/objects/varieties" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/example/bottle/dist/assets" />
@@ -102,6 +151,9 @@
       <workItem from="1717299578692" duration="5665000" />
       <workItem from="1718219909991" duration="795000" />
       <workItem from="1718429352810" duration="4947000" />
+      <workItem from="1730671356273" duration="761000" />
+      <workItem from="1730782246265" duration="714000" />
+      <workItem from="1734290554947" duration="1057000" />
     </task>
     <servers />
   </component>
