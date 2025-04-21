@@ -3,3 +3,4 @@
 #include sphere.glsl
 #include torus.glsl
 #include truncated_cone.glsl
+#include triangle.glsl
