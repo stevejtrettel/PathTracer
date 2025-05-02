@@ -33,6 +33,7 @@ uniform float panelToRender;
 
 // constants
 float PI=3.1415926;
+float pi = 3.14159;
 float EPSILON=0.001;
 float AT_THRESH=0.002;
 int maxMarchSteps=2000;

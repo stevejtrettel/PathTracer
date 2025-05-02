@@ -6,7 +6,7 @@ bool render_Environment=true;
 
 
 //set the names of the lights:
-Sphere light;
+Sphere light,light2;
 
 //set the names of the walls:
 Plane bottomWall, topWall, leftWall, rightWall, backWall, frontWall;
@@ -19,23 +19,33 @@ void buildEnvironment(){
     float lightIntensity;
 
     //----------- LIGHT 1 -------------------------
-    light.center=vec3(-10,5,-5);
+    light.center=vec3(0,8,0);
     light.radius=1.5;
     lightColor= vec3(0.9);
     lightIntensity=50.;
     light.mat=makeLight(lightColor,lightIntensity);
+
+
+    //----------- LIGHT 2 -------------------------
+    light2.center=vec3(0,3,10);
+    light2.radius=1.5;
+    lightColor= vec3(0.9);
+    lightIntensity=10.;
+    light2.mat=makeLight(lightColor,lightIntensity);
 
     //------------------------------------
     // THE WALLS
     //------------------------------------
 
     Vector orientation;
-    vec3 color=0.15*vec3(171,203,240)/255.;//sky blue
+    vec3 color=0.1*vec3(112, 128, 144)/255.;//slate
+    //0.3*vec3(255,255,227)/255.;//ivory
+    //0.15*vec3(171,203,240)/255.;//sky blue
     float specularity=0.;
     float roughness=0.1;
 
     //----------- THE FLOOR -------------------------
-    orientation.pos=vec3(0,-3,0);
+    orientation.pos=vec3(0,-1,0);
     orientation.dir=vec3(0,1,0);
     bottomWall.orientation=orientation;
     bottomWall.mat=makeDielectric(color,0.0,roughness);
@@ -97,6 +107,7 @@ float trace_Environment(Vector tv ){
     float dist=maxDist;
 
     dist = min(dist, trace(tv,light));
+    dist = min(dist, trace(tv,light2));
 
     dist=min(dist, trace(tv, bottomWall));
     dist=min(dist, trace(tv, topWall));
@@ -131,6 +142,8 @@ float sdf_Environment(Vector tv ){
 void setData_Environment( inout Path path ){
 
     setData(path, light);
+
+    setData(path, light2);
 
     setData(path, bottomWall);
 

@@ -40,26 +40,28 @@ void buildObjects(){
     sphere4.radius=rad;
     sphere4.mat=makeMetal(vec3(0.8),0.95,0.);
 
+    float emit = 0.1*extra3;
+
     triang1.center = -1.25*v2;
     triang1.side=4.*rad;
     triang1.thickness=0.1;
     triang1.orientation = rotateAboutZ(1.57)*rotateZto(v2);
     triang1.mat = makeDielectric(vec3(0.7,0.2,0.2),0.5,0.1);
-    triang1.mat.surfaceEmit = 0.05*vec3(0.7,0.2,0.2);
+    triang1.mat.surfaceEmit = emit*vec3(0.7,0.2,0.2);
 
     triang2.center = -1.25*v3;
     triang2.side=4.*rad;
     triang2.thickness=0.1;
     triang2.orientation = rotateAboutZ(1.57)*rotateZto(v3);
     triang2.mat = makeDielectric(vec3(0.2,0.7,0.2),0.5,0.1);
-    triang2.mat.surfaceEmit = 0.05*vec3(0.2,0.7,0.2);
+    triang2.mat.surfaceEmit = emit*vec3(0.2,0.7,0.2);
 
     triang3.center = -1.25*v4;
     triang3.side=4.*rad;
     triang3.thickness=0.1;
     triang3.orientation = rotateAboutZ(-1.57)*rotateZto(v4);
     triang3.mat = makeDielectric(vec3(0.2,0.2,0.7),0.5,0.1);
-    triang3.mat.surfaceEmit = 0.05*vec3(0.2,0.2,0.7);
+    triang3.mat.surfaceEmit = emit*vec3(0.2,0.2,0.7);
 
     triang4.center = -1.3*v1;
     triang4.side=4.*rad;
@@ -102,7 +104,7 @@ float sdf_Objects( Vector tv ){
     dist=min( dist, sdf(tv, triang2) );
     dist=min( dist, sdf(tv, triang3) );
 
-    dist=min( dist, sdf(tv, triang4) );
+  //  dist=min( dist, sdf(tv, triang4) );
     return dist;
 }
 
@@ -131,7 +133,7 @@ void setData_Objects(inout Path path){
     setData(path, triang1);
     setData(path, triang2);
     setData(path, triang3);
-    setData(path, triang4);
+ //   setData(path, triang4);
 
 }
 

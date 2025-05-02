@@ -61,6 +61,11 @@ float distR3( vec3 p, KleinBottle klein ){
     vec3 pos = p - klein.center;
     pos /= klein.size;
     pos = vec3(-pos.y,pos.z,pos.x);
+
+    if(length(p)>6.){
+        return length(p)-5.9;
+    }
+
     return sdKlein(pos,klein.thickness);
 }
 
