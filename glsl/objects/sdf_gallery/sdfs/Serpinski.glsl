@@ -9,9 +9,6 @@ Link: https://www.shadertoy.com/view/Xd2XDW
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
-#ifndef serpinski_glsl
-#define serpinski_glsl
-
 // This is a serpinski tetrahedron where
 // the leaves are spheres (for efficiency). They can
 // be made into tetrahedrons using sdTetrahedron.
@@ -60,6 +57,3 @@ float sdf(vec3 p)
 
     return (1.0/2.5) * (length(p) * pow(scale, float(-maxit)) - minSize);
 }
-
-
-#endif

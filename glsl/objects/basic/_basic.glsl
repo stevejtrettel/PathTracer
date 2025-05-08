@@ -2,5 +2,5 @@
 #include plane.glsl
 #include sphere.glsl
 #include torus.glsl
-#include truncated_cone.glsl
+#include cone.glsl
 #include triangle.glsl

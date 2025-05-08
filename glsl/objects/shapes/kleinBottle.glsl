@@ -15,6 +15,10 @@ struct KleinBottle{
 
 float sdKlein(vec3 p, float thickness){
 
+    if(length(p)>6.){
+        return length(p)-5.9;
+    }
+
     //from https://www.shadertoy.com/view/4ltSW8
 
     float d = maxDist;
@@ -57,16 +61,13 @@ float sdKlein(vec3 p, float thickness){
 
 //overload of distR3: distance in R3 coordinates
 float distR3( vec3 p, KleinBottle klein ){
+
     //normalize position
     vec3 pos = p - klein.center;
-    pos /= klein.size;
     pos = vec3(-pos.y,pos.z,pos.x);
+    pos /= klein.size;
 
-    if(length(p)>6.){
-        return length(p)-5.9;
-    }
-
-    return sdKlein(pos,klein.thickness);
+    return sdKlein(pos,klein.thickness*klein.size);
 }
 
 //overload of location booleans:

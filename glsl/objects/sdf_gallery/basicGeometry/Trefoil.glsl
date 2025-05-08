@@ -21,13 +21,13 @@ mat3 RotMat(vec3 axis, float angle)
     float s = sin(angle);
     float c = cos(angle);
     float oc = 1.0 - c;
-    
-    return mat3(oc*axis.x*axis.x+c,         oc*axis.x*axis.y-axis.z*s,  oc*axis.z*axis.x+axis.y*s, 
-                oc*axis.x*axis.y+axis.z*s,  oc*axis.y*axis.y+c,         oc*axis.y*axis.z-axis.x*s, 
+
+    return mat3(oc*axis.x*axis.x+c,         oc*axis.x*axis.y-axis.z*s,  oc*axis.z*axis.x+axis.y*s,
+                oc*axis.x*axis.y+axis.z*s,  oc*axis.y*axis.y+c,         oc*axis.y*axis.z-axis.x*s,
                 oc*axis.z*axis.x-axis.y*s,  oc*axis.y*axis.z+axis.x*s,  oc*axis.z*axis.z+c);
 }
 
-float dstFar = 100;
+float dstFar = 100.;
 
 float trefoil_PrBox2Df (vec2 p, vec2 b)
 {
@@ -50,20 +50,24 @@ float ObjDf (vec3 p, float r)
   a = atan (q.z, q.x);
   q.xz = vec2 (length (q.xz) - r, q.y);
   q.xz = trefoil_Rot2D (q.xz, 1.5 * a);
-  q.xz = trefoil_Rot2D (q.xz, - pi * (floor (atan (q.z, q.x) / pi + 0.5)));
+  q.xz = trefoil_Rot2D (q.xz, - PI * (floor (atan (q.z, q.x) / PI + 0.5)));
   q.x -= 1.;
   //q.y = a - aa;
   d = length (trefoil_PrBox2Df (q.xz, vec2 (0.2))) - 0.05;
-  DMINQ (1);
+    if (d < dMin) { dMin = d; }
   return 0.4 * dMin;
 }
 
 float sdf(vec3 p)
 {
-	p *= RotMat(vec3(1.,0.,0.), pi/2.);
+    if(length(p)>2.){
+        return length(p)-1.9;
+    }
+
+    p *= RotMat(vec3(1.,0.,0.), PI/2.);
 	const float scale = 0.18;
 	p *= 1. / scale;
-	return ObjDf(p, 3.5) * scale;
+	return ObjDf(p, 2.5) * scale;
 }
 
 #endif

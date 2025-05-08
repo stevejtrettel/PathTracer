@@ -5,14 +5,14 @@
 #include ../../../glsl/objects/shapes/CocktailGlass.glsl
 #include ../../../glsl/objects/shapes/Bottle.glsl
 #include ../../../glsl/objects/multiMaterial/Cocktail.glsl
-#include ../../../glsl/objects/multiMaterial/LiquorBottle.glsl
+#include ../../../glsl/objects/multiMaterial/BottleLiquid.glsl
 
 
 //set the names of objects contained in the scene
 CocktailGlass cGlass;
 Cocktail negroni;
 Bottle bottle;
-LiquorBottle gin,campari,vermouth;
+BottleLiquid gin,campari,vermouth;
 
 void buildObjects(){
 

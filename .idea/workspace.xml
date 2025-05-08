@@ -2,66 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/example/sdfGallery/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/sdfGallery/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/sdfGallery/src/environment.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/sdfGallery/src/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/sdfGallery/src/settings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/sdfGallery/vite.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Bezier.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Capsule.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Cone.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Cube.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Cylinder.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Dodecahedron.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Helix.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Hexprism.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Icosahedron.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Octabound.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Octahedron.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Pyramid.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Roundbox.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Sphere.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Tetrahedron.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Torus.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Trefoil.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Triangle.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/basicGeometry/Triprismbound.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/object.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Burger.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Cables.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Castle.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Chain.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Cheese.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Cybertruck.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Dinosaur.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Elephant.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Gear.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/HumanSkull.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Jellyfish.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Key.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Knob.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Mech.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Menger.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Mobius.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Mountain.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/PixarMike.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Rock.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Rooks.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Serpinski.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Spike.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Teapot.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Temple.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/TieFighter.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/UprightPiano.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Vase.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/sphereFractal/src/environment.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/sphereFractal/src/environment.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/sphereFractal/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/sphereFractal/src/objects.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/objects/shapes/kleinBottle.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/shapes/kleinBottle.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glsl/tracer/1Setup/uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/tracer/1Setup/uniforms.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/sdfGallery/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/sdfGallery/src/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/final/negroniForOne/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/final/negroniForOne/src/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/objects/sdf_gallery/object.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/object.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Serpinski.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Serpinski.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Temple.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs/Temple.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.vite/deps/_metadata.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -90,17 +37,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/strettel/Code/PathTracer/glsl/objects/sdf_gallery/sdfs",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/strettel/Code/PathTracer/glsl/objects/sdf_gallery/sdfs&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/WebStorm.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/glsl/objects/sdf_gallery/sdfs" />
@@ -172,7 +119,9 @@
       <workItem from="1745169653658" duration="165000" />
       <workItem from="1745169822220" duration="442000" />
       <workItem from="1745170303750" duration="8487000" />
-      <workItem from="1746154480808" duration="10510000" />
+      <workItem from="1746154480808" duration="11912000" />
+      <workItem from="1746239222626" duration="1996000" />
+      <workItem from="1746313197351" duration="1965000" />
     </task>
     <servers />
   </component>
