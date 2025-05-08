@@ -35,7 +35,7 @@ float dist2Segment(vec4 z, vec4 n, float r,Polytope4D data){
     vec4 pmin=normalize(alpha*data.pVec+min(0.,beta)*n);
     //ca and sa are the cosine and sine of the angle between z and pmin. This is the spherical distance.
     float ca=dot(z,pmin), sa=0.5*length(pmin-z)*length(pmin+z);//sqrt(1.-ca*ca);//
-    return DD(ca,sa,r)-data.segmentRad;
+    return DD(ca,sa,r)-data.edgeRad;
 }
 
 //it is possible to compute the distance to a face just as for segments: pmin will be the orthogonal projection
@@ -78,6 +78,26 @@ float distR3( vec3 p, Polytope4D obj ){
     vec3 pos = p - obj.center;
     pos /= obj.size;
     return sdf_polytope(pos,obj);
+}
+
+
+//distance function that returns BOTH vertex and edge distance!
+vec2 distR3_VE(vec3 p, Polytope4D obj){
+    //normalize position
+    vec3 pos = p - obj.center;
+    pos /= obj.size;
+
+    //do the R4 calculation
+    float r=length(pos);
+    vec4 z4=vec4(2.*pos,1.-r*r)*1./(1.+r*r);//Inverse stereographic projection of pos: z4 lies onto the unit 3-sphere centered at 0.
+    z4.xyw=obj.rot*z4.xyw;
+    z4=fold(z4,obj);//fold it
+
+    //get the distances to each
+    float dV = dist2Vertex(z4,r,obj);
+    float dE = dist2Segments(z4, r,obj);
+
+    return vec2(dV,dE);
 }
 
 
@@ -144,8 +164,20 @@ void setData( inout Path path, Polytope4D obj){
         //compute the normal
         Vector normal=normalVec(path.tv,obj);
         bool side = inside(path.tv, obj);
-        //set the material
-        setObjectInAir(path.dat, side, normal, obj.mat);
+
+        //set the material: this depends on if we hit the vertex or edge!
+        vec2 dVec = distR3_VE(path.tv.pos,obj);
+
+        if(abs(dVec.x)<abs(dVec.y)){
+            //vertex dist smaller than edge dist
+            setObjectInAir(path.dat, side, normal, obj.vertexMat);
+        }
+        else{
+            //edge dist smaller than vertexDist
+            setObjectInAir(path.dat, side, normal, obj.edgeMat);
+        }
+
+
     }
 
 }

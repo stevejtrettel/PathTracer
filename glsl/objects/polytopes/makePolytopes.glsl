@@ -10,11 +10,12 @@ struct Polytope4D{
 
 //these are set per shape (but have default values in the make functions)
     float vertexRad;
-    float segmentRad;
+    float edgeRad;
     mat3 rot;
     vec3 center;
     float size;
-    Material mat;
+    Material edgeMat;
+    Material vertexMat;
 };
 
 
@@ -61,14 +62,15 @@ void setPolytope4D(int Type, vec4 coords, inout Polytope4D poly ){
 
     //set default values of per-shape quantities
 
-    poly.vertexRad = 0.05048;
-    poly.segmentRad = 0.05476;
+    poly.vertexRad = 0.06;
+    poly.edgeRad = 0.03;
 
     poly.center = vec3(0);
     poly.size = 1.;
     poly.rot = mat3(1,0,0,0,1,0,0,0,1);
 
-    poly.mat = makeDielectric(vec3(0.5,0.5,0.5),0.5,0.2);
+    poly.vertexMat = makeDielectric(vec3(0.3,0.1,0.1),0.2,0.2);
+    poly.edgeMat = makeDielectric(vec3(0.1,0.1,0.2),0.2,0.2);
 
 }
 
