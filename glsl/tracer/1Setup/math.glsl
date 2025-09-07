@@ -42,6 +42,18 @@ float sq(float x){return x*x;}
 mat2 rot2(in float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
 
 
+//axis angle
+
+mat3 rot3AxisAngle(vec3 v, float angle){
+    float c = cos(radians(angle));
+    float s = sin(radians(angle));
+
+    return mat3(c + (1.0 - c) * v.x * v.x, (1.0 - c) * v.x * v.y - s * v.z, (1.0 - c) * v.x * v.z + s * v.y,
+    (1.0 - c) * v.x * v.y + s * v.z, c + (1.0 - c) * v.y * v.y, (1.0 - c) * v.y * v.z - s * v.x,
+    (1.0 - c) * v.x * v.z - s * v.y, (1.0 - c) * v.y * v.z + s * v.x, c + (1.0 - c) * v.z * v.z
+    );
+}
+
 
 
 //rotate Z axis to the vector targetNormal

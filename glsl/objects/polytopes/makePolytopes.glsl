@@ -69,8 +69,8 @@ void setPolytope4D(int Type, vec4 coords, inout Polytope4D poly ){
     poly.size = 1.;
     poly.rot = mat3(1,0,0,0,1,0,0,0,1);
 
-    poly.vertexMat = makeDielectric(vec3(0.3,0.1,0.1),0.2,0.2);
-    poly.edgeMat = makeDielectric(vec3(0.1,0.1,0.2),0.2,0.2);
+    poly.vertexMat = makeDielectric(vec3(0.6,0.1,0.1),0.2,0.2);
+    poly.edgeMat = makeDielectric(vec3(0.4,0.4,0.4),0.2,0.2);
 
 }
 

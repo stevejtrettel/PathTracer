@@ -2,65 +2,26 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3808057-cf59-4b36-a999-8fa8d5cd6c9d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/example/polytope4d/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/polytope4d/src/environment.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/polytope4d/src/objects.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/polytope4d/src/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurve/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurve/src/curveDispatch.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurve/src/environment.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurve/src/helixCurve.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurve/src/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurve/src/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurve/src/trefoilCurve.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurveSingle/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurveSingle/src/environment.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurveSingle/src/objects.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/parametricCurveSingle/src/settings.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/glsl/objects/shapes/parametricCurveSingle.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/glsl/objects/shapes/parametricCurveSystem.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/apollonian_broken/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/apollonian_broken/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/beer/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/beer/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottle/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottle/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottleLiquid/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottleLiquid/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottleTorus/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottleTorus/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottleTorusClearcoat/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bottleTorusClearcoat/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bunny/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/bunny/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/cocktail/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/cocktail/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/kleinBottle/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/kleinBottle/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/kleinianLimit/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/kleinianLimit/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/mobius/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/mobius/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/sdfGallery/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/sdfGallery/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/sphere/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/sphere/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/sphereFractal/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/sphereFractal/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/surfBox/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/surfBox/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/surfCyl/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/surfCyl/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/surfSphere/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/surfSphere/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/surface/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/surface/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varBox/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varBox/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varBoxClearcoat/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varBoxClearcoat/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varBoxGlass/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varBoxGlass/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varCyl/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varCyl/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varSphere/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varSphere/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varSphereClearcoat/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varSphereClearcoat/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varSphereGlass/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/varSphereGlass/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/variety/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/variety/vite.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/polytope4d/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/polytope4d/src/objects.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/variety/src/objects.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/example/variety/src/objects.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/objects/polytopes/Polytope4D.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/polytopes/Polytope4D.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glsl/objects/polytopes/makePolytopes.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/objects/polytopes/makePolytopes.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/tracer/1Setup/algVariety.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/tracer/1Setup/algVariety.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glsl/tracer/1Setup/math.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/glsl/tracer/1Setup/math.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -175,7 +136,11 @@
       <workItem from="1746154480808" duration="11912000" />
       <workItem from="1746239222626" duration="1996000" />
       <workItem from="1746313197351" duration="1965000" />
-      <workItem from="1746727570205" duration="1745000" />
+      <workItem from="1746727570205" duration="7195000" />
+      <workItem from="1755024232848" duration="2057000" />
+      <workItem from="1755192600333" duration="1122000" />
+      <workItem from="1756877167845" duration="1879000" />
+      <workItem from="1757201819532" duration="4650000" />
     </task>
     <servers />
   </component>

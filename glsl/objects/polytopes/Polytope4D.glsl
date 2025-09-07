@@ -77,6 +77,11 @@ float distR3( vec3 p, Polytope4D obj ){
     //normalize position
     vec3 pos = p - obj.center;
     pos /= obj.size;
+
+    if(length(pos)>2.5){
+        return length(pos)-2.4;
+    }
+
     return sdf_polytope(pos,obj);
 }
 

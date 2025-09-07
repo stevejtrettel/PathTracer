@@ -14,7 +14,6 @@
 
 #define T vec2
 
-
 T tfloat(float x) {
     return T(x,0);
 }
@@ -829,6 +828,31 @@ T enneper(T x, T y, T z){
 
 }
 
+
+
+
+
+    T goldman(T x, T y, T z){
+
+    //needs some constant values
+    float a = 2.*extra;
+    float b = 2.*extra2;
+    float c = 2.*extra3;
+    float d = 2.*extra4;
+    float k = 4.-a*a-b*b-c*c-a*b*c*d;
+
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T xyz = tmul(x,tmul(y,z));
+
+
+    T term1 = (a*b+c*d)*x + (a*d+b*c)*y + (a*c+b*d)*z + T(k,0);
+    T term2 =x2 + y2 + z2 + xyz;
+
+    return term2-term1;
+
+}
 
 
     //================================
