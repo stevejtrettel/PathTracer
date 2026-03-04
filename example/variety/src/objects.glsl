@@ -7,7 +7,7 @@
 T var_Eqn(T x, T y, T z){
    // return goldman(x,y,z);
     //return romanSurfaceVar(x,y,z);
-    return cayleyNodalCubic(x,y,z);
+    return myCubic(x,y,z);
 }
 
 float var_bBox(vec3 pos){

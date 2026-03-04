@@ -5,7 +5,7 @@
 
 //need to choose a variety equation from our list!
 T surfBox_Eqn(T x, T y, T z){
-    return gyroid(x,y,z);
+    return myCubic(x,y,z);
 }
 
 //now that we have chosen an equation, can build the variety struct with it
@@ -17,12 +17,14 @@ SurfBox surf;
 
 void buildObjects(){
 
-    vec3 pinkScatter = vec3(0.25,0.65,0.7);
+    vec3 pinkScatter = vec3(1,0,0);
+    //5.*vec3(0.25,0.65,0.7);
 
     surf.center=vec3(-2,1.5,-2);
     surf.box = vec3(1,1,1);
     surf.scale=10.;
     surf.mat=makeDielectric(pinkScatter,0.5,0.2);
+
 
 }
 

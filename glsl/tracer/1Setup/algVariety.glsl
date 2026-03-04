@@ -984,6 +984,52 @@ T elliptic(T x, T y, T t){
 
 
 
+
+T myCubic(T x, T y, T z, T w){
+    T x2 = tsqr(x);
+    T y2 = tsqr(y);
+    T z2 = tsqr(z);
+    T w2 = tsqr(w);
+    
+    // Pure xyz terms (no w)
+    T term1 = 24. * tmul(x, y, z);
+    T term2 = -30. * tmul(y2, z);
+    T term3 = -15. * tmul(y, z2);
+    
+    // Linear in w
+    T term4 = -24. * tmul(x2, w);
+    T term5 = 50. * tmul(y2, w);
+    T term6 = 42. * tmul(y, z, w);
+    T term7 = 6. * tmul(z2, w);
+    
+    // Quadratic in w
+    T term8 = 64. * tmul(x, w2);
+    T term9 = -95. * tmul(y, w2);
+    T term10 = -28. * tmul(z, w2);
+    
+    // Cubic in w
+    T term11 = -10. * tmul(w2, w);
+    
+    return term1 + term2 + term3 + term4 + term5 + term6 + term7 + term8 + term9 + term10 + term11;
+}
+
+// Affine version (w=1 patch)
+T myCubic(T x, T y, T z){
+    return myCubic(x, y, z, T(1, 0));
+}
+
+// Double cover via inverse stereographic projection to S³
+T myCubicStereo(T x, T y, T z){
+    T X, Y, Z, W;
+    invStereo(x, y, z, X, Y, Z, W);
+    return myCubic(X, Y, Z, W);
+}
+
+
+
+
+
+
 //
 ////-------------ALGEBRAIC VARIETIES---------------------
 ////CURRENTLY NOT INCLUDED IN THE PROGRAM!

@@ -5,7 +5,7 @@
 
 //need to choose a variety equation from our list!
 T varBox_Eqn(T x, T y, T z){
-    return gyroid(x,y,z);
+    return myCubic(x,y,z);
 }
 
 //now that we have chosen an equation, can build the variety struct with it
