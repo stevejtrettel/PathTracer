@@ -12,7 +12,7 @@
 #include ../../../glsl/objects/shapes/line.glsl
 
 // Surface data — swap this file to change the cubic
-#include ./data.glsl
+#include ./scene3d.glsl
 
 
 // ============================================
