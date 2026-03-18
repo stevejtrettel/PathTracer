@@ -17,12 +17,15 @@ struct BoundaryRing {
     Material mat;
 };
 
-// Helper: compute raw surface DE at arbitrary point
+// Helper: compute surface DE with gradient projected orthogonal to bbox
 float surfaceDist(vec3 pos, float scale) {
     vec3 scaled = scale * pos;
     float val = cubicF(scaled);
-    float gradLen = length(cubicGrad(scaled)) * scale;
-    return abs(val) / max(gradLen, 1e-6);
+    vec3 grad = cubicGrad(scaled) * scale;
+    // Project surface gradient orthogonal to sphere normal
+    vec3 nb = normalize(pos);
+    grad -= dot(grad, nb) * nb;
+    return abs(val) / max(length(grad), 1e-6);
 }
 
 // Full evaluation at arbitrary point (used by normalVec, at, inside)
@@ -30,15 +33,18 @@ float distR3(vec3 p, BoundaryRing ring) {
     vec3 pos = p - ring.center;
     float dSurf = surfaceDist(pos, ring.scale);
     float dBox = abs(sceneBBox(pos));
-    return sqrt(dSurf * dSurf + dBox * dBox) - ring.radius;
+    return 0.5 * (sqrt(dSurf * dSurf + dBox * dBox) - ring.radius);
 }
 
 // Fast path using cached values (called from sdf_Objects only)
 float sdf_cached(BoundaryRing ring) {
-    float gradLen = length(_cachedGrad) * ring.scale;
-    float dSurf = abs(_cachedVal) / max(gradLen, 1e-6);
+    vec3 grad = _cachedGrad * ring.scale;
+    // Project surface gradient orthogonal to sphere normal
+    vec3 nb = normalize(_cachedPos);
+    grad -= dot(grad, nb) * nb;
+    float dSurf = abs(_cachedVal) / max(length(grad), 1e-6);
     float dBox = abs(_cachedBBox);
-    return sqrt(dSurf * dSurf + dBox * dBox) - ring.radius;
+    return 0.5 * (sqrt(dSurf * dSurf + dBox * dBox) - ring.radius);
 }
 
 float distR3(Vector tv, BoundaryRing ring) {

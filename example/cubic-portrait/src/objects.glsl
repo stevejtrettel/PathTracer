@@ -112,7 +112,7 @@ float sceneBBox(vec3 pos) {
 }
 
 // Box bounding for plate group (lines + conics clipped to plate)
-const float PLATE_RADIUS = 1.2;
+const float PLATE_RADIUS = 1.8;
 
 float plateBBox(vec3 pos) {
     vec2 d = abs(pos.xz) - vec2(PLATE_RADIUS);
@@ -172,6 +172,86 @@ vec3 unrotXZ(vec3 p) {
 
 
 // ============================================
+// SECTION 7b: CHAIN
+// ============================================
+
+struct Chain {
+    vec3 center;     // xz position, y is ignored (chain runs vertically)
+    float yBottom;   // bottom of chain
+    float yTop;      // top of chain
+    float R;         // major radius (link size)
+    float r;         // minor radius (wire thickness)
+    float le;        // link elongation
+    Material mat;
+};
+
+// Single chain link: elongated torus (stadium shape)
+// le = elongation, r1 = major radius, r2 = minor radius
+float sdLink(vec3 p, float le, float r1, float r2) {
+    vec3 q = vec3(p.x, max(abs(p.y) - le, 0.0), p.z);
+    return length(vec2(length(q.xy) - r1, q.z)) - r2;
+}
+
+float chainLinkDist(vec3 pos, float R, float r, float le, float isOdd) {
+    // Swap x and z for alternating links
+    pos.xz = mix(pos.xz, pos.zx, isOdd);
+    return sdLink(pos, le, R, r);
+}
+
+float distR3(vec3 p, Chain ch) {
+    vec3 pos = p - vec3(ch.center.x, 0, ch.center.z);
+    // Clip to chain range
+    if (pos.y > ch.yTop + ch.R + ch.r || pos.y < ch.yBottom - ch.R - ch.r) {
+        return 1.0; // far away
+    }
+
+    float spacing = ch.R + ch.le;
+    float cell = round(pos.y / spacing);
+    float localY = pos.y - cell * spacing;
+    float odd = step(0.5, mod(abs(cell), 2.0));
+
+    // Current cell
+    float d1 = chainLinkDist(vec3(pos.x, localY, pos.z), ch.R, ch.r, ch.le, odd);
+    // Neighbor cell (check the closer one)
+    float neighborDir = sign(localY + 0.001);
+    float d2 = chainLinkDist(vec3(pos.x, localY - neighborDir * spacing, pos.z), ch.R, ch.r, ch.le, 1.0 - odd);
+
+    return min(d1, d2);
+}
+
+float distR3(Vector tv, Chain ch) { return distR3(tv.pos, ch); }
+float sdf(Vector tv, Chain ch) { return distR3(tv.pos, ch); }
+
+bool at(Vector tv, Chain ch) {
+    return (abs(distR3(tv.pos, ch)) - AT_THRESH) < 0.;
+}
+
+bool inside(Vector tv, Chain ch) {
+    return distR3(tv.pos, ch) < 0.;
+}
+
+Vector normalVec(Vector tv, Chain ch) {
+    vec3 pos = tv.pos;
+    const float ep = 0.0001;
+    vec2 e = vec2(1.0, -1.0) * 0.5773;
+    float vxyy = distR3(pos + e.xyy * ep, ch);
+    float vyyx = distR3(pos + e.yyx * ep, ch);
+    float vyxy = distR3(pos + e.yxy * ep, ch);
+    float vxxx = distR3(pos + e.xxx * ep, ch);
+    vec3 dir = e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
+    return Vector(tv.pos, normalize(dir));
+}
+
+void setData(inout Path path, Chain ch) {
+    if (at(path.tv, ch)) {
+        Vector normal = normalVec(path.tv, ch);
+        bool side = inside(path.tv, ch);
+        setObjectInAir(path.dat, side, normal, ch.mat);
+    }
+}
+
+
+// ============================================
 // SECTION 8: INSTANCES
 // ============================================
 
@@ -188,14 +268,29 @@ Checkers checkers;
 PlateLines plateLines;
 PlanarConics planarConics;
 
+// Chain
+Chain chain;
+
+// Plate legs
+Cone plateLeg1;
+Cone plateLeg2;
+Cone plateLeg3;
+Cone plateLeg4;
+
 
 // ============================================
 // SECTION 9: BUILD
 // ============================================
 
-// Offsets to position the two groups side by side
-const vec3 SURFACE_POS = vec3(3.5, 0, 0);
-const vec3 PLATE_POS   = vec3(-1, -2.4, 0);
+// Vertical stretch factor for the cubic surface
+const float STRETCH_H = 1.4;
+
+// Layout: stretched surface above plate on legs, portrait framing
+const float FLOOR_Y = -4.0;
+const float LEG_HEIGHT = 0.6;
+const float LEG_RADIUS = 0.08;
+const vec3 SURFACE_POS = vec3(0, 1.5, 0);
+const vec3 PLATE_POS   = vec3(0, FLOOR_Y + LEG_HEIGHT + 0.05, 0);
 
 
 void buildObjects() {
@@ -216,20 +311,29 @@ void buildObjects() {
 
     pairLines.center = SURFACE_POS;
     pairLines.radius = 0.02;
-    pairLines.mat = makeMetal(vec3(0.4), 0.3, 0.4);
+    pairLines.mat = makeMetal(vec3(0.7, 0.7, 0.75), 0.6, 0.2);
 
     conicLines.center = SURFACE_POS;
     conicLines.radius = 0.02;
-    conicLines.mat = makeMetal(vec3(0.1, 0.2, 0.7), 0.3, 0.4);
+    conicLines.mat = makeMetal(vec3(0.85, 0.6, 0.15), 0.6, 0.2);
 
     exceptionalLines.center = SURFACE_POS;
     exceptionalLines.radius = 0.02;
-    exceptionalLines.mat = makeMetal(vec3(0.7, 0.1, 0.1), 0.3, 0.4);
+    exceptionalLines.mat = makeMetal(vec3(0.75, 0.35, 0.35), 0.6, 0.2);
 
     ring.center = SURFACE_POS;
     ring.radius = 0.05;
     ring.scale = surface.scale;
     ring.mat = makeMetal(vec3(0.1), 0.3, 0.4);
+
+    // === CHAIN (hanging surface from above) ===
+    chain.center = SURFACE_POS + vec3(0, 0, 0.3);
+    chain.yBottom = SURFACE_POS.y + 2.0 * STRETCH_H - chain.R * 2.0;  // overlap into top of ellipsoid
+    chain.yTop = 15.0;  // off screen above
+    chain.R = 0.1;
+    chain.r = 0.025;
+    chain.le = 0.06;
+    chain.mat = makeMetal(vec3(0.04, 0.04, 0.05), 0.3, 0.5);
 
     // === PLATE GROUP (right, sitting on floor) ===
 
@@ -243,15 +347,45 @@ void buildObjects() {
     checkers.cylHeight = 0.02;
     checkers.rounding = 0.008;
     checkers.yOffset = 0.07;
-    checkers.mat = makeMetal(vec3(0.7, 0.1, 0.1), 0.3, 0.4);
+    checkers.mat = makeMetal(vec3(0.75, 0.35, 0.35), 0.6, 0.2);
 
     plateLines.center = PLATE_POS + vec3(0, 0.05, 0);
     plateLines.radius = 0.02;
-    plateLines.mat = makeMetal(vec3(0.4), 0.3, 0.4);
+    plateLines.mat = makeMetal(vec3(0.7, 0.7, 0.75), 0.6, 0.2);
 
     planarConics.center = PLATE_POS + vec3(0, 0.05, 0);
     planarConics.radius = 0.02;
-    planarConics.mat = makeMetal(vec3(0.1, 0.2, 0.7), 0.3, 0.4);
+    planarConics.mat = makeMetal(vec3(0.85, 0.6, 0.15), 0.6, 0.2);
+
+    // === PLATE LEGS (glass cylinders at corners) ===
+    float legInset = PLATE_RADIUS - 0.15;
+    float legMidY = FLOOR_Y + LEG_HEIGHT * 0.5;
+    Material legMat = makeGlass(vec3(0.1, 0.05, 0.1), 1.5, 0.98);
+    vec3 legXZ = vec3(PLATE_POS.x, legMidY, PLATE_POS.z);
+
+    plateLeg1.center = legXZ + vec3(-legInset, 0, -legInset);
+    plateLeg1.height = LEG_HEIGHT * 0.5;
+    plateLeg1.base = LEG_RADIUS;
+    plateLeg1.flare = 1.0;
+    plateLeg1.mat = legMat;
+
+    plateLeg2.center = legXZ + vec3(legInset, 0, -legInset);
+    plateLeg2.height = LEG_HEIGHT * 0.5;
+    plateLeg2.base = LEG_RADIUS;
+    plateLeg2.flare = 1.0;
+    plateLeg2.mat = legMat;
+
+    plateLeg3.center = legXZ + vec3(-legInset, 0, legInset);
+    plateLeg3.height = LEG_HEIGHT * 0.5;
+    plateLeg3.base = LEG_RADIUS;
+    plateLeg3.flare = 1.0;
+    plateLeg3.mat = legMat;
+
+    plateLeg4.center = legXZ + vec3(legInset, 0, legInset);
+    plateLeg4.height = LEG_HEIGHT * 0.5;
+    plateLeg4.base = LEG_RADIUS;
+    plateLeg4.flare = 1.0;
+    plateLeg4.mat = legMat;
 }
 
 
@@ -269,9 +403,10 @@ float sdf_Objects(Vector tv) {
 
     float dist = maxDist;
 
-    // --- Surface group (sphere bbox, with caching) ---
+    // --- Surface group (sphere bbox, with squeeze for vertical stretch) ---
     vec3 surfPos = rotXZ(tv.pos - surface.center);
-    _cachedBBox = sceneBBox(surfPos);   // sphere: rotation-invariant
+    surfPos.y /= STRETCH_H;  // squeeze y for vertical stretch
+    _cachedBBox = sceneBBox(surfPos);   // sphere in squeezed space = ellipsoid
     _cachedPos = surfPos;
 
     if (_cachedBBox <= 0.0) {
@@ -279,14 +414,24 @@ float sdf_Objects(Vector tv) {
         _cachedVal = cubicF(scaled);
         _cachedGrad = cubicGrad(scaled);
 
-        dist = min(dist, sdf_cached(surface));
-        dist = min(dist, sdf_cached(pairLines));
-        dist = min(dist, sdf_cached(conicLines));
-        dist = min(dist, sdf_cached(exceptionalLines));
-        dist = min(dist, sdf_cached(ring));
+        float sd;
+        sd = sdf_cached(surface); dist = min(dist, sd / STRETCH_H);
+        sd = sdf_cached(pairLines); dist = min(dist, sd / STRETCH_H);
+        sd = sdf_cached(conicLines); dist = min(dist, sd / STRETCH_H);
+        sd = sdf_cached(exceptionalLines); dist = min(dist, sd / STRETCH_H);
+        sd = sdf_cached(ring); dist = min(dist, sd / STRETCH_H);
     } else {
-        dist = min(dist, _cachedBBox);
+        dist = min(dist, _cachedBBox / STRETCH_H);
     }
+
+    // --- Chain ---
+    dist = min(dist, sdf(tv, chain));
+
+    // --- Plate legs ---
+    dist = min(dist, sdf(tv, plateLeg1));
+    dist = min(dist, sdf(tv, plateLeg2));
+    dist = min(dist, sdf(tv, plateLeg3));
+    dist = min(dist, sdf(tv, plateLeg4));
 
     // --- Plate group (3D bbox early exit, skip if already close to surface) ---
     if (dist > 0.001) {
@@ -306,28 +451,45 @@ float sdf_Objects(Vector tv) {
 }
 
 bool inside_Object(Vector tv) {
-    Vector rotTV = Vector(rotXZ(tv.pos - SURFACE_POS) + SURFACE_POS, tv.dir);
-    return inside(rotTV, surface) || inside(tv, plate);
+    vec3 squeezed = rotXZ(tv.pos - SURFACE_POS);
+    squeezed.y /= STRETCH_H;
+    Vector rotTV = Vector(squeezed + SURFACE_POS, tv.dir);
+    return inside(rotTV, surface) || inside(tv, plate)
+        || inside(tv, plateLeg1) || inside(tv, plateLeg2)
+        || inside(tv, plateLeg3) || inside(tv, plateLeg4);
 }
 
 void setData_Objects(inout Path path) {
-    // Rotate query point into surface-local frame
+    // Rotate + squeeze query point into surface-local frame
     Vector origTV = path.tv;
-    path.tv.pos = rotXZ(path.tv.pos - SURFACE_POS) + SURFACE_POS;
+    vec3 local = rotXZ(path.tv.pos - SURFACE_POS);
+    local.y /= STRETCH_H;
+    path.tv.pos = local + SURFACE_POS;
 
-    // Surface group (evaluated in rotated frame)
+    // Surface group (evaluated in rotated + squeezed frame)
     setData(path, surface);
     setData(path, pairLines);
     setData(path, conicLines);
     setData(path, exceptionalLines);
     setData(path, ring);
 
-    // Un-rotate the normal back to world space
+    // Un-squeeze normal (inverse transpose), then un-rotate
+    path.dat.normal.dir.y *= STRETCH_H;
+    path.dat.normal.dir = normalize(path.dat.normal.dir);
     path.dat.normal.dir = unrotXZ(path.dat.normal.dir);
     path.dat.normal.pos = origTV.pos;
 
-    // Restore original tv for plate group
+    // Restore original tv for chain, legs, plate
     path.tv = origTV;
+
+    // Chain (no rotation)
+    setData(path, chain);
+
+    // Legs (no rotation)
+    setData(path, plateLeg1);
+    setData(path, plateLeg2);
+    setData(path, plateLeg3);
+    setData(path, plateLeg4);
 
     // Plate group (no rotation)
     setData(path, plate);

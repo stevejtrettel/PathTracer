@@ -112,7 +112,7 @@ float sceneBBox(vec3 pos) {
 }
 
 // Box bounding for plate group (lines + conics clipped to plate)
-const float PLATE_RADIUS = 1.2;
+const float PLATE_RADIUS = 1.8;
 
 float plateBBox(vec3 pos) {
     vec2 d = abs(pos.xz) - vec2(PLATE_RADIUS);
@@ -121,7 +121,7 @@ float plateBBox(vec3 pos) {
 
 // 3D bounding box for entire plate group (early exit in sdf_Objects)
 float plateGroupBBox(vec3 pos) {
-    vec3 d = abs(pos) - vec3(PLATE_RADIUS, 0.15, PLATE_RADIUS);
+    vec3 d = abs(pos) - vec3(PLATE_RADIUS, PLATE_RADIUS, 0.15);
     vec3 q = max(d, 0.0);
     return length(q) + min(max(d.x, max(d.y, d.z)), 0.0);
 }
@@ -147,6 +147,23 @@ vec3 rotXZ(vec3 p) {
 
 vec3 unrotXZ(vec3 p) {
     vec2 r = xzRotInv * p.xz;
+    return vec3(r.x, p.y, r.y);
+}
+
+// 90° rotation around x-axis: stands the xz plate up into xy plane
+vec3 standUp(vec3 p) { return vec3(p.x, -p.z, p.y); }
+vec3 layDown(vec3 p) { return vec3(p.x, p.z, -p.y); }
+
+// Plate yaw (rotation around y-axis)
+mat2 plateYawRot;
+mat2 plateYawInv;
+
+vec3 plateRot(vec3 p) {
+    vec2 r = plateYawRot * p.xz;
+    return vec3(r.x, p.y, r.y);
+}
+vec3 plateUnrot(vec3 p) {
+    vec2 r = plateYawInv * p.xz;
     return vec3(r.x, p.y, r.y);
 }
 
@@ -182,6 +199,10 @@ ConicLines conicLines;
 ExceptionalLines exceptionalLines;
 BoundaryRing ring;
 
+// Pedestals
+Box pedestal;
+Box platePedestal;
+
 // Plate group
 Box plate;
 Checkers checkers;
@@ -193,9 +214,15 @@ PlanarConics planarConics;
 // SECTION 9: BUILD
 // ============================================
 
-// Offsets to position the two groups side by side
-const vec3 SURFACE_POS = vec3(3.5, 0, 0);
-const vec3 PLATE_POS   = vec3(-1, -2.4, 0);
+// Layout: surface on pedestal (right), plate standing vertical on pedestal (left)
+const float PEDESTAL_HEIGHT = 1.5;
+const float PLATE_PED_HEIGHT = 0.8;
+const float FLOOR_Y = -3.0;
+const vec3 SURFACE_POS = vec3(3.0, FLOOR_Y + PEDESTAL_HEIGHT + 2.0, 0);
+const vec3 PEDESTAL_POS = vec3(3.0, FLOOR_Y + PEDESTAL_HEIGHT * 0.5, 0);
+const vec3 PLATE_PED_POS = vec3(-2.5, FLOOR_Y + PLATE_PED_HEIGHT * 0.5, 0);
+// Plate center: on top of its pedestal, raised by PLATE_RADIUS so bottom edge rests on pedestal
+const vec3 PLATE_POS    = vec3(-2.5, FLOOR_Y + PLATE_PED_HEIGHT + PLATE_RADIUS, 0);
 
 
 void buildObjects() {
@@ -206,52 +233,73 @@ void buildObjects() {
     xzRot = mat2(ca, sa, -sa, ca);
     xzRotInv = mat2(ca, -sa, sa, ca);
 
-    // === SURFACE GROUP (left) ===
+    // Plate yaw (fixed angle)
+    float plateAngle = 0.5;
+    float pca = cos(plateAngle), psa = sin(plateAngle);
+    plateYawRot = mat2(pca, psa, -psa, pca);
+    plateYawInv = mat2(pca, -psa, psa, pca);
+
+    // === PEDESTAL ===
+
+    pedestal.center = PEDESTAL_POS;
+    pedestal.sides = vec3(0.8, PEDESTAL_HEIGHT * 0.5, 0.8);
+    pedestal.rounded = 0.05;
+    pedestal.mat = makeGlass(vec3(0.1, 0.05, 0.1), 1.5, 0.98);
+
+    // === SURFACE GROUP (on pedestal) ===
 
     surface.center = SURFACE_POS;
     surface.scale = 1.0;
-    surface.thickness = vec2(0.01, 0.0);
+    surface.thickness = vec2(0.05, 0.0);
     surface.smoothing = 0.05;
-    surface.mat =makeGlass(2.*vec3(0.3, 0.05, 0.2), 1.5, 0.95);
+    surface.mat = makeGlass(3.*vec3(0.3, 0.05, 0.2), 1.3, 0.97);
 
     pairLines.center = SURFACE_POS;
     pairLines.radius = 0.02;
-    pairLines.mat = makeMetal(vec3(0.4), 0.3, 0.4);
+    pairLines.mat = makeMetal(vec3(0.7, 0.7, 0.75), 0.6, 0.2);
 
     conicLines.center = SURFACE_POS;
     conicLines.radius = 0.02;
-    conicLines.mat = makeMetal(vec3(0.1, 0.2, 0.7), 0.3, 0.4);
+    conicLines.mat = makeMetal(vec3(0.85, 0.6, 0.15), 0.6, 0.2);
 
     exceptionalLines.center = SURFACE_POS;
     exceptionalLines.radius = 0.02;
-    exceptionalLines.mat = makeMetal(vec3(0.7, 0.1, 0.1), 0.3, 0.4);
+    exceptionalLines.mat = makeMetal(vec3(0.75, 0.35, 0.35), 0.6, 0.2);
 
     ring.center = SURFACE_POS;
     ring.radius = 0.05;
     ring.scale = surface.scale;
     ring.mat = makeMetal(vec3(0.1), 0.3, 0.4);
 
-    // === PLATE GROUP (right, sitting on floor) ===
+    // === PLATE PEDESTAL (glass box, wider and shorter than surface pedestal) ===
+
+    platePedestal.center = PLATE_PED_POS;
+    platePedestal.sides = vec3(1.2, PLATE_PED_HEIGHT * 0.5, 0.4);
+    platePedestal.rounded = 0.05;
+    platePedestal.mat = makeGlass(vec3(0.1, 0.05, 0.1), 1.5, 0.98);
+
+    // === PLATE GROUP (standing vertical — shapes evaluate in rotated frame) ===
+    // Shapes work in xz plane; standUp() rotates query so xy plane maps to xz
 
     plate.center = PLATE_POS;
-    plate.sides = vec3(PLATE_RADIUS, 0.05, PLATE_RADIUS);
+    plate.sides = vec3(PLATE_RADIUS, PLATE_RADIUS, 0.05);
     plate.rounded = 0.02;
-    plate.mat = makeGlass(vec3(0.3, 0.05, 0.2), 1.5, 0.95);
+    plate.mat = makeGlass(vec3(0.3, 0.05, 0.2), 1.5, 0.97);
 
     checkers.center = PLATE_POS;
     checkers.cylRadius = 0.06;
     checkers.cylHeight = 0.02;
     checkers.rounding = 0.008;
     checkers.yOffset = 0.07;
-    checkers.mat = makeMetal(vec3(0.7, 0.1, 0.1), 0.3, 0.4);
+    checkers.mat = makeMetal(vec3(0.75, 0.35, 0.35), 0.6, 0.2);
 
-    plateLines.center = PLATE_POS + vec3(0, 0.05, 0);
+    plateLines.center = PLATE_POS + vec3(0, 0.06, 0);
     plateLines.radius = 0.02;
-    plateLines.mat = makeMetal(vec3(0.4), 0.3, 0.4);
+    plateLines.mat = makeMetal(vec3(0.7, 0.7, 0.75), 0.6, 0.2);
 
-    planarConics.center = PLATE_POS + vec3(0, 0.05, 0);
+    planarConics.center = PLATE_POS + vec3(0, 0.06, 0);
     planarConics.radius = 0.02;
-    planarConics.mat = makeMetal(vec3(0.1, 0.2, 0.7), 0.3, 0.4);
+    planarConics.mat = makeMetal(vec3(0.85, 0.6, 0.15), 0.6, 0.2);
 }
 
 
@@ -288,15 +336,24 @@ float sdf_Objects(Vector tv) {
         dist = min(dist, _cachedBBox);
     }
 
-    // --- Plate group (3D bbox early exit, skip if already close to surface) ---
+    // --- Pedestal (surface) ---
+    dist = min(dist, sdf(tv, pedestal));
+
+    // --- Plate group + pedestal (yaw-rotated, standing vertical) ---
+    vec3 plateLocalYaw = plateRot(tv.pos - PLATE_POS);
+    Vector plateTVYaw = Vector(plateLocalYaw + PLATE_POS, tv.dir);
+
+    dist = min(dist, sdf(plateTVYaw, platePedestal));
+
     if (dist > 0.001) {
-        vec3 plateLocal = tv.pos - PLATE_POS;
-        float plateGroupDist = plateGroupBBox(plateLocal);
+        float plateGroupDist = plateGroupBBox(plateLocalYaw);
         if (plateGroupDist <= 0.0) {
-            dist = min(dist, sdf(tv, plate));
-            dist = min(dist, sdf(tv, checkers));
-            dist = min(dist, sdf(tv, plateLines));
-            dist = min(dist, sdf(tv, planarConics));
+            dist = min(dist, sdf(plateTVYaw, plate));
+            // Compose yaw + standUp for shapes that work in xz
+            Vector rotTV = Vector(standUp(plateLocalYaw) + PLATE_POS, tv.dir);
+            dist = min(dist, sdf(rotTV, checkers));
+            dist = min(dist, sdf(rotTV, plateLines));
+            dist = min(dist, sdf(rotTV, planarConics));
         } else {
             dist = min(dist, plateGroupDist);
         }
@@ -307,7 +364,9 @@ float sdf_Objects(Vector tv) {
 
 bool inside_Object(Vector tv) {
     Vector rotTV = Vector(rotXZ(tv.pos - SURFACE_POS) + SURFACE_POS, tv.dir);
-    return inside(rotTV, surface) || inside(tv, plate);
+    Vector plateTV = Vector(plateRot(tv.pos - PLATE_POS) + PLATE_POS, tv.dir);
+    return inside(rotTV, surface) || inside(plateTV, plate)
+        || inside(tv, pedestal) || inside(plateTV, platePedestal);
 }
 
 void setData_Objects(inout Path path) {
@@ -329,9 +388,37 @@ void setData_Objects(inout Path path) {
     // Restore original tv for plate group
     path.tv = origTV;
 
-    // Plate group (no rotation)
+    // Surface pedestal (no rotation)
+    setData(path, pedestal);
+
+    // Plate group: apply yaw rotation
+    Vector plateOrigTV = path.tv;
+    vec3 plateLocalYaw = plateRot(path.tv.pos - PLATE_POS);
+
+    // Plate box + pedestal (yaw only)
+    path.tv.pos = plateLocalYaw + PLATE_POS;
+    vec3 prevNormal1 = path.dat.normal.dir;
+
+    setData(path, platePedestal);
     setData(path, plate);
+
+    if (any(notEqual(path.dat.normal.dir, prevNormal1))) {
+        path.dat.normal.dir = plateUnrot(path.dat.normal.dir);
+        path.dat.normal.pos = plateOrigTV.pos;
+    }
+
+    // Plate shapes (yaw + standUp)
+    path.tv.pos = standUp(plateLocalYaw) + PLATE_POS;
+    vec3 prevNormal2 = path.dat.normal.dir;
+
     setData(path, checkers);
     setData(path, plateLines);
     setData(path, planarConics);
+
+    if (any(notEqual(path.dat.normal.dir, prevNormal2))) {
+        path.dat.normal.dir = plateUnrot(layDown(path.dat.normal.dir));
+        path.dat.normal.pos = plateOrigTV.pos;
+    }
+
+    path.tv = plateOrigTV;
 }
