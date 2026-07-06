@@ -5,19 +5,8 @@
 //----------------------------------------------------------------------------------------------------
 
 
-vec4 surfCyl_Data( vec3 p ){
-
-    //Compute gradient.
-    T vx = surfCyl_Eqn( T(p.x, 1.), T(p.y, 0.), T(p.z, 0.) );
-    T vy = surfCyl_Eqn( T(p.x, 0.), T(p.y, 1.), T(p.z, 0.) );
-    T vz = surfCyl_Eqn( T(p.x, 0.), T(p.y, 0.), T(p.z, 1.) );
-    vec3 grad = vec3(vx.y,vy.y,vz.y);
-
-    //the value of the function is automatically computed in each of the above:
-    float val = vx.x;
-
-    return vec4(grad,val);
-}
+//gradient (xyz) and value (w) of the defining equation
+VARIETY_DATA(surfCyl_Data, surfCyl_Eqn)
 
 
 

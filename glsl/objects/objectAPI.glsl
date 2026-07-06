@@ -68,3 +68,24 @@ void setData( inout Path path, Type obj ){                      \
 OBJECT_LOCATORS(Type)                                           \
 OBJECT_NORMAL_FD(Type)                                          \
 OBJECT_SETDATA(Type)
+
+
+//-------------------------------------------------
+// VARIETIES
+//
+// an algebraic variety file supplies its defining equation as a
+// dual-number function `T eqnFn(T x, T y, T z)` (see 1Setup/algVariety.glsl);
+// VARIETY_DATA generates the standard evaluator
+//
+//     vec4 dataFn( vec3 p )   // xyz = gradient, w = value
+//
+// used by the variety's sdf for the distance estimate DE(val, |grad|).
+//-------------------------------------------------
+
+#define VARIETY_DATA(dataFn, eqnFn)                             \
+vec4 dataFn( vec3 p ){                                          \
+    T vx = eqnFn( T(p.x, 1.), T(p.y, 0.), T(p.z, 0.) );         \
+    T vy = eqnFn( T(p.x, 0.), T(p.y, 1.), T(p.z, 0.) );         \
+    T vz = eqnFn( T(p.x, 0.), T(p.y, 0.), T(p.z, 1.) );         \
+    return vec4( vec3(vx.y, vy.y, vz.y), vx.x );                \
+}
