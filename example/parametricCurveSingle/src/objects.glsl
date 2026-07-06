@@ -44,6 +44,7 @@ ParametricCurve curve;
 void buildObjects(){
 
 
+    curve.frame = IDENTITY_FRAME;
     curve.t0 = 0.;
     curve.t1 = 6.28;
     curve.segments = 128;

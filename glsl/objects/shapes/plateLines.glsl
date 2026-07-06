@@ -11,35 +11,36 @@
 
 
 struct PlateLines {
-    vec3 center;
+    Frame frame;
     float radius;    // tube thickness
     Material mat;
 };
 
-//the point-level sdf
+//the local-frame sdf
 float sdf(vec3 p, PlateLines obj) {
-    vec3 pos = p - obj.center;
     float d = 1e6;
     for (int i = 0; i < 15; i++) {
-        d = min(d, lineDist2D(pos, PLANE_LINES[i]));
+        d = min(d, lineDist2D(p, PLANE_LINES[i]));
     }
     d -= obj.radius;
-    return max(d, plateBBox(pos));
+    return max(d, plateBBox(p));
 }
 
-//the standard locators: at, inside, sdf
-UNFRAMED_LOCATORS(PlateLines)
+//the standard interface: initObject, at, inside, sdf
+OBJECT_INIT(PlateLines)
+OBJECT_LOCATORS(PlateLines)
 
+//analytic normalVec: normal of the nearest line, computed in local coordinates
 Vector normalVec(Vector tv, PlateLines obj) {
-    vec3 pos = tv.pos - obj.center;
+    vec3 q = toLocal(obj.frame, tv.pos);
     float best = 1e6;
     int idx = 0;
     for (int i = 0; i < 15; i++) {
-        float d = lineDist2D(pos, PLANE_LINES[i]);
+        float d = lineDist2D(q, PLANE_LINES[i]);
         if (d < best) { best = d; idx = i; }
     }
-    vec3 n = lineNormal2D(pos, PLANE_LINES[idx]);
-    return Vector(tv.pos, n);
+    vec3 n = lineNormal2D(q, PLANE_LINES[idx]);
+    return Vector(tv.pos, dirToWorld(obj.frame, n));
 }
 
 //the standard setData

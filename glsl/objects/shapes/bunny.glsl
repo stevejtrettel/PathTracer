@@ -4,9 +4,8 @@
 //The STANFORD BUNNY sdf
 //-------------------------------------------------
 
-//the data of a sphere is its center and radius
 struct Bunny{
-    vec3 center;
+    Frame frame;
     float scale;
     Material mat;
 };
@@ -56,12 +55,10 @@ float sdBunny(vec3 p,float size) {
 }
 
 
-//the point-level sdf
+//the local-frame sdf
 float sdf( vec3 p, Bunny bunny ){
-    //normalize position
-    vec3 pos = p - bunny.center;
-    return sdBunny(pos,bunny.scale);
+    return sdBunny(p,bunny.scale);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(Bunny)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(Bunny)

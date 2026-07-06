@@ -10,20 +10,19 @@
 
 
 struct PlanarConics {
-    vec3 center;
+    Frame frame;
     float radius;    // tube thickness
     Material mat;
 };
 
-//the point-level sdf
+//the local-frame sdf
 float sdf(vec3 p, PlanarConics obj) {
-    vec3 pos = p - obj.center;
     float d = 1e6;
     for (int i = 0; i < 6; i++) {
-        d = min(d, conicTubeDist(pos, PLANE_CONICS[i], obj.radius));
+        d = min(d, conicTubeDist(p, PLANE_CONICS[i], obj.radius));
     }
-    return max(d, plateBBox(pos));
+    return max(d, plateBBox(p));
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(PlanarConics)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(PlanarConics)

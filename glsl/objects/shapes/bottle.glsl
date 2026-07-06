@@ -6,7 +6,7 @@
 
 
 struct Bottle{
-    vec3 center;
+    Frame frame;
     float baseRadius;
     float baseHeight;
     float neckRadius;
@@ -23,9 +23,10 @@ struct Bottle{
 //----distance and normal functions
 
 //auxilary function calculating bottle distance, and giving inside/outside info
+//takes a position in the bottle's LOCAL coordinates
 float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
 
-    vec3 pos=p-bottle.center;
+    vec3 pos=p;
 
     //the base of the bottle
     float base=cylinderDist(pos,bottle.baseRadius, bottle.baseHeight,bottle.rounded);
@@ -66,5 +67,5 @@ float sdf(vec3 pos, Bottle bottle){
     return bottleDistance(pos,bottle,trashFloat);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(Bottle)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(Bottle)

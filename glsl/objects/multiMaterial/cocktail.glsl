@@ -18,11 +18,13 @@ bool inDrink( Vector tv, Cocktail cocktail){
     float drinkSide;
 
     //tells us if we are inside the cup and below the waterline:
-    float cup = cocktailGlassDistance(tv.pos, cocktail.glass, drinkSide);
+    //cocktailGlassDistance works in the glass's local frame; rescale distances to world
+    float cup = cocktail.glass.frame.scale * cocktailGlassDistance(toLocal(cocktail.glass.frame, tv.pos), cocktail.glass, drinkSide);
+    drinkSide *= cocktail.glass.frame.scale;
 
     //distance to the top of the drink
     //right now direcly in the center of the cup
-    float drinkTop = tv.pos.y-cocktail.glass.center.y-cocktail.glass.height/3.;
+    float drinkTop = tv.pos.y-cocktail.glass.frame.pos.y-cocktail.glass.height/3.;
 
     //distance to drink is intersection of inside dist and this top
     float drink = max(drinkSide, drinkTop);
@@ -39,11 +41,13 @@ float sdf( Vector tv, Cocktail cocktail){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup = cocktailGlassDistance(tv.pos, cocktail.glass, drinkSide);
+    //cocktailGlassDistance works in the glass's local frame; rescale distances to world
+    float cup = cocktail.glass.frame.scale * cocktailGlassDistance(toLocal(cocktail.glass.frame, tv.pos), cocktail.glass, drinkSide);
+    drinkSide *= cocktail.glass.frame.scale;
 
     //distance to the top of the drink
     //right now direcly in the center of the cup
-    float drinkTop = tv.pos.y-cocktail.glass.center.y-cocktail.glass.height/3.;
+    float drinkTop = tv.pos.y-cocktail.glass.frame.pos.y-cocktail.glass.height/3.;
 
     //distance to drink is intersection of inside dist and this top
     float drink = max(drinkSide, drinkTop);
@@ -62,11 +66,13 @@ void setData(inout Path path, Cocktail cocktail){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup=cocktailGlassDistance(path.tv.pos,cocktail.glass,drinkSide);
+    //cocktailGlassDistance works in the glass's local frame; rescale distances to world
+    float cup=cocktail.glass.frame.scale * cocktailGlassDistance(toLocal(cocktail.glass.frame, path.tv.pos),cocktail.glass,drinkSide);
+    drinkSide *= cocktail.glass.frame.scale;
 
     //distance to the top of the drink
     //right now direcly in the center of the cup
-    float drinkTop=path.tv.pos.y-cocktail.glass.center.y-cocktail.glass.height/3.;
+    float drinkTop=path.tv.pos.y-cocktail.glass.frame.pos.y-cocktail.glass.height/3.;
 
     //distance to drink is intersection of inside dist and this top
     float drink=max(drinkSide,drinkTop);

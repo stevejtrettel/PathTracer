@@ -109,29 +109,29 @@ BoundaryRing ring;
 void buildObjects() {
 
     // --- Surface ---
-    surface.center = vec3(0);
+    surface.frame = IDENTITY_FRAME;
     surface.scale = 1.0;
     surface.thickness = vec2(0.01, 0.0);   // thin shell
     surface.smoothing = 0.05;
     surface.mat = makeGlass(vec3(0.5, 0.3, 0.1), 1.5, 0.95);
 
     // --- Pair lines (gray) ---
-    pairLines.center = vec3(0);
+    pairLines.frame = IDENTITY_FRAME;
     pairLines.radius = 0.02;
     pairLines.mat = makeMetal(vec3(0.55), 0.8, 0.1);
 
     // --- Conic lines (blue) ---
-    conicLines.center = vec3(0);
+    conicLines.frame = IDENTITY_FRAME;
     conicLines.radius = 0.02;
     conicLines.mat = makeMetal(vec3(0.2, 0.45, 0.9), 0.8, 0.1);
 
     // --- Exceptional lines (red) ---
-    exceptionalLines.center = vec3(0);
+    exceptionalLines.frame = IDENTITY_FRAME;
     exceptionalLines.radius = 0.02;
     exceptionalLines.mat = makeMetal(vec3(0.9, 0.25, 0.2), 0.8, 0.1);
 
     // --- Boundary ring ---
-    ring.center = vec3(0);
+    ring.frame = IDENTITY_FRAME;
     ring.radius = 0.01;
     ring.scale = surface.scale;
     ring.mat = makeMetal(vec3(0.1), 0.6, 0.2);
@@ -149,8 +149,8 @@ float trace_Objects(Vector tv) {
 }
 
 float sdf_Objects(Vector tv) {
-    // All objects share surface.center — compute bbox ONCE
-    vec3 pos = tv.pos - surface.center;
+    // All objects share the surface frame — localize + compute bbox ONCE
+    vec3 pos = toLocal(surface.frame, tv.pos);
     _cachedBBox = sceneBBox(pos);
     _cachedPos = pos;
 

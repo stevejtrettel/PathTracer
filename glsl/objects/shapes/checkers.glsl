@@ -13,7 +13,7 @@ float sdRoundedCylinder(vec3 p, float r, float h, float rnd) {
 
 
 struct Checkers {
-    vec3 center;
+    Frame frame;
     float cylRadius;   // xz radius of each checker
     float cylHeight;   // half-height
     float rounding;    // edge rounding
@@ -21,16 +21,15 @@ struct Checkers {
     Material mat;
 };
 
-//the point-level sdf
+//the local-frame sdf
 float sdf(vec3 p, Checkers obj) {
-    vec3 pos = p - obj.center;
     float d = 1e6;
     for (int i = 0; i < 6; i++) {
-        vec3 localPos = pos - vec3(POINTS[i].x, obj.yOffset, POINTS[i].y);
+        vec3 localPos = p - vec3(POINTS[i].x, obj.yOffset, POINTS[i].y);
         d = min(d, sdRoundedCylinder(localPos, obj.cylRadius, obj.cylHeight, obj.rounding));
     }
     return d;
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(Checkers)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(Checkers)

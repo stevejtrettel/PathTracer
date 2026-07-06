@@ -135,12 +135,14 @@ float sdf(Vector tv, BottleLiquid gin){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup=bottleDistance(tv.pos,gin.glass,drinkSide);
+    //bottleDistance works in the glass's local frame; rescale distances to world
+    float cup=gin.glass.frame.scale * bottleDistance(toLocal(gin.glass.frame, tv.pos),gin.glass,drinkSide);
+    drinkSide *= gin.glass.frame.scale;
 
     //distance to the top of the drink
     //right now no fill=exactly bottom of the glass
 
-    float drinkTop=tv.pos.y-gin.glass.center.y;
+    float drinkTop=tv.pos.y-gin.glass.frame.pos.y;
 
     drinkTop-=gin.glass.baseHeight*gin.fill;
 
@@ -164,13 +166,15 @@ void setData(inout Path path, BottleLiquid gin){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup=bottleDistance(path.tv.pos,gin.glass,drinkSide);
+    //bottleDistance works in the glass's local frame; rescale distances to world
+    float cup=gin.glass.frame.scale * bottleDistance(toLocal(gin.glass.frame, path.tv.pos),gin.glass,drinkSide);
+    drinkSide *= gin.glass.frame.scale;
 
 
     //distance to the top of the drink
     //right now no fill=exactly bottom of the glass
 
-    float drinkTop=path.tv.pos.y-gin.glass.center.y;
+    float drinkTop=path.tv.pos.y-gin.glass.frame.pos.y;
 
     drinkTop-=gin.glass.baseHeight*gin.fill;
 

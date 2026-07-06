@@ -140,11 +140,13 @@ bool inDrink( Vector tv, Beer beer){
     float drinkSide;
 
     //tells us if we are inside the cup and below the waterline:
-    float cup = pintDistance(tv.pos, beer.glass, drinkSide);
+    //pintDistance works in the glass's local frame; rescale distances to world
+    float cup = beer.glass.frame.scale * pintDistance(toLocal(beer.glass.frame, tv.pos), beer.glass, drinkSide);
+    drinkSide *= beer.glass.frame.scale;
 
     //distance to the top of the drink
     //right now direcly in the center of the cup
-    float drinkTop = tv.pos.y-beer.glass.center.y-beer.glass.height/beerHeightInCup;
+    float drinkTop = tv.pos.y-beer.glass.frame.pos.y-beer.glass.height/beerHeightInCup;
 
     //distance to drink is intersection of inside dist and this top
     float drink = max(drinkSide, drinkTop);
@@ -165,11 +167,13 @@ float sdf( Vector tv, Beer beer){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup = pintDistance(tv.pos, beer.glass, drinkSide);
+    //pintDistance works in the glass's local frame; rescale distances to world
+    float cup = beer.glass.frame.scale * pintDistance(toLocal(beer.glass.frame, tv.pos), beer.glass, drinkSide);
+    drinkSide *= beer.glass.frame.scale;
 
     //distance to the top of the drink
     //right now direcly in the center of the cup
-    float drinkTop = tv.pos.y-beer.glass.center.y-beer.glass.height/beerHeightInCup;
+    float drinkTop = tv.pos.y-beer.glass.frame.pos.y-beer.glass.height/beerHeightInCup;
 
     //distance to drink is intersection of inside dist and this top
     float drink = max(drinkSide, drinkTop);
@@ -189,11 +193,13 @@ void setData(inout Path path, Beer beer){
     float drinkSide;
 
     //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
-    float cup=pintDistance(path.tv.pos,beer.glass,drinkSide);
+    //pintDistance works in the glass's local frame; rescale distances to world
+    float cup=beer.glass.frame.scale * pintDistance(toLocal(beer.glass.frame, path.tv.pos),beer.glass,drinkSide);
+    drinkSide *= beer.glass.frame.scale;
 
     //distance to the top of the drink
     //right now direcly in the center of the cup
-    float drinkTop=path.tv.pos.y-beer.glass.center.y-beer.glass.height/beerHeightInCup;
+    float drinkTop=path.tv.pos.y-beer.glass.frame.pos.y-beer.glass.height/beerHeightInCup;
     float foamThickness = 0.4;
 
 
@@ -203,7 +209,7 @@ void setData(inout Path path, Beer beer){
     float scatterDifference = 1.-beer.drink.isotropicScatter;
     float foamScatter = beer.drink.isotropicScatter + scatterDifference * exp(-pow(abs(drinkTop/foamThickness),5.));
     float foamFreePath = beer.drink.meanFreePath*(1.+3.*exp(-pow(abs(drinkTop/foamThickness),10.)));
-    // float beerTop = path.tv.pos.y-beer.glass.center.y-beer.glass.height/2.+0.2;
+    // float beerTop = path.tv.pos.y-beer.glass.frame.pos.y-beer.glass.height/2.+0.2;
 
     //distance to drink is intersection of inside dist and this top
     float drink=max(drinkSide,drinkTop);

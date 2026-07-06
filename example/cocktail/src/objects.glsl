@@ -16,7 +16,7 @@ void buildObjects(){
     vec3 redAbsorb=vec3(0.2,1.,0.6);
     vec3 clearGlass = vec3(0.3,0.05,0.05);
 
-    cGlass.center=vec3(-1.,-0.15,-1.2);
+    cGlass.frame=makeFrame(vec3(-1.,-0.15,-1.2));
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;

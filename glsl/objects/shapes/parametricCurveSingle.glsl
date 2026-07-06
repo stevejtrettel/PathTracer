@@ -7,6 +7,9 @@
 const int MAX_SEGMENTS = 256;
 
 struct ParametricCurve {
+// Placement (curve data is authored in the local chart)
+    Frame frame;
+
 // Parameter range and sampling
     float t0;
     float t1;
@@ -94,29 +97,32 @@ ClosestInfo closestCurveTube(vec3 x, in ParametricCurve pc) {
     return ci;
 }
 
-//the point-level sdf
+//the local-frame sdf
 float sdf(vec3 p, in ParametricCurve pc) {
     float db = bboxDistance(p, pc);
     if (db > 0.) return db+0.01;           // outside → cheap, safe step
     return closestCurveTube(p, pc).d;  // inside → full evaluation
 }
 
-//the standard locators: at, inside, sdf
-UNFRAMED_LOCATORS(ParametricCurve)
+//the standard interface: initObject, at, inside, sdf
+OBJECT_INIT(ParametricCurve)
+OBJECT_LOCATORS(ParametricCurve)
 
+//analytic normalVec: away from the closest centerline point, in local coordinates
 Vector normalVec(Vector tv, in ParametricCurve pc) {
-    ClosestInfo ci = closestCurveTube(tv.pos, pc);
-    vec3 n = normalize(tv.pos - ci.q);
+    vec3 q = toLocal(pc.frame, tv.pos);
+    ClosestInfo ci = closestCurveTube(q, pc);
+    vec3 n = normalize(q - ci.q);
     if (length(n) < 1e-5) {
         const vec2 e = vec2(1.0, -1.0) * 1e-4;
         vec3 g = vec3(
-        sdf(tv.pos + vec3(e.x,0,0), pc) - sdf(tv.pos + vec3(e.y,0,0), pc),
-        sdf(tv.pos + vec3(0,e.x,0), pc) - sdf(tv.pos + vec3(0,e.y,0), pc),
-        sdf(tv.pos + vec3(0,0,e.x), pc) - sdf(tv.pos + vec3(0,0,e.y), pc)
+        sdf(q + vec3(e.x,0,0), pc) - sdf(q + vec3(e.y,0,0), pc),
+        sdf(q + vec3(0,e.x,0), pc) - sdf(q + vec3(0,e.y,0), pc),
+        sdf(q + vec3(0,0,e.x), pc) - sdf(q + vec3(0,0,e.y), pc)
         );
         n = normalize(g);
     }
-    return Vector(tv.pos, n);
+    return Vector(tv.pos, dirToWorld(pc.frame, n));
 }
 
 //the standard setData

@@ -114,7 +114,7 @@ void buildObjects() {
     plate.mat = makeGlass(vec3(0.5, 0.3, 0.1), 1.5, 0.95);
 
     // --- Checker pieces (red) ---
-    checkers.center = vec3(0);
+    checkers.frame = IDENTITY_FRAME;
     checkers.cylRadius = 0.08;
     checkers.cylHeight = 0.03;
     checkers.rounding = 0.01;
@@ -122,12 +122,12 @@ void buildObjects() {
     checkers.mat = makeMetal(vec3(0.9, 0.25, 0.2), 0.8, 0.1);
 
     // --- 15 lines (gray) ---
-    plateLines.center = vec3(0, 0.05, 0);   // sit on plate top surface
+    plateLines.frame = makeFrame(vec3(0, 0.05, 0));   // sit on plate top surface
     plateLines.radius = 0.025;
     plateLines.mat = makeMetal(vec3(0.55), 0.8, 0.1);
 
     // --- 6 conics (blue) ---
-    planarConics.center = vec3(0, 0.05, 0);   // sit on plate top surface
+    planarConics.frame = makeFrame(vec3(0, 0.05, 0));   // sit on plate top surface
     planarConics.radius = 0.025;
     planarConics.mat = makeMetal(vec3(0.2, 0.45, 0.9), 0.8, 0.1);
 }

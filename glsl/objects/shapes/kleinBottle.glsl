@@ -6,7 +6,7 @@
 
 
 struct KleinBottle{
-    vec3 center;
+    Frame frame;
     float size;
     float thickness;
     Material mat;
@@ -59,17 +59,16 @@ float sdKlein(vec3 p, float thickness){
 }
 
 
-//the point-level sdf
+//the local-frame sdf
 float sdf( vec3 p, KleinBottle klein ){
 
-    //normalize position
-    vec3 pos = p - klein.center;
-    pos = vec3(-pos.y,pos.z,pos.x);
+    //fixed axis permutation baked into the shape
+    vec3 pos = vec3(-p.y,p.z,p.x);
     pos /= klein.size;
 
     return sdKlein(pos,klein.thickness*klein.size);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(KleinBottle)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(KleinBottle)
 

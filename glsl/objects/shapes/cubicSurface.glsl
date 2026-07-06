@@ -6,11 +6,13 @@
 //   vec3 cubicGrad(vec3 p)     — evaluates the analytic gradient
 //   float sceneBBox(vec3 pos)  — bounding SDF (centered at object center)
 // Also expects cached globals: _cachedVal, _cachedGrad, _cachedBBox
+// (cached values are in the object's LOCAL frame: the scene must localize
+//  the query point with toLocal(obj.frame, ...) before filling the cache)
 //----------------------------------------------------------------------------------------------
 
 
 struct CubicSurface {
-    vec3 center;
+    Frame frame;
     float scale;
     float smoothing;
     vec2 thickness;    // .x = inward, .y = outward
@@ -18,10 +20,9 @@ struct CubicSurface {
 };
 
 
-//the point-level sdf
+//the local-frame sdf
 float sdf(vec3 p, CubicSurface surf) {
-    vec3 pos = p - surf.center;
-    vec3 scaled = surf.scale * pos;
+    vec3 scaled = surf.scale * p;
 
     float val = cubicF(scaled);
     float gradLen = length(cubicGrad(scaled)) * surf.scale;
@@ -31,7 +32,7 @@ float sdf(vec3 p, CubicSurface surf) {
     dist = abs(dist + surf.thickness.x) - surf.thickness.x - surf.thickness.y;
 
     // clip to bounding region
-    float bboxDist = sceneBBox(pos);
+    float bboxDist = sceneBBox(p);
     dist = smax(dist, bboxDist, surf.smoothing);
 
     return dist;
@@ -46,5 +47,5 @@ float sdf_cached(CubicSurface surf) {
     return dist;
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(CubicSurface)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(CubicSurface)

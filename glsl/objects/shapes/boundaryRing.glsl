@@ -7,11 +7,13 @@
 //   vec3 cubicGrad(vec3 p)     — evaluates the analytic gradient
 //   float sceneBBox(vec3 pos)  — bounding SDF
 // Also expects cached globals: _cachedVal, _cachedGrad, _cachedBBox
+// (cached values are in the object's LOCAL frame: the scene must localize
+//  the query point with toLocal(obj.frame, ...) before filling the cache)
 //----------------------------------------------------------------------------------------------
 
 
 struct BoundaryRing {
-    vec3 center;
+    Frame frame;
     float radius;    // tube thickness
     float scale;     // must match surface.scale
     Material mat;
@@ -28,11 +30,10 @@ float surfaceDist(vec3 pos, float scale) {
     return abs(val) / max(length(grad), 1e-6);
 }
 
-//the point-level sdf
+//the local-frame sdf
 float sdf(vec3 p, BoundaryRing ring) {
-    vec3 pos = p - ring.center;
-    float dSurf = surfaceDist(pos, ring.scale);
-    float dBox = abs(sceneBBox(pos));
+    float dSurf = surfaceDist(p, ring.scale);
+    float dBox = abs(sceneBBox(p));
     return 0.5 * (sqrt(dSurf * dSurf + dBox * dBox) - ring.radius);
 }
 
@@ -47,5 +48,5 @@ float sdf_cached(BoundaryRing ring) {
     return 0.5 * (sqrt(dSurf * dSurf + dBox * dBox) - ring.radius);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(BoundaryRing)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(BoundaryRing)

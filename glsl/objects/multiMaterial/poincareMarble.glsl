@@ -19,7 +19,7 @@ PoincareMarble createPoincareMarble(Material dodMat, Material glassMat ){
     obj.dod = buildHypDod(0.4);
     obj.dod.mat = dodMat;
 
-    obj.glass = Sphere(vec3(0,0,0), 1.,glassMat);
+    obj.glass = Sphere(IDENTITY_FRAME, 1.,glassMat);
     return obj;
 
 }

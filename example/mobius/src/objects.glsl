@@ -18,7 +18,7 @@ void buildObjects(){
 
 
 
-    mobius.center=vec3(-5,1.5,-2);
+    mobius.frame=makeFrame(vec3(-5,1.5,-2));
     mobius.twists=1.;
     mobius.radius=1.;
     mobius.width =0.4;
@@ -42,7 +42,7 @@ void buildObjects(){
     mobius.borderMat.roughness=0.3;
 
 
-    mobius2.center=vec3(-5,1.5,-2);
+    mobius2.frame=makeFrame(vec3(-5,1.5,-2));
     mobius2.twists=1.;
     mobius2.radius=1.;
     mobius2.width =0.4;

@@ -9,7 +9,7 @@
 //thus the first distance function has an inout telling you if you are inside the glass
 
 struct CocktailGlass{
-    vec3 center;
+    Frame frame;
     float radius;
     float height;
     float thickness;
@@ -18,9 +18,10 @@ struct CocktailGlass{
 };
 
 
+//takes a position in the glass's LOCAL coordinates
 float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
 
-    vec3 pos=p-glass.center;
+    vec3 pos=p;
 
     float outside=cylinderDist(pos,glass.radius,glass.height,0.1);
 
@@ -48,14 +49,15 @@ float sdf( vec3 p, CocktailGlass glass ){
     return cocktailGlassDistance(p, glass, trashFloat);
 }
 
-//the standard interface pieces: at, inside, sdf, normalVec
-UNFRAMED_LOCATORS(CocktailGlass)
-UNFRAMED_NORMAL_FD(CocktailGlass)
+//the standard interface pieces: initObject, at, inside, sdf, normalVec
+OBJECT_INIT(CocktailGlass)
+OBJECT_LOCATORS(CocktailGlass)
+OBJECT_NORMAL_FD(CocktailGlass)
 
 //overload of location booleans
 //note inside here means in the glass of the cup not the enclosed volume
 bvec2 relPosition( Vector tv, CocktailGlass glass ){
-    float d = sdf( tv.pos, glass );
+    float d = sdf( tv, glass );
     bool atSurf = ((abs(d)-AT_THRESH)<0.);
     bool inside = (d<0.);
     return bvec2(atSurf, inside);

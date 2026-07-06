@@ -13,7 +13,7 @@ void buildObjects(){
     vec3 pinkScatter = vec3(0.25,0.65,0.7);
     vec3 greenGlass = vec3(0.3,0.05,0.2);
 
-    bunny.center=vec3(0,0,0);
+    bunny.frame=makeFrame(vec3(0,0,0));
     bunny.scale=2.;
 
     bunny.mat=makeGlass(greenGlass,1.5,0.95);

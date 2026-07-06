@@ -62,21 +62,18 @@ float sdf_trefoil(vec3 p)
 //The OBJECT sdf
 //-------------------------------------------------
 
-//the data of a sphere is its center and radius
 struct Trefoil{
-    vec3 center;
+    Frame frame;
     float size;
     Material mat;
 };
 
 
-//the point-level sdf
+//the local-frame sdf
 float sdf( vec3 p, Trefoil obj ){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
+    vec3 pos = p / obj.size;
     return sdf_trefoil(pos);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(Trefoil)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(Trefoil)

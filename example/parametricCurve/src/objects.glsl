@@ -23,6 +23,7 @@ void buildObjects(){
 
 
     // --- Helix tube ---
+    curveA.frame = IDENTITY_FRAME;
     curveA.t0 = 0.0;
     curveA.t1 = 12.566;           // ~ 4 turns
     curveA.segments = 64;        // <= MAX_SEGMENTS
@@ -35,6 +36,7 @@ void buildObjects(){
     curveA.bboxCenter = vec3(0);
 
     // --- Trefoil tube ---
+    curveB.frame = IDENTITY_FRAME;
     curveB.t0 = 0.0;
     curveB.t1 = 6.283;            // one period
     curveB.segments = 64;

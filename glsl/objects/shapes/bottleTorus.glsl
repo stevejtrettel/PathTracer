@@ -8,8 +8,8 @@
 //a donut bottle is a smooth union of a truncated cone and a torus:
 
 struct BottleTorus{
-//need a position, a height, base/top sizes, and glass thickness
-    vec3 center;
+//need a placement, a height, base/top sizes, and glass thickness
+    Frame frame;
     float outer;
     float inner;
     float height;
@@ -21,10 +21,11 @@ struct BottleTorus{
 };
 
 
+//takes a position in the bottle's LOCAL coordinates
 float bottleTorusDistance(vec3 pos, BottleTorus donut, out float insideBottle){
 
-    //get position relative center
-    vec3 torusPos = pos - donut.center;
+    //position is already relative to the center (local coordinates)
+    vec3 torusPos = pos;
     //get position relative to torus
     vec3  conePos = torusPos - vec3(0,donut.outer+donut.inner+donut.height,0);
 
@@ -65,5 +66,5 @@ float sdf( vec3 pos, BottleTorus donut ){
 
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(BottleTorus)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(BottleTorus)

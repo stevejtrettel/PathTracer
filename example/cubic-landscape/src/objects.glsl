@@ -250,25 +250,25 @@ void buildObjects() {
 
     // === SURFACE GROUP (on pedestal) ===
 
-    surface.center = SURFACE_POS;
+    surface.frame = makeFrame(SURFACE_POS);
     surface.scale = 1.0;
     surface.thickness = vec2(0.03, 0.0);
     surface.smoothing = 0.05;
     surface.mat = makeGlass(3.*vec3(0.3, 0.05, 0.2), 1.3, 0.97);
 
-    pairLines.center = SURFACE_POS;
+    pairLines.frame = makeFrame(SURFACE_POS);
     pairLines.radius = 0.03;
     pairLines.mat = makeMetal(vec3(0.75, 0.75, 0.8), 0.85, 0.08);
 
-    conicLines.center = SURFACE_POS;
+    conicLines.frame = makeFrame(SURFACE_POS);
     conicLines.radius = 0.03;
     conicLines.mat = makeMetal(vec3(0.9, 0.65, 0.15), 0.85, 0.08);
 
-    exceptionalLines.center = SURFACE_POS;
+    exceptionalLines.frame = makeFrame(SURFACE_POS);
     exceptionalLines.radius = 0.03;
     exceptionalLines.mat = makeMetal(vec3(0.55, 0.12, 0.1), 0.85, 0.08);
 
-    ring.center = SURFACE_POS;
+    ring.frame = makeFrame(SURFACE_POS);
     ring.radius = 0.05;
     ring.scale = surface.scale;
     ring.mat = makeMetal(vec3(0.1), 0.3, 0.4);
@@ -288,18 +288,18 @@ void buildObjects() {
     plate.rounded = 0.02;
     plate.mat = makeGlass(vec3(0.3, 0.05, 0.2), 1.5, 0.97);
 
-    checkers.center = PLATE_POS;
+    checkers.frame = makeFrame(PLATE_POS);
     checkers.cylRadius = 0.06;
     checkers.cylHeight = 0.02;
     checkers.rounding = 0.008;
     checkers.yOffset = 0.07;
     checkers.mat = makeMetal(vec3(0.55, 0.12, 0.1), 0.85, 0.08);
 
-    plateLines.center = PLATE_POS + vec3(0, 0.06, 0);
+    plateLines.frame = makeFrame(PLATE_POS + vec3(0, 0.06, 0));
     plateLines.radius = 0.02;
     plateLines.mat = makeMetal(vec3(0.75, 0.75, 0.8), 0.85, 0.08);
 
-    planarConics.center = PLATE_POS + vec3(0, 0.06, 0);
+    planarConics.frame = makeFrame(PLATE_POS + vec3(0, 0.06, 0));
     planarConics.radius = 0.02;
     planarConics.mat = makeMetal(vec3(0.9, 0.65, 0.15), 0.85, 0.08);
 }
@@ -320,7 +320,8 @@ float sdf_Objects(Vector tv) {
     float dist = maxDist;
 
     // --- Surface group (sphere bbox, with caching, scaled up) ---
-    vec3 surfPos = rotXZ(tv.pos - surface.center) / SURFACE_SCALE;
+    // localize into the surface frame, then apply the scene-level rotation + scale
+    vec3 surfPos = rotXZ(toLocal(surface.frame, tv.pos)) / SURFACE_SCALE;
     _cachedBBox = sceneBBox(surfPos);
     _cachedPos = surfPos;
 

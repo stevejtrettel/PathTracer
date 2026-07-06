@@ -11,7 +11,7 @@ Beer beer;
 
 void buildObjects(){
 
-    pint.center=vec3(-1,1.3,-2);
+    pint.frame=makeFrame(vec3(-1,1.3,-2));
     pint.height=2.;
     pint.base=0.75;
     pint.flare=1.5;

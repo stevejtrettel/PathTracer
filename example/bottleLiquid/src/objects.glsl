@@ -11,7 +11,7 @@ BottleLiquid gin;
 
 void buildObjects(){
 
-    bottle.center=vec3(1,0.48,2);
+    bottle.frame=makeFrame(vec3(1,0.48,2));
     bottle.baseHeight=1.5;
     bottle.baseRadius=1.25;
     bottle.neckHeight=1.;

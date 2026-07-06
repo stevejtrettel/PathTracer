@@ -303,25 +303,25 @@ void buildObjects() {
 
     // === SURFACE GROUP (left) ===
 
-    surface.center = SURFACE_POS;
+    surface.frame = makeFrame(SURFACE_POS);
     surface.scale = 1.0;
     surface.thickness = vec2(0.01, 0.0);
     surface.smoothing = 0.05;
     surface.mat =makeGlass(2.*vec3(0.3, 0.05, 0.2), 1.5, 0.95);
 
-    pairLines.center = SURFACE_POS;
+    pairLines.frame = makeFrame(SURFACE_POS);
     pairLines.radius = 0.02;
     pairLines.mat = makeMetal(vec3(0.7, 0.7, 0.75), 0.6, 0.2);
 
-    conicLines.center = SURFACE_POS;
+    conicLines.frame = makeFrame(SURFACE_POS);
     conicLines.radius = 0.02;
     conicLines.mat = makeMetal(vec3(0.85, 0.6, 0.15), 0.6, 0.2);
 
-    exceptionalLines.center = SURFACE_POS;
+    exceptionalLines.frame = makeFrame(SURFACE_POS);
     exceptionalLines.radius = 0.02;
     exceptionalLines.mat = makeMetal(vec3(0.75, 0.35, 0.35), 0.6, 0.2);
 
-    ring.center = SURFACE_POS;
+    ring.frame = makeFrame(SURFACE_POS);
     ring.radius = 0.05;
     ring.scale = surface.scale;
     ring.mat = makeMetal(vec3(0.1), 0.3, 0.4);
@@ -342,18 +342,18 @@ void buildObjects() {
     plate.rounded = 0.02;
     plate.mat = makeGlass(vec3(0.3, 0.05, 0.2), 1.5, 0.95);
 
-    checkers.center = PLATE_POS;
+    checkers.frame = makeFrame(PLATE_POS);
     checkers.cylRadius = 0.06;
     checkers.cylHeight = 0.02;
     checkers.rounding = 0.008;
     checkers.yOffset = 0.07;
     checkers.mat = makeMetal(vec3(0.75, 0.35, 0.35), 0.6, 0.2);
 
-    plateLines.center = PLATE_POS + vec3(0, 0.05, 0);
+    plateLines.frame = makeFrame(PLATE_POS + vec3(0, 0.05, 0));
     plateLines.radius = 0.02;
     plateLines.mat = makeMetal(vec3(0.7, 0.7, 0.75), 0.6, 0.2);
 
-    planarConics.center = PLATE_POS + vec3(0, 0.05, 0);
+    planarConics.frame = makeFrame(PLATE_POS + vec3(0, 0.05, 0));
     planarConics.radius = 0.02;
     planarConics.mat = makeMetal(vec3(0.85, 0.6, 0.15), 0.6, 0.2);
 
@@ -404,7 +404,8 @@ float sdf_Objects(Vector tv) {
     float dist = maxDist;
 
     // --- Surface group (sphere bbox, with squeeze for vertical stretch) ---
-    vec3 surfPos = rotXZ(tv.pos - surface.center);
+    // localize into the surface frame, then apply the scene-level rotation
+    vec3 surfPos = rotXZ(toLocal(surface.frame, tv.pos));
     surfPos.y /= STRETCH_H;  // squeeze y for vertical stretch
     _cachedBBox = sceneBBox(surfPos);   // sphere in squeezed space = ellipsoid
     _cachedPos = surfPos;

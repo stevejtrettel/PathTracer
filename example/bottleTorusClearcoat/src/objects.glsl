@@ -13,7 +13,7 @@ void buildObjects(){
 
 
     //----------- TORUS BOTTLE -------------------------
-    donut.center=vec3(0,1.,0);
+    donut.frame=makeFrame(vec3(0,1.,0));
     donut.inner=1.2;
     donut.outer=2.;
     donut.height=2.5;

@@ -4,7 +4,7 @@
 //-------------------------------------------------
 
 struct Mobius{
-    vec3 center;
+    Frame frame;
     float radius;
     float width;
     float thickness;
@@ -13,6 +13,13 @@ struct Mobius{
     Material bandMat;
     Material borderMat;
 };
+
+//hand-written initObject (two materials, so OBJECT_INIT does not apply)
+void initObject( out Mobius obj ){
+    obj.frame = IDENTITY_FRAME;
+    zeroMat(obj.bandMat);
+    zeroMat(obj.borderMat);
+}
 
 
 
@@ -74,28 +81,26 @@ vec2 sdMobius(vec3 rP, float radius, float width, float thickness, float twists,
 
 
 
+//the local-frame sdfs (point arguments are in the object's own coordinates)
 float sdfBand(vec3 p, Mobius mobius){
-    vec3 pos = p-mobius.center;
-    pos/=2.;
+    vec3 pos = p/2.;
     vec2 dat = sdMobius(pos, mobius.radius, mobius.width, mobius.thickness, mobius.twists,mobius.offset);
     return dat.x;
 }
 
 float sdfBorder(vec3 p, Mobius mobius){
-    vec3 pos = p-mobius.center;
-    pos/=2.;
+    vec3 pos = p/2.;
     vec2 dat = sdMobius(pos, mobius.radius, mobius.width, mobius.thickness, mobius.twists,mobius.offset);
     return dat.y;
 }
 
-//overload of sdf
+//overload of sdf (world -> local through the frame)
 float sdf( Vector tv, Mobius mobius){
-    vec3 pos = tv.pos-mobius.center;
-    pos/=2.;
+    vec3 pos = toLocal(mobius.frame, tv.pos)/2.;
     vec2 dat = sdMobius(pos, mobius.radius, mobius.width, mobius.thickness,  mobius.twists,mobius.offset);
     //make the total distance:
     float dist = min( dat.x, dat.y );
-    return dist;
+    return mobius.frame.scale * dist;
 }
 
 
@@ -107,13 +112,13 @@ float sdf( Vector tv, Mobius mobius){
 
 //overload of location booleans:
 bool atBand( Vector tv,Mobius mobius){
-    float d = sdfBand( tv.pos, mobius );
+    float d = mobius.frame.scale * sdfBand( toLocal(mobius.frame, tv.pos), mobius );
     bool atSurf = ((abs(d) - AT_THRESH)<0.);
     return atSurf;
 }
 
 bool atBorder( Vector tv,Mobius mobius){
-    float d = sdfBorder( tv.pos, mobius );
+    float d = mobius.frame.scale * sdfBorder( toLocal(mobius.frame, tv.pos), mobius );
     bool atSurf = ((abs(d) - AT_THRESH)<0.);
     return atSurf;
 }
@@ -126,11 +131,11 @@ bool at( Vector tv,Mobius mobius){
 
 
 bool insideBand( Vector tv, Mobius mobius ){
-    float d = sdfBand( tv.pos, mobius );
+    float d = sdfBand( toLocal(mobius.frame, tv.pos), mobius );
     return (d<0.);
 }
 bool insideBorder( Vector tv, Mobius mobius ){
-    float d = sdfBorder( tv.pos, mobius );
+    float d = sdfBorder( toLocal(mobius.frame, tv.pos), mobius );
     return (d<0.);
 }
 
@@ -142,7 +147,7 @@ bool inside( Vector tv, Mobius mobius ){
 
 Vector normalVecBand( Vector tv, Mobius mobius ){
 
-    vec3 pos=tv.pos;
+    vec3 pos = toLocal(mobius.frame, tv.pos);
 
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
@@ -156,14 +161,14 @@ Vector normalVecBand( Vector tv, Mobius mobius ){
 
     dir=normalize(dir);
 
-    return Vector(tv.pos,dir);
+    return Vector(tv.pos, dirToWorld(mobius.frame, dir));
 
 }
 
 
 Vector normalVecBorder( Vector tv, Mobius mobius ){
 
-    vec3 pos=tv.pos;
+    vec3 pos = toLocal(mobius.frame, tv.pos);
 
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
@@ -177,7 +182,7 @@ Vector normalVecBorder( Vector tv, Mobius mobius ){
 
     dir=normalize(dir);
 
-    return Vector(tv.pos,dir);
+    return Vector(tv.pos, dirToWorld(mobius.frame, dir));
 
 }
 

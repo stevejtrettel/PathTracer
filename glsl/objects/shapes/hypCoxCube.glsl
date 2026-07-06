@@ -11,6 +11,7 @@
 //RIGHT NOW JUST GIVING D AND R DIRECTLY: NEED TO CHANGE THIS!
 
 struct HypCoxCube{
+    Frame frame;
     float d;
     float r;
     bool centerSphere;
@@ -20,6 +21,7 @@ struct HypCoxCube{
 
 HypCoxCube buildCoxCube(float dihedral ){
     HypCoxCube cube;
+    cube.frame = IDENTITY_FRAME;
 
     //half the dihedral angle theta
     float theta2 = 3.14159/(dihedral);
@@ -37,6 +39,7 @@ HypCoxCube buildCoxCube(float dihedral ){
 
 HypCoxCube buildCoxCube( float dihedral, float rCent){
     HypCoxCube cube;
+    cube.frame = IDENTITY_FRAME;
 
     //half the dihedral angle theta
     float theta2 = 3.14159/dihedral;
@@ -99,5 +102,5 @@ float sdf( vec3 pos, HypCoxCube cube ){
 }
 
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(HypCoxCube)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(HypCoxCube)

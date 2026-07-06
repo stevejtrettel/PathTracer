@@ -12,9 +12,9 @@
 //RIGHT NOW JUST GIVING D AND R DIRECTLY: NEED TO CHANGE THIS!
 
 struct HypDod{
+    Frame frame;
     float d;
     float r;
-    vec3 center;
     bool centerSphere;
     float rCent;
     Material mat;
@@ -25,7 +25,7 @@ HypDod buildHypDod(){
     float Phi = (1.+sqrt(5.))/2.;
     float c = 2./Phi;
 
-    dod.center = vec3(0,0,0);
+    dod.frame = IDENTITY_FRAME;
     dod.r = sqrt(c);
     dod.d = sqrt(c+1.);
     dod.centerSphere=false;
@@ -38,7 +38,7 @@ HypDod buildHypDod( float rCent){
     float Phi = (1.+sqrt(5.))/2.;
     float c = 2./Phi;
 
-    dod.center=vec3(0,0,0);
+    dod.frame = IDENTITY_FRAME;
     dod.r = sqrt(c);
     dod.d = sqrt(c+1.);
     dod.centerSphere=true;
@@ -48,10 +48,8 @@ HypDod buildHypDod( float rCent){
 }
 
 
-//the point-level sdf
+//the local-frame sdf
 float sdf( vec3 pos, HypDod dod ){
-
-    pos = pos - dod.center;
 
     //start with the distance to the unit sphere
     float dist = length(pos)-1.;
@@ -121,5 +119,5 @@ float sdf( vec3 pos, HypDod dod ){
 }
 
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(HypDod)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(HypDod)
