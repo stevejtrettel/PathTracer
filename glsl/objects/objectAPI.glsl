@@ -89,3 +89,47 @@ vec4 dataFn( vec3 p ){                                          \
     T vz = eqnFn( T(p.x, 0.), T(p.y, 0.), T(p.z, 1.) );         \
     return vec4( vec3(vx.y, vy.y, vz.y), vx.x );                \
 }
+
+
+//-------------------------------------------------
+// VARIETY IN A TRANSPARENT SHELL
+//
+// for a struct of the form { InnerType variety; OuterType shell; }
+// (a variety inside a glass/clearcoat shell), generates the composite
+// sdf( Vector, Type ), inside( Vector, Type ), and the two-region
+// setData: hits on the shell are an object-in-air interface; hits on
+// the variety are a material interface between shell and variety
+// (variety dominant). `shell` is the name of the outer field.
+//-------------------------------------------------
+
+#define VARIETY_IN_SHELL_API(Type, shell)                                                    \
+float sdf( Vector tv, Type obj ){                                                            \
+    float varDist = sdf(tv, obj.variety);                                                    \
+    float shellDist = sdf(tv, obj.shell);                                                    \
+    return min(abs(varDist), abs(shellDist));                                                \
+}                                                                                            \
+bool inside( Vector tv, Type obj ){                                                          \
+    return inside(tv, obj.variety);                                                          \
+}                                                                                            \
+void setData( inout Path path, Type obj ){                                                   \
+    float varDist = sdf(path.tv, obj.variety);                                               \
+    float shellDist = sdf(path.tv, obj.shell);                                               \
+    Vector normal;                                                                           \
+    if( abs(shellDist) < abs(varDist) ){                                                     \
+        normal = normalVec(path.tv, obj.shell);                                              \
+        bool outgoing = dot(path.tv.dir, normal.dir) > 0.;                                   \
+        setObjectInAir(path.dat, outgoing, normal, obj.shell.mat);                           \
+    }                                                                                        \
+    else{                                                                                    \
+        normal = normalVec(path.tv, obj.variety);                                            \
+        bool outgoing = dot(path.tv.dir, normal.dir) > 0.;                                   \
+        if( outgoing ){                                                                      \
+            path.dat.normal = negate(normal);                                                \
+            setMaterialInterface(path.dat, obj.variety.mat, obj.shell.mat, obj.variety.mat); \
+        }                                                                                    \
+        else{                                                                                \
+            path.dat.normal = normal;                                                        \
+            setMaterialInterface(path.dat, obj.shell.mat, obj.variety.mat, obj.variety.mat); \
+        }                                                                                    \
+    }                                                                                        \
+}
