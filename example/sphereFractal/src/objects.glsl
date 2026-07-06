@@ -24,49 +24,49 @@ float rad = sqrt(6.)/3.;
 
 void buildObjects(){
 
-    sphere1.center=v1;
+    sphere1.frame=makeFrame(v1);
     sphere1.radius=rad;
     sphere1.mat=makeMetal(vec3(0.8),0.95,0.);
 
-    sphere2.center=v2;
+    sphere2.frame=makeFrame(v2);
     sphere2.radius=rad;
     sphere2.mat=makeMetal(vec3(0.8),0.95,0.);
 
-    sphere3.center=v3;
+    sphere3.frame=makeFrame(v3);
     sphere3.radius=rad;
     sphere3.mat=makeMetal(vec3(0.8),0.95,0.);
 
-    sphere4.center=v4;
+    sphere4.frame=makeFrame(v4);
     sphere4.radius=rad;
     sphere4.mat=makeMetal(vec3(0.8),0.95,0.);
 
     float emit = 0.1*extra3;
 
-    triang1.center = -1.25*v2;
+    triang1.frame = makeFrame(-1.25*v2);
+    triang1.frame.rot = transpose(rotateAboutZ(1.57)*rotateZto(v2));
     triang1.side=4.*rad;
     triang1.thickness=0.1;
-    triang1.orientation = rotateAboutZ(1.57)*rotateZto(v2);
     triang1.mat = makeDielectric(vec3(0.7,0.2,0.2),0.5,0.1);
     triang1.mat.surfaceEmit = emit*vec3(0.7,0.2,0.2);
 
-    triang2.center = -1.25*v3;
+    triang2.frame = makeFrame(-1.25*v3);
+    triang2.frame.rot = transpose(rotateAboutZ(1.57)*rotateZto(v3));
     triang2.side=4.*rad;
     triang2.thickness=0.1;
-    triang2.orientation = rotateAboutZ(1.57)*rotateZto(v3);
     triang2.mat = makeDielectric(vec3(0.2,0.7,0.2),0.5,0.1);
     triang2.mat.surfaceEmit = emit*vec3(0.2,0.7,0.2);
 
-    triang3.center = -1.25*v4;
+    triang3.frame = makeFrame(-1.25*v4);
+    triang3.frame.rot = transpose(rotateAboutZ(-1.57)*rotateZto(v4));
     triang3.side=4.*rad;
     triang3.thickness=0.1;
-    triang3.orientation = rotateAboutZ(-1.57)*rotateZto(v4);
     triang3.mat = makeDielectric(vec3(0.2,0.2,0.7),0.5,0.1);
     triang3.mat.surfaceEmit = emit*vec3(0.2,0.2,0.7);
 
-    triang4.center = -1.3*v1;
+    triang4.frame = makeFrame(-1.3*v1);
+    triang4.frame.rot = transpose(rotateAboutZ(1.57)*rotateZto(v1));
     triang4.side=4.*rad;
     triang4.thickness=0.1;
-    triang4.orientation = rotateAboutZ(1.57)*rotateZto(v1);
     triang4.mat = makeGlass(vec3(1),1.2,0.95);
 
 

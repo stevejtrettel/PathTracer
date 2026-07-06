@@ -30,10 +30,6 @@ void buildObjects(){
     bottle.mat.isotropicScatter=extra;
     bottle.mat.roughness=0.0;
 
-    //set up the bounding sphere
-    bottle.boundingBox.center=bottle.center;
-    bottle.boundingBox.radius=bottle.baseHeight+bottle.neckHeight+0.5;
-
 }
 
 

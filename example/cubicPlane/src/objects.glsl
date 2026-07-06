@@ -108,7 +108,7 @@ PlanarConics planarConics;
 void buildObjects() {
 
     // --- Glass plate ---
-    plate.center = vec3(0);
+    plate.frame = makeFrame(vec3(0));
     plate.sides = vec3(PLATE_RADIUS, 0.05, PLATE_RADIUS);
     plate.rounded = 0.02;
     plate.mat = makeGlass(vec3(0.5, 0.3, 0.1), 1.5, 0.95);

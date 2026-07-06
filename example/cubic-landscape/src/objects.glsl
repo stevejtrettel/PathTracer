@@ -243,7 +243,7 @@ void buildObjects() {
 
     // === PEDESTAL ===
 
-    pedestal.center = PEDESTAL_POS;
+    pedestal.frame = makeFrame(PEDESTAL_POS);
     pedestal.sides = vec3(2.0, PEDESTAL_HEIGHT * 0.5, 2.0);
     pedestal.rounded = 0.05;
     pedestal.mat = makeGlass(vec3(0.1, 0.05, 0.1), 1.5, 0.98);
@@ -275,7 +275,7 @@ void buildObjects() {
 
     // === PLATE PEDESTAL (glass box, wider and shorter than surface pedestal) ===
 
-    platePedestal.center = PLATE_PED_POS;
+    platePedestal.frame = makeFrame(PLATE_PED_POS);
     platePedestal.sides = vec3(1.5, PLATE_PED_HEIGHT * 0.5, 0.4);
     platePedestal.rounded = 0.05;
     platePedestal.mat = makeGlass(vec3(0.1, 0.05, 0.1), 1.5, 0.98);
@@ -283,7 +283,7 @@ void buildObjects() {
     // === PLATE GROUP (standing vertical — shapes evaluate in rotated frame) ===
     // Shapes work in xz plane; standUp() rotates query so xy plane maps to xz
 
-    plate.center = PLATE_POS;
+    plate.frame = makeFrame(PLATE_POS);
     plate.sides = vec3(PLATE_WIDTH, PLATE_HEIGHT, 0.05);
     plate.rounded = 0.02;
     plate.mat = makeGlass(vec3(0.3, 0.05, 0.2), 1.5, 0.97);

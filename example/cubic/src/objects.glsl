@@ -233,7 +233,7 @@ void buildObjects() {
 
     // === PLATE GROUP (right, sitting on floor) ===
 
-    plate.center = PLATE_POS;
+    plate.frame = makeFrame(PLATE_POS);
     plate.sides = vec3(PLATE_RADIUS, 0.05, PLATE_RADIUS);
     plate.rounded = 0.02;
     plate.mat = makeGlass(vec3(0.3, 0.05, 0.2), 1.5, 0.95);

@@ -15,7 +15,6 @@ struct CocktailGlass{
     float thickness;
     float base;
     Material mat;
-    Sphere boundingBox;
 };
 
 

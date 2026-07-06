@@ -1,71 +1,62 @@
-
-
 //-------------------------------------------------
 //The SPHERE sdf
 //-------------------------------------------------
 
-//the data of a sphere is its center and radius
 struct Sphere{
-    vec3 center;
+    Frame frame;
     float radius;
     Material mat;
 };
 
 
-//the point-level sdf
+//the local-frame sdf
 float sdf( vec3 p, Sphere sphere ){
-    //normalize position
-    vec3 pos = p - sphere.center;
-
-    //distance to closest point on the sphere
-    return length(pos) - sphere.radius;
+    return length(p) - sphere.radius;
 }
 
-//the standard interface: at, inside, sdf
-UNFRAMED_LOCATORS(Sphere)
+//the standard interface: initObject, at, inside, sdf
+OBJECT_INIT(Sphere)
+OBJECT_LOCATORS(Sphere)
 
-//analytic normalVec for a sphere
+//analytic normalVec: radial from the center (valid for any rotation/scale)
 Vector normalVec( Vector tv, Sphere sphere ){
-    //position vector rel center
-    vec3 dir = tv.pos-sphere.center;
-    dir=normalize(dir);
-
-    return Vector(tv.pos,dir);
+    vec3 dir = normalize(tv.pos - sphere.frame.pos);
+    return Vector(tv.pos, dir);
 }
 
 //auxilary function for writing trace()
+//works in world space: center = frame.pos, world radius = scale*radius
 vec2 intersectRay_Sphere( Vector tv, Sphere sphere ){
-    //return all intersections with the sphere along the line:
-    vec3 p=tv.pos-sphere.center;
-    vec3 v=tv.dir;
+    vec3 p = tv.pos - sphere.frame.pos;
+    vec3 v = tv.dir;
+    float R = sphere.frame.scale * sphere.radius;
 
-    float a=dot(v,v);
-    float b=2.*dot(p,v);
-    float c=(dot(p,p)-sphere.radius*sphere.radius)/a;
+    float a = dot(v,v);
+    float b = 2.*dot(p,v);
+    float c = (dot(p,p) - R*R)/a;
 
-    float disc=b*b-4.*a*c;
-    if(disc<0.){
+    float disc = b*b - 4.*a*c;
+    if(disc < 0.){
         //intersections do not exist
         return 2.*vec2(maxDist,maxDist);
     }
     //else, return the two intersection points:
-    float D=sqrt(abs(disc));
+    float D = sqrt(abs(disc));
     return vec2(-b-D, -b+D)/(2.*a);
-
 }
 
 
 //overload of trace for a sphere
 float trace( Vector tv, Sphere sphere ){
 
-    vec2 intPt=intersectRay_Sphere(tv, sphere);
+    vec2 intPt = intersectRay_Sphere(tv, sphere);
 
     if(intPt.y < 0. || intPt.x > maxDist){
         //the sphere is not in front of us
         return maxDist;
     }
     //otherwise, find the first intersection of the sphere:
-    float dist=intPt.x < 0.  ?  intPt.y  :  intPt.x;
+    float dist = intPt.x < 0.  ?  intPt.y  :  intPt.x;
     return min(dist,maxDist);
 }
 

@@ -337,7 +337,7 @@ void buildObjects() {
 
     // === PLATE GROUP (right, sitting on floor) ===
 
-    plate.center = PLATE_POS;
+    plate.frame = makeFrame(PLATE_POS);
     plate.sides = vec3(PLATE_RADIUS, 0.05, PLATE_RADIUS);
     plate.rounded = 0.02;
     plate.mat = makeGlass(vec3(0.3, 0.05, 0.2), 1.5, 0.95);
@@ -363,25 +363,25 @@ void buildObjects() {
     Material legMat = makeGlass(vec3(0.1, 0.05, 0.1), 1.5, 0.98);
     vec3 legXZ = vec3(PLATE_POS.x, legMidY, PLATE_POS.z);
 
-    plateLeg1.center = legXZ + vec3(-legInset, 0, -legInset);
+    plateLeg1.frame = makeFrame(legXZ + vec3(-legInset, 0, -legInset));
     plateLeg1.height = LEG_HEIGHT * 0.5;
     plateLeg1.base = LEG_RADIUS;
     plateLeg1.flare = 1.0;
     plateLeg1.mat = legMat;
 
-    plateLeg2.center = legXZ + vec3(legInset, 0, -legInset);
+    plateLeg2.frame = makeFrame(legXZ + vec3(legInset, 0, -legInset));
     plateLeg2.height = LEG_HEIGHT * 0.5;
     plateLeg2.base = LEG_RADIUS;
     plateLeg2.flare = 1.0;
     plateLeg2.mat = legMat;
 
-    plateLeg3.center = legXZ + vec3(-legInset, 0, legInset);
+    plateLeg3.frame = makeFrame(legXZ + vec3(-legInset, 0, legInset));
     plateLeg3.height = LEG_HEIGHT * 0.5;
     plateLeg3.base = LEG_RADIUS;
     plateLeg3.flare = 1.0;
     plateLeg3.mat = legMat;
 
-    plateLeg4.center = legXZ + vec3(legInset, 0, legInset);
+    plateLeg4.frame = makeFrame(legXZ + vec3(legInset, 0, legInset));
     plateLeg4.height = LEG_HEIGHT * 0.5;
     plateLeg4.base = LEG_RADIUS;
     plateLeg4.flare = 1.0;

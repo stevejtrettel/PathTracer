@@ -23,10 +23,6 @@ void buildObjects(){
     bottle.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
     //makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
-    //set up the bounding sphere
-    bottle.boundingBox.center=bottle.center;
-    bottle.boundingBox.radius=bottle.baseHeight+bottle.neckHeight+0.5;
-
 
     //-------- GIN BOTTLE ----------------
     gin.glass=bottle;

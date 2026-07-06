@@ -16,7 +16,6 @@ struct Bottle{
     float smoothJoin;
     float bump;
     Material mat;
-    Sphere boundingBox;
 };
 
 

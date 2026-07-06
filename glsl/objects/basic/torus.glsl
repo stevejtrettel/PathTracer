@@ -1,21 +1,13 @@
-
-
 //-------------------------------------------------
 //The TORUS sdf
 //-------------------------------------------------
 
-//the data of a torus is its inner and outer radii, and its center
-//(also orientation, but for now all tori are vertical until I am more careful)
-
-
 struct Torus{
-    vec3 center;
+    Frame frame;
     float innerR;
     float outerR;
     Material mat;
 };
-
-
 
 
 //signed dist in terms of basic parameters
@@ -30,20 +22,10 @@ float sdTorus( vec3 pos, float ra, float rb  ){
 }
 
 
-//the point-level sdf
+//the local-frame sdf (a vertical torus about the origin)
 float sdf( vec3 pos, Torus torus ){
-    //normalize position
-    pos = vec3(pos.x,pos.z,-pos.y);
-    vec3 p = (pos - torus.center);
-
-    float rb = torus.innerR;
-    float ra = torus.outerR;
-
-    float h = length(p.xz);
-    float dist =  length(vec2(h-ra,p.y))-rb;
-
-    return dist;
+    return sdTorus(pos, torus.outerR, torus.innerR);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(Torus)
+//the standard interface
+OBJECT_API(Torus)

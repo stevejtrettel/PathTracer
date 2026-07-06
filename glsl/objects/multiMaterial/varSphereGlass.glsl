@@ -15,7 +15,7 @@ VarSphereGlass createVarSphereGlass(VarSphere var, Material glassMat){
     marble.variety = var;
 
     Sphere glass;
-    glass.center = var.center;
+    glass.frame = makeFrame(var.center);
     glass.radius = 1.2*var.radius;
     glass.mat = glassMat;
 

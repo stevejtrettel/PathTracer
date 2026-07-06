@@ -202,3 +202,12 @@ Frame makeFrame( vec3 pos, vec3 axis, float angle ){
 Frame makeFrame( vec3 pos, vec3 axis, float angle, float scale ){
     return Frame( rot3AxisAngle(normalize(axis), angle), pos, scale );
 }
+
+//frame whose local z-axis points along the given normal
+//(for planes and other surface-like objects placed by point + normal)
+//NOTE: rotateZto lists its entries row-major into GLSL's column-major
+//mat3 constructor, so it stores the transpose of the intended rotation;
+//transposing back makes rot[2] (the local z-axis) equal the normal.
+Frame makeFrameNormal( vec3 pos, vec3 normal ){
+    return Frame( transpose(rotateZto(normalize(normal))), pos, 1. );
+}

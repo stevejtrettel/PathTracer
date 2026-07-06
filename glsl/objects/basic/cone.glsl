@@ -1,11 +1,9 @@
-
-
 //-------------------------------------------------
 //The TRUNCATED CONE sdf
 //-------------------------------------------------
 
 struct Cone{
-    vec3 center;
+    Frame frame;
     float height;
     float base;
 //this is an extra parameter letting you extend the top
@@ -28,12 +26,10 @@ float sdCappedCone( vec3 p, float h, float r1, float r2 )
 }
 
 
-//the point-level sdf
+//the local-frame sdf
 float sdf( vec3 p, Cone cone ){
-    //normalize position
-    vec3 pos = p - cone.center;
-    return sdCappedCone(pos,cone.height,cone.base,cone.flare*cone.base);
+    return sdCappedCone(p, cone.height, cone.base, cone.flare*cone.base);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(Cone)
+//the standard interface
+OBJECT_API(Cone)

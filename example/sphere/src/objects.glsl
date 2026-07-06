@@ -11,7 +11,7 @@ void buildObjects(){
     vec3 pinkScatter = vec3(0.25,0.65,0.7);
     vec3 greenGlass = vec3(0.3,0.05,0.2);
 
-    sphere.center=vec3(0,1.2,0);
+    sphere.frame=makeFrame(vec3(0,1.2,0));
     sphere.radius=2.;
 
     sphere.mat=makeGlass(greenGlass,1.5,0.95);
