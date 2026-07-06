@@ -15,32 +15,32 @@ class KeyControls{
 
         this.translate = {
              right: {
-                 key: 39,
+                 code: "ArrowRight",
                  pressed: false,
                  action: new Vector3(1,0,0).multiplyScalar(this.translateSpeed)
              },
              left: {
-                 key: 37,
+                 code: "ArrowLeft",
                  pressed: false,
                  action: new Vector3(-1,0,0).multiplyScalar(this.translateSpeed),
              },
              up: {
-                 key:222,
+                 code: "Quote",
                  pressed: false,
                  action: new Vector3(0,1,0).multiplyScalar(this.translateSpeed)
              },
              down: {
-                 key: 191,
+                 code: "Slash",
                  pressed: false,
                  action: new Vector3(0,-1,0).multiplyScalar(this.translateSpeed)
              },
              forward: {
-                 key: 38,
+                 code: "ArrowUp",
                  pressed: false,
                  action: new Vector3(0,0,-1).multiplyScalar(this.translateSpeed)
              },
              backward: {
-                 key:40,
+                 code: "ArrowDown",
                  pressed: false,
                  action: new Vector3(0,0,1).multiplyScalar(this.translateSpeed)
              }
@@ -48,32 +48,32 @@ class KeyControls{
 
         this.rotate = {
             right: {
-                key: 68,
+                code: "KeyD",
                 pressed: false,
                 action: new Matrix4().makeRotationAxis(new Vector3(0,-1,0), this.rotateSpeed)
             },
             left: {
-                key:65,
+                code: "KeyA",
                 pressed: false,
                 action: new Matrix4().makeRotationAxis(new Vector3(0,1,0), this.rotateSpeed)
             },
             up: {
-                key: 87,
+                code: "KeyW",
                 pressed: false,
                 action: new Matrix4().makeRotationAxis(new Vector3(1,0,0), this.rotateSpeed)
             },
             down: {
-                key: 83,
+                code: "KeyS",
                 pressed: false,
                 action: new Matrix4().makeRotationAxis(new Vector3(-1,0,0), this.rotateSpeed)
             },
             clockwise: {
-                key:69,
+                code: "KeyE",
                 pressed: false,
                 action: new Matrix4().makeRotationAxis(new Vector3(0,0,1), this.rotateSpeed)
             },
             counterlockwise: {
-                key: 81,
+                code: "KeyQ",
                 pressed: false,
                 action: new Matrix4().makeRotationAxis(new Vector3(0,0,-1), this.rotateSpeed)
             },
@@ -92,13 +92,13 @@ class KeyControls{
     down(event){
 
         for(const dir in this.translate){
-            if(this.translate[dir].key == event.keyCode){
+            if(this.translate[dir].code == event.code){
                 this.translate[dir].pressed = true;
                 this.needsUpdate=true;
             }
         }
         for(const dir in this.rotate){
-            if(this.rotate[dir].key == event.keyCode){
+            if(this.rotate[dir].code == event.code){
                 this.rotate[dir].pressed = true;
                 this.needsUpdate=true;
             }
@@ -108,12 +108,12 @@ class KeyControls{
     up(event){
 
         for(const dir in this.translate){
-            if(this.translate[dir].key == event.keyCode){
+            if(this.translate[dir].code == event.code){
                 this.translate[dir].pressed = false;
             }
         }
         for(const dir in this.rotate){
-            if(this.rotate[dir].key == event.keyCode){
+            if(this.rotate[dir].code == event.code){
                 this.rotate[dir].pressed = false;
             }
         }
