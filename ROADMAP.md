@@ -65,6 +65,16 @@ Litmus that assigns Render vs Export: *does it change the picture you're looking
 
 ## Deferred / smaller items
 
+- **Dead `render_Environment` / `render_Objects` flags**: declared in every
+  scene's environment.glsl / objects.glsl but never read — `trace_Scene` always
+  traces both. Either wire them up (skip tracing when false) or delete them.
+  (Found during A4: setting `render_Environment=false` did nothing.)
+- **render-test staleness gotcha**: `vite-plugin-glsl` caches the inlined
+  `setupShader` transform, so editing an *included* `.glsl` (e.g. sky.glsl)
+  without touching the parent serves a stale shader. `rm -rf node_modules/.vite`
+  before render-testing GLSL-include changes; also kill stray dev servers first
+  (a squatter on :5173 makes render-test screenshot the wrong thing).
+
 - **apollonian_broken**: renders black; verified pre-existing (identical before the frame
   migration). Suspects: the `extra`-slider coupling in the gasket sdf and the always-true
   `at()`. Debug or delete the example.

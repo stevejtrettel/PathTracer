@@ -141,3 +141,16 @@ coupled workflow; splitting its geometry into Render isn't worth the cross-tab f
   `node scripts/render-test.mjs sphere`.
 - **B.** sweep the 35 scenes onto it (behavior-frozen, render-test panel each checkpoint).
 - **C.** custom tabbed GUI as a pure renderer swap.
+
+## Status (built so far)
+
+- `maxBounces` promoted to a live `int` knob (commit 43e5e71).
+- **A1** knob generator + `settings.params` named knobs, piloted on sphere (`ior`).
+- **A2** camera/render/scratch routed through the generator; `engineKnobs.js` is the
+  single source, `uniforms.glsl` drops the hardcoded knob block. Added `int` knob type.
+- **A3** shared `js/createScene.js`; every `main.js` is a 5-line stub; `settings.aspect`
+  dissolves cubic-portrait/landscape.
+- **A4** per-scene `settings.sky`: image / solid / gradient (`buildSky` + `getSky`).
+
+Still open: **B** (extra→scratch1..4 rename sweep), **C/Phase 5** (custom tabbed GUI incl.
+live aspect + sky-color controls).
