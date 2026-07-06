@@ -15,18 +15,17 @@ VARIETY_DATA(surface_Data, surface_Eqn)
 // -------------------------
 
 struct Surface{
-    vec3 center;
+    Frame frame;
     float scale;
     Material mat;
 };
 
 
-//the point-level sdf
+//the point-level sdf (local coordinates)
 float sdf( vec3 p, Surface surf ){
 
-    //normalize position
-    vec3 pos = p - surf.center;
-    vec3 scaledPos = surf.scale * pos;
+    //internal zoom of the defining equation
+    vec3 scaledPos = surf.scale * p;
 
     //get the distance estimate
     vec4 data = surface_Data(scaledPos);
@@ -37,7 +36,7 @@ float sdf( vec3 p, Surface surf ){
     dist=abs(dist);
 
     //bounding sphere
-    float bboxDist = surface_bBox(pos);
+    float bboxDist = surface_bBox(p);
     dist = max(dist,bboxDist);
 
     // return dist;
@@ -45,9 +44,10 @@ float sdf( vec3 p, Surface surf ){
 }
 
 
-//the standard interface: at, inside, sdf, normalVec
-UNFRAMED_LOCATORS(Surface)
-UNFRAMED_NORMAL_FD(Surface)
+//the standard interface: initObject, at, inside, sdf, normalVec
+OBJECT_INIT(Surface)
+OBJECT_LOCATORS(Surface)
+OBJECT_NORMAL_FD(Surface)
 
 //setData for a two sided surface
 void setData( inout Path path, Surface surf ){
@@ -58,9 +58,13 @@ void setData( inout Path path, Surface surf ){
         Vector normal=normalVec(path.tv,surf);
         Material mat=surf.mat;
 
+        //local position on the surface
+        vec3 q = toLocal(surf.frame, path.tv.pos);
+
         //check if we are on the outside edge:
-        vec3 pos = path.tv.pos-surf.center;
-        bool onEdge = abs(surface_bBox(pos))<0.005;
+        //(edge threshold is in LOCAL units: with frame.scale != 1
+        // the corresponding world-space band scales by frame.scale)
+        bool onEdge = abs(surface_bBox(q))<0.005;
 
         if(onEdge){
             //average of the two side colors
@@ -71,8 +75,7 @@ void setData( inout Path path, Surface surf ){
         else {
 
             //what side of the variety are we on?
-            vec3 pos = path.tv.pos - surf.center;
-            pos *= surf.scale;
+            vec3 pos = surf.scale * q;
             float val= surface_Data(pos).w;
             //val positive is one side, val negative is the other;
 

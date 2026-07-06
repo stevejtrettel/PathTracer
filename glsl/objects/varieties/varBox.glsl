@@ -14,8 +14,9 @@ VARIETY_DATA(varBox_Data, varBox_Eqn)
 // ------------------------------------------------
 
 struct VarBox{
-//the bounding sphere
-    vec3 center;
+//placement in the world
+    Frame frame;
+//the bounding box
     vec3 box;
 //smoothing between bounding sphere and variety
     float smoothing;
@@ -38,12 +39,11 @@ float bBox(vec3 pos, vec3 box){
 
 
 
-//the point-level sdf
+//the point-level sdf (local coordinates)
 float sdf( vec3 p, VarBox var ){
 
-    //normalize position
-    vec3 pos = p - var.center;
-    vec3 scaledPos = var.scale * pos;
+    //internal zoom of the defining equation
+    vec3 scaledPos = var.scale * p;
 
     //get the distance estimate
     vec4 data = varBox_Data(scaledPos);
@@ -56,7 +56,7 @@ float sdf( vec3 p, VarBox var ){
     dist=abs(dist+var.thickness.x)-var.thickness.x-var.thickness.y;
 
     // //bounding box
-    float bboxDist = bBox(pos,var.box);
+    float bboxDist = bBox(p,var.box);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
@@ -67,5 +67,5 @@ float sdf( vec3 p, VarBox var ){
 
 
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(VarBox)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(VarBox)

@@ -14,8 +14,9 @@ VARIETY_DATA(varCyl_Data, varCyl_Eqn)
 // ------------------------------------------------
 
 struct VarCyl{
+//placement in the world
+    Frame frame;
 //the bounding cylinder
-    vec3 center;
     vec2 cyl;//dims.x=rad, dims.y=height
 //smoothing between bounding sphere and variety
     float smoothing;
@@ -39,12 +40,11 @@ float bCyl(vec3 pos, vec2 cyl){
     return bboxDist;
 }
 
-//the point-level sdf
+//the point-level sdf (local coordinates)
 float sdf( vec3 p, VarCyl var ){
 
-    //normalize position
-    vec3 pos = p - var.center;
-    vec3 scaledPos = var.scale * pos;
+    //internal zoom of the defining equation
+    vec3 scaledPos = var.scale * p;
 
     //get the distance estimate
     vec4 data = varCyl_Data(scaledPos);
@@ -57,7 +57,7 @@ float sdf( vec3 p, VarCyl var ){
     dist=abs(dist+var.thickness.x)-var.thickness.x-var.thickness.y;
 
     // //bounding box
-    float bboxDist = bCyl(pos,var.cyl);
+    float bboxDist = bCyl(p,var.cyl);
 
     //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
@@ -68,5 +68,5 @@ float sdf( vec3 p, VarCyl var ){
 
 
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(VarCyl)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(VarCyl)

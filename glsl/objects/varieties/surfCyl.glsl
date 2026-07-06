@@ -15,7 +15,7 @@ VARIETY_DATA(surfCyl_Data, surfCyl_Eqn)
 // -------------------------
 
 struct SurfCyl{
-    vec3 center;
+    Frame frame;
     vec2 cyl;
     float scale;
     Material mat;
@@ -32,12 +32,11 @@ float bCyl(vec3 pos, vec2 cyl){
     return bboxDist;
 }
 
-//the point-level sdf
+//the point-level sdf (local coordinates)
 float sdf( vec3 p, SurfCyl surf ){
 
-    //normalize position
-    vec3 pos = p - surf.center;
-    vec3 scaledPos = surf.scale * pos;
+    //internal zoom of the defining equation
+    vec3 scaledPos = surf.scale * p;
 
     //get the distance estimate
     vec4 data = surfCyl_Data(scaledPos);
@@ -47,17 +46,18 @@ float sdf( vec3 p, SurfCyl surf ){
 
     dist=abs(dist);
 
-    //bounding sphere
-    float bboxDist = bCyl(pos,surf.cyl);
+    //bounding cylinder
+    float bboxDist = bCyl(p,surf.cyl);
     dist = max(dist,bboxDist);
 
     return dist;
 }
 
 
-//the standard interface: at, inside, sdf, normalVec
-UNFRAMED_LOCATORS(SurfCyl)
-UNFRAMED_NORMAL_FD(SurfCyl)
+//the standard interface: initObject, at, inside, sdf, normalVec
+OBJECT_INIT(SurfCyl)
+OBJECT_LOCATORS(SurfCyl)
+OBJECT_NORMAL_FD(SurfCyl)
 
 //setData for a two sided surface
 void setData( inout Path path, SurfCyl surf ){
@@ -68,9 +68,13 @@ void setData( inout Path path, SurfCyl surf ){
         Vector normal=normalVec(path.tv,surf);
         Material mat=surf.mat;
 
+        //local position on the surface
+        vec3 q = toLocal(surf.frame, path.tv.pos);
+
         //check if we are on the outside edge:
-        vec3 pos = path.tv.pos-surf.center;
-        bool onEdge = abs(bCyl(pos,surf.cyl))<0.005;
+        //(edge threshold is in LOCAL units: with frame.scale != 1
+        // the corresponding world-space band scales by frame.scale)
+        bool onEdge = abs(bCyl(q,surf.cyl))<0.005;
 
         if(onEdge){
             //average of the two side colors
@@ -81,8 +85,7 @@ void setData( inout Path path, SurfCyl surf ){
         else {
 
             //what side of the variety are we on?
-            vec3 pos = path.tv.pos - surf.center;
-            pos *= surf.scale;
+            vec3 pos = surf.scale * q;
             float val= surfCyl_Data(pos).w;
             //val positive is one side, val negative is the other;
 

@@ -14,7 +14,7 @@ VarBoxGlass createVarBoxGlass(VarBox var, Material glassMat){
     VarBoxGlass marble;
 
     Box glass;
-    glass.frame = makeFrame(var.center);
+    glass.frame = makeFrame(var.frame.pos);
     glass.sides = 1.2*var.box;
     glass.rounded = 0.1;
     glass.mat = glassMat;

@@ -15,19 +15,18 @@ VARIETY_DATA(surfSphere_Data, surfSphere_Eqn)
 // -------------------------
 
 struct SurfSphere{
-    vec3 center;
+    Frame frame;
     float radius;
     float scale;
     Material mat;
 };
 
 
-//the point-level sdf
+//the point-level sdf (local coordinates)
 float sdf( vec3 p, SurfSphere surf ){
 
-    //normalize position
-    vec3 pos = p - surf.center;
-    vec3 scaledPos = surf.scale * pos;
+    //internal zoom of the defining equation
+    vec3 scaledPos = surf.scale * p;
 
     //get the distance estimate
     vec4 data = surfSphere_Data(scaledPos);
@@ -38,7 +37,7 @@ float sdf( vec3 p, SurfSphere surf ){
     dist=abs(dist);
 
     //bounding sphere
-    float bboxDist = length(pos)-surf.radius;
+    float bboxDist = length(p)-surf.radius;
     dist = max(dist,bboxDist);
 
     // return dist;
@@ -46,9 +45,10 @@ float sdf( vec3 p, SurfSphere surf ){
 }
 
 
-//the standard interface: at, inside, sdf, normalVec
-UNFRAMED_LOCATORS(SurfSphere)
-UNFRAMED_NORMAL_FD(SurfSphere)
+//the standard interface: initObject, at, inside, sdf, normalVec
+OBJECT_INIT(SurfSphere)
+OBJECT_LOCATORS(SurfSphere)
+OBJECT_NORMAL_FD(SurfSphere)
 
 //setData for a two sided surface
 void setData( inout Path path, SurfSphere surf ){
@@ -59,8 +59,13 @@ void setData( inout Path path, SurfSphere surf ){
         Vector normal=normalVec(path.tv,surf);
         Material mat=surf.mat;
 
+        //local position on the surface
+        vec3 q = toLocal(surf.frame, path.tv.pos);
+
         //check if we are on the outside edge:
-        float rad = length(path.tv.pos-surf.center);
+        //(compare in LOCAL units against surf.radius: with frame.scale != 1
+        // the corresponding world-space band scales by frame.scale)
+        float rad = length(q);
         bool onEdge = (abs(rad-surf.radius)<0.005);
 
         if(onEdge){
@@ -72,8 +77,7 @@ void setData( inout Path path, SurfSphere surf ){
         else {
 
             //what side of the variety are we on?
-            vec3 pos = path.tv.pos - surf.center;
-            pos *= surf.scale;
+            vec3 pos = surf.scale * q;
             float val= surfSphere_Data(pos).w;
             //val positive is one side, val negative is the other;
 

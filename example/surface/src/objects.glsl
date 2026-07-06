@@ -22,7 +22,7 @@ void buildObjects(){
 
     vec3 pinkScatter = vec3(0.25,0.65,0.7);
 
-    surf.center=vec3(-2,1.5,-2);
+    surf.frame = makeFrame(vec3(-2,1.5,-2));
     surf.scale=10.;
     surf.mat=makeDielectric(pinkScatter,0.5,0.2);
 

@@ -19,7 +19,7 @@ void buildObjects(){
 
     vec3 pinkScatter = vec3(0.25,0.65,0.7);
 
-    var.center=vec3(-2,1.5,-2);
+    var.frame = makeFrame(vec3(-2,1.5,-2));
     var.radius = 2.;
     var.smoothing =0.065;
     var.scale=10.;
