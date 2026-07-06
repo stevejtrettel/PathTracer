@@ -39,9 +39,19 @@ void initObject( out Type obj ){                                \
 }
 
 
-#define OBJECT_LOCATORS(Type)                                   \
+// bound( Type ) is the object's BOUNDING RADIUS in its own LOCAL coordinates:
+// the world sdf skips the (possibly expensive) real sdf whenever the ray is
+// outside that sphere, returning the bound distance instead. BOUND_MARGIN keeps
+// that raw bound out of the hit band so the bounding sphere is never itself hit.
+// The default is huge (10000) — effectively unbounded, no behavior change — so a
+// type opts in by hand-writing its own `float bound( Type )` (in local units)
+// and using the *_B macros, which omit the default. Examples: Box, CubicSurface.
+#define OBJECT_LOCATORS_B(Type)                                 \
 float sdf( Vector tv, Type obj ){                               \
-    return obj.frame.scale * sdf( toLocal(obj.frame, tv.pos), obj ); \
+    vec3 local = toLocal(obj.frame, tv.pos);                    \
+    float b = obj.frame.scale * (length(local) - bound(obj));   \
+    if( b > BOUND_MARGIN ) return b;                            \
+    return obj.frame.scale * sdf( local, obj );                 \
 }                                                               \
 bool at( Vector tv, Type obj ){                                 \
     float d = sdf( tv, obj );                                   \
@@ -50,6 +60,10 @@ bool at( Vector tv, Type obj ){                                 \
 bool inside( Vector tv, Type obj ){                             \
     return ( sdf( tv, obj ) < 0. );                             \
 }
+
+#define OBJECT_LOCATORS(Type)                                   \
+float bound( Type obj ){ return 10000.; }                       \
+OBJECT_LOCATORS_B(Type)
 
 
 #define OBJECT_NORMAL_FD(Type)                                  \
@@ -78,6 +92,16 @@ void setData( inout Path path, Type obj ){                      \
 #define OBJECT_API(Type)                                        \
 OBJECT_INIT(Type)                                               \
 OBJECT_LOCATORS(Type)                                           \
+OBJECT_NORMAL_FD(Type)                                          \
+OBJECT_SETDATA(Type)
+
+
+// like OBJECT_API but omits the default bound(): the type hand-writes its own
+// `float bound( Type )` (local units) before this macro. Use for shapes with a
+// natural tight bound (see box.glsl, cubicSurface.glsl).
+#define OBJECT_API_B(Type)                                      \
+OBJECT_INIT(Type)                                               \
+OBJECT_LOCATORS_B(Type)                                         \
 OBJECT_NORMAL_FD(Type)                                          \
 OBJECT_SETDATA(Type)
 

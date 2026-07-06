@@ -47,5 +47,9 @@ float sdf_cached(CubicSurface surf) {
     return dist;
 }
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(CubicSurface)
+//local bounding radius: the surface is clipped to sceneBBox (radius ~2), so a
+//sphere of radius 3 in local coords safely encloses it
+float bound( CubicSurface surf ){ return 3.0; }
+
+//the standard interface (custom bound above)
+OBJECT_API_B(CubicSurface)

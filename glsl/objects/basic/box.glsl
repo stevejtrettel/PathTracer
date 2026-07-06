@@ -16,5 +16,8 @@ float sdf( vec3 p, Box box ){
     return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - box.rounded;
 }
 
-//the standard interface
-OBJECT_API(Box)
+//local bounding radius: distance to the far corner, plus the rounding
+float bound( Box box ){ return length(box.sides) + box.rounded; }
+
+//the standard interface (custom bound above)
+OBJECT_API_B(Box)

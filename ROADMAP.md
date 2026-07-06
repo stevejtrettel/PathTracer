@@ -65,15 +65,19 @@ Litmus that assigns Render vs Export: *does it change the picture you're looking
 
 ## Deferred / smaller items
 
-- **Default bounding-box support in `sdf_Objects` (post-GUI plan)**: the cubic scenes
-  hand-roll a bounding volume (sphere / group box) as a march accelerator, and every one
-  hit the same trap — returning the raw bound distance as the marched sdf makes the
-  raymarcher (`abs(sdf) < EPSILON`) *hit the bound itself*, rendering it as an opaque
-  (glass) shell. Fixed per-scene July 2026 with a margin: enter real evaluation when
-  `bboxDist <= BBOX_MARGIN` (`0.05`, > EPSILON) so the raw bound never reaches the hit
-  band. This margin trick should become a first-class engine helper (e.g. a `bounded(...)`
-  wrapper or a convention baked into the object API) so scenes get correct bounding for
-  free instead of re-deriving it and re-hitting the bug. Do after the GUI (Phase 5) lands.
+- **Default bounding-box support in the object API (DONE July 2026)**: the cubic scenes
+  hand-rolled a bounding volume and every one hit the same trap — returning the raw bound
+  distance as the marched sdf makes the raymarcher (`abs(sdf) < EPSILON`) *hit the bound
+  itself*, rendering it as an opaque (glass) shell. Now a first-class, hit-safe feature:
+  every object type may define `float bound( Type )` — its bounding-sphere radius in LOCAL
+  coords — and the `OBJECT_LOCATORS` world sdf skips the real sdf (returning the bound
+  distance) whenever the ray is outside, with `BOUND_MARGIN` (0.05, > EPSILON) keeping the
+  raw bound out of the hit band. Default `bound()` = 10000 (effectively unbounded, no
+  behavior change); a type opts into a tight bound via the `*_B` macros (`OBJECT_API_B`).
+  Baked so far: `Box` (`length(sides)+rounded`), `CubicSurface` (`3`). Follow-ups: give
+  `Variety` a bound (needs its scene-set bbox radius exposed as a field), and migrate the
+  cubic scenes' hand-rolled group bounds onto the feature (they share one cubicF eval
+  across the group via caching, so that needs a group-level bound, not just per-object).
 - **cubicSurface / cubic-portrait still broken (separate from the bounding bug)**:
   `cubicSurface` renders black — `settings.facing` is the identity at `position=[0,2,-6]`,
   so the camera points away from the object at the origin (an unfinished WIP camera).

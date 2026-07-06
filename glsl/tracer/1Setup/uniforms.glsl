@@ -34,5 +34,11 @@ float AT_THRESH=0.002;
 int maxMarchSteps=2000;
 float maxDist=100.;
 
+//margin (> EPSILON) at which a bounded object switches from returning its
+//bounding-sphere distance to evaluating its real sdf. Keeps the raw bound out
+//of the hit band (abs(sdf) < EPSILON) so a bounding volume is never itself hit.
+//(see bound() in objects/objectAPI.glsl)
+float BOUND_MARGIN=0.05;
+
 //throwaway sink for unused out-parameters (see shapes/bottle.glsl etc)
 float trashFloat;
