@@ -24,4 +24,8 @@ facing: facing
 
 export {location};
 
-export default {uiParams: uiParams, location:location};
+
+//A-series portrait (1 : √2): width/height ratio for the initial render size
+export const aspect = 1 / Math.SQRT2;
+
+export default {uiParams: uiParams, location:location, aspect:aspect};
