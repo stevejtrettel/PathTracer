@@ -50,12 +50,11 @@ struct Icosahedron{
 
 
 //the point-level sdf
-//NOTE: this calls sdf_dodecahedron, not sdf_icosahedron (preserved from original)
 float sdf( vec3 p, Icosahedron obj ){
     //normalize position
     vec3 pos = p - obj.center;
     pos /= obj.size;
-    return sdf_dodecahedron(pos);
+    return sdf_icosahedron(pos);
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
