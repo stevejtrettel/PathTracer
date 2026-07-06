@@ -40,7 +40,7 @@ void buildEnvironment(){
 
     //----------- THE CEILING -------------------------
     topWall.frame=makeFrameNormal(vec3(0,14,0), vec3(0,-1,0));
-    topWall.mat=makeLight(vec3(1,1,1),1.*extra4);
+    topWall.mat=makeLight(vec3(1,1,1),1.*scratch4);
 
 
     //----------- THE FRONT -------------------------

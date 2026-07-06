@@ -33,8 +33,8 @@ void buildObjects(){
     Material polyMat = makeGlass(10.*pinkScatter,1.5,0.95);
 //    polyMat.refractionChance=0.;
 //    polyMat.subSurface=true;
-//    polyMat.meanFreePath=0.5*extra2;
-//    polyMat.isotropicScatter=extra;
+//    polyMat.meanFreePath=0.5*scratch2;
+//    polyMat.isotropicScatter=scratch1;
 //    polyMat.roughness=0.0;
 
 //    poly.edgeMat = polyMat;
@@ -46,8 +46,8 @@ void buildObjects(){
 //    Material dualMat = makeGlass(10.*greenGlass,1.5,0.95);
 //    dualMat.refractionChance=0.;
 //    dualMat.subSurface=true;
-//    dualMat.meanFreePath=0.5*extra2;
-//    dualMat.isotropicScatter=extra;
+//    dualMat.meanFreePath=0.5*scratch2;
+//    dualMat.isotropicScatter=scratch1;
 //    dualMat.roughness=0.0;
 //
 //    dual.edgeMat = dualMat;

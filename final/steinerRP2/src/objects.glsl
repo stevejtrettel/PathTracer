@@ -32,8 +32,8 @@ void buildObjects(){
     var.mat=makeGlass(30.*pinkScatter,1.5,0.99);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
-    var.mat.meanFreePath=0.2*extra2;
-    var.mat.isotropicScatter=extra;
+    var.mat.meanFreePath=0.2*scratch2;
+    var.mat.isotropicScatter=scratch1;
     var.mat.roughness=0.7;
 
 }

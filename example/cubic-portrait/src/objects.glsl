@@ -136,7 +136,7 @@ float _cachedVal;
 vec3  _cachedGrad;
 vec3  _cachedPos;
 
-// XZ rotation for the surface group (controlled by extra slider)
+// XZ rotation for the surface group (controlled by scratch1 slider)
 mat2 xzRot;
 mat2 xzRotInv;
 
@@ -295,8 +295,8 @@ const vec3 PLATE_POS   = vec3(0, FLOOR_Y + LEG_HEIGHT + 0.05, 0);
 
 void buildObjects() {
 
-    // XZ rotation from extra slider (0→2π)
-    float angle = extra * 6.2832;
+    // XZ rotation from scratch1 slider (0→2π)
+    float angle = scratch1 * 6.2832;
     float ca = cos(angle), sa = sin(angle);
     xzRot = mat2(ca, sa, -sa, ca);
     xzRotInv = mat2(ca, -sa, sa, ca);

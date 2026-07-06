@@ -26,11 +26,11 @@ void buildObjects(){
     dod.mat=makeGlass(6.*(brownAbsorb+0.25*redAbsorb),1.5,0.97);
     dod.frame = makeFrame(vec3(1.5,-0.5,2.25));
     //dod.mat = makeMetal(color,specularity,roughness);
-    //    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
+    //    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,scratch2);
     //    dod.mat.refractionChance=0.;
     //    dod.mat.subSurface=true;
-    //    dod.mat.meanFreePath=0.5*extra2;
-    //    dod.mat.isotropicScatter=extra;
+    //    dod.mat.meanFreePath=0.5*scratch2;
+    //    dod.mat.isotropicScatter=scratch1;
     //    dod.mat.roughness=0.04;
 
 
@@ -41,15 +41,15 @@ void buildObjects(){
     dodE.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
     dodE.mat.refractionChance=0.;
     dodE.mat.subSurface=true;
-    dodE.mat.meanFreePath=0.5*extra2;
-    dodE.mat.isotropicScatter=extra;
+    dodE.mat.meanFreePath=0.5*scratch2;
+    dodE.mat.isotropicScatter=scratch1;
     dodE.mat.roughness=0.04;
 
     //dod.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
     //dod.mat.refractionChance=0.;
     //dod.mat.subSurface=true;
-    //dod.mat.meanFreePath=0.5*extra2;
-    //dod.mat.isotropicScatter=extra;
+    //dod.mat.meanFreePath=0.5*scratch2;
+    //dod.mat.isotropicScatter=scratch1;
     //dod.mat.roughness=0.04;
     //
 
@@ -59,19 +59,19 @@ void buildObjects(){
 
     //    poin.dod.mat.refractionChance=0.;
     //    poin.dod.mat.subSurface=true;
-    //    poin.dod.mat.meanFreePath=0.5*extra2;
-    //    poin.dod.mat.isotropicScatter=extra;
+    //    poin.dod.mat.meanFreePath=0.5*scratch2;
+    //    poin.dod.mat.isotropicScatter=scratch1;
     //    poin.dod.mat.roughness=0.04;
 
 
     cube = buildCoxCube(3.);
     //makeMetal(color,specularity,roughness);
-    //cube5.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
+    //cube5.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,scratch2);
     cube.mat=makeGlass(20.*(vec3(1)-vec3(0.6,0.1,0.5)),1.5,0.95);
     cube.mat.refractionChance=0.;
     cube.mat.subSurface=true;
-    cube.mat.meanFreePath=0.5*extra2;
-    cube.mat.isotropicScatter=extra;
+    cube.mat.meanFreePath=0.5*scratch2;
+    cube.mat.isotropicScatter=scratch1;
     cube.mat.roughness=0.04;
 
 

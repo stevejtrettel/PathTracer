@@ -20,15 +20,15 @@ void buildObjects(){
 
     bunny.mat.refractionChance=0.;
     bunny.mat.subSurface=true;
-    bunny.mat.meanFreePath=0.5*extra2;
-    bunny.mat.isotropicScatter=extra;
+    bunny.mat.meanFreePath=0.5*scratch2;
+    bunny.mat.isotropicScatter=scratch1;
     bunny.mat.roughness=0.0;
 
 //    //make the bunny glow
 //    bunny.mat.diffuseColor=vec3(1);
 //    bunny.mat.absorbColor=vec3(0.1);
-//    bunny.mat.emitColor =  0.4*extra2*vec3(1.,0.15,0.);
-//    bunny.mat.surfaceEmit =  0.1*extra3*vec3(0.75,0.25,0.);
+//    bunny.mat.emitColor =  0.4*scratch2*vec3(1.,0.15,0.);
+//    bunny.mat.surfaceEmit =  0.1*scratch3*vec3(0.75,0.25,0.);
 
 }
 

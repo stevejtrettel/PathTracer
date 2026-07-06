@@ -4,10 +4,10 @@ let uiParams = {
     exposure: 1,
     focusHelp: false,
     fov: 69,
-    extra: 0.73,
-    extra2: 0.84,
-    extra3: 0.368,
-    extra4: 0.5,
+    scratch1: 0.73,
+    scratch2: 0.84,
+    scratch3: 0.368,
+    scratch4: 0.5,
 }
 
 export {uiParams};

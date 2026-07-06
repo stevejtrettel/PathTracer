@@ -35,9 +35,9 @@ void buildObjects(){
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.1;
-    //0.2*extra2;
+    //0.2*scratch2;
     var.mat.isotropicScatter=0.7;
-    //extra;
+    //scratch1;
     var.mat.roughness=0.7;
 
 }

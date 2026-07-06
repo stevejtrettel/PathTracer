@@ -24,13 +24,13 @@ void buildObjects(){
     mobius.width =0.4;
     mobius.thickness=0.04;
     mobius.offset=false;
-    //mobius.borderMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
+    //mobius.borderMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,scratch2);
 
     mobius.bandMat=makeGlass(30.*(0.75*brownAbsorb+0.5*redAbsorb),1.5,0.99);
     mobius.bandMat.refractionChance=0.;
     mobius.bandMat.subSurface=true;
-    mobius.bandMat.meanFreePath=0.2*extra2;
-    mobius.bandMat.isotropicScatter=extra;
+    mobius.bandMat.meanFreePath=0.2*scratch2;
+    mobius.bandMat.isotropicScatter=scratch1;
     mobius.bandMat.roughness=0.7;
 
     //mobius.borderMat=makeMetal(vec3(0.02),specularity,0.4);
@@ -49,12 +49,12 @@ void buildObjects(){
     mobius2.thickness=0.04;
     mobius2.offset=true;
 
-    //mobius2.bandMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.1,extra2);
+    //mobius2.bandMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.1,scratch2);
     mobius2.bandMat=makeGlass(20.*vec3(1,0.6,0.3),1.5,0.99);
     mobius2.bandMat.refractionChance=0.;
     mobius2.bandMat.subSurface=true;
-    mobius2.bandMat.meanFreePath=0.2*extra2;
-    mobius2.bandMat.isotropicScatter=extra;
+    mobius2.bandMat.meanFreePath=0.2*scratch2;
+    mobius2.bandMat.isotropicScatter=scratch1;
     mobius2.bandMat.roughness=0.7;
 
     mobius2.borderMat=makeGlass(0.5*vec3(1,0.6,0.3),1.5,0.99);

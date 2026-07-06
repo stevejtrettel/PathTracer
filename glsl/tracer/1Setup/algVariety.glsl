@@ -835,10 +835,10 @@ T enneper(T x, T y, T z){
     T goldman(T x, T y, T z){
 
     //needs some constant values
-    float a = 2.*extra;
-    float b = 2.*extra2;
-    float c = 2.*extra3;
-    float d = 2.*extra4;
+    float a = 2.*scratch1;
+    float b = 2.*scratch2;
+    float c = 2.*scratch3;
+    float d = 2.*scratch4;
     float k = 4.-a*a-b*b-c*c-a*b*c*d;
 
     T x2 = tsqr(x);

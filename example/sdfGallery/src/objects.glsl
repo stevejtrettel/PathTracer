@@ -24,15 +24,15 @@ void buildObjects(){
 
     obj.mat.refractionChance=0.;
     obj.mat.subSurface=true;
-    obj.mat.meanFreePath=0.5*extra2;
-    obj.mat.isotropicScatter=extra;
-    obj.mat.roughness=extra3;
+    obj.mat.meanFreePath=0.5*scratch2;
+    obj.mat.isotropicScatter=scratch1;
+    obj.mat.roughness=scratch3;
 
 //    //make the bunny glow
 //    sphere.mat.diffuseColor=vec3(1);
 //    sphere.mat.absorbColor=vec3(0.1);
-//    sphere.mat.emitColor =  0.4*extra2*vec3(1.,0.15,0.);
-//    sphere.mat.surfaceEmit =  0.1*extra3*vec3(0.75,0.25,0.);
+//    sphere.mat.emitColor =  0.4*scratch2*vec3(1.,0.15,0.);
+//    sphere.mat.surfaceEmit =  0.1*scratch3*vec3(0.75,0.25,0.);
 
 }
 

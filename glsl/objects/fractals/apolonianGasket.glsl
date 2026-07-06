@@ -11,8 +11,8 @@ struct Gasket{
 
 
 //the local-frame sdf
-//NOTE: the fractal's shape is coupled to the global uniform `extra`
-//(the "extra" slider in the UI shifts the fold offset each iteration)
+//NOTE: the fractal's shape is coupled to the global uniform `scratch1`
+//(the "scratch1" slider in the UI shifts the fold offset each iteration)
 //NOTE: the radius multiply is a shape parameter (inversion radius), not placement
 float sdf( vec3 p, Gasket gasket ){
 
@@ -27,7 +27,7 @@ float sdf( vec3 p, Gasket gasket ){
 
     for( int i=0; i<10;i++ )
     {
-        p = -1.0 + 2.0*fract(0.5*p+extra);
+        p = -1.0 + 2.0*fract(0.5*p+scratch1);
 
         float r2 = dot(p,p);
 

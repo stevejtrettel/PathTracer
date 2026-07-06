@@ -29,7 +29,7 @@ void buildEnvironment(){
 
     //----------- LIGHT 2 -------------------------
     light2.frame=makeFrame(vec3(-10,3,10));
-    light2.radius=2.*extra4;
+    light2.radius=2.*scratch4;
     lightColor= vec3(1.);
     lightIntensity=100.;
     light2.mat=makeLight(lightColor,lightIntensity);
@@ -63,7 +63,7 @@ void buildEnvironment(){
 
     //----------- THE CEILING -------------------------
         topWall.frame=makeFrameNormal(vec3(0,14,0), vec3(0,-1,0));
-    topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
+    topWall.mat=makeLight(vec3(1,1,1),5.*scratch4);
 
 
     //----------- THE FRONT -------------------------

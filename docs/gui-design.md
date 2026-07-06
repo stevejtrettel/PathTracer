@@ -151,6 +151,8 @@ coupled workflow; splitting its geometry into Render isn't worth the cross-tab f
 - **A3** shared `js/createScene.js`; every `main.js` is a 5-line stub; `settings.aspect`
   dissolves cubic-portrait/landscape.
 - **A4** per-scene `settings.sky`: image / solid / gradient (`buildSky` + `getSky`).
+- **B** renamed the scratch dials `extra/extra2/extra3/extra4` → `scratch1..4` everywhere
+  (engineKnobs list, ~130 scene GLSL + settings files, and the two library files
+  `algVariety.glsl` / `apolonianGasket.glsl`). Behavior-frozen (values moved with names).
 
-Still open: **B** (extra→scratch1..4 rename sweep), **C/Phase 5** (custom tabbed GUI incl.
-live aspect + sky-color controls).
+Still open: **C/Phase 5** (custom tabbed GUI incl. live aspect + sky-color controls).

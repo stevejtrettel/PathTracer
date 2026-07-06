@@ -40,7 +40,7 @@ void buildObjects(){
     sphere4.radius=rad;
     sphere4.mat=makeMetal(vec3(0.8),0.95,0.);
 
-    float emit = 0.1*extra3;
+    float emit = 0.1*scratch3;
 
     triang1.frame = makeFrame(-1.25*v2);
     triang1.frame.rot = rotateZto(v2)*rotateAboutZ(1.57);

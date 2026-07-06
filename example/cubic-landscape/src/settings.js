@@ -4,10 +4,10 @@ focalLength: 14.92,
 exposure: 1,
 focusHelp: false,
 fov: 66,
-extra: 0.791,
-extra2: 0.73,
-extra3: 0.368,
-extra4: 0.5,
+scratch1: 0.791,
+scratch2: 0.73,
+scratch3: 0.368,
+scratch4: 0.5,
 }
 
 export {uiParams};

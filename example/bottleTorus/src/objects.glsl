@@ -24,14 +24,14 @@ void buildObjects(){
     donut.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.6,0.99);
     //donut.mat.diffuseColor=0.6*(vec3(1.)-4.*vec3(0.2,0.03,0.0));
     //donut.mat.absorbColor= 4.*0.01*vec3(0.2,0.04,0.0);
-    //donut.mat.emitColor= extra*vec3(0.5,0.1,0.0);
-    //donut.mat.surfaceEmit=0.5*extra2*vec3(0.3,0.3,0.0);
+    //donut.mat.emitColor= scratch1*vec3(0.5,0.1,0.0);
+    //donut.mat.surfaceEmit=0.5*scratch2*vec3(0.3,0.3,0.0);
     //donut.mat.specularChance=0.05;
     //donut.mat.specularColor=vec3(1.)-donut.mat.absorbColor/3.;
     donut.mat.refractionChance=0.0;
     donut.mat.subSurface=true;
     donut.mat.meanFreePath=0.02;
-    donut.mat.isotropicScatter=extra3;
+    donut.mat.isotropicScatter=scratch3;
     donut.mat.roughness=0.0;
 
 }
