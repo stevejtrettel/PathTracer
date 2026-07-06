@@ -5,12 +5,10 @@
 
 uniform vec3 iResolution;
 uniform sampler2D sky;
-uniform sampler2D skySM;
 uniform mat3 facing;
 uniform vec3 location;
 uniform float frameNumber;
 uniform float exposure;
-//uniform bool renderBlocks;
 
 uniform float aperture;
 uniform float focalLength;
@@ -40,7 +38,5 @@ int maxMarchSteps=2000;
 float maxDist=100.;
 int maxBounces=50;
 
-//======trash constants:
-bool trashBool;
+//throwaway sink for unused out-parameters (see shapes/bottle.glsl etc)
 float trashFloat;
-vec3 debug;

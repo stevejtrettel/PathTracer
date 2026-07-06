@@ -17,8 +17,6 @@ float distR3( vec3 p, Object box ){
     vec3 pos = p - box.center;
 
     return sdf(pos);
-//    vec3 q = abs(pos) - vec3(1);
-//    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 }
 
 

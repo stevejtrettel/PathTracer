@@ -16,14 +16,6 @@ import settings from "./src/settings.js";
 
 
 
-//---------------------------------
-// The scene we are rendering
-//---------------------------------
-const sceneName = 'cubic-landscape';
-//----------------------------------
-export {sceneName};
-//----------------------------------
-
 //build up stats
 let panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;
 let stats = new Stats();

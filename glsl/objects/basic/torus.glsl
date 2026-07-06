@@ -66,24 +66,6 @@ float sdf( Vector tv, Torus torus ){
 
 
 
-////overload of normalVec for a torus
-//Vector normalVec( Vector tv, Torus torus ){
-//
-//    //normalize position
-//    vec3 p = (pos - torus.center);
-//
-//    float ra = torus.outerR;
-//    float rb = torus.innerR;
-//
-//    float h = length(p.xz);
-//    vec3 dir = normalize(p*vec3(h-ra,h,h-ra));
-//
-//    return Vector(tv.pos,dir);
-//}
-
-
-
-
 //overload of normalVec for a sphere
 Vector normalVec( Vector tv, Torus torus ){
 

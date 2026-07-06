@@ -105,31 +105,3 @@ mat3 rotateAboutZ(float theta){
 }
 
 
-//
-//
-//// Build R that sends (0,0,1) → normalize(vec3(a,b,c))
-//mat3 makeRotationToNormal(vec3 a_b_c) {
-//    vec3 up    = vec3(0.,0.,1.);
-//    vec3 n     = normalize(a_b_c);
-//    float cosA = clamp(dot(up, n), -1.0, 1.0);
-//    float angle = acos(cosA);
-//
-//    vec3 axis = cross(up, n);
-//    float axisLen = length(axis);
-//    if (axisLen < 1e-6) {
-//        // up || n: if pointing opposite, rotate 180° around X
-//        if (cosA < 0.) return mat3(-1.,0.,0., 0.,1.,0., 0.,0.,-1.);
-//        else           return mat3(1.0);  // no rotation
-//    }
-//    axis /= axisLen;
-//
-//    mat3 K = mat3(
-//    0.,       -axis.z,  axis.y,
-//    axis.z,   0.,      -axis.x,
-//    -axis.y,   axis.x,   0.
-//    );
-//    return mat3(1.0)
-//    + K * sin(angle)
-//    + (K * K) * (1.0 - cosA);
-//}
-//

@@ -1,12 +1,8 @@
-
-
-
-
 //-------------------------------------------------
 //The APOLLONIAN GASKET sdf
 //-------------------------------------------------
 
-//the data of a sphere is its center and radius
+//the data of a gasket is its center and radius
 struct Gasket{
     vec3 center;
     float radius;
@@ -14,47 +10,9 @@ struct Gasket{
 };
 
 
-//auxillary function for calculating this
-float apollonian(vec3 p)
-{
-    float K=0.4;
-    float scale = 1.0;
-    vec4 orb = vec4(1000.0);
-
-    for( int i=0; i < 15;  i++ )
-    {
-        p = -1.0 + 2.0*fract(0.5*p+0.5);
-        float r2 = dot(p,p);
-        orb = min( orb, vec4(abs(p),r2) );
-        float k = (1.0 + K)/r2;
-        p *= k;
-        scale *= k;
-    }
-
-    //this adds in balls insteaad
-    //float res = abs(p.y);
-    //
-    float  res = min(abs(p.z)+abs(p.x),
-    min(abs(p.x)+abs(p.y),
-    abs(p.y)+abs(p.z)));
-
-    return 0.25/scale*res;
-}
-
-float sqrt3=sqrt(3.);
-vec3 triangles(vec3 p){
-    float zm = 1.;
-    p.x = p.x-sqrt3*(p.y+.5)/3.;
-    p = vec3(mod(p.x+sqrt3/2.,sqrt3)-sqrt3/2., mod(p.y+.5,1.5)-.5 , mod(p.z+.5*zm,zm)-.5*zm);
-    p = vec3(p.x/sqrt3, (p.y+.5)*2./3. -.5 , p.z);
-    p = p.y>-p.x ? vec3(-p.y,-p.x , p.z) : p;
-    p = vec3(p.x*sqrt3, (p.y+.5)*3./2.-.5 , p.z);
-    return vec3(p.x+sqrt3*(p.y+.5)/3., p.y , p.z);
-}
-
-
-vec4 orb;
 //overload of distR3: distance in R3 coordinates
+//NOTE: the fractal's shape is coupled to the global uniform `extra`
+//(the "extra" slider in the UI shifts the fold offset each iteration)
 float distR3( vec3 p, Gasket gasket ){
 
     p-=gasket.center;
@@ -64,27 +22,8 @@ float distR3( vec3 p, Gasket gasket ){
     p += vec3(1.0);
     p*=3.;
 
-
-    //
-    //        float scale = 1.;
-    //        float s = 1./3.;
-    //        for( int i=0; i<20;i++ )
-    //        {
-    //            p = triangles(p);
-    //            float r2= dot(p,p);
-    //            float k = s/r2;
-    //            p = p * k;
-    //            scale=scale*k;
-    //        }
-    //        return .3*length(p)/scale -.001/sqrt(scale);
-
-
-    //********************************************************************************
-    //
-
     float scale = 1.0;
     float s=1.5;
-    orb = vec4(1000.0);
 
     for( int i=0; i<10;i++ )
     {
@@ -92,125 +31,28 @@ float distR3( vec3 p, Gasket gasket ){
 
         float r2 = dot(p,p);
 
-        orb = min( orb, vec4(abs(p),r2) );
-
         float k = s/r2;
         p     *= k;
         scale *= k;
     }
     float  res = min(abs(p.z)+abs(p.x),min(abs(p.x)+abs(p.y),abs(p.y)+abs(p.z)))+0.2;
-    //float res=abs(p.y);
     float dist= 0.25*res/scale;
     return dist;
-
-    //********************************************************************************
-
-
-    //        float scale = 6.0;
-    //        vec3 q=p;
-    //        p /= scale;
-    //        float s = 1.0;
-    //    //    if (doInversion) {
-    //            s = dot(p,p);
-    //            p /= s;
-    //            p += vec3(1.0);
-    //    //    }
-    //        //if (doTranslate) p.y += 0.1*iTime;
-    //        float d0=apollonian(p)*scale;
-    //        float d = d0;
-    //        return d*s;
 }
-
-
-
-
-
-
-//-------------------
-// ONE ALTERNATIVE GASKET
-//-------------------
-//
-//float sqrt3 =1.73205080757;
-//vec3 triangles(vec3 p){
-//    float zm = 1.;
-//    p.x = p.x-sqrt3*(p.y+.5)/3.;
-//    p = vec3(mod(p.x+sqrt3/2.,sqrt3)-sqrt3/2., mod(p.y+.5,1.5)-.5 , mod(p.z+.5*zm,zm)-.5*zm);
-//    p = vec3(p.x/sqrt3, (p.y+.5)*2./3. -.5 , p.z);
-//    p = p.y>-p.x ? vec3(-p.y,-p.x , p.z) : p;
-//    p = vec3(p.x*sqrt3, (p.y+.5)*3./2.-.5 , p.z);
-//    return vec3(p.x+sqrt3*(p.y+.5)/3., p.y , p.z);
-//}
-//float distR3(vec3 p, Gasket gasket){
-//
-//    p-=gasket.center;
-//    p=gasket.radius*p;
-//
-//    p /= dot(p,p);
-//    p += vec3(1.0);
-//    p*=5.;
-//
-//    float scale = 1.;
-//    float s = 1./3.;
-//    for( int i=0; i<10;i++ )
-//    {
-//        p = triangles(p);
-//        float r2= dot(p,p);
-//        float k = s/r2;
-//        p = p * k;
-//        scale=scale*k;
-//    }
-//    return .3*length(p)/scale		-.001/sqrt(scale);
-//}
-
-
-
-//-------------------
-// ANOTHER ALTERNATIVE GASKET: SIMPLE!
-//-------------------
-//float distR3( vec3 p, Gasket gasket )
-//{
-//
-//    p-=gasket.center;
-//    p=gasket.radius*p;
-//
-//    p /= dot(p,p);
-//    p += vec3(1.0);
-//    p*=5.;
-//
-//
-//    float s = 1.1;
-//    float scale = 1.0;
-//
-//    for( int i=0; i<8;i++ )
-//    {
-//        p = -1.0 + 2.0*fract(0.5*p+0.5);
-//
-//        float r2 = dot(p,p);
-//
-//        float k = s/r2;
-//        p     *= k;
-//        scale *= k;
-//    }
-//
-//    return 0.25*abs(p.y)/scale;
-//}
 
 
 //overload of location booleans:
 bool at( Vector tv, Gasket gasket){
+    //the custom trace() below uses a distance-proportional precision (0.001*t),
+    //which at large t stops farther from the surface than AT_THRESH.
+    //so: any point we are asked about is treated as on the surface.
     return true;
-    float d = distR3( tv.pos, gasket );
-    bool atSurf = ((abs(d) - AT_THRESH)<0.);
-    return atSurf;
 }
 
 bool inside( Vector tv, Gasket gasket ){
-    //return false;
     float d = distR3( tv.pos, gasket );
     return (d<0.);
 }
-
-
 
 
 //overload of sdf for a gasket
@@ -221,7 +63,7 @@ float sdf( Vector tv, Gasket gasket ){
 
 }
 
-//overload of normalVec for a sphere
+//overload of normalVec for a gasket
 Vector normalVec( Vector tv, Gasket gasket ){
 
     vec3 pos=tv.pos;
@@ -244,58 +86,24 @@ Vector normalVec( Vector tv, Gasket gasket ){
 
 
 //overload of trace for a gasket
+//sphere-traces with precision proportional to distance traveled
 float trace( Vector tv, Gasket gasket ){
     vec3 ro=tv.pos;
     vec3 rd=tv.dir;
-
-    //
-    //        float pixelRadius= 1.0/(iResolution.y * 2.0);
-    //        float t = 0.002;
-    //        float h = 5.;
-    //        for( int i=0; i<512; i++ )
-    //        {
-    //            if(h<t*pixelRadius || t>maxDist){break;}
-    //            h =distR3( ro+rd*t, gasket );
-    //            t += h;
-    //        }
-    //        if(h>t*pixelRadius){t=maxDist*2.;}
-    //        return t;
-    //
-
-
-    //**************************************************************
-
 
     float t = 0.001;
     for( int i=0; i<512; i++ )
     {
         float precis = 0.001*t;
-        // float precis = 0.001;
         float h = distR3( ro+rd*t, gasket);
         if( h<precis||t>maxDist) break;
         t += h;
     }
     return t;
-    //**************************************************************
-    //    vec3 ro=tv.pos;
-    //    vec3 rd=tv.dir;
-    //    float pixel_size = 1.0/(iResolution.y * 2.0);
-    //    float t = 1.0;
-    //
-    //    for( int i=0; i<2048; i++ )
-    //    {
-    //        float c = distR3(ro + rd*t,gasket);
-    //        if( c<0.5*pixel_size*t ) break;
-    //        t += c;
-    //        if( t>100.0 ) return maxDist;
-    //    }
-    //    return t;
-
 }
 
 
-
-//overload of setData for a sphere
+//overload of setData for a gasket
 void setData( inout Path path, Gasket gasket){
 
     //if we are at the surface
@@ -307,10 +115,3 @@ void setData( inout Path path, Gasket gasket){
         setObjectInAir(path.dat, side, normal, gasket.mat);
     }
 }
-
-
-
-
-
-
-

@@ -4,14 +4,13 @@ uniform vec3 iResolution;
 uniform float iFrame;
 uniform sampler2D accTex;
 
-void mainImage( out vec4 fragColor, in ivec2 pixelCoord )
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
 
-    //directly return the pixel value at fragCoord
-    vec3 color = texelFetch(accTex, pixelCoord, 0).rgb;
-
-    ////sample the texture at the given location
-    //vec3 color = texture(accTex, fragCoord / iResolution.xy).rgb;
+    //sample the accumulated image with normalized coordinates:
+    //if the accumulation texture is smaller than the screen (preview mode),
+    //it stretches to fill (pixelated, since the texture uses NearestFilter)
+    vec3 color = texture(accTex, fragCoord / iResolution.xy).rgb;
 
     // convert unbounded HDR color range to SDR color range
     color = ACESFilm(color);
@@ -29,7 +28,7 @@ void mainImage( out vec4 fragColor, in ivec2 pixelCoord )
 
 void main() {
 
-    mainImage(gl_FragColor, ivec2(gl_FragCoord.xy));
+    mainImage(gl_FragColor, gl_FragCoord.xy);
 }
 
 

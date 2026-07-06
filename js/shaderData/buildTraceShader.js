@@ -6,8 +6,6 @@
 import {Matrix3, TextureLoader, Vector3} from "three";
 
 const skyTex = new TextureLoader().load('/assets/office.jpg');
-//background sky texture
-const skyTexSmall = new TextureLoader().load('/assets/office.jpg');
 
 import setupShaderChunk from "../../glsl/tracer/setupShader.glsl"
 import traceShaderChunk from "../../glsl/tracer/traceShader.glsl"
@@ -36,12 +34,9 @@ let buildTraceShader= function(sceneData, settings){
             value: 0
         },
 
-        //loaded directly above: skybox images
+        //loaded directly above: skybox image
         sky: {
             value: skyTex
-        },
-        skySM: {
-            value: skyTexSmall
         },
 
 
@@ -76,9 +71,6 @@ let buildTraceShader= function(sceneData, settings){
         fov: {
             value: uiParams.fov
         },
-        // renderBlocks: {
-        //     value: false
-        // },
         extra: {
             value: uiParams.extra
         },

@@ -19,9 +19,8 @@
 //get the new frame
 vec3 newFrame(vec2 fragCoord ){
 
-    // initialize a random number seed
-    float rand = floor(1000.*randomFloat());
-    seed = randomSeed(fragCoord, frameNumber+rand);
+    // initialize the random number seed from pixel and frame
+    seed = randomSeed(fragCoord, frameNumber);
 
     //set up the camera:
     Camera cam=buildCamFromUniforms();
@@ -51,12 +50,7 @@ vec3 newFrame(vec2 fragCoord ){
 //-------------------------------------------------
 
 void main() {
-    int iter=10;
-    vec3 pixel=vec3(0);
-    // for(int i =0; i<iter; i++){
-    pixel += newFrame(gl_FragCoord.xy);
-    // }
-    // pixel /= float(iter);
+    vec3 pixel = newFrame(gl_FragCoord.xy);
     gl_FragColor=vec4(pixel, 1.);
 }
 

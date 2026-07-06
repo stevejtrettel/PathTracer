@@ -18,7 +18,6 @@ class UI extends GUI{
             extra4: pathtracer.settings.uiParams.extra4,
 
             preview: false,
-            // renderBlocks:false,
             resize: ()=>pathtracer.resize({x:window.innerWidth,y:window.innerHeight}),
 
 
@@ -197,20 +196,6 @@ class UI extends GUI{
             pathtracer.tracer.updateUniforms({renderPanel:value});
             pathtracer.reset();
         });
-
-
-
-
-
-
-
-        //
-        // HD.add(this.params, 'customWidth').name('Width (px)').onFinishChange(function(value){
-        //     let aspect = window.innerHeight/window.innerWidth;
-        //     let xRes = value;
-        //     let yRes = aspect*value;
-        //     pathtracer.resize({x:xRes,y: yRes});
-        // });
 
 
         this.add(this.params,'printSettings').name('Download Settings');

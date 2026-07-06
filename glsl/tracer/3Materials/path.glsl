@@ -29,9 +29,7 @@ struct localData{
 };
 
 
-localData trashDat;
-
-void initializeData(localData dat){
+void initializeData(inout localData dat){
     dat.subSurface=false;
     dat.isSky=false;
     dat.isPhysical=true;

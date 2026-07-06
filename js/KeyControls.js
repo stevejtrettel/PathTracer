@@ -152,8 +152,9 @@ class KeyControls{
     printLocation(){
 
         //internally things are stored column-major, but are entered row-major
-        //so, to save the correct matrix as output, we transpose it
-        let origFacing = this.facing.transpose();
+        //so, to save the correct matrix as output, we transpose a copy
+        //(transpose() mutates in place: do not transpose this.facing itself!)
+        let origFacing = this.facing.clone().transpose();
 
         let str = ``;
         str += `let position = [${this.position.x},${this.position.y},${this.position.z}];\n\n`;

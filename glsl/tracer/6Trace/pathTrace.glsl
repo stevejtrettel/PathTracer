@@ -7,8 +7,6 @@
 
 vec3 pathTrace(Path path){
 
-        maxBounces=50;
-
         for (int bounceIndex = 0; bounceIndex < maxBounces; ++bounceIndex)
         {
                 //move forward until the next intersection, update localData
@@ -21,7 +19,9 @@ vec3 pathTrace(Path path){
                 updateFromVolume(path);
 
                 // if you hit the sky: stop
+                //(no surface data was set, so do not scatter off of it)
                 updateFromSky(path);
+                if(!path.keepGoing){ break; }
 
                 //scatter the path off in a new direction
                 scatter(path);

@@ -4,6 +4,12 @@
 //Struct Camera
 //-------------------------------------------------
 
+//LEGACY GLOBAL CAMERA OFFSET
+//every ray origin is shifted by this before applying location/facing.
+//all saved settings.js camera positions were authored with this baked in,
+//so removing it would re-frame every existing scene.
+const vec3 CAMERA_OFFSET = vec3(-2., 0., 6.);
+
 
 struct Camera{
     vec3 pos;
@@ -120,9 +126,6 @@ vec2 panelFragCoord(vec2 fragCoord, float nPanels, float panelToRender){
 
 Vector cameraRay(vec2 fragCoord, Camera cam){
 
-    //SET THE POSITION THE CAMERA STARTS AT REL THE ORIGIN
-    vec3 startPos=vec3(-2,0,6);
-
     //if we are rendering by panels, set the correct panel
     if(cam.renderPanel){
         fragCoord = panelFragCoord(fragCoord, cam.numPanels, cam.panelToRender);
@@ -151,7 +154,7 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
     tv.pos=facing*tv.pos;
 
     //translate by the right amount
-    tv.pos+=cam.pos+startPos;
+    tv.pos+=cam.pos+CAMERA_OFFSET;
 
     //rotate by facing (a uniform)
     tv=rotateByFacing(tv,cam.facing);

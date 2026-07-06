@@ -13,8 +13,6 @@ struct Vector{
     vec3 dir; //tangent vector,
 };
 
-Vector trashVector;
-
 Vector randomVector(vec3 pos){
     return Vector(pos,randomUnitVec3());
 }
@@ -128,8 +126,6 @@ struct Isometry {
     mat4 mat;// isometry of the space.
 };
 
-
-Isometry trashIsometry;
 
 const Isometry identity = Isometry(mat4(1));
 
