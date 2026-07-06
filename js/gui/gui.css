@@ -160,6 +160,13 @@
 }
 .gui-btn:hover { background: rgba(110, 168, 254, 0.22); border-color: #6ea8fe; }
 
+/* camera pose readout */
+.gui-pose {
+  padding: 4px 0;
+  color: #eaeaea;
+  font-variant-numeric: tabular-nums;
+}
+
 /* keybinding map (Help tab) */
 .gui-keys { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; }
 .gui-keys .key {

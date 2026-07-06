@@ -101,19 +101,21 @@ function numberField(label, value, onChange){
     return row;
 }
 
-// a dropdown of numeric options
+// a dropdown. options is an array of [label, value] pairs; onChange receives
+// the selected value (any type — the option's DOM value is its index, so null
+// and floats survive). `value` preselects the matching option.
 function select(label, options, value, onChange){
     let row = el('div', 'knob');
     row.append(el('label', 'knob-label', label));
 
     let sel = el('select', 'knob-select');
-    for(let opt of options){
-        let o = el('option', null, String(opt));
-        o.value = opt;
-        if(opt === value) o.selected = true;
+    options.forEach(([lab, val], i) => {
+        let o = el('option', null, lab);
+        o.value = String(i);
+        if(val === value) o.selected = true;
         sel.append(o);
-    }
-    sel.addEventListener('change', () => onChange(parseFloat(sel.value)));
+    });
+    sel.addEventListener('change', () => onChange(options[parseInt(sel.value)][1]));
 
     row.append(sel);
     return row;

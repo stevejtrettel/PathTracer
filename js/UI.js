@@ -15,8 +15,33 @@ const KEYBINDINGS = [
 ];
 
 
+// on-screen aspect-ratio presets: [label, width/height]. null = fill window.
+const ASPECTS = [
+    ['Fill',        null],
+    ['1:1',         1],
+    ['3:2',         3/2],
+    ['2:3',         2/3],
+    ['16:9',        16/9],
+    ['9:16',        9/16],
+    ['√2',          Math.SQRT2],
+    ['portrait √2', 1/Math.SQRT2],
+];
+
+// largest {x,y} box of the given width/height ratio that fits the window
+// (mirrors resolutionFor() in createScene.js; duplicated to avoid a circular
+// import, since createScene imports UI).
+function fitAspect(aspect){
+    let w = window.innerWidth, h = window.innerHeight;
+    if(aspect){
+        if(w / h > aspect) w = Math.round(h * aspect);
+        else               h = Math.round(w / aspect);
+    }
+    return {x: w, y: h};
+}
+
+
 class UI{
-    constructor(pathtracer){
+    constructor(pathtracer, stats){
 
         //engine-owned knobs, with per-scene values pulled from settings.uiParams
         const uiParams    = pathtracer.settings.uiParams;
@@ -46,9 +71,34 @@ class UI{
         const scene = panel.tab('Scene');
         for(let k of [...sceneParams, ...scrKnobs]) scene.append(control(k, wire(k)));
 
-        //--- Camera: lens knobs ---
+        //--- Camera: lens knobs + live pose readout + reset ---
         const cam = panel.tab('Camera');
         for(let k of camKnobs) cam.append(control(k, wire(k)));
+
+        cam.append(section('Pose'));
+        const pose = el('div', 'gui-pose');
+        cam.append(pose);
+        const refreshPose = () => {
+            let p = pathtracer.controls.position;
+            pose.textContent = `x ${p.x.toFixed(2)}   y ${p.y.toFixed(2)}   z ${p.z.toFixed(2)}`;
+            requestAnimationFrame(refreshPose);
+        };
+        refreshPose();
+
+        const home = pathtracer.settings.location;
+        cam.append(button('Reset Camera', () => {
+            pathtracer.controls.position.set(home.position[0], home.position[1], home.position[2]);
+            pathtracer.controls.facing.set(
+                home.facing[0], home.facing[1], home.facing[2],
+                home.facing[3], home.facing[4], home.facing[5],
+                home.facing[6], home.facing[7], home.facing[8]
+            );
+            pathtracer.tracer.updateUniforms({
+                location: pathtracer.controls.position,
+                facing:   pathtracer.controls.facing,
+            });
+            pathtracer.reset();
+        }));
 
         //--- Render: quality + on-screen geometry ---
         const ren = panel.tab('Render');
@@ -63,6 +113,11 @@ class UI{
             pathtracer.accumulate.setSize(res);
             pathtracer.tracer.setSize(res);
         }));
+
+        //live aspect ratio: re-fit the canvas to a preset ratio. Preselects the
+        //scene's settings.aspect (so cubic-portrait/landscape land on √2).
+        ren.append(select('Aspect', ASPECTS, pathtracer.settings.aspect ?? null,
+            (aspect) => pathtracer.resize(fitAspect(aspect))));
 
         //--- Export: files (images + settings), incl. the whole HD-tile feature ---
         const exp = panel.tab('Export');
@@ -83,7 +138,7 @@ class UI{
             (v) => { panelW = v; pathtracer.resize({x: panelW, y: panelH}); }));
         exp.append(numberField('Panel Height', panelH,
             (v) => { panelH = v; pathtracer.resize({x: panelW, y: panelH}); }));
-        exp.append(select('# Panels', [1, 4, 9, 16, 25], 1, (v) => {
+        exp.append(select('# Panels', [[1,1],[4,4],[9,9],[16,16],[25,25]], 1, (v) => {
             pathtracer.tracer.updateUniforms({numPanels: v});
             pathtracer.reset();
         }));
@@ -105,7 +160,7 @@ class UI{
             pathtracer.reset();
         }));
 
-        //--- Help: static keybinding map ---
+        //--- Help: static keybinding map + fps stats ---
         const help = panel.tab('Help');
         help.append(section('Camera Keys'));
         let keys = el('div', 'gui-keys');
@@ -113,6 +168,14 @@ class UI{
             keys.append(el('span', 'key', k), el('span', 'desc', d));
         }
         help.append(keys);
+
+        //host the fps meter here (createScene hands us stats instead of
+        //appending it to <body>). Strip its fixed positioning to sit in-flow.
+        if(stats){
+            stats.dom.style.position = 'static';
+            help.append(section('Performance'));
+            help.append(stats.dom);
+        }
     }
 
     //regenerate settings.js (engine knob values + scene params + camera pose)

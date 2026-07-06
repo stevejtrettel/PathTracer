@@ -21,10 +21,9 @@ import buildTraceShader from "./shaderData/buildTraceShader.js";
 
 function createScene({environment, objects, settings}){
 
-    //stats readout (fps)
+    //stats readout (fps); the UI hosts stats.dom inside its Help tab
     let stats = new Stats();
     stats.showPanel(0);
-    document.body.appendChild(stats.dom);
 
     //build the tracer shader for this scene
     let sceneData = {
@@ -44,7 +43,7 @@ function createScene({environment, objects, settings}){
 
     //build and run the path tracer
     let pathtracer = new PathTracer(shaders, settings, res);
-    let ui = new UI(pathtracer);
+    let ui = new UI(pathtracer, stats);
 
     function animate(){
         requestAnimationFrame(animate);
