@@ -20,6 +20,7 @@ import {Vector2, Vector3} from "three";
 // GLSL uniform type per knob type
 const GLSL_TYPE = {
     float: 'float',
+    int:   'int',
     bool:  'bool',
     color: 'vec3',
     vec2:  'vec2',
@@ -97,6 +98,27 @@ function addKnobControls(folder, knobs, target, pathtracer){
 }
 
 
+// override each knob's initial value from a {name: value} map (a scene's
+// settings.uiParams). Used for the engine knobs, whose list is fixed but whose
+// values are per-scene. Missing keys keep the knob's own default.
+function withValues(knobs, valueMap){
+    return knobs.map(k => ({...k, value: valueMap?.[k.name] ?? k.value}));
+}
+
+
+// serialize engine knobs back to the flat `uiParams` object (the legacy
+// settings.js format) with current values. Companion to serializeKnobs, which
+// emits the `params` array for named scene knobs.
+function serializeUiParams(knobs, values){
+    let rows = knobs.map(normalize).map(k => {
+        let v = values[k.name] ?? k.value;
+        let val = Array.isArray(v) ? `[${v.join(', ')}]` : v;
+        return `    ${k.name}: ${val},`;
+    });
+    return `let uiParams = {\n${rows.join('\n')}\n}\n\nexport {uiParams};`;
+}
+
+
 // 4. settings.js:  the `export const params = [...]` block, with current values
 function serializeKnobs(knobs, values){
     let rows = knobs.map(normalize).map(k => {
@@ -115,4 +137,4 @@ function serializeKnobs(knobs, values){
 }
 
 
-export {knobUniformDecls, knobUniforms, addKnobControls, serializeKnobs};
+export {knobUniformDecls, knobUniforms, addKnobControls, serializeKnobs, withValues, serializeUiParams};

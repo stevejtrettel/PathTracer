@@ -10,7 +10,8 @@ const skyTex = new TextureLoader().load('/assets/office.jpg');
 import setupShaderChunk from "../../glsl/tracer/setupShader.glsl"
 import traceShaderChunk from "../../glsl/tracer/traceShader.glsl"
 
-import {knobUniformDecls, knobUniforms} from "./knobs.js";
+import {knobUniformDecls, knobUniforms, withValues} from "./knobs.js";
+import {engineKnobs} from "./engineKnobs.js";
 
 
 let buildTraceShader= function(sceneData, settings){
@@ -20,15 +21,20 @@ let buildTraceShader= function(sceneData, settings){
         sceneShaderChunk = sceneShaderChunk.concat(sceneData[key]);
     }
 
-    //named scene parameters (knobs) declared in settings.js: generate their
-    //GLSL uniform declarations and inject them just before the scene code.
-    let sceneParams = settings.params ?? [];
-    let paramDecls = `\n//--- scene params ---\n` + knobUniformDecls(sceneParams) + `\n`;
-
-    let tracerShader = setupShaderChunk.concat(paramDecls).concat(sceneShaderChunk).concat(traceShaderChunk);
-
     let location = settings.location;
     let uiParams = settings.uiParams;
+
+    //all tunable controls are knobs: the engine-owned camera/render/scratch
+    //knobs (values from settings.uiParams) plus this scene's named params.
+    //One generator produces their GLSL uniform decls, three.js uniforms, GUI,
+    //and serialization (see js/shaderData/knobs.js).
+    let sceneParams = settings.params ?? [];
+    let allKnobs = [...withValues(engineKnobs, uiParams), ...sceneParams];
+
+    //inject the uniform declarations at the TOP: camera knobs are used inside
+    //the setup chunk (camera.glsl), so they must be declared before it.
+    let knobDecls = `//--- generated uniforms (knobs) ---\n` + knobUniformDecls(allKnobs) + `\n`;
+    let tracerShader = knobDecls.concat(setupShaderChunk).concat(sceneShaderChunk).concat(traceShaderChunk);
 
 
     let tracerUniforms = {
@@ -62,39 +68,6 @@ let buildTraceShader= function(sceneData, settings){
         },
 
 
-        //imported from settings: uiParams
-        aperture: {
-            value: uiParams.aperture
-        },
-        focalLength: {
-            value: uiParams.focalLength
-        },
-        exposure: {
-            value: uiParams.exposure
-        },
-        focusHelp: {
-            value: false
-        },
-        fov: {
-            value: uiParams.fov
-        },
-        maxBounces: {
-            value: uiParams.maxBounces ?? 50
-        },
-        extra: {
-            value: uiParams.extra
-        },
-        extra2: {
-            value: uiParams.extra2
-        },
-        extra3: {
-            value: uiParams.extra3
-        },
-        extra4: {
-            value: uiParams.extra4
-        },
-
-
         //HD Rendering Default = disabled
         renderPanel: {
             value: false,
@@ -108,8 +81,8 @@ let buildTraceShader= function(sceneData, settings){
 
     };
 
-    //add a uniform for each named scene parameter
-    Object.assign(tracerUniforms, knobUniforms(sceneParams));
+    //add a uniform for every knob (camera/render/scratch + scene params)
+    Object.assign(tracerUniforms, knobUniforms(allKnobs));
 
 
     return {

@@ -8,18 +8,10 @@ uniform sampler2D sky;
 uniform mat3 facing;
 uniform vec3 location;
 uniform float frameNumber;
-uniform float exposure;
 
-uniform float aperture;
-uniform float focalLength;
-uniform float fov;
-uniform bool focusHelp;
-uniform float extra;
-uniform float extra2;
-uniform float extra3;
-uniform float extra4;
-
-uniform int maxBounces;
+//camera/render/scratch knob uniforms (aperture, fov, exposure, focusHelp,
+//maxBounces, extra1..4, ...) are generated from the knob lists and injected
+//at the top of the shader by buildTraceShader.js. See js/shaderData/knobs.js.
 
 uniform bool renderPanel;
 uniform float numPanels;

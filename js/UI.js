@@ -1,5 +1,6 @@
 import {GUI} from "three/addons/libs/lil-gui.module.min";
-import {addKnobControls, serializeKnobs} from "./shaderData/knobs.js";
+import {addKnobControls, serializeKnobs, serializeUiParams, withValues} from "./shaderData/knobs.js";
+import {cameraKnobs, renderKnobs, scratchKnobs, engineKnobs} from "./shaderData/engineKnobs.js";
 
 
 class UI extends GUI{
@@ -9,19 +10,13 @@ class UI extends GUI{
         //named scene parameters (knobs) declared in the scene's settings.js
         const sceneParams = pathtracer.settings.params ?? [];
 
+        //engine-owned knobs, with per-scene values pulled from settings.uiParams
+        const uiParams = pathtracer.settings.uiParams;
+        const camKnobs = withValues(cameraKnobs, uiParams);
+        const renKnobs = withValues(renderKnobs, uiParams);
+        const scrKnobs = withValues(scratchKnobs, uiParams);
+
         this.params = {
-            aperture: pathtracer.settings.uiParams.aperture,
-            focalLength: pathtracer.settings.uiParams.focalLength,
-            exposure: pathtracer.settings.uiParams.exposure,
-            focusHelp:false,
-            fov: pathtracer.settings.uiParams.fov,
-
-            maxBounces: pathtracer.settings.uiParams.maxBounces ?? 50,
-
-            extra: pathtracer.settings.uiParams.extra,
-            extra2: pathtracer.settings.uiParams.extra2,
-            extra3: pathtracer.settings.uiParams.extra3,
-            extra4: pathtracer.settings.uiParams.extra4,
 
             preview: false,
             resize: ()=>pathtracer.resize({x:window.innerWidth,y:window.innerHeight}),
@@ -86,23 +81,9 @@ class UI extends GUI{
         };
 
 
-        this.printParams = () => {
-                let str = `let uiParams = {\n`;
-                str += `aperture: ${this.params.aperture},\n`;
-                str += `focalLength: ${this.params.focalLength},\n`;
-                str += `exposure: ${this.params.exposure},\n`;
-                str += `focusHelp: ${this.params.focusHelp},\n`;
-                str += `fov: ${this.params.fov},\n`;
-                str += `maxBounces: ${this.params.maxBounces},\n`;
-                str += `extra: ${this.params.extra},\n`;
-                str += `extra2: ${this.params.extra2},\n`;
-                str += `extra3: ${this.params.extra3},\n`;
-                str += `extra4: ${this.params.extra4},\n`;
-                str += `}`;
-                str += `\n\n`;
-                str += `export {uiParams};`;
-                return str;
-        }
+        //serialize the engine knobs (camera/render/scratch) to the flat
+        //uiParams object, reading current values off this.params
+        this.printParams = () => serializeUiParams(engineKnobs, this.params);
 
         //make folders
         const cam = this.addFolder('Camera');
@@ -111,55 +92,17 @@ class UI extends GUI{
         //in case we need let
         let theParams = this.params;
 
-        cam.add(this.params, 'aperture',0,2,0.001).name('Aperture').onChange(function(value){
-            pathtracer.tracer.updateUniforms({aperture: value});
-            pathtracer.reset();
-        });
-        cam.add(this.params, 'focalLength',0,40,0.01).name('Focal Length').onChange(function(value){
-            pathtracer.tracer.updateUniforms({focalLength: value});
-            pathtracer.reset();
-        });
-        cam.add(this.params, 'focusHelp').name('Focus Help').onChange(function(value){
-            pathtracer.tracer.updateUniforms({focusHelp: value});
-            pathtracer.reset();
-        });;
-        cam.add(this.params, 'fov',15,140,1).name('FOV').onChange(function(value){
-            pathtracer.tracer.updateUniforms({fov: value});
-            pathtracer.reset();
-        });
-        cam.add(this.params, 'exposure',0,2,0.01).name('Exposure').onChange(function(value){
-            pathtracer.tracer.updateUniforms({exposure: value});
-            pathtracer.reset();
-        });
+        //generated controls: camera + scratch knobs, then the scene's named
+        //params, then the render-quality knobs (maxBounces)
+        addKnobControls(cam, camKnobs, this.params, pathtracer);
+        addKnobControls(params, scrKnobs, this.params, pathtracer);
 
-
-        params.add(this.params, 'extra',0,1,0.001).onChange(function(value){
-            pathtracer.tracer.updateUniforms({extra:value});
-            pathtracer.reset();
-        });
-        params.add(this.params, 'extra2',0,1,0.001).onChange(function(value){
-            pathtracer.tracer.updateUniforms({extra2:value});
-            pathtracer.reset();
-        });
-        params.add(this.params, 'extra3',0,1,0.001).onChange(function(value){
-            pathtracer.tracer.updateUniforms({extra3:value});
-            pathtracer.reset();
-        });
-        params.add(this.params, 'extra4',0,1,0.001).onChange(function(value){
-            pathtracer.tracer.updateUniforms({extra4:value});
-            pathtracer.reset();
-        });
-
-        //generated controls for the scene's named parameters
         if(sceneParams.length){
             const scene = this.addFolder('Scene');
             addKnobControls(scene, sceneParams, this.params, pathtracer);
         }
 
-        ren.add(this.params, 'maxBounces',1,100,1).name('Max Bounces').onChange(function(value){
-            pathtracer.tracer.updateUniforms({maxBounces:value});
-            pathtracer.reset();
-        });
+        addKnobControls(ren, renKnobs, this.params, pathtracer);
 
         ren.add(this.params,'resize').name('Size to Screen');
 
