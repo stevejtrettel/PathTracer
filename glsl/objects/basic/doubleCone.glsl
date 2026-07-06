@@ -25,19 +25,15 @@ float sdf_doubleCone(vec3 p){
 //-------------------------------------------------
 
 struct DoubleCone{
-    vec3 center;
-    float size;
+    Frame frame;
     Material mat;
 };
 
 
-//the point-level sdf
-float sdf( vec3 p, DoubleCone obj ){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
-    return sdf_doubleCone(pos);
+//the local-frame sdf: the unit-sized shape at the origin
+float sdfLocal( vec3 p, DoubleCone obj ){
+    return sdf_doubleCone(p);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(DoubleCone)
+//world placement + the standard interface
+FRAMED_OBJECT_API(DoubleCone)

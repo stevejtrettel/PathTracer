@@ -24,19 +24,15 @@ float sdf_octahedron(vec3 p) {
 //-------------------------------------------------
 
 struct Octahedron{
-    vec3 center;
-    float size;
+    Frame frame;
     Material mat;
 };
 
 
-//the point-level sdf
-float sdf( vec3 p, Octahedron obj ){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
-    return sdf_octahedron(pos);
+//the local-frame sdf: the unit-sized shape at the origin
+float sdfLocal( vec3 p, Octahedron obj ){
+    return sdf_octahedron(p);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Octahedron)
+//world placement + the standard interface
+FRAMED_OBJECT_API(Octahedron)

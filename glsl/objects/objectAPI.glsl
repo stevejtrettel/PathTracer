@@ -71,6 +71,31 @@ OBJECT_SETDATA(Type)
 
 
 //-------------------------------------------------
+// FRAMED OBJECTS
+//
+// for objects placed by a Frame (a struct field `Frame frame`, see
+// 2Space/geometry.glsl): hand-write the geometry in the object's OWN
+// local coordinates,
+//
+//     float sdfLocal( vec3 p, Type obj )
+//
+// and FRAMED_SDF generates the world-space point-level sdf: it pulls
+// the query point into the local frame and converts the local distance
+// back to world units (*scale — exact for uniform scaling).
+// FRAMED_OBJECT_API adds the rest of the standard interface.
+//-------------------------------------------------
+
+#define FRAMED_SDF(Type)                                        \
+float sdf( vec3 p, Type obj ){                                  \
+    return obj.frame.scale * sdfLocal( toLocal(obj.frame, p), obj ); \
+}
+
+#define FRAMED_OBJECT_API(Type)                                 \
+FRAMED_SDF(Type)                                                \
+OBJECT_API(Type)
+
+
+//-------------------------------------------------
 // VARIETIES
 //
 // an algebraic variety file supplies its defining equation as a

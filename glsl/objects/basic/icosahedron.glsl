@@ -1,4 +1,6 @@
 
+//golden ratio, used by the GDF direction vectors below
+#define PHI 1.6180339887
 
 #define GDFVector3 normalize(vec3(1, 1, 1 ))
 #define GDFVector4 normalize(vec3(-1, 1, 1))
@@ -43,19 +45,15 @@ float sdf_icosahedron(vec3 p) {
 //-------------------------------------------------
 
 struct Icosahedron{
-    vec3 center;
-    float size;
+    Frame frame;
     Material mat;
 };
 
 
-//the point-level sdf
-float sdf( vec3 p, Icosahedron obj ){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
-    return sdf_icosahedron(pos);
+//the local-frame sdf: the unit-sized shape at the origin
+float sdfLocal( vec3 p, Icosahedron obj ){
+    return sdf_icosahedron(p);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Icosahedron)
+//world placement + the standard interface
+FRAMED_OBJECT_API(Icosahedron)

@@ -118,89 +118,87 @@ void flow(inout Vector tv, float t){
 
 
 //-------------------------------------------------
-//The ISOMETRY Struct
+//The FRAME Struct
+//
+// a similarity transformation of R3: rotate, scale, translate.
+// used to place (and size) objects in the world: an object is authored
+// in its own local coordinates and carried into the scene by its frame.
+//
+// world -> local is exact and cheap: the inverse of the rotation is its
+// transpose, which GLSL applies via vector*matrix multiplication.
+// distances measured in local units convert to world units by *scale.
 //-------------------------------------------------
 
-
-struct Isometry {
-    mat4 mat;// isometry of the space.
+struct Frame {
+    mat3 rot;    //orthogonal: columns are the local axes in world coordinates
+    vec3 pos;    //world position of the local origin
+    float scale; //uniform scale, > 0
 };
 
+const Frame IDENTITY_FRAME = Frame(mat3(1.), vec3(0.), 1.);
 
-const Isometry identity = Isometry(mat4(1));
 
+//---- applying frames --------------
 
-// Product of two isometries (more precisely isom1 * isom2)
-Isometry composeIsometry(Isometry isom1, Isometry isom2) {
-    return Isometry(isom1.mat * isom2.mat);
+//points
+vec3 toLocal( Frame f, vec3 p ){
+    return ((p - f.pos) * f.rot) / f.scale;
 }
 
-// Return the inverse of the given isometry
-Isometry getInverse(Isometry isom) {
-    return Isometry(inverse(isom.mat));
+vec3 toWorld( Frame f, vec3 p ){
+    return f.rot * (f.scale * p) + f.pos;
 }
 
-
-
-// Translate a point by the given isometry
-vec3 translate(Isometry isom, vec3 p) {
-    vec4 coords=isom.mat * vec4(p,1.);
-    return coords.xyz;
+//directions: rotation only (uniform scale preserves angles)
+vec3 dirToLocal( Frame f, vec3 v ){
+    return v * f.rot;
 }
 
-
-
-// overload to translate a direction
-//applying isometry acts via linear part on direction
-Vector translate(Isometry isom, Vector v) {
-    // apply an isometry to the tangent vector
-    vec3 newPos=translate(isom, v.pos);
-    vec3 newDir=(isom.mat*vec4(v.dir,0.)).xyz;
-    return Vector(newPos,newDir);
+vec3 dirToWorld( Frame f, vec3 v ){
+    return f.rot * v;
 }
 
+//tangent vectors
+Vector toLocal( Frame f, Vector v ){
+    return Vector( toLocal(f, v.pos), dirToLocal(f, v.dir) );
+}
 
-
-
-
-
-//---- making Isometries --------------
-
-
-
-//make isometry taking origin to p
-Isometry makeTranslation(vec3 p){
-    //remember matrices are entered BACKWARDS
-    mat4 mat=mat4(1.,0.,0.,0.,
-    0.,1.,0.,0.,
-    0.,0.,1.,0.,
-    p.x,p.y,p.z,1.);
-    return Isometry(mat);
+Vector toWorld( Frame f, Vector v ){
+    return Vector( toWorld(f, v.pos), dirToWorld(f, v.dir) );
 }
 
 
-//return isometry rotating angle around axis
-Isometry makeRotation(vec3 axis, float angle)
-{
-    axis = normalize(axis);
-    float s = sin(angle);
-    float c = cos(angle);
-    float oc = 1.0 - c;
-    mat4 mat= mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-    oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-    oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-    0.0,                                0.0,                                0.0,                                1.0);
-    return Isometry(mat);
+//---- the group structure --------------
+
+//apply b, then a
+Frame composeFrames( Frame a, Frame b ){
+    return Frame( a.rot * b.rot, a.pos + a.rot * (a.scale * b.pos), a.scale * b.scale );
+}
+
+Frame invFrame( Frame f ){
+    mat3 rotInv = transpose(f.rot);
+    return Frame( rotInv, -(rotInv * f.pos) / f.scale, 1. / f.scale );
 }
 
 
-//roate about an axis then translate
-Isometry makeIsometry(vec3 pos, vec3 axis, float angle){
+//---- making frames --------------
 
-    Isometry trans=makeTranslation(pos);
-    Isometry rot=makeRotation(axis, angle);
+//place at pos (no rotation, unit scale)
+Frame makeFrame( vec3 pos ){
+    return Frame( mat3(1.), pos, 1. );
+}
 
-    //first rotate using point stabilizer, then translate
-    return composeIsometry(trans,rot);
+//place at pos with a uniform scale
+Frame makeFrame( vec3 pos, float scale ){
+    return Frame( mat3(1.), pos, scale );
+}
 
+//rotate angle degrees about axis, then place at pos
+Frame makeFrame( vec3 pos, vec3 axis, float angle ){
+    return Frame( rot3AxisAngle(normalize(axis), angle), pos, 1. );
+}
+
+//rotate angle degrees about axis, place at pos, with a uniform scale
+Frame makeFrame( vec3 pos, vec3 axis, float angle, float scale ){
+    return Frame( rot3AxisAngle(normalize(axis), angle), pos, scale );
 }

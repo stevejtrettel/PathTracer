@@ -1,4 +1,6 @@
 
+//golden ratio, used by the GDF direction vectors below
+#define PHI 1.6180339887
 
 #define GDFVector3 normalize(vec3(1, 1, 1 ))
 #define GDFVector4 normalize(vec3(-1, 1, 1))
@@ -42,19 +44,15 @@ float sdf_dodecahedron(vec3 p) {
 //-------------------------------------------------
 
 struct Dodecahedron{
-    vec3 center;
-    float size;
+    Frame frame;
     Material mat;
 };
 
 
-//the point-level sdf
-float sdf( vec3 p, Dodecahedron obj ){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
-    return sdf_dodecahedron(pos);
+//the local-frame sdf: the unit-sized shape at the origin
+float sdfLocal( vec3 p, Dodecahedron obj ){
+    return sdf_dodecahedron(p);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Dodecahedron)
+//world placement + the standard interface
+FRAMED_OBJECT_API(Dodecahedron)

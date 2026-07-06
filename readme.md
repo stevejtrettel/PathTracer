@@ -43,7 +43,7 @@ glsl/tracer/traceShader.glsl      (engine: scene assembly, bounce loop, main())
 ```
 
 The engine sections live in numbered folders reflecting concatenation order:
-`1Setup` (uniforms, math, dual-number variety DE, RNG, sky), `2Space` (Vector/Isometry
+`1Setup` (uniforms, math, dual-number variety DE, RNG, sky), `2Space` (Vector/Frame
 structs, geodesic flow, camera, physics), `3Materials` (Material struct, Path struct,
 scattering), `5Scene` (glue that calls the scene's functions), `6Trace` (raymarch/raytrace,
 bounce loop, subsurface scattering). Scene code is inserted between 3 and 5, so it may use

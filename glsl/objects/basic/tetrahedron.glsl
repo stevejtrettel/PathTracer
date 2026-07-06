@@ -17,19 +17,15 @@ float sdf_tetrahedron(vec3 p) {
 //-------------------------------------------------
 
 struct Tetrahedron{
-    vec3 center;
-    float size;
+    Frame frame;
     Material mat;
 };
 
 
-//the point-level sdf
-float sdf( vec3 p, Tetrahedron obj ){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
-    return sdf_tetrahedron(pos);
+//the local-frame sdf: the unit-sized shape at the origin
+float sdfLocal( vec3 p, Tetrahedron obj ){
+    return sdf_tetrahedron(p);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Tetrahedron)
+//world placement + the standard interface
+FRAMED_OBJECT_API(Tetrahedron)

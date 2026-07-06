@@ -17,21 +17,17 @@ float sdBoxFrame( vec3 p, vec3 b, float e )
 //-------------------------------------------------
 
 struct BoxFrame{
-    vec3 center;
+    Frame frame;
     vec3 sides;
     float edge;
-    float size;
     Material mat;
 };
 
 
-//the point-level sdf
-float sdf( vec3 p, BoxFrame obj ){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
-    return sdBoxFrame(pos,obj.sides,obj.edge);
+//the local-frame sdf
+float sdfLocal( vec3 p, BoxFrame obj ){
+    return sdBoxFrame(p, obj.sides, obj.edge);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(BoxFrame)
+//world placement + the standard interface
+FRAMED_OBJECT_API(BoxFrame)
