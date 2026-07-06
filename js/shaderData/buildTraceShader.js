@@ -2,16 +2,47 @@
 //Uniforms for the tracer
 //=============================================
 
-//background sky texture
-import {Matrix3, TextureLoader, Vector3} from "three";
-
-const skyTex = new TextureLoader().load('/assets/office.jpg');
+import {DataTexture, Matrix3, RGBAFormat, TextureLoader, Vector3} from "three";
 
 import setupShaderChunk from "../../glsl/tracer/setupShader.glsl"
 import traceShaderChunk from "../../glsl/tracer/traceShader.glsl"
 
 import {knobUniformDecls, knobUniforms, withValues} from "./knobs.js";
 import {engineKnobs} from "./engineKnobs.js";
+
+
+//the sky a ray sees when it escapes, from settings.sky (default: office image):
+//  '/path.jpg'                                     image (shorthand)
+//  { type:'image',    src:'/path.jpg' }            image
+//  { type:'solid',    color:[r,g,b] }              flat color
+//  { type:'gradient', top:[r,g,b], bottom:[r,g,b] } vertical gradient
+const SKY_MODE = {image: 0, solid: 1, gradient: 2};
+
+function buildSky(sky){
+    if(sky === undefined) sky = {type: 'image', src: '/assets/office.jpg'};
+    if(typeof sky === 'string') sky = {type: 'image', src: sky};
+
+    let mode = SKY_MODE[sky.type] ?? 0;
+
+    let tex;
+    if(mode === 0){
+        tex = new TextureLoader().load(sky.src ?? '/assets/office.jpg');
+    } else {
+        //a sampler2D must always be bound: 1x1 white stand-in for non-image skies
+        tex = new DataTexture(new Uint8Array([255,255,255,255]), 1, 1, RGBAFormat);
+        tex.needsUpdate = true;
+    }
+
+    let color1 = sky.color ?? sky.top ?? [1,1,1];       //solid / gradient top
+    let color2 = sky.bottom ?? sky.color ?? [1,1,1];    //gradient bottom
+
+    return {
+        tex:  tex,
+        mode: mode,
+        color1: new Vector3(color1[0], color1[1], color1[2]),
+        color2: new Vector3(color2[0], color2[1], color2[2]),
+    };
+}
 
 
 let buildTraceShader= function(sceneData, settings){
@@ -23,6 +54,7 @@ let buildTraceShader= function(sceneData, settings){
 
     let location = settings.location;
     let uiParams = settings.uiParams;
+    let sky = buildSky(settings.sky);
 
     //all tunable controls are knobs: the engine-owned camera/render/scratch
     //knobs (values from settings.uiParams) plus this scene's named params.
@@ -47,9 +79,18 @@ let buildTraceShader= function(sceneData, settings){
             value: 0
         },
 
-        //loaded directly above: skybox image
+        //environment the ray sees on escape (see buildSky above)
         sky: {
-            value: skyTex
+            value: sky.tex
+        },
+        skyMode: {
+            value: sky.mode
+        },
+        skyColor1: {
+            value: sky.color1
+        },
+        skyColor2: {
+            value: sky.color2
         },
 
 

@@ -80,3 +80,20 @@ vec3 skyTex(vec3 v){
 
 
 
+//-------------------------------------------------
+//The sky a ray sees: image, solid color, or vertical gradient
+//-------------------------------------------------
+
+vec3 getSky(vec3 dir){
+    if(skyMode == 1){
+        return SRGBToLinear(skyColor1);
+    }
+    if(skyMode == 2){
+        float t = 0.5*(dir.y + 1.0);            //-1 (down) .. +1 (up)
+        return SRGBToLinear(mix(skyColor2, skyColor1, t));
+    }
+    return skyTex(dir);                          //image (already sRGB->linear)
+}
+
+
+

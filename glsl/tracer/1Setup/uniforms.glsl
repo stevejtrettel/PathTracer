@@ -5,6 +5,9 @@
 
 uniform vec3 iResolution;
 uniform sampler2D sky;
+uniform int skyMode;      //0 image · 1 solid · 2 gradient
+uniform vec3 skyColor1;   //solid color / gradient top
+uniform vec3 skyColor2;   //gradient bottom
 uniform mat3 facing;
 uniform vec3 location;
 uniform float frameNumber;
