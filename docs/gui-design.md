@@ -154,5 +154,16 @@ coupled workflow; splitting its geometry into Render isn't worth the cross-tab f
 - **B** renamed the scratch dials `extra/extra2/extra3/extra4` → `scratch1..4` everywhere
   (engineKnobs list, ~130 scene GLSL + settings files, and the two library files
   `algVariety.glsl` / `apolonianGasket.glsl`). Behavior-frozen (values moved with names).
+- **C1** custom tabbed GUI as a renderer swap (lil-gui removed). `js/gui/`: `widgets.js`
+  (pure builders `slider`/`toggle` + `control()` router + `el`/`button`/`numberField`/
+  `select`/`section` furniture), `Panel.js` (hamburger-collapsed stateful shell), `gui.css`
+  (dark translucent). `UI.js` no longer `extends GUI`; assembles the five tabs (Scene /
+  Camera / Render / Export / Help), injects one `wire` as every widget's onChange, seeds
+  `this.values` so Download Settings serializes identically. Behavior-frozen.
+- **C2** the new affordances: Render **live Aspect** dropdown (presets incl. √2, re-fits
+  canvas; preselects `settings.aspect`); Camera **pose readout + Reset**; **fps stats moved
+  into Help** (createScene hands `stats` to UI). `select` generalized to `[label,value]`
+  pairs. Sky-color kept **file-driven** (rarely needs a live knob) — no `colorPicker` built.
 
-Still open: **C/Phase 5** (custom tabbed GUI incl. live aspect + sky-color controls).
+**Phase 5 COMPLETE (C1 + C2).** Deferred if ever wanted: a `colorPicker` widget for a
+live sky-color knob (Scene tab), and `xyPad` for vec2.
