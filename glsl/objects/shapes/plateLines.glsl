@@ -16,7 +16,8 @@ struct PlateLines {
     Material mat;
 };
 
-float distR3(vec3 p, PlateLines obj) {
+//the point-level sdf
+float sdf(vec3 p, PlateLines obj) {
     vec3 pos = p - obj.center;
     float d = 1e6;
     for (int i = 0; i < 15; i++) {
@@ -26,22 +27,8 @@ float distR3(vec3 p, PlateLines obj) {
     return max(d, plateBBox(pos));
 }
 
-float distR3(Vector tv, PlateLines obj) {
-    return distR3(tv.pos, obj);
-}
-
-float sdf(Vector tv, PlateLines obj) {
-    return distR3(tv.pos, obj);
-}
-
-bool at(Vector tv, PlateLines obj) {
-    float d = distR3(tv.pos, obj);
-    return (abs(d) - AT_THRESH) < 0.;
-}
-
-bool inside(Vector tv, PlateLines obj) {
-    return distR3(tv.pos, obj) < 0.;
-}
+//the standard locators: at, inside, sdf
+OBJECT_LOCATORS(PlateLines)
 
 Vector normalVec(Vector tv, PlateLines obj) {
     vec3 pos = tv.pos - obj.center;
@@ -55,10 +42,5 @@ Vector normalVec(Vector tv, PlateLines obj) {
     return Vector(tv.pos, n);
 }
 
-void setData(inout Path path, PlateLines obj) {
-    if (at(path.tv, obj)) {
-        Vector normal = normalVec(path.tv, obj);
-        bool side = inside(path.tv, obj);
-        setObjectInAir(path.dat, side, normal, obj.mat);
-    }
-}
+//the standard setData
+OBJECT_SETDATA(PlateLines)

@@ -1,7 +1,5 @@
 
 
-
-
 //-------------------------------------------------
 //The SPHERE sdf
 //-------------------------------------------------
@@ -14,8 +12,8 @@ struct Sphere{
 };
 
 
-//overload of distR3: distance in R3 coordinates
-float distR3( vec3 p, Sphere sphere ){
+//the point-level sdf
+float sdf( vec3 p, Sphere sphere ){
     //normalize position
     vec3 pos = p - sphere.center;
 
@@ -23,41 +21,10 @@ float distR3( vec3 p, Sphere sphere ){
     return length(pos) - sphere.radius;
 }
 
-//overload of location booleans:
-bvec2 relPosition( Vector tv, Sphere sphere){
+//the standard interface: at, inside, sdf
+OBJECT_LOCATORS(Sphere)
 
-    float d = distR3( tv.pos, sphere );
-    bool atSurf = ((abs(d) - AT_THRESH)<0.);
-    bool inside = d<0.;
-    return bvec2(atSurf, inside);
-}
-
-//overload of location booleans:
-bool at( Vector tv, Sphere sphere){
-
-    float d = distR3( tv.pos, sphere );
-    bool atSurf = ((abs(d) - AT_THRESH)<0.);
-    return atSurf;
-}
-
-bool inside( Vector tv, Sphere sphere ){
-    float d = distR3( tv.pos, sphere );
-    return (d<0.);
-}
-
-
-
-
-//overload of sdf for a sphere
-float sdf( Vector tv, Sphere sphere ){
-
-    //distance to closest point on sphere
-    float d=distR3(tv.pos, sphere);
-    return d;
-
-}
-
-//overload of normalVec for a sphere
+//analytic normalVec for a sphere
 Vector normalVec( Vector tv, Sphere sphere ){
     //position vector rel center
     vec3 dir = tv.pos-sphere.center;
@@ -102,27 +69,8 @@ float trace( Vector tv, Sphere sphere ){
     return min(dist,maxDist);
 }
 
-
-//overload of setData for a sphere
-void setData( inout Path path, Sphere sphere ){
-
-    //if we are at the surface
-    if(at(path.tv, sphere)){
-        //compute the normal
-        Vector normal=normalVec(path.tv,sphere);
-        bool side = inside(path.tv, sphere);
-        //set the material
-        setObjectInAir(path.dat, side, normal, sphere.mat);
-    }
-
-}
-
-
-
-
-
-
-
+//the standard interface: setData
+OBJECT_SETDATA(Sphere)
 
 
 float sdRoundBox( vec3 p, vec3 b, float r )
@@ -130,4 +78,3 @@ float sdRoundBox( vec3 p, vec3 b, float r )
     vec3 q = abs(p) - b;
     return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - r;
 }
-

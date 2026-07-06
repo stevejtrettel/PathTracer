@@ -156,39 +156,19 @@ float  JosKleinian(vec3 z)
 
 
 
-//overload of distR3: distance in R3 coordinates
-float distR3( vec3 p, Kleinian klein ){
+//the point-level sdf
+float sdf( vec3 p, Kleinian klein ){
     //normalize position
     vec3 pos = p - klein.center;
     return SeahorseKleinian(pos);
 }
 
 
-//overload of location booleans:
-bool at( Vector tv, Kleinian klein){
+//at, inside, and the Vector-level sdf
+OBJECT_LOCATORS(Kleinian)
 
-    float d = distR3( tv.pos, klein );
-    bool atSurf = ((abs(d) - AT_THRESH)<0.);
-    return atSurf;
-}
-
-bool inside( Vector tv, Kleinian klein ){
-    float d = distR3( tv.pos, klein );
-    return (d<0.);
-}
-
-
-
-
-//overload of sdf for a sphere
-float sdf( Vector tv, Kleinian klein ){
-
-    //distance to closest point on sphere
-    return distR3(tv.pos, klein);
-
-}
-
-//overload of normalVec for a sphere
+//overload of normalVec: kept hand-written, uses a smaller epsilon (0.00001)
+//than the standard macro (0.0001)
 Vector normalVec( Vector tv, Kleinian klein ){
 
     vec3 pos=tv.pos;
@@ -196,10 +176,10 @@ Vector normalVec( Vector tv, Kleinian klein ){
     const float ep = 0.00001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
 
-    float vxyy=distR3( pos + e.xyy*ep, klein);
-    float vyyx=distR3( pos + e.yyx*ep, klein);
-    float vyxy=distR3( pos + e.yxy*ep, klein);
-    float vxxx=distR3( pos + e.xxx*ep, klein);
+    float vxyy=sdf( pos + e.xyy*ep, klein);
+    float vyyx=sdf( pos + e.yyx*ep, klein);
+    float vyxy=sdf( pos + e.yxy*ep, klein);
+    float vxxx=sdf( pos + e.xxx*ep, klein);
 
     vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
 
@@ -209,23 +189,6 @@ Vector normalVec( Vector tv, Kleinian klein ){
 
 }
 
-//overload of setData for a sphere
-void setData( inout Path path, Kleinian klein ){
-
-    //if we are at the surface
-    if(at(path.tv, klein)){
-        //compute the normal
-        Vector normal=normalVec(path.tv,klein);
-        bool side = inside(path.tv, klein);
-        //set the material
-        // vec4 col = JosKleinian(path.tv.pos);
-        //klein.mat.diffuseColor=col.yzw;
-        setObjectInAir(path.dat, side, normal, klein.mat);
-    }
-
-}
-
-
-
-
+//the standard setData
+OBJECT_SETDATA(Kleinian)
 

@@ -21,7 +21,8 @@ struct PairLines {
     Material mat;
 };
 
-float distR3(vec3 p, PairLines obj) {
+//the point-level sdf
+float sdf(vec3 p, PairLines obj) {
     vec3 pos = p - obj.center;
     float d = 1e6;
     for (int i = 0; i < 15; i++) {
@@ -40,22 +41,8 @@ float sdf_cached(PairLines obj) {
     return max(d, _cachedBBox);
 }
 
-float distR3(Vector tv, PairLines obj) {
-    return distR3(tv.pos, obj);
-}
-
-float sdf(Vector tv, PairLines obj) {
-    return distR3(tv.pos, obj);
-}
-
-bool at(Vector tv, PairLines obj) {
-    float d = distR3(tv.pos, obj);
-    return (abs(d) - AT_THRESH) < 0.;
-}
-
-bool inside(Vector tv, PairLines obj) {
-    return distR3(tv.pos, obj) < 0.;
-}
+//the standard locators: at, inside, sdf
+OBJECT_LOCATORS(PairLines)
 
 Vector normalVec(Vector tv, PairLines obj) {
     vec3 pos = tv.pos - obj.center;
@@ -69,13 +56,8 @@ Vector normalVec(Vector tv, PairLines obj) {
     return Vector(tv.pos, n);
 }
 
-void setData(inout Path path, PairLines obj) {
-    if (at(path.tv, obj)) {
-        Vector normal = normalVec(path.tv, obj);
-        bool side = inside(path.tv, obj);
-        setObjectInAir(path.dat, side, normal, obj.mat);
-    }
-}
+//the standard setData
+OBJECT_SETDATA(PairLines)
 
 
 // ============================================================
@@ -88,7 +70,8 @@ struct ConicLines {
     Material mat;
 };
 
-float distR3(vec3 p, ConicLines obj) {
+//the point-level sdf
+float sdf(vec3 p, ConicLines obj) {
     vec3 pos = p - obj.center;
     float d = 1e6;
     for (int i = 0; i < 6; i++) {
@@ -107,22 +90,8 @@ float sdf_cached(ConicLines obj) {
     return max(d, _cachedBBox);
 }
 
-float distR3(Vector tv, ConicLines obj) {
-    return distR3(tv.pos, obj);
-}
-
-float sdf(Vector tv, ConicLines obj) {
-    return distR3(tv.pos, obj);
-}
-
-bool at(Vector tv, ConicLines obj) {
-    float d = distR3(tv.pos, obj);
-    return (abs(d) - AT_THRESH) < 0.;
-}
-
-bool inside(Vector tv, ConicLines obj) {
-    return distR3(tv.pos, obj) < 0.;
-}
+//the standard locators: at, inside, sdf
+OBJECT_LOCATORS(ConicLines)
 
 Vector normalVec(Vector tv, ConicLines obj) {
     vec3 pos = tv.pos - obj.center;
@@ -136,13 +105,8 @@ Vector normalVec(Vector tv, ConicLines obj) {
     return Vector(tv.pos, n);
 }
 
-void setData(inout Path path, ConicLines obj) {
-    if (at(path.tv, obj)) {
-        Vector normal = normalVec(path.tv, obj);
-        bool side = inside(path.tv, obj);
-        setObjectInAir(path.dat, side, normal, obj.mat);
-    }
-}
+//the standard setData
+OBJECT_SETDATA(ConicLines)
 
 
 // ============================================================
@@ -155,7 +119,8 @@ struct ExceptionalLines {
     Material mat;
 };
 
-float distR3(vec3 p, ExceptionalLines obj) {
+//the point-level sdf
+float sdf(vec3 p, ExceptionalLines obj) {
     vec3 pos = p - obj.center;
     float d = 1e6;
     for (int i = 0; i < 6; i++) {
@@ -174,22 +139,8 @@ float sdf_cached(ExceptionalLines obj) {
     return max(d, _cachedBBox);
 }
 
-float distR3(Vector tv, ExceptionalLines obj) {
-    return distR3(tv.pos, obj);
-}
-
-float sdf(Vector tv, ExceptionalLines obj) {
-    return distR3(tv.pos, obj);
-}
-
-bool at(Vector tv, ExceptionalLines obj) {
-    float d = distR3(tv.pos, obj);
-    return (abs(d) - AT_THRESH) < 0.;
-}
-
-bool inside(Vector tv, ExceptionalLines obj) {
-    return distR3(tv.pos, obj) < 0.;
-}
+//the standard locators: at, inside, sdf
+OBJECT_LOCATORS(ExceptionalLines)
 
 Vector normalVec(Vector tv, ExceptionalLines obj) {
     vec3 pos = tv.pos - obj.center;
@@ -203,10 +154,5 @@ Vector normalVec(Vector tv, ExceptionalLines obj) {
     return Vector(tv.pos, n);
 }
 
-void setData(inout Path path, ExceptionalLines obj) {
-    if (at(path.tv, obj)) {
-        Vector normal = normalVec(path.tv, obj);
-        bool side = inside(path.tv, obj);
-        setObjectInAir(path.dat, side, normal, obj.mat);
-    }
-}
+//the standard setData
+OBJECT_SETDATA(ExceptionalLines)

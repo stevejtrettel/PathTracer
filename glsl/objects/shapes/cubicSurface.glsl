@@ -18,8 +18,8 @@ struct CubicSurface {
 };
 
 
-// Full evaluation at arbitrary point (used by normalVec, at, inside)
-float distR3(vec3 p, CubicSurface surf) {
+//the point-level sdf
+float sdf(vec3 p, CubicSurface surf) {
     vec3 pos = p - surf.center;
     vec3 scaled = surf.scale * pos;
 
@@ -46,41 +46,5 @@ float sdf_cached(CubicSurface surf) {
     return dist;
 }
 
-float distR3(Vector tv, CubicSurface surf) {
-    return distR3(tv.pos, surf);
-}
-
-float sdf(Vector tv, CubicSurface surf) {
-    return distR3(tv.pos, surf);
-}
-
-bool at(Vector tv, CubicSurface surf) {
-    float d = distR3(tv.pos, surf);
-    return (abs(d) - AT_THRESH) < 0.;
-}
-
-bool inside(Vector tv, CubicSurface surf) {
-    return distR3(tv.pos, surf) < 0.;
-}
-
-Vector normalVec(Vector tv, CubicSurface surf) {
-    vec3 pos = tv.pos;
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0, -1.0) * 0.5773;
-
-    float vxyy = distR3(pos + e.xyy * ep, surf);
-    float vyyx = distR3(pos + e.yyx * ep, surf);
-    float vyxy = distR3(pos + e.yxy * ep, surf);
-    float vxxx = distR3(pos + e.xxx * ep, surf);
-
-    vec3 dir = e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
-    return Vector(tv.pos, normalize(dir));
-}
-
-void setData(inout Path path, CubicSurface surf) {
-    if (at(path.tv, surf)) {
-        Vector normal = normalVec(path.tv, surf);
-        bool side = inside(path.tv, surf);
-        setObjectInAir(path.dat, side, normal, surf.mat);
-    }
-}
+//the standard interface: at, inside, sdf, normalVec, setData
+OBJECT_API(CubicSurface)

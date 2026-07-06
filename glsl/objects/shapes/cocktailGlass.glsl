@@ -44,52 +44,19 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
 }
 
 
-//overload of distR3
-float distR3( vec3 p, CocktailGlass glass ){
+//the point-level sdf
+float sdf( vec3 p, CocktailGlass glass ){
     return cocktailGlassDistance(p, glass, trashFloat);
 }
 
-
-//overload of sdf
-float sdf(Vector tv, CocktailGlass glass){
-
-    //only bother if we are inside the bounding sphere:
-    //    float bBox=sdf(tv, glass.boundingBox);
-    //
-    //    if(bBox>0.){
-    //        //if we are outisde the box, march towards it
-    //        return bBox+0.05;
-    //    }
-
-    //if we are inside, compute the actual distance
-    return distR3(tv.pos, glass);
-}
-
-//overload of normalVec
-Vector normalVec(Vector tv, CocktailGlass glass){
-
-    vec3 pos=tv.pos;
-
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-
-    float vxyy=distR3( pos + e.xyy*ep, glass);
-    float vyyx=distR3( pos + e.yyx*ep, glass);
-    float vyxy=distR3( pos + e.yxy*ep, glass);
-    float vxxx=distR3( pos + e.xxx*ep, glass);
-
-    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
-
-    dir=normalize(dir);
-
-    return Vector(tv.pos,dir);
-
-}
+//the standard interface pieces: at, inside, sdf, normalVec
+OBJECT_LOCATORS(CocktailGlass)
+OBJECT_NORMAL_FD(CocktailGlass)
 
 //overload of location booleans
 //note inside here means in the glass of the cup not the enclosed volume
 bvec2 relPosition( Vector tv, CocktailGlass glass ){
-    float d = distR3( tv.pos, glass );
+    float d = sdf( tv.pos, glass );
     bool atSurf = ((abs(d)-AT_THRESH)<0.);
     bool inside = (d<0.);
     return bvec2(atSurf, inside);

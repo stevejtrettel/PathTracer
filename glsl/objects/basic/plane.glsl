@@ -14,8 +14,8 @@ struct Plane{
 
 
 
-//overload of distR3
-float distR3( vec3 pos, Plane plane ){
+//the point-level sdf
+float sdf( vec3 pos, Plane plane ){
 
     //get position relative to point on plane
     vec3 relPos = pos - plane.orientation.pos;
@@ -29,26 +29,26 @@ float distR3( vec3 pos, Plane plane ){
 //overload of location booleans:
 bool at( Vector tv, Plane plane){
 
-    float d = distR3( tv.pos, plane );
+    float d = sdf( tv.pos, plane );
     return  (abs(d) < AT_THRESH);
 
 }
 
 bool inside( Vector tv, Plane plane ){
-    float d = distR3( tv.pos, plane );
+    float d = sdf( tv.pos, plane );
     return (d < 0.);
 }
 
 
 
-//overload of sdf
+//overload of sdf: custom, returns maxDist when aimed away from the plane
 float sdf( Vector tv, Plane plane ){
 
     //if aimed away from plane:
     if(dot(tv.dir,plane.orientation.dir)>0.){return maxDist;}
 
     //otherwise give distance
-    return distR3(tv.pos, plane);
+    return sdf(tv.pos, plane);
 }
 
 //overload of normalVec
@@ -64,26 +64,9 @@ float trace( Vector tv, Plane plane ){
     if(denom>0.){return maxDist;}
 
     //otherwise, aimed at plane
-    return - distR3( tv.pos, plane) / denom;
+    return - sdf( tv.pos, plane) / denom;
 }
 
 
-//overload of setData for a sphere
-void setData( inout Path path, Plane plane ){
-
-    //if we are at the surface
-    if(at(path.tv, plane)){
-        //compute the normal
-        Vector normal=normalVec(path.tv, plane);
-        bool side = inside(path.tv, plane);
-        //set the material
-        setObjectInAir(path.dat, side, normal, plane.mat);
-    }
-
-}
-
-
-
-
-
-
+//the standard interface: setData
+OBJECT_SETDATA(Plane)

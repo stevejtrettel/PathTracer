@@ -94,24 +94,15 @@ ClosestInfo closestCurveTube(vec3 x, in ParametricCurve pc) {
     return ci;
 }
 
-// ---- Public API (mirrors your Sphere) ----
-
-float distR3(vec3 p, in ParametricCurve pc) {
+//the point-level sdf
+float sdf(vec3 p, in ParametricCurve pc) {
     float db = bboxDistance(p, pc);
     if (db > 0.) return db+0.01;           // outside → cheap, safe step
     return closestCurveTube(p, pc).d;  // inside → full evaluation
 }
 
-float sdf(Vector tv, in ParametricCurve pc) { return distR3(tv.pos, pc); }
-
-bool at(Vector tv, in ParametricCurve pc) {
-    float d = distR3(tv.pos, pc);
-    return (abs(d) - AT_THRESH) < 0.0;
-}
-
-bool inside(Vector tv, in ParametricCurve pc) {
-    return distR3(tv.pos, pc) < 0.0;
-}
+//the standard locators: at, inside, sdf
+OBJECT_LOCATORS(ParametricCurve)
 
 Vector normalVec(Vector tv, in ParametricCurve pc) {
     ClosestInfo ci = closestCurveTube(tv.pos, pc);
@@ -119,19 +110,14 @@ Vector normalVec(Vector tv, in ParametricCurve pc) {
     if (length(n) < 1e-5) {
         const vec2 e = vec2(1.0, -1.0) * 1e-4;
         vec3 g = vec3(
-        distR3(tv.pos + vec3(e.x,0,0), pc) - distR3(tv.pos + vec3(e.y,0,0), pc),
-        distR3(tv.pos + vec3(0,e.x,0), pc) - distR3(tv.pos + vec3(0,e.y,0), pc),
-        distR3(tv.pos + vec3(0,0,e.x), pc) - distR3(tv.pos + vec3(0,0,e.y), pc)
+        sdf(tv.pos + vec3(e.x,0,0), pc) - sdf(tv.pos + vec3(e.y,0,0), pc),
+        sdf(tv.pos + vec3(0,e.x,0), pc) - sdf(tv.pos + vec3(0,e.y,0), pc),
+        sdf(tv.pos + vec3(0,0,e.x), pc) - sdf(tv.pos + vec3(0,0,e.y), pc)
         );
         n = normalize(g);
     }
     return Vector(tv.pos, n);
 }
 
-void setData(inout Path path, in ParametricCurve pc) {
-    if (at(path.tv, pc)) {
-        Vector N = normalVec(path.tv, pc);
-        bool side = inside(path.tv, pc);
-        setObjectInAir(path.dat, side, N, pc.mat);
-    }
-}
+//the standard setData
+OBJECT_SETDATA(ParametricCurve)

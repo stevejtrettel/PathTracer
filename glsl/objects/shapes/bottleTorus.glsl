@@ -58,66 +58,12 @@ float bottleTorusDistance(vec3 pos, BottleTorus donut, out float insideBottle){
 
 
 
-//overload of distR3
-float distR3( vec3 pos, BottleTorus donut ){
+//the point-level sdf
+float sdf( vec3 pos, BottleTorus donut ){
 
     return bottleTorusDistance(pos, donut, trashFloat);
 
 }
 
-
-//overload of location booleans:
-bool at( Vector tv, BottleTorus donut){
-
-    float d = distR3( tv.pos, donut );
-    return  (abs(d) < AT_THRESH);
-
-}
-
-bool inside( Vector tv, BottleTorus donut ){
-    float d = distR3( tv.pos, donut );
-    return (d < 0.);
-}
-
-
-
-//overload of sdf
-float sdf( Vector tv, BottleTorus donut ){
-
-    return distR3(tv.pos, donut);
-}
-
-//overload of normalVec
-Vector normalVec( Vector tv, BottleTorus donut ){
-    vec3 pos=tv.pos;
-
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-
-    float vxyy=distR3( pos + e.xyy*ep, donut);
-    float vyyx=distR3( pos + e.yyx*ep, donut);
-    float vyxy=distR3( pos + e.yxy*ep, donut);
-    float vxxx=distR3( pos + e.xxx*ep, donut);
-
-    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
-
-    dir=normalize(dir);
-
-    return Vector(tv.pos,dir);
-
-}
-
-
-//overload of setData for a sphere
-void setData( inout Path path, BottleTorus donut ){
-
-    //if we are at the surface
-    if(at(path.tv, donut)){
-        //compute the normal
-        Vector normal=normalVec(path.tv, donut);
-        bool side = inside(path.tv, donut);
-        //set the material
-        setObjectInAir(path.dat, side, normal, donut.mat);
-    }
-
-}
+//the standard interface: at, inside, sdf, normalVec, setData
+OBJECT_API(BottleTorus)

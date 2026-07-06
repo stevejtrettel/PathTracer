@@ -10,10 +10,10 @@ struct Gasket{
 };
 
 
-//overload of distR3: distance in R3 coordinates
+//the point-level sdf
 //NOTE: the fractal's shape is coupled to the global uniform `extra`
 //(the "extra" slider in the UI shifts the fold offset each iteration)
-float distR3( vec3 p, Gasket gasket ){
+float sdf( vec3 p, Gasket gasket ){
 
     p-=gasket.center;
     p=gasket.radius*p;
@@ -50,7 +50,7 @@ bool at( Vector tv, Gasket gasket){
 }
 
 bool inside( Vector tv, Gasket gasket ){
-    float d = distR3( tv.pos, gasket );
+    float d = sdf( tv.pos, gasket );
     return (d<0.);
 }
 
@@ -59,28 +59,7 @@ bool inside( Vector tv, Gasket gasket ){
 float sdf( Vector tv, Gasket gasket ){
 
     //distance to closest point on fractal
-    return distR3(tv.pos, gasket);
-
-}
-
-//overload of normalVec for a gasket
-Vector normalVec( Vector tv, Gasket gasket ){
-
-    vec3 pos=tv.pos;
-
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-
-    float vxyy=distR3( pos + e.xyy*ep, gasket);
-    float vyyx=distR3( pos + e.yyx*ep, gasket);
-    float vyxy=distR3( pos + e.yxy*ep, gasket);
-    float vxxx=distR3( pos + e.xxx*ep, gasket);
-
-    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
-
-    dir=normalize(dir);
-
-    return Vector(tv.pos,dir);
+    return sdf(tv.pos, gasket);
 
 }
 
@@ -95,7 +74,7 @@ float trace( Vector tv, Gasket gasket ){
     for( int i=0; i<512; i++ )
     {
         float precis = 0.001*t;
-        float h = distR3( ro+rd*t, gasket);
+        float h = sdf( ro+rd*t, gasket);
         if( h<precis||t>maxDist) break;
         t += h;
     }
@@ -103,15 +82,6 @@ float trace( Vector tv, Gasket gasket ){
 }
 
 
-//overload of setData for a gasket
-void setData( inout Path path, Gasket gasket){
-
-    //if we are at the surface
-    if(at(path.tv, gasket)){
-        //compute the normal
-        Vector normal=normalVec(path.tv,gasket);
-        bool side = inside(path.tv, gasket);
-        //set the material
-        setObjectInAir(path.dat, side, normal, gasket.mat);
-    }
-}
+//the rest of the standard interface: normalVec, setData
+OBJECT_NORMAL_FD(Gasket)
+OBJECT_SETDATA(Gasket)

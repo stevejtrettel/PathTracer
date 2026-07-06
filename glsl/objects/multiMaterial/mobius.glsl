@@ -74,14 +74,14 @@ vec2 sdMobius(vec3 rP, float radius, float width, float thickness, float twists,
 
 
 
-float distR3Band(vec3 p, Mobius mobius){
+float sdfBand(vec3 p, Mobius mobius){
     vec3 pos = p-mobius.center;
     pos/=2.;
     vec2 dat = sdMobius(pos, mobius.radius, mobius.width, mobius.thickness, mobius.twists,mobius.offset);
     return dat.x;
 }
 
-float distR3Border(vec3 p, Mobius mobius){
+float sdfBorder(vec3 p, Mobius mobius){
     vec3 pos = p-mobius.center;
     pos/=2.;
     vec2 dat = sdMobius(pos, mobius.radius, mobius.width, mobius.thickness, mobius.twists,mobius.offset);
@@ -107,13 +107,13 @@ float sdf( Vector tv, Mobius mobius){
 
 //overload of location booleans:
 bool atBand( Vector tv,Mobius mobius){
-    float d = distR3Band( tv.pos, mobius );
+    float d = sdfBand( tv.pos, mobius );
     bool atSurf = ((abs(d) - AT_THRESH)<0.);
     return atSurf;
 }
 
 bool atBorder( Vector tv,Mobius mobius){
-    float d = distR3Border( tv.pos, mobius );
+    float d = sdfBorder( tv.pos, mobius );
     bool atSurf = ((abs(d) - AT_THRESH)<0.);
     return atSurf;
 }
@@ -126,11 +126,11 @@ bool at( Vector tv,Mobius mobius){
 
 
 bool insideBand( Vector tv, Mobius mobius ){
-    float d = distR3Band( tv.pos, mobius );
+    float d = sdfBand( tv.pos, mobius );
     return (d<0.);
 }
 bool insideBorder( Vector tv, Mobius mobius ){
-    float d = distR3Border( tv.pos, mobius );
+    float d = sdfBorder( tv.pos, mobius );
     return (d<0.);
 }
 
@@ -147,10 +147,10 @@ Vector normalVecBand( Vector tv, Mobius mobius ){
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
 
-    float vxyy=distR3Band( pos + e.xyy*ep, mobius);
-    float vyyx=distR3Band( pos + e.yyx*ep, mobius);
-    float vyxy=distR3Band( pos + e.yxy*ep, mobius);
-    float vxxx=distR3Band( pos + e.xxx*ep, mobius);
+    float vxyy=sdfBand( pos + e.xyy*ep, mobius);
+    float vyyx=sdfBand( pos + e.yyx*ep, mobius);
+    float vyxy=sdfBand( pos + e.yxy*ep, mobius);
+    float vxxx=sdfBand( pos + e.xxx*ep, mobius);
 
     vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
 
@@ -168,10 +168,10 @@ Vector normalVecBorder( Vector tv, Mobius mobius ){
     const float ep = 0.0001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
 
-    float vxyy=distR3Border( pos + e.xyy*ep, mobius);
-    float vyyx=distR3Border( pos + e.yyx*ep, mobius);
-    float vyxy=distR3Border( pos + e.yxy*ep, mobius);
-    float vxxx=distR3Border( pos + e.xxx*ep, mobius);
+    float vxyy=sdfBorder( pos + e.xyy*ep, mobius);
+    float vyyx=sdfBorder( pos + e.yyx*ep, mobius);
+    float vyxy=sdfBorder( pos + e.yxy*ep, mobius);
+    float vxxx=sdfBorder( pos + e.xxx*ep, mobius);
 
     vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
 

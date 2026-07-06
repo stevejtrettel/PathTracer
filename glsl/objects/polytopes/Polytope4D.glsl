@@ -72,8 +72,8 @@ float sdf_polytope(vec3 pos,Polytope4D data) {
 //-------------------------------------------------
 
 
-//overload of distR3: distance in R3 coordinates
-float distR3( vec3 p, Polytope4D obj ){
+//the point-level sdf
+float sdf( vec3 p, Polytope4D obj ){
     //normalize position
     vec3 pos = p - obj.center;
     pos /= obj.size;
@@ -87,7 +87,7 @@ float distR3( vec3 p, Polytope4D obj ){
 
 
 //distance function that returns BOTH vertex and edge distance!
-vec2 distR3_VE(vec3 p, Polytope4D obj){
+vec2 sdf_VE(vec3 p, Polytope4D obj){
     //normalize position
     vec3 pos = p - obj.center;
     pos /= obj.size;
@@ -108,60 +108,12 @@ vec2 distR3_VE(vec3 p, Polytope4D obj){
 
 
 
-//-------------------------------------------------
-//STUFF DERIVED FROM THIS
-//-------------------------------------------------
+//at, inside, the Vector-level sdf, and normalVec from the standard interface
+OBJECT_LOCATORS(Polytope4D)
+OBJECT_NORMAL_FD(Polytope4D)
 
 
-//overload of location booleans:
-bool at( Vector tv,Polytope4D obj){
-
-    float d = distR3( tv.pos, obj );
-    bool atSurf = ((abs(d) - AT_THRESH)<0.);
-    return atSurf;
-}
-
-bool inside( Vector tv, Polytope4D obj ){
-    float d = distR3( tv.pos, obj );
-    return (d<0.);
-}
-
-
-
-
-//overload of sdf for a sphere
-float sdf( Vector tv, Polytope4D obj ){
-
-    //distance to closest point on box
-    float d=distR3(tv.pos, obj);
-    return d;
-}
-
-
-//overload of normalVec for a sphere
-Vector normalVec( Vector tv, Polytope4D obj ){
-
-    vec3 pos=tv.pos;
-
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-
-    float vxyy=distR3( pos + e.xyy*ep, obj);
-    float vyyx=distR3( pos + e.yyx*ep, obj);
-    float vyxy=distR3( pos + e.yxy*ep, obj);
-    float vxxx=distR3( pos + e.xxx*ep, obj);
-
-    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
-
-    dir=normalize(dir);
-
-    return Vector(tv.pos,dir);
-
-}
-
-
-
-//overload of setData for a sphere
+//custom setData: the material depends on whether we hit a vertex or an edge
 void setData( inout Path path, Polytope4D obj){
 
     //if we are at the surface
@@ -171,7 +123,7 @@ void setData( inout Path path, Polytope4D obj){
         bool side = inside(path.tv, obj);
 
         //set the material: this depends on if we hit the vertex or edge!
-        vec2 dVec = distR3_VE(path.tv.pos,obj);
+        vec2 dVec = sdf_VE(path.tv.pos,obj);
 
         if(abs(dVec.x)<abs(dVec.y)){
             //vertex dist smaller than edge dist

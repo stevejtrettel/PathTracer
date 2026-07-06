@@ -43,8 +43,8 @@ float bCyl(vec3 pos, vec2 cyl){
     return bboxDist;
 }
 
-//overload of distR3: distance in R3 coordinates
-float distR3( vec3 p, SurfCyl surf ){
+//the point-level sdf
+float sdf( vec3 p, SurfCyl surf ){
 
     //normalize position
     vec3 pos = p - surf.center;
@@ -66,48 +66,9 @@ float distR3( vec3 p, SurfCyl surf ){
 }
 
 
-//overload of distR3 and sdf
-float distR3( Vector tv, SurfCyl surf ){
-    float dist = distR3(tv.pos,surf);
-    return dist;
-}
-
-float sdf( Vector tv, SurfCyl surf ){
-    return distR3(tv.pos, surf);
-}
-
-
-//overload of location booleans:
-bool at( Vector tv, SurfCyl surf){
-    float d = distR3( tv.pos, surf );
-    bool atSurf = ((abs(d) - AT_THRESH)<0.);
-    return atSurf;
-}
-
-bool inside( Vector tv, SurfCyl surf ){
-    float d = distR3( tv.pos, surf );
-    return (d<0.);
-}
-
-
-Vector normalVec( Vector tv, SurfCyl surf ){
-
-    vec3 pos =tv.pos;
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;//this normalization makes exyy etc all unit vectors;
-
-    float vxyy=distR3( pos + e.xyy*ep, surf);
-    float vyyx=distR3( pos + e.yyx*ep, surf);
-    float vyxy=distR3( pos + e.yxy*ep, surf);
-    float vxxx=distR3( pos + e.xxx*ep, surf);
-
-    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
-
-    dir=normalize(dir);
-
-    return Vector(tv.pos,dir);
-
-}
+//the standard interface: at, inside, sdf, normalVec
+OBJECT_LOCATORS(SurfCyl)
+OBJECT_NORMAL_FD(SurfCyl)
 
 //setData for a two sided surface
 void setData( inout Path path, SurfCyl surf ){

@@ -56,75 +56,12 @@ float sdBunny(vec3 p,float size) {
 }
 
 
-//overload of distR3: distance in R3 coordinates
-float distR3( vec3 p, Bunny bunny ){
+//the point-level sdf
+float sdf( vec3 p, Bunny bunny ){
     //normalize position
     vec3 pos = p - bunny.center;
     return sdBunny(pos,bunny.scale);
 }
 
-
-//overload of location booleans:
-bool at( Vector tv, Bunny bunny){
-
-    float d = distR3( tv.pos, bunny );
-    bool atSurf = ((abs(d) - AT_THRESH)<0.);
-    return atSurf;
-}
-
-bool inside( Vector tv, Bunny bunny ){
-    float d = distR3( tv.pos, bunny );
-    return (d<0.);
-}
-
-
-
-
-//overload of sdf for a sphere
-float sdf( Vector tv, Bunny bunny ){
-
-    //distance to closest point on sphere
-    return distR3(tv.pos, bunny);
-
-}
-
-//overload of normalVec for a sphere
-Vector normalVec( Vector tv, Bunny bunny ){
-
-    vec3 pos=tv.pos;
-
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-
-    float vxyy=distR3( pos + e.xyy*ep, bunny);
-    float vyyx=distR3( pos + e.yyx*ep, bunny);
-    float vyxy=distR3( pos + e.yxy*ep, bunny);
-    float vxxx=distR3( pos + e.xxx*ep, bunny);
-
-    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
-
-    dir=normalize(dir);
-
-    return Vector(tv.pos,dir);
-
-}
-
-//overload of setData for a sphere
-void setData( inout Path path, Bunny bunny ){
-
-    //if we are at the surface
-    if(at(path.tv, bunny)){
-        //compute the normal
-        Vector normal=normalVec(path.tv,bunny);
-        bool side = inside(path.tv, bunny);
-        //set the material
-        setObjectInAir(path.dat, side, normal, bunny.mat);
-    }
-
-
-
-
-
-}
-
-
+//the standard interface: at, inside, sdf, normalVec, setData
+OBJECT_API(Bunny)

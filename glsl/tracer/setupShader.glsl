@@ -8,5 +8,6 @@
 #include 3Materials/_materials.glsl
 
 //a minimal number of basic objects for basic environments
+#include ../objects/objectAPI.glsl
 #include ../objects/computations.glsl
 #include ../objects/basic/_basic.glsl

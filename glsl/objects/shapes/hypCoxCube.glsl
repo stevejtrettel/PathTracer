@@ -52,8 +52,8 @@ HypCoxCube buildCoxCube( float dihedral, float rCent){
 }
 
 
-//signed distance in R3 coordinates
-float distR3( vec3 pos, HypCoxCube cube ){
+//the point-level sdf
+float sdf( vec3 pos, HypCoxCube cube ){
 
     //start with the distance to the unit sphere
     float dist = length(pos)-1.;
@@ -99,58 +99,5 @@ float distR3( vec3 pos, HypCoxCube cube ){
 }
 
 
-//location booleans
-bool at( Vector tv, HypCoxCube cube){
-    float d = distR3( tv.pos, cube );
-    bool atSurf = ((abs(d) - AT_THRESH)<0.);
-    return atSurf;
-}
-
-
-bool inside( Vector tv, HypCoxCube cube ){
-    float d = distR3( tv.pos, cube );
-    return (d<0.);
-}
-
-//overload of sdf for a polytope
-float sdf( Vector tv, HypCoxCube cube ){
-    return distR3(tv.pos, cube);
-}
-
-////overload of normalVec for a sphere
-Vector normalVec( Vector tv, HypCoxCube cube ){
-
-    const float ep = 0.0001;
-    vec2 e = vec2(1.0,-1.0)*0.5773;
-
-    vec3 pos = tv.pos;
-
-    float vxyy=distR3( pos + e.xyy*ep, cube);
-    float vyyx=distR3( pos + e.yyx*ep, cube);
-    float vyxy=distR3( pos + e.yxy*ep, cube);
-    float vxxx=distR3( pos + e.xxx*ep, cube);
-
-    vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
-
-    dir=normalize(dir);
-
-    return Vector(tv.pos,dir);
-}
-
-
-//overload of setData for a torus
-void setData( inout Path path, HypCoxCube cube ){
-
-    //if we are at the surface
-    if(at(path.tv, cube)){
-        //compute the normal
-        Vector normal=normalVec(path.tv, cube);
-        bool side = inside(path.tv, cube);
-        //set the material
-        setObjectInAir(path.dat, side, normal, cube.mat);
-    }
-}
-
-
-
-
+//the standard interface: at, inside, sdf, normalVec, setData
+OBJECT_API(HypCoxCube)
