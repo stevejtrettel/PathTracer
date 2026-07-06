@@ -66,4 +66,4 @@ float sdf( vec3 pos, BottleTorus donut ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(BottleTorus)
+UNFRAMED_OBJECT_API(BottleTorus)

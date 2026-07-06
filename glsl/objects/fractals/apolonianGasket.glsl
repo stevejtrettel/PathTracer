@@ -83,5 +83,5 @@ float trace( Vector tv, Gasket gasket ){
 
 
 //the rest of the standard interface: normalVec, setData
-OBJECT_NORMAL_FD(Gasket)
+UNFRAMED_NORMAL_FD(Gasket)
 OBJECT_SETDATA(Gasket)

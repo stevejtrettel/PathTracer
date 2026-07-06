@@ -46,4 +46,4 @@ float sdf( vec3 pos, Torus torus ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Torus)
+UNFRAMED_OBJECT_API(Torus)

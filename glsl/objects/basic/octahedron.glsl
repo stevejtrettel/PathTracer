@@ -30,9 +30,9 @@ struct Octahedron{
 
 
 //the local-frame sdf: the unit-sized shape at the origin
-float sdfLocal( vec3 p, Octahedron obj ){
+float sdf( vec3 p, Octahedron obj ){
     return sdf_octahedron(p);
 }
 
-//world placement + the standard interface
-FRAMED_OBJECT_API(Octahedron)
+//the standard interface (placement handled by the frame)
+OBJECT_API(Octahedron)

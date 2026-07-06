@@ -100,4 +100,4 @@ float sdf( vec3 pos, HypCoxCube cube ){
 
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(HypCoxCube)
+UNFRAMED_OBJECT_API(HypCoxCube)

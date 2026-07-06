@@ -26,4 +26,4 @@ float sdf(vec3 p, PlanarConics obj) {
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(PlanarConics)
+UNFRAMED_OBJECT_API(PlanarConics)

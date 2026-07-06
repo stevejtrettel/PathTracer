@@ -22,4 +22,4 @@ float sdf( vec3 p, Object obj ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Object)
+UNFRAMED_OBJECT_API(Object)

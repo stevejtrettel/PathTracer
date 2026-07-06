@@ -22,7 +22,7 @@ float sdf( vec3 p, Sphere sphere ){
 }
 
 //the standard interface: at, inside, sdf
-OBJECT_LOCATORS(Sphere)
+UNFRAMED_LOCATORS(Sphere)
 
 //analytic normalVec for a sphere
 Vector normalVec( Vector tv, Sphere sphere ){

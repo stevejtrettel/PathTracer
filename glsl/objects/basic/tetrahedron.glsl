@@ -23,9 +23,9 @@ struct Tetrahedron{
 
 
 //the local-frame sdf: the unit-sized shape at the origin
-float sdfLocal( vec3 p, Tetrahedron obj ){
+float sdf( vec3 p, Tetrahedron obj ){
     return sdf_tetrahedron(p);
 }
 
-//world placement + the standard interface
-FRAMED_OBJECT_API(Tetrahedron)
+//the standard interface (placement handled by the frame)
+OBJECT_API(Tetrahedron)

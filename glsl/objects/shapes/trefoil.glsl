@@ -79,4 +79,4 @@ float sdf( vec3 p, Trefoil obj ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Trefoil)
+UNFRAMED_OBJECT_API(Trefoil)

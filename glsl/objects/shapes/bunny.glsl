@@ -64,4 +64,4 @@ float sdf( vec3 p, Bunny bunny ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Bunny)
+UNFRAMED_OBJECT_API(Bunny)

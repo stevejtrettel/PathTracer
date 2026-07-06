@@ -165,7 +165,7 @@ float sdf( vec3 p, Kleinian klein ){
 
 
 //at, inside, and the Vector-level sdf
-OBJECT_LOCATORS(Kleinian)
+UNFRAMED_LOCATORS(Kleinian)
 
 //overload of normalVec: kept hand-written, uses a smaller epsilon (0.00001)
 //than the standard macro (0.0001)

@@ -48,4 +48,4 @@ float sdf_cached(BoundaryRing ring) {
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(BoundaryRing)
+UNFRAMED_OBJECT_API(BoundaryRing)

@@ -71,5 +71,5 @@ float sdf( vec3 p, KleinBottle klein ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(KleinBottle)
+UNFRAMED_OBJECT_API(KleinBottle)
 

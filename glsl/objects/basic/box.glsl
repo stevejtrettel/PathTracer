@@ -20,4 +20,4 @@ float sdf( vec3 p, Box box ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Box)
+UNFRAMED_OBJECT_API(Box)

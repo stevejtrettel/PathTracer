@@ -47,4 +47,4 @@ float sdf_cached(CubicSurface surf) {
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(CubicSurface)
+UNFRAMED_OBJECT_API(CubicSurface)

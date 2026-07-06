@@ -47,8 +47,8 @@ float sdf( vec3 p, SurfSphere surf ){
 
 
 //the standard interface: at, inside, sdf, normalVec
-OBJECT_LOCATORS(SurfSphere)
-OBJECT_NORMAL_FD(SurfSphere)
+UNFRAMED_LOCATORS(SurfSphere)
+UNFRAMED_NORMAL_FD(SurfSphere)
 
 //setData for a two sided surface
 void setData( inout Path path, SurfSphere surf ){

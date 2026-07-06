@@ -33,4 +33,4 @@ float sdf(vec3 p, Checkers obj) {
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Checkers)
+UNFRAMED_OBJECT_API(Checkers)

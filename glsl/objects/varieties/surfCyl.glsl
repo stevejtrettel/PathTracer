@@ -56,8 +56,8 @@ float sdf( vec3 p, SurfCyl surf ){
 
 
 //the standard interface: at, inside, sdf, normalVec
-OBJECT_LOCATORS(SurfCyl)
-OBJECT_NORMAL_FD(SurfCyl)
+UNFRAMED_LOCATORS(SurfCyl)
+UNFRAMED_NORMAL_FD(SurfCyl)
 
 //setData for a two sided surface
 void setData( inout Path path, SurfCyl surf ){

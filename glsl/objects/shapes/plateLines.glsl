@@ -28,7 +28,7 @@ float sdf(vec3 p, PlateLines obj) {
 }
 
 //the standard locators: at, inside, sdf
-OBJECT_LOCATORS(PlateLines)
+UNFRAMED_LOCATORS(PlateLines)
 
 Vector normalVec(Vector tv, PlateLines obj) {
     vec3 pos = tv.pos - obj.center;

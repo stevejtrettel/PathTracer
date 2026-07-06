@@ -34,4 +34,4 @@ float sdf( vec3 p, Mobius obj ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Mobius)
+UNFRAMED_OBJECT_API(Mobius)

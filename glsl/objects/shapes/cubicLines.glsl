@@ -42,7 +42,7 @@ float sdf_cached(PairLines obj) {
 }
 
 //the standard locators: at, inside, sdf
-OBJECT_LOCATORS(PairLines)
+UNFRAMED_LOCATORS(PairLines)
 
 Vector normalVec(Vector tv, PairLines obj) {
     vec3 pos = tv.pos - obj.center;
@@ -91,7 +91,7 @@ float sdf_cached(ConicLines obj) {
 }
 
 //the standard locators: at, inside, sdf
-OBJECT_LOCATORS(ConicLines)
+UNFRAMED_LOCATORS(ConicLines)
 
 Vector normalVec(Vector tv, ConicLines obj) {
     vec3 pos = tv.pos - obj.center;
@@ -140,7 +140,7 @@ float sdf_cached(ExceptionalLines obj) {
 }
 
 //the standard locators: at, inside, sdf
-OBJECT_LOCATORS(ExceptionalLines)
+UNFRAMED_LOCATORS(ExceptionalLines)
 
 Vector normalVec(Vector tv, ExceptionalLines obj) {
     vec3 pos = tv.pos - obj.center;

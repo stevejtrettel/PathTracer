@@ -51,9 +51,9 @@ struct Icosahedron{
 
 
 //the local-frame sdf: the unit-sized shape at the origin
-float sdfLocal( vec3 p, Icosahedron obj ){
+float sdf( vec3 p, Icosahedron obj ){
     return sdf_icosahedron(p);
 }
 
-//world placement + the standard interface
-FRAMED_OBJECT_API(Icosahedron)
+//the standard interface (placement handled by the frame)
+OBJECT_API(Icosahedron)

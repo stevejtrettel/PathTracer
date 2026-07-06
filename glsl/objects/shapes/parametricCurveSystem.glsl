@@ -85,7 +85,7 @@ float sdf(vec3 p, in ParametricCurve pc) {
 }
 
 //the standard locators: at, inside, sdf
-OBJECT_LOCATORS(ParametricCurve)
+UNFRAMED_LOCATORS(ParametricCurve)
 
 Vector normalVec(Vector tv, in ParametricCurve pc) {
     ClosestInfo ci = closestCurveTube(tv.pos, pc);

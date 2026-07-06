@@ -45,7 +45,7 @@ float sdf( vec3 pos, Pint pint ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Pint)
+UNFRAMED_OBJECT_API(Pint)
 
 
 

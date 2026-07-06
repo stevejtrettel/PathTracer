@@ -25,4 +25,4 @@ float sdf( vec3 p, Triangle obj ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Triangle)
+UNFRAMED_OBJECT_API(Triangle)

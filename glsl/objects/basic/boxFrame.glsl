@@ -25,9 +25,9 @@ struct BoxFrame{
 
 
 //the local-frame sdf
-float sdfLocal( vec3 p, BoxFrame obj ){
+float sdf( vec3 p, BoxFrame obj ){
     return sdBoxFrame(p, obj.sides, obj.edge);
 }
 
-//world placement + the standard interface
-FRAMED_OBJECT_API(BoxFrame)
+//the standard interface (placement handled by the frame)
+OBJECT_API(BoxFrame)

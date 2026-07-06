@@ -58,4 +58,4 @@ float sdf( vec3 p, Variety var ){
 
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Variety)
+UNFRAMED_OBJECT_API(Variety)

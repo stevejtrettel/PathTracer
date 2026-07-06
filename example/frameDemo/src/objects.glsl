@@ -14,6 +14,11 @@ Tetrahedron tet;
 
 void buildObjects(){
 
+    //start each object with an identity frame and zeroed material
+    initObject(dod);
+    initObject(ico);
+    initObject(tet);
+
     //centerpiece: tilted, enlarged dodecahedron
     dod.frame = makeFrame( vec3(0., 1.4, 0.), vec3(1.,1.,0.), 30., 1.4 );
     dod.mat = makeGlass( vec3(0.25, 0.05, 0.3), 1.5 );

@@ -109,8 +109,8 @@ vec2 sdf_VE(vec3 p, Polytope4D obj){
 
 
 //at, inside, the Vector-level sdf, and normalVec from the standard interface
-OBJECT_LOCATORS(Polytope4D)
-OBJECT_NORMAL_FD(Polytope4D)
+UNFRAMED_LOCATORS(Polytope4D)
+UNFRAMED_NORMAL_FD(Polytope4D)
 
 
 //custom setData: the material depends on whether we hit a vertex or an edge

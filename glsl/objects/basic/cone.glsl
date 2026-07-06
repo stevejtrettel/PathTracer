@@ -36,4 +36,4 @@ float sdf( vec3 p, Cone cone ){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Cone)
+UNFRAMED_OBJECT_API(Cone)

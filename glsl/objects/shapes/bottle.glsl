@@ -68,4 +68,4 @@ float sdf(vec3 pos, Bottle bottle){
 }
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(Bottle)
+UNFRAMED_OBJECT_API(Bottle)

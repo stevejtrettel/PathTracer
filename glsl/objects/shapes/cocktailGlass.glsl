@@ -50,8 +50,8 @@ float sdf( vec3 p, CocktailGlass glass ){
 }
 
 //the standard interface pieces: at, inside, sdf, normalVec
-OBJECT_LOCATORS(CocktailGlass)
-OBJECT_NORMAL_FD(CocktailGlass)
+UNFRAMED_LOCATORS(CocktailGlass)
+UNFRAMED_NORMAL_FD(CocktailGlass)
 
 //overload of location booleans
 //note inside here means in the glass of the cup not the enclosed volume

@@ -122,4 +122,4 @@ float sdf( vec3 pos, HypDod dod ){
 
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(HypDod)
+UNFRAMED_OBJECT_API(HypDod)

@@ -1,56 +1,67 @@
 //-------------------------------------------------
 // THE STANDARD OBJECT API
 //
-// an object type is a struct (with a Material mat field) plus one function,
-// the only per-object code you write by hand:
+// an object type is a struct with a `Frame frame` field (its placement:
+// see 2Space/geometry.glsl), a `Material mat` field, any shape parameters,
+// plus ONE hand-written function — the geometry in the object's OWN
+// local coordinates, authored at the origin:
 //
 //     float sdf( vec3 p, Type obj )
 //
-// the point-level signed distance field: negative inside, and either exact
-// or a conservative underestimate. all else derives from it mechanically.
+// (negative inside; exact distance or a conservative underestimate.)
 //
-// the macros below generate the rest of the standard interface, overloaded
-// on the struct type (dispatch is GLSL function overloading):
+// the convention throughout: a vec3 argument means the object's own
+// local chart; a Vector argument means ray state in the world. the
+// macros generate the world-facing interface from the local sdf:
 //
-//     OBJECT_LOCATORS(Type)    at(), inside(), and the Vector-level sdf()
-//     OBJECT_NORMAL_FD(Type)   normalVec() by tetrahedral finite difference
+//     OBJECT_INIT(Type)        initObject(): identity frame, zeroed material
+//     OBJECT_LOCATORS(Type)    world sdf(Vector), at(), inside()
+//     OBJECT_NORMAL_FD(Type)   normalVec(): finite difference in local
+//                              coordinates, gradient rotated to world
 //     OBJECT_SETDATA(Type)     setData(): normal + side + material on a hit
 //
-//     OBJECT_API(Type)         all three of the above
+//     OBJECT_API(Type)         all four of the above
 //
-// use the pieces individually when a type overrides part of the interface:
-//     analytic normalVec / trace   (sphere, plane)
-//     custom at()                  (apollonian gasket)
-//     custom setData()             (the multiMaterial objects)
+// use the pieces individually when a type overrides part of the interface
+// (analytic normal or trace, custom at(), multi-material setData).
 // trace( Vector, Type ) is never generated: only shapes with an analytic
-// ray intersection define it; everything else is raymarched via sdf.
+// ray intersection define it (work in the local frame, then rescale the
+// returned distance by obj.frame.scale).
 //
 // (no comments inside the macro bodies: they use backslash continuations)
 //-------------------------------------------------
 
 
+#define OBJECT_INIT(Type)                                       \
+void initObject( out Type obj ){                                \
+    obj.frame = IDENTITY_FRAME;                                 \
+    zeroMat(obj.mat);                                           \
+}
+
+
 #define OBJECT_LOCATORS(Type)                                   \
+float sdf( Vector tv, Type obj ){                               \
+    return obj.frame.scale * sdf( toLocal(obj.frame, tv.pos), obj ); \
+}                                                               \
 bool at( Vector tv, Type obj ){                                 \
-    float d = sdf( tv.pos, obj );                               \
+    float d = sdf( tv, obj );                                   \
     return ((abs(d) - AT_THRESH) < 0.);                         \
 }                                                               \
 bool inside( Vector tv, Type obj ){                             \
-    return ( sdf( tv.pos, obj ) < 0. );                         \
-}                                                               \
-float sdf( Vector tv, Type obj ){                               \
-    return sdf( tv.pos, obj );                                  \
+    return ( sdf( tv, obj ) < 0. );                             \
 }
 
 
 #define OBJECT_NORMAL_FD(Type)                                  \
 Vector normalVec( Vector tv, Type obj ){                        \
+    vec3 q = toLocal(obj.frame, tv.pos);                        \
     const float ep = 0.0001;                                    \
     vec2 e = vec2(1.0,-1.0)*0.5773;                             \
-    vec3 dir = e.xyy*sdf( tv.pos + e.xyy*ep, obj )              \
-             + e.yyx*sdf( tv.pos + e.yyx*ep, obj )              \
-             + e.yxy*sdf( tv.pos + e.yxy*ep, obj )              \
-             + e.xxx*sdf( tv.pos + e.xxx*ep, obj );             \
-    return Vector( tv.pos, normalize(dir) );                    \
+    vec3 dir = e.xyy*sdf( q + e.xyy*ep, obj )                   \
+             + e.yyx*sdf( q + e.yyx*ep, obj )                   \
+             + e.yxy*sdf( q + e.yxy*ep, obj )                   \
+             + e.xxx*sdf( q + e.xxx*ep, obj );                  \
+    return Vector( tv.pos, dirToWorld(obj.frame, normalize(dir)) ); \
 }
 
 
@@ -65,34 +76,48 @@ void setData( inout Path path, Type obj ){                      \
 
 
 #define OBJECT_API(Type)                                        \
+OBJECT_INIT(Type)                                               \
 OBJECT_LOCATORS(Type)                                           \
 OBJECT_NORMAL_FD(Type)                                          \
 OBJECT_SETDATA(Type)
 
 
 //-------------------------------------------------
-// FRAMED OBJECTS
+// TRANSITIONAL: UNFRAMED OBJECTS
 //
-// for objects placed by a Frame (a struct field `Frame frame`, see
-// 2Space/geometry.glsl): hand-write the geometry in the object's OWN
-// local coordinates,
-//
-//     float sdfLocal( vec3 p, Type obj )
-//
-// and FRAMED_SDF generates the world-space point-level sdf: it pulls
-// the query point into the local frame and converts the local distance
-// back to world units (*scale — exact for uniform scaling).
-// FRAMED_OBJECT_API adds the rest of the standard interface.
+// the old contract, for types not yet migrated to Frame placement:
+// the hand-written sdf( vec3 p, Type obj ) is in WORLD coordinates
+// (the object handles its own `center` internally). these macros are
+// deleted once the migration is complete — do not use them in new code.
 //-------------------------------------------------
 
-#define FRAMED_SDF(Type)                                        \
-float sdf( vec3 p, Type obj ){                                  \
-    return obj.frame.scale * sdfLocal( toLocal(obj.frame, p), obj ); \
+#define UNFRAMED_LOCATORS(Type)                                 \
+bool at( Vector tv, Type obj ){                                 \
+    float d = sdf( tv.pos, obj );                               \
+    return ((abs(d) - AT_THRESH) < 0.);                         \
+}                                                               \
+bool inside( Vector tv, Type obj ){                             \
+    return ( sdf( tv.pos, obj ) < 0. );                         \
+}                                                               \
+float sdf( Vector tv, Type obj ){                               \
+    return sdf( tv.pos, obj );                                  \
 }
 
-#define FRAMED_OBJECT_API(Type)                                 \
-FRAMED_SDF(Type)                                                \
-OBJECT_API(Type)
+#define UNFRAMED_NORMAL_FD(Type)                                \
+Vector normalVec( Vector tv, Type obj ){                        \
+    const float ep = 0.0001;                                    \
+    vec2 e = vec2(1.0,-1.0)*0.5773;                             \
+    vec3 dir = e.xyy*sdf( tv.pos + e.xyy*ep, obj )              \
+             + e.yyx*sdf( tv.pos + e.yyx*ep, obj )              \
+             + e.yxy*sdf( tv.pos + e.yxy*ep, obj )              \
+             + e.xxx*sdf( tv.pos + e.xxx*ep, obj );             \
+    return Vector( tv.pos, normalize(dir) );                    \
+}
+
+#define UNFRAMED_OBJECT_API(Type)                               \
+UNFRAMED_LOCATORS(Type)                                         \
+UNFRAMED_NORMAL_FD(Type)                                        \
+OBJECT_SETDATA(Type)
 
 
 //-------------------------------------------------

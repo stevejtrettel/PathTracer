@@ -68,4 +68,4 @@ float sdf( vec3 p, VarBox var ){
 
 
 //the standard interface: at, inside, sdf, normalVec, setData
-OBJECT_API(VarBox)
+UNFRAMED_OBJECT_API(VarBox)
