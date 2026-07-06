@@ -108,20 +108,21 @@ vec3 cubicGrad(vec3 p) {
 
 // Sphere bounding for cubic surface group
 float sceneBBox(vec3 pos) {
-    return length(pos) - 2.0;
+    return length(pos) - 3.;
 }
 
-// Box bounding for plate group (lines + conics clipped to plate)
-const float PLATE_RADIUS = 1.8;
+// Rectangle bounding for plate group (lines + conics clipped to plate)
+const float PLATE_WIDTH  = 2.5;   // x in rotated frame (horizontal in world)
+const float PLATE_HEIGHT = 1.8;   // z in rotated frame (vertical in world)
 
 float plateBBox(vec3 pos) {
-    vec2 d = abs(pos.xz) - vec2(PLATE_RADIUS);
+    vec2 d = abs(pos.xz) - vec2(PLATE_WIDTH, PLATE_HEIGHT);
     return max(d.x, d.y);
 }
 
 // 3D bounding box for entire plate group (early exit in sdf_Objects)
 float plateGroupBBox(vec3 pos) {
-    vec3 d = abs(pos) - vec3(PLATE_RADIUS, PLATE_RADIUS, 0.15);
+    vec3 d = abs(pos) - vec3(PLATE_WIDTH, PLATE_HEIGHT, 0.15);
     vec3 q = max(d, 0.0);
     return length(q) + min(max(d.x, max(d.y, d.z)), 0.0);
 }
@@ -215,14 +216,15 @@ PlanarConics planarConics;
 // ============================================
 
 // Layout: surface on pedestal (right), plate standing vertical on pedestal (left)
+const float SURFACE_SCALE = 1.5;  // uniformly scale up the surface group
 const float PEDESTAL_HEIGHT = 1.5;
 const float PLATE_PED_HEIGHT = 0.8;
 const float FLOOR_Y = -3.0;
-const vec3 SURFACE_POS = vec3(3.0, FLOOR_Y + PEDESTAL_HEIGHT + 2.0, 0);
-const vec3 PEDESTAL_POS = vec3(3.0, FLOOR_Y + PEDESTAL_HEIGHT * 0.5, 0);
-const vec3 PLATE_PED_POS = vec3(-2.5, FLOOR_Y + PLATE_PED_HEIGHT * 0.5, 0);
-// Plate center: on top of its pedestal, raised by PLATE_RADIUS so bottom edge rests on pedestal
-const vec3 PLATE_POS    = vec3(-2.5, FLOOR_Y + PLATE_PED_HEIGHT + PLATE_RADIUS, 0);
+const vec3 SURFACE_POS = vec3(4.5, FLOOR_Y + PEDESTAL_HEIGHT + 3.0 * SURFACE_SCALE, 0);
+const vec3 PEDESTAL_POS = vec3(4.5, FLOOR_Y + PEDESTAL_HEIGHT * 0.5, 0);
+const vec3 PLATE_PED_POS = vec3(-5.5, FLOOR_Y + PLATE_PED_HEIGHT * 0.5, 0);
+// Plate center: on top of its pedestal, raised by PLATE_HEIGHT so bottom edge rests on pedestal
+const vec3 PLATE_POS    = vec3(-5.5, FLOOR_Y + PLATE_PED_HEIGHT + PLATE_HEIGHT + 0.01, 0);
 
 
 void buildObjects() {
@@ -242,7 +244,7 @@ void buildObjects() {
     // === PEDESTAL ===
 
     pedestal.center = PEDESTAL_POS;
-    pedestal.sides = vec3(0.8, PEDESTAL_HEIGHT * 0.5, 0.8);
+    pedestal.sides = vec3(2.0, PEDESTAL_HEIGHT * 0.5, 2.0);
     pedestal.rounded = 0.05;
     pedestal.mat = makeGlass(vec3(0.1, 0.05, 0.1), 1.5, 0.98);
 
@@ -250,21 +252,21 @@ void buildObjects() {
 
     surface.center = SURFACE_POS;
     surface.scale = 1.0;
-    surface.thickness = vec2(0.05, 0.0);
+    surface.thickness = vec2(0.03, 0.0);
     surface.smoothing = 0.05;
     surface.mat = makeGlass(3.*vec3(0.3, 0.05, 0.2), 1.3, 0.97);
 
     pairLines.center = SURFACE_POS;
-    pairLines.radius = 0.02;
-    pairLines.mat = makeMetal(vec3(0.7, 0.7, 0.75), 0.6, 0.2);
+    pairLines.radius = 0.03;
+    pairLines.mat = makeMetal(vec3(0.75, 0.75, 0.8), 0.85, 0.08);
 
     conicLines.center = SURFACE_POS;
-    conicLines.radius = 0.02;
-    conicLines.mat = makeMetal(vec3(0.85, 0.6, 0.15), 0.6, 0.2);
+    conicLines.radius = 0.03;
+    conicLines.mat = makeMetal(vec3(0.9, 0.65, 0.15), 0.85, 0.08);
 
     exceptionalLines.center = SURFACE_POS;
-    exceptionalLines.radius = 0.02;
-    exceptionalLines.mat = makeMetal(vec3(0.75, 0.35, 0.35), 0.6, 0.2);
+    exceptionalLines.radius = 0.03;
+    exceptionalLines.mat = makeMetal(vec3(0.55, 0.12, 0.1), 0.85, 0.08);
 
     ring.center = SURFACE_POS;
     ring.radius = 0.05;
@@ -274,7 +276,7 @@ void buildObjects() {
     // === PLATE PEDESTAL (glass box, wider and shorter than surface pedestal) ===
 
     platePedestal.center = PLATE_PED_POS;
-    platePedestal.sides = vec3(1.2, PLATE_PED_HEIGHT * 0.5, 0.4);
+    platePedestal.sides = vec3(1.5, PLATE_PED_HEIGHT * 0.5, 0.4);
     platePedestal.rounded = 0.05;
     platePedestal.mat = makeGlass(vec3(0.1, 0.05, 0.1), 1.5, 0.98);
 
@@ -282,7 +284,7 @@ void buildObjects() {
     // Shapes work in xz plane; standUp() rotates query so xy plane maps to xz
 
     plate.center = PLATE_POS;
-    plate.sides = vec3(PLATE_RADIUS, PLATE_RADIUS, 0.05);
+    plate.sides = vec3(PLATE_WIDTH, PLATE_HEIGHT, 0.05);
     plate.rounded = 0.02;
     plate.mat = makeGlass(vec3(0.3, 0.05, 0.2), 1.5, 0.97);
 
@@ -291,15 +293,15 @@ void buildObjects() {
     checkers.cylHeight = 0.02;
     checkers.rounding = 0.008;
     checkers.yOffset = 0.07;
-    checkers.mat = makeMetal(vec3(0.75, 0.35, 0.35), 0.6, 0.2);
+    checkers.mat = makeMetal(vec3(0.55, 0.12, 0.1), 0.85, 0.08);
 
     plateLines.center = PLATE_POS + vec3(0, 0.06, 0);
     plateLines.radius = 0.02;
-    plateLines.mat = makeMetal(vec3(0.7, 0.7, 0.75), 0.6, 0.2);
+    plateLines.mat = makeMetal(vec3(0.75, 0.75, 0.8), 0.85, 0.08);
 
     planarConics.center = PLATE_POS + vec3(0, 0.06, 0);
     planarConics.radius = 0.02;
-    planarConics.mat = makeMetal(vec3(0.85, 0.6, 0.15), 0.6, 0.2);
+    planarConics.mat = makeMetal(vec3(0.9, 0.65, 0.15), 0.85, 0.08);
 }
 
 
@@ -317,9 +319,9 @@ float sdf_Objects(Vector tv) {
 
     float dist = maxDist;
 
-    // --- Surface group (sphere bbox, with caching) ---
-    vec3 surfPos = rotXZ(tv.pos - surface.center);
-    _cachedBBox = sceneBBox(surfPos);   // sphere: rotation-invariant
+    // --- Surface group (sphere bbox, with caching, scaled up) ---
+    vec3 surfPos = rotXZ(tv.pos - surface.center) / SURFACE_SCALE;
+    _cachedBBox = sceneBBox(surfPos);
     _cachedPos = surfPos;
 
     if (_cachedBBox <= 0.0) {
@@ -363,7 +365,7 @@ float sdf_Objects(Vector tv) {
 }
 
 bool inside_Object(Vector tv) {
-    Vector rotTV = Vector(rotXZ(tv.pos - SURFACE_POS) + SURFACE_POS, tv.dir);
+    Vector rotTV = Vector(rotXZ(tv.pos - SURFACE_POS) / SURFACE_SCALE + SURFACE_POS, tv.dir);
     Vector plateTV = Vector(plateRot(tv.pos - PLATE_POS) + PLATE_POS, tv.dir);
     return inside(rotTV, surface) || inside(plateTV, plate)
         || inside(tv, pedestal) || inside(plateTV, platePedestal);
@@ -372,7 +374,7 @@ bool inside_Object(Vector tv) {
 void setData_Objects(inout Path path) {
     // Rotate query point into surface-local frame
     Vector origTV = path.tv;
-    path.tv.pos = rotXZ(path.tv.pos - SURFACE_POS) + SURFACE_POS;
+    path.tv.pos = rotXZ(path.tv.pos - SURFACE_POS) / SURFACE_SCALE + SURFACE_POS;
 
     // Surface group (evaluated in rotated frame)
     setData(path, surface);

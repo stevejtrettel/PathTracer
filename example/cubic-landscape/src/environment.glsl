@@ -20,17 +20,17 @@ void buildEnvironment(){
     float lightIntensity;
 
     //----------- LIGHT 1 -------------------------
-    light.center=vec3(-8,10,2);
+    light.center=vec3(-6,10,-3);
     light.radius=0.5;
 
-    lightColor= vec3(1., 0.95, 0.9);
+    lightColor= vec3(1., 0.92, 0.82);
     lightIntensity=400.;
     light.mat=makeLight(lightColor,lightIntensity);
 
-    //----------- LIGHT 2 (left side) -------------------------
-    light2.center=vec3(-12,4,-4);
+    //----------- LIGHT 2 (right side) -------------------------
+    light2.center=vec3(10,6,-12);
     light2.radius=0.4;
-    light2.mat=makeLight(vec3(1.), 300.);
+    light2.mat=makeLight(vec3(1., 0.92, 0.82), 300.);
 
     //------------------------------------
     // THE WALLS
@@ -52,7 +52,7 @@ void buildEnvironment(){
     orientation.pos=vec3(0,14,0);
     orientation.dir=vec3(0,-1,0);
     topWall.orientation=orientation;
-    topWall.mat=makeDielectric(vec3(0.5),0.0,roughness);
+    topWall.mat=makeLight(vec3(1),1.0);
 
 
     //----------- THE FRONT (behind camera) -------------------------

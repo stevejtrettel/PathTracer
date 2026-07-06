@@ -20,7 +20,7 @@ void buildEnvironment(){
     float lightIntensity;
 
     //----------- LIGHT 1 (upper left) -------------------------
-    light.center=vec3(-8,10,2);
+    light.center=vec3(-3,10,2);
     light.radius=0.5;
 
     lightColor= vec3(1., 0.95, 0.9);
@@ -28,7 +28,7 @@ void buildEnvironment(){
     light.mat=makeLight(lightColor,lightIntensity);
 
     //----------- LIGHT 2 (right side) -------------------------
-    light2.center=vec3(10,4,-4);
+    light2.center=vec3(3,4,-4);
     light2.radius=0.4;
     light2.mat=makeLight(vec3(1.), 300.);
 
@@ -69,7 +69,7 @@ void buildEnvironment(){
 
 
     //----------- THE LEFT -------------------------
-    orientation.pos=vec3(-20,0,0);
+    orientation.pos=vec3(-4,0,0);
     orientation.dir=vec3(1,0,0);
     leftWall.orientation=orientation;
     leftWall.mat=makeDielectric(color,0.0,roughness);
@@ -77,7 +77,7 @@ void buildEnvironment(){
 
 
     //----------- THE RIGHT -------------------------
-    orientation.pos=vec3(20,0,0);
+    orientation.pos=vec3(4,0,0);
     orientation.dir=vec3(-1,0,0);
     rightWall.orientation=orientation;
     rightWall.mat=makeDielectric(color,0.0,roughness);
