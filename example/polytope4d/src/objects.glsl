@@ -14,14 +14,14 @@ void buildObjects(){
     setHypercube(poly);
     poly.frame = makeFrame(vec3(0,1.5,0));
     //poly.rot is an internal rotation of the 3-sphere (not 3D placement): unchanged
-    poly.rot = rot3AxisAngle(normalize(vec3(0,1,0.1)),90.);
+    poly.rot = rot3AxisAngle(normalize(vec3(0,1,0.1)),-90.);
     poly.edgeRad = 0.05;
     poly.vertexRad =0.15;
 
 
     set16Cell(dual);
     dual.frame = makeFrame(vec3(0,1.5,0));
-    dual.rot = rot3AxisAngle(normalize(vec3(0,1,0.1)),90.);
+    dual.rot = rot3AxisAngle(normalize(vec3(0,1,0.1)),-90.);
     dual.edgeRad = 0.05;
     dual.vertexRad =0.15;
 

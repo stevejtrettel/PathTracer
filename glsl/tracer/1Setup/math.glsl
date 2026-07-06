@@ -42,15 +42,19 @@ float sq(float x){return x*x;}
 mat2 rot2(in float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
 
 
-//axis angle
+//axis angle: right-hand rotation by angle (degrees) about the unit axis v.
+//entries are listed COLUMN-major (GLSL constructor order), so this is the
+//true rotation: rot3AxisAngle(v,a) * p rotates p by +a about v.
 
 mat3 rot3AxisAngle(vec3 v, float angle){
     float c = cos(radians(angle));
     float s = sin(radians(angle));
+    float ic = 1.0 - c;
 
-    return mat3(c + (1.0 - c) * v.x * v.x, (1.0 - c) * v.x * v.y - s * v.z, (1.0 - c) * v.x * v.z + s * v.y,
-    (1.0 - c) * v.x * v.y + s * v.z, c + (1.0 - c) * v.y * v.y, (1.0 - c) * v.y * v.z - s * v.x,
-    (1.0 - c) * v.x * v.z - s * v.y, (1.0 - c) * v.y * v.z + s * v.x, c + (1.0 - c) * v.z * v.z
+    return mat3(
+    c + ic * v.x * v.x,        ic * v.x * v.y + s * v.z,  ic * v.x * v.z - s * v.y,
+    ic * v.x * v.y - s * v.z,  c + ic * v.y * v.y,        ic * v.y * v.z + s * v.x,
+    ic * v.x * v.z + s * v.y,  ic * v.y * v.z - s * v.x,  c + ic * v.z * v.z
     );
 }
 
@@ -83,20 +87,24 @@ mat3 rotateZto(vec3 targetNormal) {
     float c = cosTheta;
     float ic = 1.0 - c;
 
+    //entries listed COLUMN-major: this is the true rotation, so
+    //rotateZto(n) * vec3(0,0,1) == normalize(n)
     return mat3(
-    k.x * k.x * ic + c,        k.x * k.y * ic - k.z * s,  k.x * k.z * ic + k.y * s,
-    k.y * k.x * ic + k.z * s,  k.y * k.y * ic + c,        k.y * k.z * ic - k.x * s,
-    k.z * k.x * ic - k.y * s,  k.z * k.y * ic + k.x * s,  k.z * k.z * ic + c
+    k.x * k.x * ic + c,        k.x * k.y * ic + k.z * s,  k.x * k.z * ic - k.y * s,
+    k.y * k.x * ic - k.z * s,  k.y * k.y * ic + c,        k.y * k.z * ic + k.x * s,
+    k.z * k.x * ic + k.y * s,  k.z * k.y * ic - k.x * s,  k.z * k.z * ic + c
     );
 }
 
 
 
+//right-hand rotation by theta (radians) about the z-axis
+//(entries listed COLUMN-major: this is the true rotation)
 mat3 rotateAboutZ(float theta){
     float c = cos(theta);
     float s = sin(theta);
 
-    return mat3(c,-s,0, s, c, 0, 0,0,1);
+    return mat3(c, s, 0,  -s, c, 0,  0, 0, 1);
 }
 
 

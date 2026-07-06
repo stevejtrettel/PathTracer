@@ -43,28 +43,28 @@ void buildObjects(){
     float emit = 0.1*extra3;
 
     triang1.frame = makeFrame(-1.25*v2);
-    triang1.frame.rot = transpose(rotateAboutZ(1.57)*rotateZto(v2));
+    triang1.frame.rot = rotateZto(v2)*rotateAboutZ(1.57);
     triang1.side=4.*rad;
     triang1.thickness=0.1;
     triang1.mat = makeDielectric(vec3(0.7,0.2,0.2),0.5,0.1);
     triang1.mat.surfaceEmit = emit*vec3(0.7,0.2,0.2);
 
     triang2.frame = makeFrame(-1.25*v3);
-    triang2.frame.rot = transpose(rotateAboutZ(1.57)*rotateZto(v3));
+    triang2.frame.rot = rotateZto(v3)*rotateAboutZ(1.57);
     triang2.side=4.*rad;
     triang2.thickness=0.1;
     triang2.mat = makeDielectric(vec3(0.2,0.7,0.2),0.5,0.1);
     triang2.mat.surfaceEmit = emit*vec3(0.2,0.7,0.2);
 
     triang3.frame = makeFrame(-1.25*v4);
-    triang3.frame.rot = transpose(rotateAboutZ(-1.57)*rotateZto(v4));
+    triang3.frame.rot = rotateZto(v4)*rotateAboutZ(-1.57);
     triang3.side=4.*rad;
     triang3.thickness=0.1;
     triang3.mat = makeDielectric(vec3(0.2,0.2,0.7),0.5,0.1);
     triang3.mat.surfaceEmit = emit*vec3(0.2,0.2,0.7);
 
     triang4.frame = makeFrame(-1.3*v1);
-    triang4.frame.rot = transpose(rotateAboutZ(1.57)*rotateZto(v1));
+    triang4.frame.rot = rotateZto(v1)*rotateAboutZ(1.57);
     triang4.side=4.*rad;
     triang4.thickness=0.1;
     triang4.mat = makeGlass(vec3(1),1.2,0.95);
