@@ -1,0 +1,173 @@
+/*-------------------------------------------------
+  Custom tabbed GUI — dark translucent, minimal.
+  Collapsed by default to a hamburger (upper right);
+  .gui.open reveals the panel.
+--------------------------------------------------*/
+
+.gui {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 100;
+  font: 12px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #d8d8d8;
+  user-select: none;
+}
+
+/* the ☰ toggle: always visible, sits above the panel */
+.gui-hamburger {
+  display: block;
+  margin-left: auto;              /* stay pinned to the right edge */
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 30px;
+  color: #d8d8d8;
+  background: rgba(20, 20, 22, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.gui-hamburger:hover { background: rgba(40, 40, 44, 0.7); }
+
+/* the panel body: hidden until .open */
+.gui-panel {
+  display: none;
+  width: 240px;
+  margin-top: 6px;
+  background: rgba(20, 20, 22, 0.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.gui.open .gui-panel { display: block; }
+
+/* tab strip */
+.gui-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.gui-tab {
+  flex: 1;
+  padding: 7px 4px;
+  font: inherit;
+  font-size: 11px;
+  color: #9a9a9a;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.gui-tab:hover { color: #d8d8d8; }
+.gui-tab.active {
+  color: #fff;
+  border-bottom-color: #6ea8fe;
+}
+
+/* tab bodies */
+.gui-body { display: none; padding: 8px 10px; }
+.gui-body.active { display: block; }
+
+/* a knob / control row: [ label · widget · value ] */
+.knob {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+.knob-label {
+  flex: 0 0 82px;
+  color: #b6b6b6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.knob-value {
+  flex: 0 0 42px;
+  text-align: right;
+  color: #eaeaea;
+  font-variant-numeric: tabular-nums;
+}
+
+/* slider: thin track + moving dot */
+.knob-range {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.knob-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #6ea8fe;
+  cursor: pointer;
+}
+.knob-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background: #6ea8fe;
+  cursor: pointer;
+}
+
+.knob-check { margin-left: auto; accent-color: #6ea8fe; cursor: pointer; }
+
+.knob-num, .knob-select {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 5px;
+  font: inherit;
+  color: #eaeaea;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+}
+
+/* section heading inside a tab */
+.gui-section {
+  margin: 10px 0 2px;
+  padding-top: 8px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7d7d7d;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.gui-body > .gui-section:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+
+/* full-width action buttons */
+.gui-btn {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 7px;
+  font: inherit;
+  color: #eaeaea;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  cursor: pointer;
+}
+.gui-btn:hover { background: rgba(110, 168, 254, 0.22); border-color: #6ea8fe; }
+
+/* keybinding map (Help tab) */
+.gui-keys { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; }
+.gui-keys .key {
+  justify-self: start;
+  padding: 1px 5px;
+  color: #eaeaea;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 3px;
+}
+.gui-keys .desc { color: #b6b6b6; align-self: center; }
