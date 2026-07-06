@@ -22,7 +22,7 @@ Variety var;
 
 void buildObjects(){
 
-    var.center=vec3(-2,1.8,0);
+    var.frame=makeFrame(vec3(-2,1.8,0));
     var.scale=5.;
     var.thickness = vec2(0.02,0.0);
     var.smoothing =0.075;

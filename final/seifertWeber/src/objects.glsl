@@ -24,7 +24,7 @@ void buildObjects(){
     dod = buildHypDod();
 
     dod.mat=makeGlass(6.*(brownAbsorb+0.25*redAbsorb),1.5,0.97);
-    dod.center = vec3(1.5,-0.5,2.25);
+    dod.frame = makeFrame(vec3(1.5,-0.5,2.25));
     //dod.mat = makeMetal(color,specularity,roughness);
     //    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,extra2);
     //    dod.mat.refractionChance=0.;
@@ -35,7 +35,7 @@ void buildObjects(){
 
 
     dodE = buildHypDod(0.4);
-    dodE.center = vec3(-2,-0.5,2);
+    dodE.frame = makeFrame(vec3(-2,-0.5,2));
     //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
     dodE.mat = makeDielectric(vec3(0.5,0.2,0.4),specularity,roughness);
     dodE.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);

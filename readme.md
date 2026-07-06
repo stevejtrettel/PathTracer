@@ -51,16 +51,34 @@ anything defined in 1–3 plus the object library.
 
 ### The object library (`glsl/objects/`)
 
-Reusable shapes. Each object file defines a struct plus overloads of the standard interface,
-dispatched by GLSL function overloading on the struct type:
+Every object is placed in the world by a **Frame** — a similarity transform
+`{mat3 rot, vec3 pos, float scale}` (see `2Space/geometry.glsl`). An object file defines:
 
-- `float distR3(vec3 p, Type o)` — the SDF (the only genuinely per-object code)
-- `bool at(Vector tv, Type o)` / `bool inside(Vector tv, Type o)`
-- `float sdf(Vector tv, Type o)` — SDF at a tangent vector's position
-- `Vector normalVec(Vector tv, Type o)` — normal (finite-difference by default)
-- `void setData(inout Path path, Type o)` — writes material/normal into the path on a hit
-- optionally `float trace(Vector tv, Type o)` for shapes with analytic/custom intersection
+- a struct with a `Frame frame` field, a `Material mat`, and any shape parameters
+- `float sdf(vec3 p, Type o)` — the geometry in the object's OWN local coordinates,
+  authored at the origin (the only hand-written code for most objects)
+- one macro line, `OBJECT_API(Type)` (see `objects/objectAPI.glsl`), which generates the
+  world-facing interface: `initObject()`, the world `sdf(Vector, Type)`, `at`/`inside`,
+  a finite-difference `normalVec`, and `setData`
 
+The convention throughout: a `vec3` argument means local coordinates, a `Vector` argument
+means world ray state. Objects with analytic normals or ray intersections (sphere, plane)
+hand-write those pieces and use the individual macros for the rest; `trace(Vector, Type)`
+is always hand-written and only exists for analytically-intersectable shapes.
+
+In a scene, initialize then place:
+
+```glsl
+Sphere ball;
+void buildObjects(){
+    initObject(ball);                                     //identity frame, zeroed material
+    ball.frame = makeFrame(vec3(0,1,0));                  //or makeFrame(pos, axis, angleDeg, scale)
+    ball.radius = 2.;
+    ball.mat = makeGlass(vec3(.3,.05,.2), 1.5);
+}
+```
+
+`makeFrameNormal(pos, normal)` places surface-like objects (planes) by point + normal.
 `basic/` is auto-included by the engine; anything else must be `#include`d from the scene's
 `objects.glsl` with a path relative to that file.
 

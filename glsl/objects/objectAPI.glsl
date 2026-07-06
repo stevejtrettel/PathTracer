@@ -83,44 +83,6 @@ OBJECT_SETDATA(Type)
 
 
 //-------------------------------------------------
-// TRANSITIONAL: UNFRAMED OBJECTS
-//
-// the old contract, for types not yet migrated to Frame placement:
-// the hand-written sdf( vec3 p, Type obj ) is in WORLD coordinates
-// (the object handles its own `center` internally). these macros are
-// deleted once the migration is complete — do not use them in new code.
-//-------------------------------------------------
-
-#define UNFRAMED_LOCATORS(Type)                                 \
-bool at( Vector tv, Type obj ){                                 \
-    float d = sdf( tv.pos, obj );                               \
-    return ((abs(d) - AT_THRESH) < 0.);                         \
-}                                                               \
-bool inside( Vector tv, Type obj ){                             \
-    return ( sdf( tv.pos, obj ) < 0. );                         \
-}                                                               \
-float sdf( Vector tv, Type obj ){                               \
-    return sdf( tv.pos, obj );                                  \
-}
-
-#define UNFRAMED_NORMAL_FD(Type)                                \
-Vector normalVec( Vector tv, Type obj ){                        \
-    const float ep = 0.0001;                                    \
-    vec2 e = vec2(1.0,-1.0)*0.5773;                             \
-    vec3 dir = e.xyy*sdf( tv.pos + e.xyy*ep, obj )              \
-             + e.yyx*sdf( tv.pos + e.yyx*ep, obj )              \
-             + e.yxy*sdf( tv.pos + e.yxy*ep, obj )              \
-             + e.xxx*sdf( tv.pos + e.xxx*ep, obj );             \
-    return Vector( tv.pos, normalize(dir) );                    \
-}
-
-#define UNFRAMED_OBJECT_API(Type)                               \
-UNFRAMED_LOCATORS(Type)                                         \
-UNFRAMED_NORMAL_FD(Type)                                        \
-OBJECT_SETDATA(Type)
-
-
-//-------------------------------------------------
 // VARIETIES
 //
 // an algebraic variety file supplies its defining equation as a

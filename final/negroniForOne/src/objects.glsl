@@ -21,7 +21,7 @@ void buildObjects(){
     vec3 clearGlass = vec3(0.3,0.05,0.05);
 
     //-------- BASE COCKTAIL GLASS  ----------------
-    cGlass.center=vec3(-1.,-0.15,-1.2);
+    cGlass.frame=makeFrame(vec3(-1.,-0.15,-1.2));
     cGlass.radius=1.;
     cGlass.height=1.;
     cGlass.thickness=0.1;
@@ -44,13 +44,9 @@ void buildObjects(){
     bottle.thickness=0.02;
     bottle.rounded=0.1;
     bottle.smoothJoin=0.3;
-    bottle.center=vec3(2,0.48,1);
+    bottle.frame=makeFrame(vec3(2,0.48,1));
     bottle.bump=0.5;
     bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
-
-    //set up the bounding sphere
-    bottle.boundingBox.center=bottle.center;
-    bottle.boundingBox.radius=bottle.baseHeight+bottle.neckHeight+0.5;
 
 
     //-------- GIN BOTTLE ----------------
@@ -67,7 +63,7 @@ void buildObjects(){
 
      //-------- CAMPARI BOTTLE ----------------
     campari.glass=bottle;
-    campari.glass.center=vec3(3,2.4,-6);
+    campari.glass.frame=makeFrame(vec3(3,2.4,-6));
     campari.glass.baseRadius=1.;
     campari.glass.baseHeight=3.5;
     campari.glass.neckHeight=0.75;
@@ -80,7 +76,7 @@ void buildObjects(){
 
     //-------- VERMOUTH BOTTLE ----------------
     vermouth.glass=bottle;
-    vermouth.glass.center=vec3(5,1.32,-3);
+    vermouth.glass.frame=makeFrame(vec3(5,1.32,-3));
     vermouth.glass.baseRadius=0.75;
     vermouth.glass.baseHeight=2.5;
     vermouth.glass.thickness=0.05;

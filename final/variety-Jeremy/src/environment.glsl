@@ -19,7 +19,7 @@ void buildEnvironment(){
     float lightIntensity;
 
     //----------- LIGHT 1 -------------------------
-    light1.center=vec3(7,5,10);
+    light1.frame=makeFrame(vec3(7,5,10));
     light1.radius=0.75;
     lightColor= vec3(0.5);
     lightIntensity=100.;
@@ -28,7 +28,7 @@ void buildEnvironment(){
 
 
     //----------- LIGHT 2 -------------------------
-    light2.center=vec3(-10,3,10);
+    light2.frame=makeFrame(vec3(-10,3,10));
     light2.radius=2.*extra4;
     lightColor= vec3(1.);
     lightIntensity=100.;
@@ -37,7 +37,7 @@ void buildEnvironment(){
 
 
     //----------- LIGHT 3 -------------------------
-    light3.center=vec3(-3,4,8);
+    light3.frame=makeFrame(vec3(-3,4,8));
     light3.radius=0.3;
     lightColor= vec3(1.);
     lightIntensity=100.;
@@ -48,8 +48,6 @@ void buildEnvironment(){
     //------------------------------------
     // THE WALLS
     //------------------------------------
-
-    Vector orientation;
     vec3 color;
     float specularity, roughness, offset;
     //-----------GENERAL FOR THE WALLS -------------------------
@@ -59,44 +57,32 @@ void buildEnvironment(){
 
 
     //----------- THE FLOOR -------------------------
-    orientation.pos=vec3(0,-0.75,0);
-    orientation.dir=vec3(0,1,0);
-    bottomWall.orientation=orientation;
+        bottomWall.frame=makeFrameNormal(vec3(0,-0.75,0), vec3(0,1,0));
     bottomWall.mat=makeDielectric(color,0.0,roughness);
 
 
     //----------- THE CEILING -------------------------
-    orientation.pos=vec3(0,14,0);
-    orientation.dir=vec3(0,-1,0);
-    topWall.orientation=orientation;
+        topWall.frame=makeFrameNormal(vec3(0,14,0), vec3(0,-1,0));
     topWall.mat=makeLight(vec3(1,1,1),5.*extra4);
 
 
     //----------- THE FRONT -------------------------
-    orientation.pos=vec3(0,0,-12);
-    orientation.dir=vec3(0,0,1);
-    frontWall.orientation=orientation;
+        frontWall.frame=makeFrameNormal(vec3(0,0,-12), vec3(0,0,1));
     frontWall.mat=makeDielectric(color,0.0,roughness);
 
     //----------- THE BACK -------------------------
-    orientation.pos=vec3(0,0,30);
-    orientation.dir=vec3(0,0,-1);
-    backWall.orientation=orientation;
+        backWall.frame=makeFrameNormal(vec3(0,0,30), vec3(0,0,-1));
     backWall.mat=makeDielectric(color,0.0,roughness);
 
 
     //----------- THE LEFT -------------------------
-    orientation.pos=vec3(-20,0,0);
-    orientation.dir=vec3(1,0,0);
-    leftWall.orientation=orientation;
+        leftWall.frame=makeFrameNormal(vec3(-20,0,0), vec3(1,0,0));
     leftWall.mat=makeDielectric(color,0.0,roughness);
     leftWall.mat.specularChance=0.5;
 
 
     //----------- THE RIGHT -------------------------
-    orientation.pos=vec3(6.5,0,0);
-    orientation.dir=vec3(-1,0,0);
-    rightWall.orientation=orientation;
+        rightWall.frame=makeFrameNormal(vec3(6.5,0,0), vec3(-1,0,0));
     rightWall.mat=makeDielectric(color,0.0,roughness);
 
 }
