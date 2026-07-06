@@ -8,24 +8,60 @@ Convention: `vec3` argument = local coordinates, `Vector` argument = world ray s
 Verification tool: `node scripts/render-test.mjs <scene...>` (headless Chrome screenshots
 into `render-tests/`).
 
-## Phase 3 — scene authoring consolidation (next up)
+Phases 3 and 4 were originally separate; discussion (July 2026) merged them — the
+"named scene params" and the "uniform descriptor table" are the same object. The full
+design is written up in **`docs/gui-design.md`**; the summary follows. Pilot scene =
+`sphere`.
 
-- **Shared `createScene()` entry point**: all 35 `example/*/main.js` files are identical
-  copies. Replace with one engine-side entry (`js/createScene.js` or similar) so a scene
-  folder is just its three `src/` files; `main.js` shrinks to a few lines or disappears.
-- **Per-scene sky texture**: the environment map is hardcoded to `/assets/office.jpg` in
-  `js/shaderData/buildTraceShader.js`. Make it a `settings.js` entry.
-- **Named scene parameters**: replace the anonymous `extra`/`extra2`/`extra3`/`extra4`
-  sliders with named params declared in settings (`{name, label, min, max, value}`),
-  generating both the lil-gui controls and the GLSL uniforms. Scenes reference them by
-  name in GLSL.
+## Phase 3/4 — the knob list (unified; next up)
 
-## Phase 4 — single uniform descriptor table
+Every tunable control becomes one plain data object — a **knob**:
+`{name, label, type, min, max, step, value, group}`, with `type` ∈
+`float | bool | color(vec3) | vec2 | vec3`. One **generator** turns a list of knobs into
+the four things now hand-synced across five files: GLSL `uniform` decls, three.js uniform
+objects, lil-gui controls (each wired `onChange → updateUniforms + reset`), and the
+`settings.js` serialization on Download. The knob list is assembled from three sources:
 
-The camera/render parameter list is hand-synced across five places: `uniforms.glsl`,
-`buildTraceShader.js`, `UI.params`, `UI.printParams`, and every scene's `settings.js`.
-One descriptor table should generate: the GLSL uniform declarations, the three.js uniform
-objects, the GUI controls, and the settings download. Builds on Phase 3's machinery.
+- **camera** knobs (`fov`, `aperture`, `focalLength`, `exposure`, `focusHelp`) — engine-owned
+  default list, values overridden per scene from `settings`. (`maxBounces`, `group:'render'`,
+  already promoted to a uniform in commit 43e5e71 as the proof-of-concept.)
+- **scratch** knobs (`scratch1..4`, renamed from `extra1..4`) — engine-owned, always present.
+  These are a deliberate *live-tweak scratchpad*, NOT latent scene params: four generic,
+  always-there dials the user rewires constantly while iterating. Kept, not replaced.
+- **named** params — the scene's optional `settings.params`. Populated by *promotion*: tune
+  on scratch, and when a value is a keeper, graduate it into a named param (rename in GLSL,
+  move one line into settings). Scene tab starts scratch-only and accretes meaning.
+
+Riding the same settings pass:
+- **Shared `createScene()` entry point**: the 35 `example/*/main.js` are all identical
+  (only `cubic-portrait`/`cubic-landscape` differ — a custom aspect ratio). One engine-side
+  entry; a scene folder becomes just its `src/` files. The aspect override moves into
+  `settings` (a Render control), so those two scenes stop being special.
+- **Per-scene sky texture**: hardcoded `/assets/office.jpg` in `buildTraceShader.js` →
+  `settings` entry.
+
+Name-collision note: single letters (`a b c d`) are UNSAFE as global scratch uniforms —
+they shadow locals everywhere (`d`=829, `a`=712 uses across the GLSL). Multi-char names
+(`scratch1`, `extra1`) are collision-free; keep them.
+
+## Phase 5 — custom tabbed GUI (later; a pure renderer swap)
+
+The knob list is the seam: a custom GUI is just a different *renderer* of the same list, so
+this decouples fully from the refactor above and changes no scene. Replace lil-gui with a
+custom vanilla-JS tabbed panel (no framework — stays consistent with the three.js/vanilla
+stack). A knob's `group` field routes it to a tab; each tab = its knob-group render plus
+optional hand-written action widgets. Tabs:
+
+- **Scene** — named params + scratch (knobs only)
+- **Camera** — lens knobs + pose readout / reset
+- **Render** — image geometry + quality: resolution, aspect ratio, preview, `maxBounces`
+  (mix of knobs and engine-action widgets)
+- **Export** — Save Image, Download Settings, autosave, and the whole HD-tile feature
+  (kept intact — a coupled "emit a final file" workflow)
+- **Help** — keybinding map + stats (the WASD/QE/arrow bindings are invisible today)
+
+Litmus that assigns Render vs Export: *does it change the picture you're looking at* (Render)
+*or produce a file* (Export). HD tiling is file-producing → Export, whole.
 
 ## Deferred / smaller items
 
