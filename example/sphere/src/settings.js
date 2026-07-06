@@ -24,4 +24,12 @@ let location = {
 
 export {location};
 
-export default {uiParams: uiParams, location:location};
+
+//named scene parameters (knobs): each generates a GLSL uniform, a GUI
+//slider, and a line in the downloaded settings. Referenced by name in
+//objects.glsl / environment.glsl.
+export const params = [
+    { name: 'ior', label: 'Index of Refraction', min: 1.0, max: 2.5, step: 0.001, value: 1.5 },
+];
+
+export default {uiParams: uiParams, location:location, params:params};

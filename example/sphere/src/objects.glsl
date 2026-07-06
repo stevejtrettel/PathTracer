@@ -14,7 +14,7 @@ void buildObjects(){
     sphere.frame=makeFrame(vec3(0,1.2,0));
     sphere.radius=2.;
 
-    sphere.mat=makeGlass(greenGlass,1.5,0.95);
+    sphere.mat=makeGlass(greenGlass,ior,0.95);
 
 //    sphere.mat.refractionChance=0.;
 //    sphere.mat.subSurface=true;

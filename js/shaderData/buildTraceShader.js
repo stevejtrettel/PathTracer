@@ -10,6 +10,8 @@ const skyTex = new TextureLoader().load('/assets/office.jpg');
 import setupShaderChunk from "../../glsl/tracer/setupShader.glsl"
 import traceShaderChunk from "../../glsl/tracer/traceShader.glsl"
 
+import {knobUniformDecls, knobUniforms} from "./knobs.js";
+
 
 let buildTraceShader= function(sceneData, settings){
 
@@ -18,7 +20,12 @@ let buildTraceShader= function(sceneData, settings){
         sceneShaderChunk = sceneShaderChunk.concat(sceneData[key]);
     }
 
-    let tracerShader = setupShaderChunk.concat(sceneShaderChunk).concat(traceShaderChunk);
+    //named scene parameters (knobs) declared in settings.js: generate their
+    //GLSL uniform declarations and inject them just before the scene code.
+    let sceneParams = settings.params ?? [];
+    let paramDecls = `\n//--- scene params ---\n` + knobUniformDecls(sceneParams) + `\n`;
+
+    let tracerShader = setupShaderChunk.concat(paramDecls).concat(sceneShaderChunk).concat(traceShaderChunk);
 
     let location = settings.location;
     let uiParams = settings.uiParams;
@@ -100,6 +107,9 @@ let buildTraceShader= function(sceneData, settings){
         }
 
     };
+
+    //add a uniform for each named scene parameter
+    Object.assign(tracerUniforms, knobUniforms(sceneParams));
 
 
     return {

@@ -1,9 +1,13 @@
 import {GUI} from "three/addons/libs/lil-gui.module.min";
+import {addKnobControls, serializeKnobs} from "./shaderData/knobs.js";
 
 
 class UI extends GUI{
     constructor(pathtracer) {
         super();
+
+        //named scene parameters (knobs) declared in the scene's settings.js
+        const sceneParams = pathtracer.settings.params ?? [];
 
         this.params = {
             aperture: pathtracer.settings.uiParams.aperture,
@@ -47,7 +51,13 @@ class UI extends GUI{
                 contents += `\n\n\n`;
                 contents += pathtracer.printLocation();
                 contents += `\n\n`;
-                contents += `export default {uiParams: uiParams, location:location};`
+                if(sceneParams.length){
+                    contents += serializeKnobs(sceneParams, this.params);
+                    contents += `\n\n`;
+                    contents += `export default {uiParams: uiParams, location:location, params:params};`
+                } else {
+                    contents += `export default {uiParams: uiParams, location:location};`
+                }
 
                 const file = new File([contents], `settingsNew.js`, {
                     type: 'javascript',
@@ -139,6 +149,12 @@ class UI extends GUI{
             pathtracer.tracer.updateUniforms({extra4:value});
             pathtracer.reset();
         });
+
+        //generated controls for the scene's named parameters
+        if(sceneParams.length){
+            const scene = this.addFolder('Scene');
+            addKnobControls(scene, sceneParams, this.params, pathtracer);
+        }
 
         ren.add(this.params, 'maxBounces',1,100,1).name('Max Bounces').onChange(function(value){
             pathtracer.tracer.updateUniforms({maxBounces:value});
