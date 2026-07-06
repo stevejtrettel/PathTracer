@@ -8,16 +8,16 @@ light paths, accumulated frame-by-frame in a full-screen shader.
 
 ```
 npm install
-npm run dev
+npm run dev <scene-name>        # e.g.  npm run dev sphere
 ```
 
-Vite serves `index.html`, which loads **one scene** via its script tag:
+Run `npm run dev` with no argument to list the available scenes.
+`npm run build <scene-name>` builds a scene into `dist/<scene-name>/`.
 
-```html
-<script type='module' src='./example/<scene-name>/main.js'></script>
-```
-
-To switch scenes, edit that line to point at a different folder in `example/`.
+Under the hood (`scripts/run-example.mjs`), the script rewrites the single
+script tag in `index.html` to point at `example/<scene-name>/main.js`, then
+launches vite — so `index.html` always reflects the last scene you ran, and
+editing the tag by hand still works too.
 
 ## Architecture
 
