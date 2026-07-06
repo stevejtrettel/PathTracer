@@ -18,109 +18,62 @@ struct BottleLiquid{
 
 
 
+//set the local data at a hit: either on the glass surface or the free
+//liquid surface, each an interface between two of {air, cup, drink}.
+//uses the standard setMaterialInterface(current, neighbor, dominant),
+//then overrides roughness with the dominant material's (the helper
+//takes it from the neighbor, which would zero it against air).
 void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout localData dat,BottleLiquid cocktail){
 
     float eps=2.*EPSILON;
     float drink=max(drinkSide,drinkTop);
+    Material airMat = air(vec3(0.));
 
-    dat.renderMaterial=true;
-
-    //------------------------------------------------
     if(abs(cup)<eps){
-        //if we hit the cup (the main option)
-        //the normal will be this or its negation
-        dat.normal=normalVec(tv,cocktail.glass);
+        //we hit the glass surface
+        Vector normal=normalVec(tv,cocktail.glass);
 
-        //whether we are in the drink or not, will use the glass as the interacting material
-        dat.surfDiffuse=cocktail.cup.diffuseColor;
-        dat.surfSpecular=cocktail.cup.specularColor;
-        dat.surfEmit=cocktail.cup.surfaceEmit;
-        dat.surfRoughness=cocktail.cup.roughness;
-
-        dat.probSpecular=cocktail.cup.specularChance;
-        dat.probRefract=cocktail.cup.refractionChance;
-        dat.probDiffuse=1.-dat.probRefract-dat.probSpecular;
-
-        //if we hit the cup from inside or outside determines direction of normal
         if(cup>0.){
-            //we hit the cup from outside
-            //the normal stays the same
-            //but did we hit it near the drink?
+            //hit from outside the glass
+            dat.normal=normal;
             if(abs(drink)>eps||drinkTop>0.){
-                //we are far from drink
-                //dat.materialInterface=false;
-                dat.IOR=1./cocktail.cup.IOR;
-                dat.reflectAbsorb=vec3(0.);
-                dat.refractAbsorb=cocktail.cup.absorbColor;
+                //far from the drink: air -> cup
+                setMaterialInterface(dat, airMat, cocktail.cup, cocktail.cup);
             }
             else{
-                //we are inside the drink
-                //dat.materialInterface=true;
-                dat.IOR=cocktail.drink.IOR/cocktail.cup.IOR;
-                dat.reflectAbsorb=cocktail.drink.absorbColor;
-                dat.refractAbsorb=cocktail.cup.absorbColor;
+                //against the drink: drink -> cup
+                setMaterialInterface(dat, cocktail.drink, cocktail.cup, cocktail.cup);
             }
-
         }
         else{
-            //we hit the cup from inside the glass
-            //normal gets reversed
-            dat.normal=negate(dat.normal);
-            //again, did we hit it near the drink?
+            //hit from inside the glass wall
+            dat.normal=negate(normal);
             if(abs(drink)>eps){
-                //we are far from the drink
-                //dat.materialInterface=false;
-                dat.IOR=cocktail.cup.IOR/1.;
-                dat.reflectAbsorb=cocktail.cup.absorbColor;
-                dat.refractAbsorb=vec3(0.);
+                //far from the drink: cup -> air
+                setMaterialInterface(dat, cocktail.cup, airMat, cocktail.cup);
             }
             else{
-                //we are entering the drink
-                //dat.materialInterface=true;
-                dat.IOR=cocktail.cup.IOR/cocktail.drink.IOR;
-                dat.reflectAbsorb=cocktail.cup.absorbColor;
-                dat.refractAbsorb=cocktail.drink.absorbColor;
+                //entering the drink: cup -> drink
+                setMaterialInterface(dat, cocktail.cup, cocktail.drink, cocktail.cup);
             }
         }
-
+        dat.surfRoughness=cocktail.cup.roughness;
     }
-    //------------------------------------------------
 
-
-    //------------------------------------------------
     else{
-        //if we didn't hit the cup, we hit the liquid's surface
-        dat.surfDiffuse=cocktail.drink.diffuseColor;
-        dat.surfSpecular=cocktail.drink.specularColor;
-        dat.surfEmit=cocktail.drink.surfaceEmit;
-        dat.surfRoughness=cocktail.drink.roughness;
-
-        dat.probSpecular=cocktail.drink.specularChance;
-        dat.probRefract=cocktail.drink.refractionChance;
-        dat.probDiffuse=1.-dat.probRefract-dat.probSpecular;
-
-        //upward normal
-        dat.normal=Vector(tv.pos,vec3(0,1,0));
-        //dat.materialInterface=false;
-
-        //only two options: above or below water line:
+        //we hit the free surface of the liquid (world-horizontal)
         if(drinkTop>0.){
-            //above the water line
-            dat.IOR=1./cocktail.drink.IOR;
-            dat.reflectAbsorb=vec3(0.);
-            dat.refractAbsorb=cocktail.drink.absorbColor;
+            //from above: air -> drink
+            dat.normal=Vector(tv.pos,vec3(0,1,0));
+            setMaterialInterface(dat, airMat, cocktail.drink, cocktail.drink);
         }
         else{
-            //below the water line
-            //reverse the normal
-            dat.normal=negate(dat.normal);
-            dat.IOR=cocktail.drink.IOR/1.;
-            dat.reflectAbsorb=cocktail.drink.absorbColor;
-            dat.refractAbsorb=vec3(0.);
+            //from below: drink -> air
+            dat.normal=Vector(tv.pos,vec3(0,-1,0));
+            setMaterialInterface(dat, cocktail.drink, airMat, cocktail.drink);
         }
-
+        dat.surfRoughness=cocktail.drink.roughness;
     }
-    //------------------------------------------------
 }
 
 
@@ -148,9 +101,6 @@ float sdf(Vector tv, BottleLiquid gin){
 
     //distance to drink is intersection of inside dist and this top
     float drink=max(drinkSide,drinkTop);
-
-    //make the total distance:
-    float dist=min(abs(cup),abs(drink));
 
     return min(cup,drink);
 }
