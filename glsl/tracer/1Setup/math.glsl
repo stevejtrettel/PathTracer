@@ -91,11 +91,6 @@ mat3 rotateZto(vec3 targetNormal) {
 }
 
 
-//inverse of the above: rotate this vector to Z
-mat3 rotateToZ(vec3 targetNormal){
-    mat3 rot = rotateZto(targetNormal);
-    return inverse(rot);
-}
 
 mat3 rotateAboutZ(float theta){
     float c = cos(theta);
