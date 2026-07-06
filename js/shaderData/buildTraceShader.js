@@ -71,6 +71,9 @@ let buildTraceShader= function(sceneData, settings){
         fov: {
             value: uiParams.fov
         },
+        maxBounces: {
+            value: uiParams.maxBounces ?? 50
+        },
         extra: {
             value: uiParams.extra
         },

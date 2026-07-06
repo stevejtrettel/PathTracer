@@ -12,6 +12,8 @@ class UI extends GUI{
             focusHelp:false,
             fov: pathtracer.settings.uiParams.fov,
 
+            maxBounces: pathtracer.settings.uiParams.maxBounces ?? 50,
+
             extra: pathtracer.settings.uiParams.extra,
             extra2: pathtracer.settings.uiParams.extra2,
             extra3: pathtracer.settings.uiParams.extra3,
@@ -81,6 +83,7 @@ class UI extends GUI{
                 str += `exposure: ${this.params.exposure},\n`;
                 str += `focusHelp: ${this.params.focusHelp},\n`;
                 str += `fov: ${this.params.fov},\n`;
+                str += `maxBounces: ${this.params.maxBounces},\n`;
                 str += `extra: ${this.params.extra},\n`;
                 str += `extra2: ${this.params.extra2},\n`;
                 str += `extra3: ${this.params.extra3},\n`;
@@ -134,6 +137,11 @@ class UI extends GUI{
         });
         params.add(this.params, 'extra4',0,1,0.001).onChange(function(value){
             pathtracer.tracer.updateUniforms({extra4:value});
+            pathtracer.reset();
+        });
+
+        ren.add(this.params, 'maxBounces',1,100,1).name('Max Bounces').onChange(function(value){
+            pathtracer.tracer.updateUniforms({maxBounces:value});
             pathtracer.reset();
         });
 

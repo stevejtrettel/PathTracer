@@ -19,6 +19,8 @@ uniform float extra2;
 uniform float extra3;
 uniform float extra4;
 
+uniform int maxBounces;
+
 uniform bool renderPanel;
 uniform float numPanels;
 uniform float panelToRender;
@@ -36,7 +38,6 @@ float EPSILON=0.001;
 float AT_THRESH=0.002;
 int maxMarchSteps=2000;
 float maxDist=100.;
-int maxBounces=50;
 
 //throwaway sink for unused out-parameters (see shapes/bottle.glsl etc)
 float trashFloat;
