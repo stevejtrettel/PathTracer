@@ -11,8 +11,8 @@ struct Polytope4D{
 //these are set per shape (but have default values in the make functions)
     float vertexRad;
     float edgeRad;
-    mat3 rot;
-    vec3 center;
+    mat3 rot;    //internal rotation of the 3-sphere (acts on z4.xyw), NOT 3D placement
+    Frame frame;
     float size;
     Material edgeMat;
     Material vertexMat;
@@ -65,7 +65,7 @@ void setPolytope4D(int Type, vec4 coords, inout Polytope4D poly ){
     poly.vertexRad = 0.06;
     poly.edgeRad = 0.03;
 
-    poly.center = vec3(0);
+    poly.frame = IDENTITY_FRAME;
     poly.size = 1.;
     poly.rot = mat3(1,0,0,0,1,0,0,0,1);
 

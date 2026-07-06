@@ -2,20 +2,20 @@
 //The APOLLONIAN GASKET sdf
 //-------------------------------------------------
 
-//the data of a gasket is its center and radius
+//the data of a gasket is its frame and radius
 struct Gasket{
-    vec3 center;
+    Frame frame;
     float radius;
     Material mat;
 };
 
 
-//the point-level sdf
+//the local-frame sdf
 //NOTE: the fractal's shape is coupled to the global uniform `extra`
 //(the "extra" slider in the UI shifts the fold offset each iteration)
+//NOTE: the radius multiply is a shape parameter (inversion radius), not placement
 float sdf( vec3 p, Gasket gasket ){
 
-    p-=gasket.center;
     p=gasket.radius*p;
 
     p /= dot(p,p);
@@ -41,6 +41,17 @@ float sdf( vec3 p, Gasket gasket ){
 }
 
 
+//initObject from the standard interface
+OBJECT_INIT(Gasket)
+
+
+//hand-written Vector-level sdf: the standard lift of the local sdf
+//(kept by hand because at() below is custom)
+float sdf( Vector tv, Gasket gasket ){
+    return gasket.frame.scale * sdf( toLocal(gasket.frame, tv.pos), gasket );
+}
+
+
 //overload of location booleans:
 bool at( Vector tv, Gasket gasket){
     //the custom trace() below uses a distance-proportional precision (0.001*t),
@@ -50,25 +61,20 @@ bool at( Vector tv, Gasket gasket){
 }
 
 bool inside( Vector tv, Gasket gasket ){
-    float d = sdf( tv.pos, gasket );
+    float d = sdf( tv, gasket );
     return (d<0.);
 }
 
 
-//overload of sdf for a gasket
-float sdf( Vector tv, Gasket gasket ){
-
-    //distance to closest point on fractal
-    return sdf(tv.pos, gasket);
-
-}
-
-
 //overload of trace for a gasket
-//sphere-traces with precision proportional to distance traveled
+//sphere-traces with precision proportional to distance traveled;
+//marches in the gasket's local frame (the local sdf lives there):
+//toLocal keeps the direction unit length, so the local march parameter
+//converts to a world distance by multiplying by frame.scale
 float trace( Vector tv, Gasket gasket ){
-    vec3 ro=tv.pos;
-    vec3 rd=tv.dir;
+    Vector ltv = toLocal(gasket.frame, tv);
+    vec3 ro=ltv.pos;
+    vec3 rd=ltv.dir;
 
     float t = 0.001;
     for( int i=0; i<512; i++ )
@@ -78,10 +84,10 @@ float trace( Vector tv, Gasket gasket ){
         if( h<precis||t>maxDist) break;
         t += h;
     }
-    return t;
+    return t * gasket.frame.scale;
 }
 
 
 //the rest of the standard interface: normalVec, setData
-UNFRAMED_NORMAL_FD(Gasket)
+OBJECT_NORMAL_FD(Gasket)
 OBJECT_SETDATA(Gasket)

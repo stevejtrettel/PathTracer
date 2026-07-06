@@ -72,11 +72,9 @@ float sdf_polytope(vec3 pos,Polytope4D data) {
 //-------------------------------------------------
 
 
-//the point-level sdf
+//the local-frame sdf (size is a shape parameter, kept as before)
 float sdf( vec3 p, Polytope4D obj ){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
+    vec3 pos = p / obj.size;
 
     if(length(pos)>2.5){
         return length(pos)-2.4;
@@ -87,10 +85,9 @@ float sdf( vec3 p, Polytope4D obj ){
 
 
 //distance function that returns BOTH vertex and edge distance!
+//takes LOCAL coordinates, like the point-level sdf
 vec2 sdf_VE(vec3 p, Polytope4D obj){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
+    vec3 pos = p / obj.size;
 
     //do the R4 calculation
     float r=length(pos);
@@ -109,8 +106,9 @@ vec2 sdf_VE(vec3 p, Polytope4D obj){
 
 
 //at, inside, the Vector-level sdf, and normalVec from the standard interface
-UNFRAMED_LOCATORS(Polytope4D)
-UNFRAMED_NORMAL_FD(Polytope4D)
+//(no OBJECT_INIT: the type has edgeMat/vertexMat instead of a single mat field)
+OBJECT_LOCATORS(Polytope4D)
+OBJECT_NORMAL_FD(Polytope4D)
 
 
 //custom setData: the material depends on whether we hit a vertex or an edge
@@ -123,7 +121,8 @@ void setData( inout Path path, Polytope4D obj){
         bool side = inside(path.tv, obj);
 
         //set the material: this depends on if we hit the vertex or edge!
-        vec2 dVec = sdf_VE(path.tv.pos,obj);
+        //(sdf_VE takes local coordinates)
+        vec2 dVec = sdf_VE(toLocal(obj.frame, path.tv.pos),obj);
 
         if(abs(dVec.x)<abs(dVec.y)){
             //vertex dist smaller than edge dist

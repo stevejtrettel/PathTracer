@@ -17,7 +17,7 @@ void buildObjects(){
     float specularity, roughness;
 
     //----------- GASKET -------------------------
-    gasket.center=vec3(0,1.8,0);
+    gasket.frame=makeFrame(vec3(0,1.8,0));
     gasket.radius=1.;
 
     color= vec3(0.4,0.3,0.2);

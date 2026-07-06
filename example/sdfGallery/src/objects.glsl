@@ -13,7 +13,7 @@ void buildObjects(){
     vec3 pinkScatter = vec3(0.25,0.65,0.7);
     vec3 greenGlass = vec3(0.3,0.05,0.2);
 
-    obj.center=vec3(0,-0.4,0);
+    obj.frame=makeFrame(vec3(0,-0.4,0));
     //obj.mat=makeDielectric(vec3(0.6,0.55,0.5),0.2,0.5);
 
 

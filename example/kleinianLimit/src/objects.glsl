@@ -15,7 +15,7 @@ void buildObjects(){
     vec3 redAbsorb=vec3(0.2,1.,0.6);
     vec3 whiskey=vec3(0.18,0.43,0.62);
 
-    klein.center=vec3(0,0,-3);
+    klein.frame=makeFrame(vec3(0,0,-3));
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;

@@ -52,22 +52,20 @@ float sdf_menger(in vec3 p)
 //The OBJECT sdf
 //-------------------------------------------------
 
-//the data of a sphere is its center and radius
+//the data of a menger sponge is its frame and size
 struct MengerSponge{
-    vec3 center;
+    Frame frame;
     float size;
     Material mat;
 };
 
 
-//the point-level sdf
+//the local-frame sdf (size is a shape parameter, kept as before)
 float sdf( vec3 p, MengerSponge obj ){
-    //normalize position
-    vec3 pos = p - obj.center;
-    pos /= obj.size;
+    vec3 pos = p / obj.size;
     return sdf_menger(pos);
 }
 
-//the standard interface: at, inside, sdf, normalVec, setData
-UNFRAMED_OBJECT_API(MengerSponge)
+//the standard interface: initObject, at, inside, sdf, normalVec, setData
+OBJECT_API(MengerSponge)
 

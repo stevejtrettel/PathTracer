@@ -3,9 +3,9 @@
 //A KLEINIAN LIMIT SET
 //-------------------------------------------------
 
-//the data of a sphere is its center and radius
+//the data of a kleinian limit set is its frame
 struct Kleinian{
-    vec3 center;
+    Frame frame;
     Material mat;
 };
 
@@ -156,36 +156,36 @@ float  JosKleinian(vec3 z)
 
 
 
-//the point-level sdf
+//the local-frame sdf
 float sdf( vec3 p, Kleinian klein ){
-    //normalize position
-    vec3 pos = p - klein.center;
-    return SeahorseKleinian(pos);
+    return SeahorseKleinian(p);
 }
 
 
-//at, inside, and the Vector-level sdf
-UNFRAMED_LOCATORS(Kleinian)
+//initObject, at, inside, and the Vector-level sdf
+OBJECT_INIT(Kleinian)
+OBJECT_LOCATORS(Kleinian)
 
 //overload of normalVec: kept hand-written, uses a smaller epsilon (0.00001)
-//than the standard macro (0.0001)
+//than the standard macro (0.0001); finite differences of the local sdf,
+//gradient rotated back to world
 Vector normalVec( Vector tv, Kleinian klein ){
 
-    vec3 pos=tv.pos;
+    vec3 q = toLocal(klein.frame, tv.pos);
 
     const float ep = 0.00001;
     vec2 e = vec2(1.0,-1.0)*0.5773;
 
-    float vxyy=sdf( pos + e.xyy*ep, klein);
-    float vyyx=sdf( pos + e.yyx*ep, klein);
-    float vyxy=sdf( pos + e.yxy*ep, klein);
-    float vxxx=sdf( pos + e.xxx*ep, klein);
+    float vxyy=sdf( q + e.xyy*ep, klein);
+    float vyyx=sdf( q + e.yyx*ep, klein);
+    float vyxy=sdf( q + e.yxy*ep, klein);
+    float vxxx=sdf( q + e.xxx*ep, klein);
 
     vec3 dir=  e.xyy*vxyy + e.yyx*vyyx + e.yxy*vyxy + e.xxx*vxxx;
 
     dir=normalize(dir);
 
-    return Vector(tv.pos,dir);
+    return Vector(tv.pos, dirToWorld(klein.frame, dir));
 
 }
 
