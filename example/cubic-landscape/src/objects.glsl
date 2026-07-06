@@ -325,7 +325,12 @@ float sdf_Objects(Vector tv) {
     _cachedBBox = sceneBBox(surfPos);
     _cachedPos = surfPos;
 
-    if (_cachedBBox <= 0.0) {
+    // start real cubic evaluation a margin before the ray reaches the sphere,
+    // so the raw bbox distance never falls into the hit band (abs(sdf)<EPSILON)
+    // at the boundary and renders the bounding sphere as an opaque shell.
+    const float BBOX_MARGIN = 0.05;   // > EPSILON (0.001)
+
+    if (_cachedBBox <= BBOX_MARGIN) {
         vec3 scaled = surface.scale * surfPos;
         _cachedVal = cubicF(scaled);
         _cachedGrad = cubicGrad(scaled);
@@ -350,7 +355,8 @@ float sdf_Objects(Vector tv) {
 
     if (dist > 0.001) {
         float plateGroupDist = plateGroupBBox(plateLocalYaw);
-        if (plateGroupDist <= 0.0) {
+        // margin trick (see surface bbox): don't hit the group box as a surface
+        if (plateGroupDist <= BBOX_MARGIN) {
             dist = min(dist, sdf(plateTVYaw, plate));
             // Compose yaw + standUp for shapes that work in xz
             Vector rotTV = Vector(standUp(plateLocalYaw) + PLATE_POS, tv.dir);

@@ -154,8 +154,12 @@ float sdf_Objects(Vector tv) {
     _cachedBBox = sceneBBox(pos);
     _cachedPos = pos;
 
-    // Early exit: most march steps are far from the object.
-    if (_cachedBBox > 0.0) return _cachedBBox;
+    // Early exit: most march steps are far from the object. Switch to real
+    // cubic evaluation a margin BEFORE the sphere so the raw bbox distance never
+    // falls into the hit band (abs(sdf)<EPSILON) and renders the bounding sphere
+    // as an opaque shell instead of the surface inside.
+    const float BBOX_MARGIN = 0.05;   // > EPSILON (0.001)
+    if (_cachedBBox > BBOX_MARGIN) return _cachedBBox;
 
     // Inside bbox: evaluate cubic ONCE, cache for surface + ring
     vec3 scaled = surface.scale * pos;

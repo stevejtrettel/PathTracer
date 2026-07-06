@@ -275,7 +275,14 @@ float sdf_Objects(Vector tv) {
     _cachedBBox = sceneBBox(surfPos);   // sphere: rotation-invariant
     _cachedPos = surfPos;
 
-    if (_cachedBBox <= 0.0) {
+    // Bounding sphere is a march accelerator + clip region, NOT a visible
+    // surface. Start evaluating the real (clipped) cubic shell a margin BEFORE
+    // the ray reaches the sphere, so the raw bbox distance never drops into the
+    // hit band (abs(sdf) < EPSILON) at the boundary. Otherwise every ray hits
+    // the sphere and renders it as an opaque glass shell.
+    const float BBOX_MARGIN = 0.05;   // > EPSILON (0.001)
+
+    if (_cachedBBox <= BBOX_MARGIN) {
         vec3 scaled = surface.scale * surfPos;
         _cachedVal = cubicF(scaled);
         _cachedGrad = cubicGrad(scaled);
@@ -286,6 +293,8 @@ float sdf_Objects(Vector tv) {
         dist = min(dist, sdf_cached(exceptionalLines));
         dist = min(dist, sdf_cached(ring));
     } else {
+        // raw bbox here is always > BBOX_MARGIN > EPSILON, so it steps the ray
+        // toward the sphere without ever registering a hit at the boundary.
         dist = min(dist, _cachedBBox);
     }
 
@@ -293,7 +302,10 @@ float sdf_Objects(Vector tv) {
     if (dist > 0.001) {
         vec3 plateLocal = tv.pos - PLATE_POS;
         float plateGroupDist = plateGroupBBox(plateLocal);
-        if (plateGroupDist <= 0.0) {
+        // same margin trick as the surface bbox: evaluate the real plate objects
+        // a margin before the group box, so the box itself is never hit as a
+        // (glass) surface.
+        if (plateGroupDist <= BBOX_MARGIN) {
             dist = min(dist, sdf(tv, plate));
             dist = min(dist, sdf(tv, checkers));
             dist = min(dist, sdf(tv, plateLines));
