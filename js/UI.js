@@ -99,6 +99,8 @@ class UI{
             });
             pathtracer.reset();
         }));
+        //aim the camera here, then save the pose (settings.js) without leaving the tab
+        cam.append(button('Download Settings', () => this.downloadSettings(pathtracer, sceneParams)));
 
         //--- Render: quality + live image ---
         const ren = panel.tab('Render');
@@ -136,46 +138,51 @@ class UI{
         refreshSpp();
         ren.append(button('Reset', () => pathtracer.reset()));
 
-        //--- Export: files (images + settings), incl. the whole HD-tile feature ---
+        //--- Export: produce files ---
         const exp = panel.tab('Export');
 
         exp.append(button('Save Image',        () => pathtracer.saveImage()));
         exp.append(button('Download Settings', () => this.downloadSettings(pathtracer, sceneParams)));
 
+        //one unified autosave for the live view
         exp.append(section('Auto Save'));
         exp.append(toggle({label: 'Auto Save', value: false},
             (on) => { pathtracer.autoSave = on; }));
-        exp.append(numberField('Save At (spp)', pathtracer.autoSaveSPP,
+        exp.append(numberField('Every (spp)', pathtracer.autoSaveSPP,
             (v) => { pathtracer.autoSaveSPP = v; }));
 
-        exp.append(section('HD Tiles'));
-        //panel dimensions: resize keeps the other dimension (mirrors legacy pairing)
-        let panelW = window.innerWidth, panelH = window.innerHeight;
-        exp.append(numberField('Panel Width',  panelW,
-            (v) => { panelW = v; pathtracer.resize({x: panelW, y: panelH}); }));
-        exp.append(numberField('Panel Height', panelH,
-            (v) => { panelH = v; pathtracer.resize({x: panelW, y: panelH}); }));
-        exp.append(select('# Panels', [[1,1],[4,4],[9,9],[16,16],[25,25]], 1, (v) => {
-            pathtracer.tracer.updateUniforms({numPanels: v});
-            pathtracer.reset();
-        }));
-        exp.append(toggle({label: 'Auto Save Panels', value: false}, (on) => {
-            pathtracer.autoSavePanels = on;
-            pathtracer.tracer.updateUniforms({renderPanel: on, panelToRender: 0});
-            pathtracer.reset();
-        }));
-        exp.append(numberField('Save At (spp)', pathtracer.autoSavePanelsSPP,
-            (v) => { pathtracer.autoSavePanelsSPP = v; }));
+        //HD render: final size + samples -> auto-tiled square grid, each tile
+        //saved as it finishes. The tiling is worked out for you (planHD); Advanced
+        //lets you cap tile size or re-render a single tile after a crash.
+        exp.append(section('HD Render'));
+        let hd = { w: window.innerWidth * 2, h: window.innerHeight * 2, spp: 1000, maxTile: 4000, tile: 0 };
+        exp.append(numberField('Width',   hd.w,   (v) => hd.w = v));
+        exp.append(numberField('Height',  hd.h,   (v) => hd.h = v));
+        exp.append(numberField('Samples', hd.spp, (v) => hd.spp = v));
+        exp.append(button('Start HD Render',
+            () => pathtracer.startHDRender(hd.w, hd.h, hd.spp, {maxTile: hd.maxTile})));
 
-        exp.append(section('Individual Panel'));
-        exp.append(numberField('Current Panel', 0, (v) => {
-            pathtracer.tracer.updateUniforms({panelToRender: v});
-            pathtracer.reset();
-        }));
-        exp.append(toggle({label: 'Render This Panel', value: false}, (on) => {
-            pathtracer.tracer.updateUniforms({renderPanel: on});
-            pathtracer.reset();
-        }));
+        //live progress / plan readout
+        const hdInfo = el('div', 'gui-pose');
+        exp.append(hdInfo);
+        const refreshHd = () => {
+            if(pathtracer.hd && pathtracer.hd.active){
+                let pr = pathtracer.tracer.material.uniforms.panelToRender.value;
+                let fn = Math.floor(pathtracer.tracer.material.uniforms.frameNumber.value);
+                hdInfo.textContent = `tile ${pr + 1}/${pathtracer.hd.N} · ${fn}/${pathtracer.hd.spp} spp`;
+            } else {
+                let p = pathtracer.planHD(hd.w, hd.h, hd.maxTile);
+                hdInfo.textContent = `${p.root}×${p.root} grid · ${p.tileW}×${p.tileH} tiles`;
+            }
+            requestAnimationFrame(refreshHd);
+        };
+        refreshHd();
+
+        exp.append(section('Advanced'));
+        exp.append(numberField('Max Tile', hd.maxTile, (v) => hd.maxTile = v));
+        exp.append(numberField('Tile #',        hd.tile,    (v) => hd.tile = v));
+        exp.append(button('Re-render Tile',
+            () => pathtracer.startHDRender(hd.w, hd.h, hd.spp, {maxTile: hd.maxTile, tile: hd.tile})));
 
         //--- Help: static keybinding map + fps stats ---
         const help = panel.tab('Help');
