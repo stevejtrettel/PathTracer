@@ -100,24 +100,41 @@ class UI{
             pathtracer.reset();
         }));
 
-        //--- Render: quality + on-screen geometry ---
+        //--- Render: quality + live image ---
         const ren = panel.tab('Render');
-        for(let k of renKnobs) ren.append(control(k, wire(k)));
+        for(let k of renKnobs) ren.append(control(k, wire(k)));   // maxBounces
 
-        ren.append(button('Size to Screen',
-            () => pathtracer.resize({x: window.innerWidth, y: window.innerHeight})));
-
-        ren.append(toggle({label: 'Preview (pixelated)', value: false}, (on) => {
-            let adjust = on ? 1/4 : 1;
-            let res = {x: Math.floor(adjust * window.innerWidth), y: Math.floor(adjust * window.innerHeight)};
-            pathtracer.accumulate.setSize(res);
-            pathtracer.tracer.setSize(res);
+        //render scale: the tracer/accumulate resolution as a fraction of the
+        //window. Full = native (resizes everything); Half/Quarter render smaller
+        //and let the display stretch them up (pixelated but fast) — Quarter is
+        //the old "preview".
+        ren.append(select('Scale', [['Full', 1], ['Half', 0.5], ['Quarter', 0.25]], 1, (scale) => {
+            let w = window.innerWidth, h = window.innerHeight;
+            if(scale === 1){
+                pathtracer.resize({x: w, y: h});
+            } else {
+                let r = {x: Math.floor(scale * w), y: Math.floor(scale * h)};
+                pathtracer.tracer.setSize(r);
+                pathtracer.accumulate.setSize(r);
+            }
+            pathtracer.reset();
         }));
 
         //live aspect ratio: re-fit the canvas to a preset ratio. Preselects the
         //scene's settings.aspect (so cubic-portrait/landscape land on √2).
         ren.append(select('Aspect', ASPECTS, pathtracer.settings.aspect ?? null,
             (aspect) => pathtracer.resize(fitAspect(aspect))));
+
+        //samples accumulated (live) + restart accumulation
+        ren.append(section('Samples'));
+        const spp = el('div', 'gui-pose');
+        ren.append(spp);
+        const refreshSpp = () => {
+            spp.textContent = `${Math.floor(pathtracer.tracer.material.uniforms.frameNumber.value)} spp`;
+            requestAnimationFrame(refreshSpp);
+        };
+        refreshSpp();
+        ren.append(button('Reset', () => pathtracer.reset()));
 
         //--- Export: files (images + settings), incl. the whole HD-tile feature ---
         const exp = panel.tab('Export');
