@@ -208,3 +208,15 @@
 /* HD render lock: grey and disable the tab bodies so a stray touch can't
    restart accumulation. Tabs/hamburger stay clickable to watch progress. */
 .gui.rendering .gui-body { pointer-events: none; opacity: 0.45; }
+
+/* Stop Render: only visible while an HD render runs; sits outside the locked
+   bodies so it stays clickable. Styled as an abort (red). */
+.gui-stop {
+  display: none;
+  width: 100%;
+  margin: 8px 0 2px;
+  color: #ff9a9a;
+  border-color: rgba(255, 120, 120, 0.5);
+}
+.gui-stop:hover { background: rgba(255, 90, 90, 0.22); border-color: #ff7a7a; }
+.gui.rendering .gui-stop { display: block; }

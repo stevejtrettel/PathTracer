@@ -94,11 +94,7 @@ class PathTracer{
                     this.reset();
                 }
             } else {
-                this.hd.active = false;
-                this.rendering = false;
-                this.tracer.updateUniforms({renderPanel: false, panelToRender: 0});
-                this.resize(this.hdRestore);
-                this.reset();
+                this.stopHDRender();
             }
         }
     }
@@ -168,6 +164,18 @@ class PathTracer{
             stopAfter: (opts.tile != null) ? start + 1 : plan.N,
         };
         this.rendering = true;
+    }
+
+    //end an HD render: on natural completion (all tiles saved) OR user cancel.
+    //Clears the tile state, unlocks the controls, and restores the live view.
+    //Safe to call when idle (no-op).
+    stopHDRender(){
+        if(!this.rendering) return;
+        if(this.hd) this.hd.active = false;
+        this.rendering = false;
+        this.tracer.updateUniforms({renderPanel: false, panelToRender: 0});
+        this.resize(this.hdRestore);
+        this.reset();
     }
 
     resize(res){

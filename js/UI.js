@@ -78,6 +78,13 @@ class UI{
 
         const panel = new Panel();
 
+        //Stop button for an in-progress HD render. Lives on the panel itself
+        //(not a tab body), so the render lock — which greys the bodies — leaves
+        //it clickable. Hidden unless rendering (CSS keys off the .rendering class).
+        const stopBtn = button('Stop Render', () => pathtracer.stopHDRender());
+        stopBtn.classList.add('gui-stop');
+        panel.panel.append(stopBtn);
+
         //--- Scene: named params + scratch dials ---
         const scene = panel.tab('Scene');
         for(let k of [...sceneParams, ...scrKnobs]) scene.append(control(k, wire(k)));
