@@ -150,6 +150,27 @@
 }
 .gui-body > .gui-section:first-child { margin-top: 0; border-top: none; padding-top: 0; }
 
+/* collapsible section: clickable heading (styled like gui-section) + hidden body */
+.gui-collapse-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 2px;
+  padding-top: 8px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7d7d7d;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  user-select: none;
+}
+.gui-collapse-head:hover { color: #b6b6b6; }
+.gui-collapse-arrow { display: inline-block; font-size: 8px; transition: transform 0.15s; }
+.gui-collapse.open .gui-collapse-arrow { transform: rotate(90deg); }
+.gui-collapse-body { display: none; }
+.gui-collapse.open .gui-collapse-body { display: block; }
+
 /* full-width action buttons */
 .gui-btn {
   display: block;

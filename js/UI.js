@@ -1,5 +1,5 @@
 import Panel from "./gui/Panel.js";
-import {el, control, toggle, button, numberField, select, section} from "./gui/widgets.js";
+import {el, control, toggle, button, numberField, select, section, collapsible} from "./gui/widgets.js";
 import {serializeKnobs, serializeUiParams, withValues} from "./shaderData/knobs.js";
 import {cameraKnobs, renderKnobs, scratchKnobs, engineKnobs} from "./shaderData/engineKnobs.js";
 
@@ -151,18 +151,33 @@ class UI{
         exp.append(numberField('Every (spp)', pathtracer.autoSaveSPP,
             (v) => { pathtracer.autoSaveSPP = v; }));
 
-        //HD render: final size + samples -> auto-tiled square grid, each tile
-        //saved as it finishes. The tiling is worked out for you (planHD); Advanced
-        //lets you cap tile size or re-render a single tile after a crash.
+        //HD render: you set ONE dimension; the other is derived from the current
+        //view's aspect (so the output matches whatever you've framed on screen).
+        //planHD tiles it into a square grid, each tile saved as it finishes.
         exp.append(section('HD Render'));
-        let hd = { w: window.innerWidth * 2, h: window.innerHeight * 2, spp: 1000, maxTile: 4000, tile: 0 };
-        exp.append(numberField('Width',   hd.w,   (v) => hd.w = v));
-        exp.append(numberField('Height',  hd.h,   (v) => hd.h = v));
-        exp.append(numberField('Samples', hd.spp, (v) => hd.spp = v));
-        exp.append(button('Start HD Render',
-            () => pathtracer.startHDRender(hd.w, hd.h, hd.spp, {maxTile: hd.maxTile})));
+        let hd = { fix: 'w', size: window.innerWidth * 2, spp: 1000, maxTile: 4000, tile: 0 };
 
-        //live progress / plan readout
+        const fullSize = () => {
+            let h = pathtracer.canvas.height || 1;
+            let aspect = pathtracer.canvas.width / h;
+            return hd.fix === 'w'
+                ? { w: hd.size, h: Math.round(hd.size / aspect) }
+                : { w: Math.round(hd.size * aspect), h: hd.size };
+        };
+
+        const sizeRow = numberField('Width', hd.size, (v) => hd.size = v);
+        exp.append(select('Fix', [['Width', 'w'], ['Height', 'h']], 'w', (d) => {
+            hd.fix = d;
+            sizeRow.querySelector('.knob-label').textContent = (d === 'w') ? 'Width' : 'Height';
+        }));
+        exp.append(sizeRow);
+        exp.append(numberField('Samples', hd.spp, (v) => hd.spp = v));
+        exp.append(button('Start HD Render', () => {
+            let s = fullSize();
+            pathtracer.startHDRender(s.w, s.h, hd.spp, {maxTile: hd.maxTile});
+        }));
+
+        //live progress / plan readout (derived full size + tiling)
         const hdInfo = el('div', 'gui-pose');
         exp.append(hdInfo);
         const refreshHd = () => {
@@ -171,18 +186,22 @@ class UI{
                 let fn = Math.floor(pathtracer.tracer.material.uniforms.frameNumber.value);
                 hdInfo.textContent = `tile ${pr + 1}/${pathtracer.hd.N} · ${fn}/${pathtracer.hd.spp} spp`;
             } else {
-                let p = pathtracer.planHD(hd.w, hd.h, hd.maxTile);
-                hdInfo.textContent = `${p.root}×${p.root} grid · ${p.tileW}×${p.tileH} tiles`;
+                let s = fullSize();
+                let p = pathtracer.planHD(s.w, s.h, hd.maxTile);
+                hdInfo.textContent = `${s.w}×${s.h} · ${p.root}×${p.root} · ${p.tileW}×${p.tileH} tiles`;
             }
             requestAnimationFrame(refreshHd);
         };
         refreshHd();
 
-        exp.append(section('Advanced'));
-        exp.append(numberField('Max Tile', hd.maxTile, (v) => hd.maxTile = v));
-        exp.append(numberField('Tile #',        hd.tile,    (v) => hd.tile = v));
-        exp.append(button('Re-render Tile',
-            () => pathtracer.startHDRender(hd.w, hd.h, hd.spp, {maxTile: hd.maxTile, tile: hd.tile})));
+        const adv = collapsible('Advanced');
+        exp.append(adv);
+        adv.body.append(numberField('Max Tile', hd.maxTile, (v) => hd.maxTile = v));
+        adv.body.append(numberField('Tile #',   hd.tile,    (v) => hd.tile = v));
+        adv.body.append(button('Re-render Tile', () => {
+            let s = fullSize();
+            pathtracer.startHDRender(s.w, s.h, hd.spp, {maxTile: hd.maxTile, tile: hd.tile});
+        }));
 
         //--- Help: static keybinding map + fps stats ---
         const help = panel.tab('Help');

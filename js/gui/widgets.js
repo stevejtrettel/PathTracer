@@ -155,5 +155,18 @@ function section(title){
     return el('div', 'gui-section', title);
 }
 
+// a collapsible section: a clickable heading that shows/hides its body (closed
+// by default). Returns the wrapper element; append children to its `.body`.
+function collapsible(title){
+    let wrap = el('div', 'gui-collapse');
+    let head = el('div', 'gui-collapse-head');
+    head.append(el('span', 'gui-collapse-arrow', '▸'), el('span', null, title));
+    let body = el('div', 'gui-collapse-body');
+    head.addEventListener('click', () => wrap.classList.toggle('open'));
+    wrap.append(head, body);
+    wrap.body = body;
+    return wrap;
+}
 
-export {el, control, slider, toggle, button, numberField, select, section};
+
+export {el, control, slider, toggle, button, numberField, select, section, collapsible};
