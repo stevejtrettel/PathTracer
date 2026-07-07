@@ -120,6 +120,11 @@
   cursor: pointer;
 }
 
+.knob-range:focus { outline: none; }
+/* the selected (clicked) slider — its =/- nudge target */
+.knob:focus-within .knob-label { color: #6ea8fe; }
+.knob:focus-within .knob-range { background: rgba(110, 168, 254, 0.4); }
+
 .knob-check { margin-left: auto; accent-color: #6ea8fe; cursor: pointer; }
 
 .knob-num, .knob-select {

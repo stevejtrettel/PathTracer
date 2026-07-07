@@ -28,6 +28,30 @@ function fmt(v){
 }
 
 
+// keyboard nudge: click a slider to select it (focus), then =/+ and -/_ step it
+// by one step. Installed once; a no-op unless a slider is focused, so it never
+// interferes with the camera keys (which are all other keys).
+let selectedSlider = null;
+let nudgeInstalled = false;
+function installNudge(){
+    if(nudgeInstalled) return;
+    nudgeInstalled = true;
+    window.addEventListener('keydown', (e) => {
+        if(!selectedSlider) return;
+        let dir = (e.key === '=' || e.key === '+') ? 1
+                : (e.key === '-' || e.key === '_') ? -1 : 0;
+        if(!dir) return;
+        e.preventDefault();
+        let s = selectedSlider;
+        let step = parseFloat(s.step) || 1;
+        let v = parseFloat(s.value) + dir * step;
+        v = Math.min(parseFloat(s.max), Math.max(parseFloat(s.min), v));
+        s.value = v;
+        s.dispatchEvent(new Event('input'));   // reuse the slider's own handler
+    });
+}
+
+
 // float/int knob:  [ label · track+dot · value ]
 function slider(knob, onChange){
     let row = el('div', 'knob');
@@ -47,6 +71,11 @@ function slider(knob, onChange){
         readout.textContent = fmt(v);
         onChange(v);
     });
+
+    //select-on-focus so =/- can nudge this slider
+    installNudge();
+    input.addEventListener('focus', () => { selectedSlider = input; });
+    input.addEventListener('blur',  () => { if(selectedSlider === input) selectedSlider = null; });
 
     row.append(input, readout);
     return row;
