@@ -23,6 +23,11 @@ class PathTracer{
         //HD tile render state (null when idle); see startHDRender()
         this.hd = null;
 
+        //true while an HD render is in progress: locks the inputs that would
+        //restart accumulation (camera keys + GUI knobs) so a stray touch can't
+        //wreck a long tiled export. Live-view tweaking is unaffected.
+        this.rendering = false;
+
 
         this.canvas = this.renderer.domElement;
         document.body.appendChild(this.canvas);
@@ -42,7 +47,7 @@ class PathTracer{
         this.tracer.material.uniforms.frameNumber.value +=1.;
         this.accumulate.material.uniforms.frameNumber.value += 1.;
 
-        if(this.controls.isPressed()){
+        if(!this.rendering && this.controls.isPressed()){
             this.controls.update();
             this.tracer.updateUniforms({
                 facing: this.controls.facing,
@@ -90,6 +95,7 @@ class PathTracer{
                 }
             } else {
                 this.hd.active = false;
+                this.rendering = false;
                 this.tracer.updateUniforms({renderPanel: false, panelToRender: 0});
                 this.resize(this.hdRestore);
                 this.reset();
@@ -161,6 +167,7 @@ class PathTracer{
             spp:       spp,
             stopAfter: (opts.tile != null) ? start + 1 : plan.N,
         };
+        this.rendering = true;
     }
 
     resize(res){

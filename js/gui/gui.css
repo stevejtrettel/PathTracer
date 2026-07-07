@@ -204,3 +204,7 @@
   border-radius: 3px;
 }
 .gui-keys .desc { color: #b6b6b6; align-self: center; }
+
+/* HD render lock: grey and disable the tab bodies so a stray touch can't
+   restart accumulation. Tabs/hamburger stay clickable to watch progress. */
+.gui.rendering .gui-body { pointer-events: none; opacity: 0.45; }

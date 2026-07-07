@@ -198,6 +198,9 @@ class UI{
         const hdInfo = el('div', 'gui-pose');
         exp.append(hdInfo);
         const refreshHd = () => {
+            //lock the controls (grey the tab bodies) while an HD render runs, so
+            //touching a knob can't restart accumulation. Tabs/hamburger stay live.
+            panel.el.classList.toggle('rendering', pathtracer.rendering);
             if(pathtracer.hd && pathtracer.hd.active){
                 let pr = pathtracer.tracer.material.uniforms.panelToRender.value;
                 let fn = Math.floor(pathtracer.tracer.material.uniforms.frameNumber.value);
