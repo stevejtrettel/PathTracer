@@ -165,5 +165,17 @@ coupled workflow; splitting its geometry into Render isn't worth the cross-tab f
   into Help** (createScene hands `stats` to UI). `select` generalized to `[label,value]`
   pairs. Sky-color kept **file-driven** (rarely needs a live knob) — no `colorPicker` built.
 
-**Phase 5 COMPLETE (C1 + C2).** Deferred if ever wanted: a `colorPicker` widget for a
+- **C3** Render/Export simplification. **Render tab** = live image: `Scale` (Full/Half/
+  Quarter — folds the old Size-to-Screen button + Preview toggle; Quarter == old preview),
+  `Aspect`, `Max Bounces`, live `spp` readout + `Reset`. **Export tab** = files: `Save
+  Image`, `Download Settings` (also added to Camera), one unified `Auto Save every N spp`,
+  and **HD Render** — the old 7 tile controls (Panel W/H, # Panels, Auto Save Panels + SPP,
+  Current Panel, Render This Panel) collapse into Width/Height/Samples + Start. `planHD()`
+  picks a square √N grid so each tile is ≤ Max Tile (4000) and ≥ 1000 px where possible;
+  `startHDRender()` renders each tile to N spp and **saves it as it finishes** (crash-robust),
+  then restores the view. A readout shows the plan/progress. Advanced keeps a Max Tile
+  override + single-tile re-render (recovery). `exposure` stays a Camera control. Auto-stitch
+  was **considered and skipped** — per-tile save is the method (robust to memory / lost tiles).
+
+**Phase 5 COMPLETE (C1 + C2 + C3).** Deferred if ever wanted: a `colorPicker` widget for a
 live sky-color knob (Scene tab), and `xyPad` for vec2.
