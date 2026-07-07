@@ -43,6 +43,16 @@ function fitAspect(aspect){
 class UI{
     constructor(pathtracer, stats){
 
+        //X saves an image (S is the camera pitch-down key). Skip while typing in
+        //a field so 'x' still types normally.
+        window.addEventListener('keydown', (e) => {
+            if(e.key !== 'x' && e.key !== 'X') return;
+            let a = document.activeElement, tag = a && a.tagName;
+            if(tag === 'TEXTAREA' || tag === 'SELECT' ||
+               (tag === 'INPUT' && (a.type === 'number' || a.type === 'text'))) return;
+            pathtracer.saveImage();
+        });
+
         //engine-owned knobs, with per-scene values pulled from settings.uiParams
         const uiParams    = pathtracer.settings.uiParams;
         const camKnobs    = withValues(cameraKnobs,  uiParams);
@@ -208,7 +218,7 @@ class UI{
 
         help.append(section('Panel'));
         let panelKeys = el('div', 'gui-keys');
-        for(let [k, d] of [['H', 'show / hide panel'], ['= / −', 'nudge selected slider']]){
+        for(let [k, d] of [['H', 'show / hide panel'], ['X', 'save image'], ['= / −', 'nudge selected slider']]){
             panelKeys.append(el('span', 'key', k), el('span', 'desc', d));
         }
         help.append(panelKeys);
