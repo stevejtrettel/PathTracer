@@ -55,7 +55,8 @@ function installNudge(){
 // float/int knob:  [ label · track+dot · value ]
 function slider(knob, onChange){
     let row = el('div', 'knob');
-    row.append(el('label', 'knob-label', knob.label ?? knob.name));
+    let label = el('label', 'knob-label', knob.label ?? knob.name);
+    row.append(label);
 
     let input = el('input', 'knob-range');
     input.type  = 'range';
@@ -72,10 +73,16 @@ function slider(knob, onChange){
         onChange(v);
     });
 
-    //select-on-focus so =/- can nudge this slider
+    //select this slider for =/- nudging by clicking its NAME or VALUE (not the
+    //track — that would move the value). Focusing selects without changing
+    //anything; blur (clicking away) deselects.
     installNudge();
     input.addEventListener('focus', () => { selectedSlider = input; });
     input.addEventListener('blur',  () => { if(selectedSlider === input) selectedSlider = null; });
+    for(let target of [label, readout]){
+        target.style.cursor = 'pointer';
+        target.addEventListener('mousedown', (e) => { e.preventDefault(); input.focus(); });
+    }
 
     row.append(input, readout);
     return row;
