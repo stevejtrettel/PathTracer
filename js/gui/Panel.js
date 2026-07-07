@@ -40,6 +40,16 @@ class Panel{
         this.setOpen(saved.open ?? false);
 
         this.toggle.addEventListener('click', () => this.setOpen(!this.open));
+
+        //H shows/hides the panel — but not while typing in a field (so 'h' still
+        //types in number/text inputs). Camera keys use event.code so 'h' is free.
+        window.addEventListener('keydown', (e) => {
+            if(e.key !== 'h' && e.key !== 'H') return;
+            let a = document.activeElement, tag = a && a.tagName;
+            if(tag === 'TEXTAREA' || tag === 'SELECT' ||
+               (tag === 'INPUT' && (a.type === 'number' || a.type === 'text'))) return;
+            this.setOpen(!this.open);
+        });
     }
 
     //write the current open/active-tab state to localStorage

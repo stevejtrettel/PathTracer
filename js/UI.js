@@ -205,6 +205,14 @@ class UI{
 
         //--- Help: static keybinding map + fps stats ---
         const help = panel.tab('Help');
+
+        help.append(section('Panel'));
+        let panelKeys = el('div', 'gui-keys');
+        for(let [k, d] of [['H', 'show / hide panel'], ['= / −', 'nudge selected slider']]){
+            panelKeys.append(el('span', 'key', k), el('span', 'desc', d));
+        }
+        help.append(panelKeys);
+
         help.append(section('Camera Keys'));
         let keys = el('div', 'gui-keys');
         for(let [k, d] of KEYBINDINGS){
