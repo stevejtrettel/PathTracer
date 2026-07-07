@@ -10,6 +10,14 @@ import './gui.css';
 import {el} from './widgets.js';
 
 
+// persisted panel state (open + active tab index) across reloads
+const STORE = 'pt-gui';
+function loadState(){
+    try { return JSON.parse(localStorage.getItem(STORE)) || {}; }
+    catch { return {}; }
+}
+
+
 class Panel{
     constructor(){
         this.el     = el('div', 'gui');
@@ -22,14 +30,28 @@ class Panel{
         document.body.append(this.el);
 
         this.tabs = [];
+
+        //restore persisted state (open + which tab); tabs apply savedTab as they
+        //register (see tab()), open is applied now
+        let saved = loadState();
+        this.savedTab = saved.tab ?? 0;
+        this.activeTab = this.savedTab;
         this.open = false;
+        this.setOpen(saved.open ?? false);
 
         this.toggle.addEventListener('click', () => this.setOpen(!this.open));
+    }
+
+    //write the current open/active-tab state to localStorage
+    save(){
+        try { localStorage.setItem(STORE, JSON.stringify({open: this.open, tab: this.activeTab})); }
+        catch { /* storage unavailable — persistence is best-effort */ }
     }
 
     setOpen(open){
         this.open = open;
         this.el.classList.toggle('open', open);
+        this.save();
     }
 
     // register a tab; returns its (empty) body <div> for the caller to fill
@@ -42,7 +64,10 @@ class Panel{
         this.panel.append(body);
         this.tabs.push({body, btn});
 
-        if(this.tabs.length === 1) this.show(body, btn);   // first tab active
+        //default the first tab active, then let the persisted tab win once it registers
+        let index = this.tabs.length - 1;
+        if(index === 0) this.show(body, btn);
+        if(index === this.savedTab) this.show(body, btn);
         return body;
     }
 
@@ -52,6 +77,8 @@ class Panel{
             t.body.classList.toggle('active', active);
             t.btn.classList.toggle('active', active);
         }
+        this.activeTab = this.tabs.findIndex(t => t.body === body);
+        this.save();
     }
 }
 
