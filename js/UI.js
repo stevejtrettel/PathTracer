@@ -12,6 +12,7 @@ const KEYBINDINGS = [
     ['W / S',      'pitch up / down'],
     ['A / D',      'yaw left / right'],
     ['Q / E',      'roll'],
+    ['Shift',      'hold to move faster'],
 ];
 
 
@@ -84,6 +85,12 @@ class UI{
         //--- Camera: lens knobs + live pose readout + reset ---
         const cam = panel.tab('Camera');
         for(let k of camKnobs) cam.append(control(k, wire(k)));
+
+        //fly speed: a live multiplier on the keyboard move/turn steps. Drives
+        //engine state directly (not a knob/uniform), so it isn't serialized.
+        cam.append(section('Fly'));
+        cam.append(control({label: 'Speed', type: 'float', min: 0.1, max: 10, step: 0.1, value: pathtracer.controls.speed},
+            (v) => { pathtracer.controls.speed = v; }));
 
         cam.append(section('Pose'));
         const pose = el('div', 'gui-pose');

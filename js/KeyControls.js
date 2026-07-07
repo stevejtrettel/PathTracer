@@ -11,72 +11,34 @@ class KeyControls{
         this.needsUpdate = false;
 
         this.translateSpeed = 0.03;
-        this.rotateSpeed = 0.01;
+        this.rotateSpeed = 0.007;   //fixed turn rate; independent of fly speed
 
+        //fly speed: a live multiplier on the TRANSLATE step only (set from the
+        //Camera tab), plus a hold-Shift boost for coarse repositioning. Rotation
+        //is deliberately left out — turning is scale-independent, so it stays a
+        //fixed rate. speed=1 reproduces the original 0.03 move step.
+        this.speed = 1;
+        this.boostFactor = 5;
+        this.boosted = false;
+
+        //translate bindings: `action` is a unit direction (local camera frame)
         this.translate = {
-             right: {
-                 code: "ArrowRight",
-                 pressed: false,
-                 action: new Vector3(1,0,0).multiplyScalar(this.translateSpeed)
-             },
-             left: {
-                 code: "ArrowLeft",
-                 pressed: false,
-                 action: new Vector3(-1,0,0).multiplyScalar(this.translateSpeed),
-             },
-             up: {
-                 code: "Quote",
-                 pressed: false,
-                 action: new Vector3(0,1,0).multiplyScalar(this.translateSpeed)
-             },
-             down: {
-                 code: "Slash",
-                 pressed: false,
-                 action: new Vector3(0,-1,0).multiplyScalar(this.translateSpeed)
-             },
-             forward: {
-                 code: "ArrowUp",
-                 pressed: false,
-                 action: new Vector3(0,0,-1).multiplyScalar(this.translateSpeed)
-             },
-             backward: {
-                 code: "ArrowDown",
-                 pressed: false,
-                 action: new Vector3(0,0,1).multiplyScalar(this.translateSpeed)
-             }
+             right:    { code: "ArrowRight", pressed: false, action: new Vector3( 1, 0, 0) },
+             left:     { code: "ArrowLeft",  pressed: false, action: new Vector3(-1, 0, 0) },
+             up:       { code: "Quote",      pressed: false, action: new Vector3( 0, 1, 0) },
+             down:     { code: "Slash",      pressed: false, action: new Vector3( 0,-1, 0) },
+             forward:  { code: "ArrowUp",    pressed: false, action: new Vector3( 0, 0,-1) },
+             backward: { code: "ArrowDown",  pressed: false, action: new Vector3( 0, 0, 1) },
         };
 
+        //rotate bindings: `axis` is the local rotation axis (angle applied in update)
         this.rotate = {
-            right: {
-                code: "KeyD",
-                pressed: false,
-                action: new Matrix4().makeRotationAxis(new Vector3(0,-1,0), this.rotateSpeed)
-            },
-            left: {
-                code: "KeyA",
-                pressed: false,
-                action: new Matrix4().makeRotationAxis(new Vector3(0,1,0), this.rotateSpeed)
-            },
-            up: {
-                code: "KeyW",
-                pressed: false,
-                action: new Matrix4().makeRotationAxis(new Vector3(1,0,0), this.rotateSpeed)
-            },
-            down: {
-                code: "KeyS",
-                pressed: false,
-                action: new Matrix4().makeRotationAxis(new Vector3(-1,0,0), this.rotateSpeed)
-            },
-            clockwise: {
-                code: "KeyE",
-                pressed: false,
-                action: new Matrix4().makeRotationAxis(new Vector3(0,0,1), this.rotateSpeed)
-            },
-            counterlockwise: {
-                code: "KeyQ",
-                pressed: false,
-                action: new Matrix4().makeRotationAxis(new Vector3(0,0,-1), this.rotateSpeed)
-            },
+            right:           { code: "KeyD", pressed: false, axis: new Vector3(0,-1, 0) },
+            left:            { code: "KeyA", pressed: false, axis: new Vector3(0, 1, 0) },
+            up:              { code: "KeyW", pressed: false, axis: new Vector3(1, 0, 0) },
+            down:            { code: "KeyS", pressed: false, axis: new Vector3(-1,0, 0) },
+            clockwise:       { code: "KeyE", pressed: false, axis: new Vector3(0, 0, 1) },
+            counterlockwise: { code: "KeyQ", pressed: false, axis: new Vector3(0, 0,-1) },
         }
 
         //set the original position and facing from the settings file
@@ -90,6 +52,8 @@ class KeyControls{
     }
 
     down(event){
+
+        if(event.code == "ShiftLeft" || event.code == "ShiftRight") this.boosted = true;
 
         for(const dir in this.translate){
             if(this.translate[dir].code == event.code){
@@ -106,6 +70,8 @@ class KeyControls{
     }
 
     up(event){
+
+        if(event.code == "ShiftLeft" || event.code == "ShiftRight") this.boosted = false;
 
         for(const dir in this.translate){
             if(this.translate[dir].code == event.code){
@@ -132,9 +98,13 @@ class KeyControls{
 
     update(){
 
+        //fly speed scales translation only (× slider × Shift boost); rotation
+        //keeps its fixed rate so turning doesn't get faster with move speed
+        let mult = this.speed * (this.boosted ? this.boostFactor : 1);
+
         for(const dir in this.translate){
             if(this.translate[dir].pressed){
-                let newTrans = this.translate[dir].action.clone();
+                let newTrans = this.translate[dir].action.clone().multiplyScalar(this.translateSpeed * mult);
                 newTrans.applyMatrix3(this.facing)
                 this.position.add(newTrans);
             }
@@ -142,7 +112,8 @@ class KeyControls{
 
         for(const dir in this.rotate){
             if(this.rotate[dir].pressed){
-                this.facing.multiply(new Matrix3().setFromMatrix4(this.rotate[dir].action));
+                let rot = new Matrix4().makeRotationAxis(this.rotate[dir].axis, this.rotateSpeed);
+                this.facing.multiply(new Matrix3().setFromMatrix4(rot));
             }
         }
 
