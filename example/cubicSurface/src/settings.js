@@ -13,7 +13,9 @@ let uiParams = {
 export {uiParams};
 
 
-let position = [0, 2, -6];
+//effective camera = position + CAMERA_OFFSET(-2,0,6) = (0,1,11), looking -z
+//at the surface (IDENTITY_FRAME at the origin, radius ~2)
+let position = [2, 1, 5];
 
 let facing = [1, 0, 0, 0, 1, 0, 0, 0, 1];
 

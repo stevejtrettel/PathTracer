@@ -13,7 +13,9 @@ let uiParams = {
 export {uiParams};
 
 
-let position = [0, 5, -4];
+//x=2 so effective camera (position + CAMERA_OFFSET.x=-2) sits at x=0, centering
+//the plate diagram (which is at the origin) horizontally
+let position = [2, 5, -4];
 
 let facing = [1, 0, 0, 0, 0.6, 0.8, 0, -0.8, 0.6];
 

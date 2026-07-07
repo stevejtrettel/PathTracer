@@ -83,12 +83,15 @@ Litmus that assigns Render vs Export: *does it change the picture you're looking
   `Kleinian` (limit set, needs a safe ball), and migrate the cubic scenes' hand-rolled
   group bounds onto the feature (they share one cubicF eval across the group via caching, so
   that needs a group-level bound, not just per-object).
-- **cubicSurface / cubic-portrait still broken (separate from the bounding bug)**:
-  `cubicSurface` renders black — `settings.facing` is the identity at `position=[0,2,-6]`,
-  so the camera points away from the object at the origin (an unfinished WIP camera).
-  `cubic-portrait` renders dim/faint (glass fixed, but a lighting/exposure issue remains;
-  its camera IS aimed correctly). Both got the bounding fix; both need a real camera /
-  lighting pass to actually render.
+- **cubic-portrait still needs a camera aim**: renders near-black — the objects (a tall
+  x=0 stack: surface above plate on a pedestal) are mostly out of frame; lights are strong
+  (400+300) so it's framing, not brightness. Its `facing` needs re-aiming by eye — best done
+  interactively in the app (WASD + pose readout + Download Settings, all now in the GUI),
+  then paste the downloaded facing into settings.js. (FIXED July 2026: `cubicSurface` — its
+  camera pointed away from the origin; now `position=[2,1,5]` puts the effective camera at
+  (0,1,11) looking -z at the surface. `cubicPlane` — the diagram at x=0 rendered in the
+  corner because CAMERA_OFFSET.x=-2 shifts the effective camera; `position.x=2` recenters
+  it.)
 - **Dead `render_Environment` / `render_Objects` flags**: declared in every
   scene's environment.glsl / objects.glsl but never read — `trace_Scene` always
   traces both. Either wire them up (skip tracing when false) or delete them.
