@@ -74,10 +74,15 @@ Litmus that assigns Render vs Export: *does it change the picture you're looking
   distance) whenever the ray is outside, with `BOUND_MARGIN` (0.05, > EPSILON) keeping the
   raw bound out of the hit band. Default `bound()` = 10000 (effectively unbounded, no
   behavior change); a type opts into a tight bound via the `*_B` macros (`OBJECT_API_B`).
-  Baked so far: `Box` (`length(sides)+rounded`), `CubicSurface` (`3`). Follow-ups: give
-  `Variety` a bound (needs its scene-set bbox radius exposed as a field), and migrate the
-  cubic scenes' hand-rolled group bounds onto the feature (they share one cubicF eval
-  across the group via caching, so that needs a group-level bound, not just per-object).
+  Baked so far: `Box`, `CubicSurface`, and the whole variety/surface-in-a-shape family —
+  `SurfSphere`/`SurfBox`/`SurfCyl` (hard-clipped, exact bound) and `VarSphere`/`VarBox`/
+  `VarCyl` (smax-clipped, bound padded by `smoothing + thickness.y` so the soft edge isn't
+  clipped). These carry their bound as a struct field and run an expensive dual-number eval
+  *before* their internal bbox clamp, so bounding is a real cull. Follow-ups: `Surface`/
+  `Variety` (bounded by a scene-supplied bbox function, not a field — expose a radius),
+  `Kleinian` (limit set, needs a safe ball), and migrate the cubic scenes' hand-rolled
+  group bounds onto the feature (they share one cubicF eval across the group via caching, so
+  that needs a group-level bound, not just per-object).
 - **cubicSurface / cubic-portrait still broken (separate from the bounding bug)**:
   `cubicSurface` renders black — `settings.facing` is the identity at `position=[0,2,-6]`,
   so the camera points away from the object at the origin (an unfinished WIP camera).

@@ -67,5 +67,9 @@ float sdf( vec3 p, VarBox var ){
 
 
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(VarBox)
+//local bounding radius: box far corner, padded for the smax rounding and the
+//outward thickness so the soft edge is never clipped
+float bound( VarBox var ){ return length(var.box) + var.smoothing + var.thickness.y; }
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(VarBox)

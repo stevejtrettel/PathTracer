@@ -53,9 +53,12 @@ float sdf( vec3 p, SurfBox surf ){
 }
 
 
+//local bounding radius: the surface is hard-clipped to this box (far corner)
+float bound( SurfBox surf ){ return length(surf.box); }
+
 //the standard interface: initObject, at, inside, sdf, normalVec
 OBJECT_INIT(SurfBox)
-OBJECT_LOCATORS(SurfBox)
+OBJECT_LOCATORS_B(SurfBox)
 OBJECT_NORMAL_FD(SurfBox)
 
 //setData for a two sided surface

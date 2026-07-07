@@ -57,5 +57,9 @@ float sdf( vec3 p, VarSphere var ){
 
 
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(VarSphere)
+//local bounding radius: bounding sphere, padded for the smax rounding and the
+//outward thickness so the soft edge is never clipped
+float bound( VarSphere var ){ return var.radius + var.smoothing + var.thickness.y; }
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(VarSphere)

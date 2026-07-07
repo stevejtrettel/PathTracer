@@ -68,5 +68,9 @@ float sdf( vec3 p, VarCyl var ){
 
 
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(VarCyl)
+//local bounding radius: cylinder (rad,height) extent, padded for the smax
+//rounding and the outward thickness so the soft edge is never clipped
+float bound( VarCyl var ){ return length(var.cyl) + var.smoothing + var.thickness.y; }
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(VarCyl)

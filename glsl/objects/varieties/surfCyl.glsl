@@ -54,9 +54,12 @@ float sdf( vec3 p, SurfCyl surf ){
 }
 
 
+//local bounding radius: the surface is hard-clipped to this cylinder (rad,height)
+float bound( SurfCyl surf ){ return length(surf.cyl); }
+
 //the standard interface: initObject, at, inside, sdf, normalVec
 OBJECT_INIT(SurfCyl)
-OBJECT_LOCATORS(SurfCyl)
+OBJECT_LOCATORS_B(SurfCyl)
 OBJECT_NORMAL_FD(SurfCyl)
 
 //setData for a two sided surface
