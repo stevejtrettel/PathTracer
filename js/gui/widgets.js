@@ -104,12 +104,76 @@ function toggle(knob, onChange){
 }
 
 
-// the router: a knob's type -> its widget. Grows a case at a time
-// (colorPicker / xyPad arrive with C2), mirroring the switch in knobs.js.
+// color knob (vec3 in 0..1):  [ label · native color swatch ]
+function rgbToHex([r, g, b]){
+    let h = (n) => Math.round(Math.max(0, Math.min(1, n)) * 255).toString(16).padStart(2, '0');
+    return `#${h(r)}${h(g)}${h(b)}`;
+}
+function hexToRgb(hex){
+    return [parseInt(hex.slice(1, 3), 16) / 255,
+            parseInt(hex.slice(3, 5), 16) / 255,
+            parseInt(hex.slice(5, 7), 16) / 255];
+}
+function colorPicker(knob, onChange){
+    let row = el('div', 'knob');
+    row.append(el('label', 'knob-label', knob.label ?? knob.name));
+
+    let input = el('input', 'knob-color');
+    input.type  = 'color';
+    input.value = rgbToHex(knob.value);
+    input.addEventListener('input', () => onChange(hexToRgb(input.value)));
+
+    row.append(input);
+    return row;
+}
+
+
+// vec2 knob:  [ label · draggable 2D pad · value ]. Both axes share the knob's
+// min/max; the pad's y runs bottom(min)->top(max).
+function xyPad(knob, onChange){
+    let row = el('div', 'knob knob-xy');
+    row.append(el('label', 'knob-label', knob.label ?? knob.name));
+
+    let pad = el('div', 'knob-pad');
+    let dot = el('div', 'knob-pad-dot');
+    pad.append(dot);
+    let readout = el('span', 'knob-value');
+
+    let min = knob.min ?? 0, max = knob.max ?? 1, span = (max - min) || 1;
+    let val = [knob.value[0], knob.value[1]];
+
+    let place = () => {
+        dot.style.left = `${((val[0] - min) / span) * 100}%`;
+        dot.style.top  = `${(1 - (val[1] - min) / span) * 100}%`;
+        readout.textContent = `${fmt(val[0])}, ${fmt(val[1])}`;
+    };
+    let setFromEvent = (e) => {
+        let r = pad.getBoundingClientRect();
+        let fx = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+        let fy = Math.min(1, Math.max(0, (e.clientY - r.top)  / r.height));
+        val = [min + fx * span, min + (1 - fy) * span];
+        place();
+        onChange([val[0], val[1]]);
+    };
+
+    let dragging = false;
+    pad.addEventListener('mousedown', (e) => { dragging = true; setFromEvent(e); });
+    window.addEventListener('mousemove', (e) => { if(dragging) setFromEvent(e); });
+    window.addEventListener('mouseup',   ()  => { dragging = false; });
+
+    place();
+    row.append(pad, readout);
+    return row;
+}
+
+
+// the router: a knob's type -> its widget, mirroring the switch in knobs.js.
 function control(knob, onChange){
     switch(knob.type){
-        case 'bool': return toggle(knob, onChange);
-        default:     return slider(knob, onChange);   // float, int
+        case 'bool':  return toggle(knob, onChange);
+        case 'color': return colorPicker(knob, onChange);
+        case 'vec2':  return xyPad(knob, onChange);
+        default:      return slider(knob, onChange);   // float, int
     }
 }
 
@@ -176,4 +240,4 @@ function collapsible(title){
 }
 
 
-export {el, control, slider, toggle, button, numberField, select, section, collapsible};
+export {el, control, slider, toggle, colorPicker, xyPad, button, numberField, select, section, collapsible};

@@ -137,4 +137,4 @@ function serializeKnobs(knobs, values){
 }
 
 
-export {knobUniformDecls, knobUniforms, addKnobControls, serializeKnobs, withValues, serializeUiParams};
+export {knobUniformDecls, knobUniforms, addKnobControls, serializeKnobs, withValues, serializeUiParams, toUniformValue};

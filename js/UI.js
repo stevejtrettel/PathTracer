@@ -1,6 +1,6 @@
 import Panel from "./gui/Panel.js";
 import {el, control, toggle, button, numberField, select, section, collapsible} from "./gui/widgets.js";
-import {serializeKnobs, serializeUiParams, withValues} from "./shaderData/knobs.js";
+import {serializeKnobs, serializeUiParams, withValues, toUniformValue} from "./shaderData/knobs.js";
 import {cameraKnobs, renderKnobs, scratchKnobs, engineKnobs} from "./shaderData/engineKnobs.js";
 
 
@@ -71,8 +71,8 @@ class UI{
         //the one place that knows a knob drives a uniform. Injected into every
         //widget as its onChange; also records the value for serialization.
         const wire = (knob) => (value) => {
-            this.values[knob.name] = value;
-            pathtracer.tracer.updateUniforms({ [knob.name]: value });
+            this.values[knob.name] = value;   // stored as-is (array for color/vec2) for serialization
+            pathtracer.tracer.updateUniforms({ [knob.name]: toUniformValue(knob, value) });
             pathtracer.reset();
         };
 

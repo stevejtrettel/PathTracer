@@ -135,6 +135,40 @@
 
 .knob-check { margin-left: auto; accent-color: #6ea8fe; cursor: pointer; }
 
+/* color knob: native swatch */
+.knob-color {
+  margin-left: auto;
+  width: 40px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  background: none;
+  cursor: pointer;
+}
+
+/* vec2 knob: draggable 2D pad + moving dot */
+.knob-xy { align-items: flex-start; }
+.knob-pad {
+  position: relative;
+  flex: 0 0 auto;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+  cursor: crosshair;
+}
+.knob-pad-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: #6ea8fe;
+  pointer-events: none;
+}
+
 .knob-num, .knob-select {
   flex: 1;
   min-width: 0;
