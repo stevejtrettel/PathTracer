@@ -121,9 +121,17 @@
 }
 
 .knob-range:focus { outline: none; }
-/* the selected (clicked) slider — its =/- nudge target */
+/* the selected (clicked) slider — the =/- nudge target. A left accent bar +
+   row tint make the armed slider unmistakable. */
 .knob:focus-within .knob-label { color: #6ea8fe; }
 .knob:focus-within .knob-range { background: rgba(110, 168, 254, 0.4); }
+.knob-selected {
+  background: rgba(110, 168, 254, 0.14);
+  box-shadow: inset 3px 0 0 #6ea8fe;
+  border-radius: 3px;
+}
+.knob-selected .knob-label { color: #6ea8fe; }
+.knob-selected .knob-range { background: rgba(110, 168, 254, 0.5); }
 
 .knob-check { margin-left: auto; accent-color: #6ea8fe; cursor: pointer; }
 

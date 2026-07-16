@@ -125,6 +125,16 @@ class UI{
             });
             pathtracer.reset();
         }));
+        //copy just the position/facing block to the clipboard — paste it
+        //straight over the pose in the scene's settings.js (skips the download)
+        const copyBtn = button('Copy Pose', () => {
+            navigator.clipboard.writeText(pathtracer.printLocation()).then(
+                () => { copyBtn.textContent = 'Copied!';     setTimeout(() => copyBtn.textContent = 'Copy Pose', 1000); },
+                () => { copyBtn.textContent = 'Copy failed'; setTimeout(() => copyBtn.textContent = 'Copy Pose', 1000); },
+            );
+        });
+        cam.append(copyBtn);
+
         //aim the camera here, then save the pose (settings.js) without leaving the tab
         cam.append(button('Download Settings', () => this.downloadSettings(pathtracer, sceneParams)));
 

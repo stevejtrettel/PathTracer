@@ -77,8 +77,8 @@ function slider(knob, onChange){
     //track — that would move the value). Focusing selects without changing
     //anything; blur (clicking away) deselects.
     installNudge();
-    input.addEventListener('focus', () => { selectedSlider = input; });
-    input.addEventListener('blur',  () => { if(selectedSlider === input) selectedSlider = null; });
+    input.addEventListener('focus', () => { selectedSlider = input; row.classList.add('knob-selected'); });
+    input.addEventListener('blur',  () => { if(selectedSlider === input) selectedSlider = null; row.classList.remove('knob-selected'); });
     for(let target of [label, readout]){
         target.style.cursor = 'pointer';
         target.addEventListener('mousedown', (e) => { e.preventDefault(); input.focus(); });
