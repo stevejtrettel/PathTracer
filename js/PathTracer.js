@@ -1,4 +1,5 @@
-import {WebGLRenderer, Vector2} from "three";
+import {WebGLRenderer} from "three";
+import {Vector2} from "./math/index.js";
 
 import ComputeShader from "./ComputeShader.js";
 import KeyControls from "./KeyControls.js";

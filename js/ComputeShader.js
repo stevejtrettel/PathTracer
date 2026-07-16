@@ -10,8 +10,8 @@ import {
     ClampToEdgeWrapping,
     NearestFilter,
     WebGLRenderTarget,
-    Vector3,
 } from "three";
+import {Vector3} from "./math/index.js";
 
 
 const _geometry = new BufferGeometry();

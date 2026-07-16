@@ -1,4 +1,4 @@
-import {Vector3, Matrix3, Matrix4} from "three";
+import {Vector3, Matrix3, Matrix4} from "./math/index.js";
 
 
 //-------------------------------------------------

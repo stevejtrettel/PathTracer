@@ -1,4 +1,4 @@
-import {Vector3} from "three";
+import {Vector3} from "../math/index.js";
 
 import display from '../../glsl/display/display.glsl';
 

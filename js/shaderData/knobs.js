@@ -14,7 +14,7 @@
 //
 // type ∈ float | bool | color | vec2 | vec3  (color is a vec3 with a picker)
 
-import {Vector2, Vector3} from "three";
+import {Vector2, Vector3} from "../math/index.js";
 
 
 // GLSL uniform type per knob type

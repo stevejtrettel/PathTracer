@@ -2,7 +2,8 @@
 //Uniforms for the tracer
 //=============================================
 
-import {DataTexture, Matrix3, RGBAFormat, TextureLoader, Vector3} from "three";
+import {DataTexture, RGBAFormat, TextureLoader} from "three";
+import {Matrix3, Vector3} from "../math/index.js";
 
 import setupShaderChunk from "../../glsl/tracer/setupShader.glsl"
 import traceShaderChunk from "../../glsl/tracer/traceShader.glsl"
