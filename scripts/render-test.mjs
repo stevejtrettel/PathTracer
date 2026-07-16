@@ -46,7 +46,9 @@ for (const scene of scenes) {
   // capture stdout so we can read the ACTUAL port vite bound to — it picks
   // 5174+ when 5173 is taken (e.g. another project's dev server), and screenshotting
   // a hardcoded :5173 would then shoot the wrong app.
-  const server = spawn('node', ['scripts/run-example.mjs', 'dev', scene], {
+  // dev with no scene arg: serve the whole array without --open (headless), then
+  // screenshot the scene's own page below
+  const server = spawn('node', ['scripts/run-example.mjs', 'dev'], {
     cwd: root, stdio: ['ignore', 'pipe', 'pipe'], detached: true,
   });
   let out = '';
@@ -59,7 +61,7 @@ for (const scene of scenes) {
       if (m) port = m[1]; else await sleep(500);
     }
     if (!port) { console.error(`${scene}: dev server never reported a port`); continue; }
-    const url = `http://127.0.0.1:${port}/`;
+    const url = `http://127.0.0.1:${port}/scenes/${scene}/`;
     if (!(await waitForServer(url))) {
       console.error(`${scene}: dev server ${url} never came up`);
       continue;

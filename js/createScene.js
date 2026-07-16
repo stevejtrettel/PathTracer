@@ -1,3 +1,5 @@
+import "../style.css";
+
 import FpsMeter from "./FpsMeter.js";
 
 import PathTracer from "./PathTracer.js";

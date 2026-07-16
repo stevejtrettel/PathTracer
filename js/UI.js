@@ -307,10 +307,9 @@ class UI{
         return contents;
     }
 
-    //the current scene folder, read from the page's <script src=".../example/<scene>/main.js">
+    //the current scene folder, from the page URL (each scene is /scenes/<name>/)
     sceneName(){
-        let s = document.querySelector('script[src*="/example/"]');
-        let m = s && s.getAttribute('src').match(/example\/([^/]+)\//);
+        let m = window.location.pathname.match(/\/scenes\/([^/]+)\//);
         return m ? m[1] : null;
     }
 
