@@ -98,6 +98,8 @@ class UI{
         cam.append(section('Fly'));
         cam.append(control({label: 'Speed', type: 'float', min: 0.1, max: 10, step: 0.1, value: pathtracer.controls.speed},
             (v) => { pathtracer.controls.speed = v; }));
+        cam.append(toggle({label: 'Mouse Orbit', value: pathtracer.orbitEnabled},
+            (on) => { pathtracer.orbitEnabled = on; }));
 
         cam.append(section('Pose'));
         const pose = el('div', 'gui-pose');
@@ -246,6 +248,13 @@ class UI{
             keys.append(el('span', 'key', k), el('span', 'desc', d));
         }
         help.append(keys);
+
+        help.append(section('Mouse'));
+        let mouseKeys = el('div', 'gui-keys');
+        for(let [k, d] of [['drag', 'orbit the view'], ['pinch', 'zoom in / out']]){
+            mouseKeys.append(el('span', 'key', k), el('span', 'desc', d));
+        }
+        help.append(mouseKeys);
 
         //host the fps meter here (createScene hands us stats instead of
         //appending it to <body>). Strip its fixed positioning to sit in-flow.

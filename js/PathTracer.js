@@ -2,6 +2,7 @@ import {WebGLRenderer, Vector2} from "three";
 
 import ComputeShader from "./ComputeShader.js";
 import KeyControls from "./KeyControls.js";
+import OrbitControls from "./OrbitControls.js";
 
 
 //class to run the path tracer from
@@ -41,6 +42,15 @@ class PathTracer{
         this.accumulate = new ComputeShader(shaders.accumulate, this.renderer,res);
         this.display = new ComputeShader(shaders.display, this.renderer,res);
 
+        //mouse orbit (adapted from the PathTracerGLSL repo): drag orbits the
+        //look-point, pinch dollies. Writes the same position/facing the keyboard
+        //uses, so the two compose. Suspended during an HD render (the lock).
+        this.orbitEnabled = true;
+        this.orbit = new OrbitControls(this.canvas, this.controls, {
+            onChange: () => { this.tracer.updateUniforms({facing: this.controls.facing, location: this.controls.position}); this.reset(); },
+            target:   this.settings.target ?? [0, 0, 0],
+            enabled:  () => this.orbitEnabled && !this.rendering,
+        });
     }
 
     updateUniforms(){
