@@ -48,5 +48,8 @@ export default defineConfig({
     publicDir: path.join(projectRoot, 'public'),                    // shared assets, copied into every build
     build:     scene ? { outDir: path.join(projectRoot, 'dist', scene), emptyOutDir: true } : {},
     server:    { fs: { allow: [projectRoot] } },                    // a scene page imports ../../js
+    //scope dev dep-scanning to the real scene pages, so it doesn't crawl (and
+    //choke on) the archived pre-refactor pages in final/ (which still import three).
+    optimizeDeps: scene ? undefined : { entries: ['index.html', 'scenes/*/index.html'] },
     plugins:   [glsl(), saveSettingsPlugin()],
 });
