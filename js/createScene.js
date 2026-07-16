@@ -1,8 +1,7 @@
-import Stats from "three/addons/libs/stats.module";
+import FpsMeter from "./FpsMeter.js";
 
 import PathTracer from "./PathTracer.js";
 import UI from "./UI.js";
-import {showShaderError} from "./gui/ErrorOverlay.js";
 
 import accShaderData from "./shaderData/accShaderData.js";
 import displayShaderData from "./shaderData/displayShaderData.js";
@@ -23,8 +22,7 @@ import buildTraceShader from "./shaderData/buildTraceShader.js";
 function createScene({environment, objects, settings}){
 
     //stats readout (fps); the UI hosts stats.dom inside its Help tab
-    let stats = new Stats();
-    stats.showPanel(0);
+    let stats = new FpsMeter();
 
     //build the tracer shader for this scene
     let sceneData = {
@@ -45,10 +43,6 @@ function createScene({environment, objects, settings}){
     //build and run the path tracer
     let pathtracer = new PathTracer(shaders, settings, res);
     let ui = new UI(pathtracer, stats);
-
-    //surface GLSL compile errors on-screen instead of a silent black canvas.
-    //Fires only on a real shader link failure; inert for working scenes.
-    pathtracer.renderer.debug.onShaderError = (gl, program, vs, fs) => showShaderError(gl, program, vs, fs);
 
     function animate(){
         requestAnimationFrame(animate);

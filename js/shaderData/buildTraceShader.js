@@ -2,7 +2,6 @@
 //Uniforms for the tracer
 //=============================================
 
-import {DataTexture, RGBAFormat, TextureLoader} from "three";
 import {Matrix3, Vector3} from "../math/index.js";
 
 import setupShaderChunk from "../../glsl/tracer/setupShader.glsl"
@@ -19,27 +18,20 @@ import {engineKnobs} from "./engineKnobs.js";
 //  { type:'gradient', top:[r,g,b], bottom:[r,g,b] } vertical gradient
 const SKY_MODE = {image: 0, solid: 1, gradient: 2};
 
+//a plain DESCRIPTOR (no GL object): the uniforms are assembled before the WebGL
+//context exists, so PathTracer builds the actual sky texture from this later.
 function buildSky(sky){
     if(sky === undefined) sky = {type: 'image', src: '/assets/office.jpg'};
     if(typeof sky === 'string') sky = {type: 'image', src: sky};
 
     let mode = SKY_MODE[sky.type] ?? 0;
 
-    let tex;
-    if(mode === 0){
-        tex = new TextureLoader().load(sky.src ?? '/assets/office.jpg');
-    } else {
-        //a sampler2D must always be bound: 1x1 white stand-in for non-image skies
-        tex = new DataTexture(new Uint8Array([255,255,255,255]), 1, 1, RGBAFormat);
-        tex.needsUpdate = true;
-    }
-
     let color1 = sky.color ?? sky.top ?? [1,1,1];       //solid / gradient top
     let color2 = sky.bottom ?? sky.color ?? [1,1,1];    //gradient bottom
 
     return {
-        tex:  tex,
         mode: mode,
+        src:  (mode === 0) ? (sky.src ?? '/assets/office.jpg') : null,
         color1: new Vector3(color1[0], color1[1], color1[2]),
         color2: new Vector3(color2[0], color2[1], color2[2]),
     };
@@ -80,9 +72,10 @@ let buildTraceShader= function(sceneData, settings){
             value: 0
         },
 
-        //environment the ray sees on escape (see buildSky above)
+        //environment the ray sees on escape (see buildSky above). The texture is
+        //built by PathTracer once the gl context exists; null until then.
         sky: {
-            value: sky.tex
+            value: null
         },
         skyMode: {
             value: sky.mode
@@ -129,7 +122,8 @@ let buildTraceShader= function(sceneData, settings){
 
     return {
         shader: tracerShader,
-        uniforms: tracerUniforms
+        uniforms: tracerUniforms,
+        sky: sky,                //descriptor: PathTracer builds the GL texture
     }
 }
 

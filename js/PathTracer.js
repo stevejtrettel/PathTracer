@@ -1,6 +1,3 @@
-import {WebGLRenderer} from "three";
-import {Vector2} from "./math/index.js";
-
 import ComputeShader from "./ComputeShader.js";
 import KeyControls from "./KeyControls.js";
 import OrbitControls from "./OrbitControls.js";
@@ -11,12 +8,6 @@ class PathTracer{
     constructor(shaders, settings, res={x:window.innerWidth,y:window.innerHeight}) {
 
         this.settings = settings;
-
-        //build the renderer
-        this.renderer = new WebGLRenderer({
-            //this is what lets me screenshot the canvas I guess?
-            preserveDrawingBuffer:true,
-        });
 
         //set up for autosave (live view)
         this.autoSave = false;
@@ -30,18 +21,27 @@ class PathTracer{
         //wreck a long tiled export. Live-view tweaking is unaffected.
         this.rendering = false;
 
-
-        this.canvas = this.renderer.domElement;
+        //raw WebGL2 canvas + context. preserveDrawingBuffer keeps toDataURL
+        //working for saveImage; float render targets need EXT_color_buffer_float.
+        this.canvas = document.createElement('canvas');
+        this.gl = this.canvas.getContext('webgl2', {preserveDrawingBuffer: true});
+        this.gl.getExtension('EXT_color_buffer_float');
         document.body.appendChild(this.canvas);
-        this.renderer.setSize(res.x,res.y);
+        this.size = res;
+        this._setCanvasSize(res);
 
         //the control system
         this.controls = new KeyControls(this.settings.location);
 
         //the shaders
-        this.tracer = new ComputeShader(shaders.tracer, this.renderer,res);
-        this.accumulate = new ComputeShader(shaders.accumulate, this.renderer,res);
-        this.display = new ComputeShader(shaders.display, this.renderer,res);
+        this.tracer = new ComputeShader(shaders.tracer, this.gl, res);
+        this.accumulate = new ComputeShader(shaders.accumulate, this.gl, res);
+        this.display = new ComputeShader(shaders.display, this.gl, res);
+
+        //the sky sampler needs a real texture; the uniforms were assembled before
+        //the gl context existed, so build it here from the scene's sky descriptor
+        //(1x1 white until an image loads — see buildSky / _makeSkyTexture).
+        this.tracer.updateUniforms({sky: this._makeSkyTexture(shaders.tracer.sky)});
 
         //mouse orbit (adapted from the PathTracerGLSL repo): drag orbits the
         //look-point, pinch dollies. Writes the same position/facing the keyboard
@@ -52,6 +52,43 @@ class PathTracer{
             target:   this.settings.target ?? [0, 0, 0],
             enabled:  () => this.orbitEnabled && !this.rendering,
         });
+    }
+
+    //set the canvas backing-store size and its on-screen (CSS) size to match
+    _setCanvasSize(res){
+        this.canvas.width  = res.x;
+        this.canvas.height = res.y;
+        this.canvas.style.width  = res.x + 'px';
+        this.canvas.style.height = res.y + 'px';
+    }
+
+    //build the sky WebGLTexture from a descriptor ({mode, src, color1, color2}).
+    //1x1 white so the sampler is always complete; for image mode, an <img> loads
+    //and replaces it (matching three's TextureLoader defaults: flipY, mipmaps,
+    //linear-mipmap-linear, RGBA8/no sRGB decode), then restarts accumulation.
+    _makeSkyTexture(desc){
+        let gl = this.gl;
+        let tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255,255,255,255]));
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        if(desc && desc.src){
+            let img = new Image();
+            img.onload = () => {
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                gl.generateMipmap(gl.TEXTURE_2D);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+                this.reset();
+            };
+            img.src = desc.src;
+        }
+        return tex;
     }
 
     updateUniforms(){
@@ -159,9 +196,7 @@ class PathTracer{
         let start = (opts.tile != null) ? Math.min(Math.max(opts.tile, 0), plan.N - 1) : 0;
 
         //remember the current view size, to restore when the render finishes
-        let cur = new Vector2();
-        this.renderer.getSize(cur);
-        this.hdRestore = {x: cur.x, y: cur.y};
+        this.hdRestore = {x: this.size.x, y: this.size.y};
 
         this.resize({x: plan.tileW, y: plan.tileH});
         this.tracer.updateUniforms({numPanels: plan.N, panelToRender: start, renderPanel: true});
@@ -190,10 +225,11 @@ class PathTracer{
     }
 
     resize(res){
+        this.size = res;
+        this._setCanvasSize(res);
         this.tracer.setSize(res);
         this.accumulate.setSize(res);
         this.display.setSize(res);
-        this.renderer.setSize(res.x,res.y);
     }
 
     printLocation(){
