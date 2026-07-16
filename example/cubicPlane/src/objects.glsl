@@ -137,7 +137,6 @@ void buildObjects() {
 // SECTION 7: SCENE WIRING
 // ============================================
 
-bool render_Objects = true;
 
 float trace_Objects(Vector tv) {
     return maxDist;   // nothing analytically traced

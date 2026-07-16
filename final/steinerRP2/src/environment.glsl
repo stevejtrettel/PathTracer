@@ -2,7 +2,6 @@
 // ENVIRONMENT OF THE SCENE
 //-------------------------------------------------
 
-bool render_Environment=true;
 
 
 //set the names of the lights:

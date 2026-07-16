@@ -33,7 +33,6 @@ void buildObjects(){
 
 }
 
-bool render_Objects = true;
 
 //no analytic intersections: everything is raymarched via the sdf
 float trace_Objects( Vector tv ){
