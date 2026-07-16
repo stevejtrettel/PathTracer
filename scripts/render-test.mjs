@@ -43,21 +43,34 @@ async function waitForServer(url, tries = 40) {
 }
 
 for (const scene of scenes) {
+  // capture stdout so we can read the ACTUAL port vite bound to — it picks
+  // 5174+ when 5173 is taken (e.g. another project's dev server), and screenshotting
+  // a hardcoded :5173 would then shoot the wrong app.
   const server = spawn('node', ['scripts/run-example.mjs', 'dev', scene], {
-    cwd: root, stdio: 'ignore', detached: true,
+    cwd: root, stdio: ['ignore', 'pipe', 'pipe'], detached: true,
   });
+  let out = '';
+  server.stdout.on('data', (d) => { out += d; });
+  server.stderr.on('data', (d) => { out += d; });
   try {
-    if (!(await waitForServer('http://127.0.0.1:5173/'))) {
-      console.error(`${scene}: dev server never came up`);
+    let port = null;
+    for (let i = 0; i < 40 && !port; i++) {
+      const m = out.match(/127\.0\.0\.1:(\d+)/);
+      if (m) port = m[1]; else await sleep(500);
+    }
+    if (!port) { console.error(`${scene}: dev server never reported a port`); continue; }
+    const url = `http://127.0.0.1:${port}/`;
+    if (!(await waitForServer(url))) {
+      console.error(`${scene}: dev server ${url} never came up`);
       continue;
     }
     const shot = path.join(outDir, `${scene}.png`);
     execFileSync(chrome, [
       '--headless=new', '--enable-unsafe-swiftshader',
       '--window-size=400,300', `--virtual-time-budget=${budget}`,
-      `--screenshot=${shot}`, 'http://127.0.0.1:5173/',
+      `--screenshot=${shot}`, url,
     ], { stdio: 'ignore' });
-    console.log(`${scene}: ${shot}`);
+    console.log(`${scene}: ${shot} (port ${port})`);
   } finally {
     try { process.kill(-server.pid); } catch {}
     await sleep(500);
