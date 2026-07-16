@@ -135,6 +135,15 @@ class UI{
         });
         cam.append(copyBtn);
 
+        //Save to Scene: write the live settings/pose straight into the scene's
+        //settings.js (dev only — the dev server does the write). Download is the
+        //offline fallback (and the right tool in a build).
+        if(import.meta.env.DEV){
+            const saveBtn = button('Save to Scene', () => this.saveToScene(pathtracer, sceneParams, saveBtn));
+            saveBtn.dataset.label = 'Save to Scene';
+            cam.append(saveBtn);
+        }
+
         //aim the camera here, then save the pose (settings.js) without leaving the tab
         cam.append(button('Download Settings', () => this.downloadSettings(pathtracer, sceneParams)));
 
@@ -177,7 +186,12 @@ class UI{
         //--- Export: produce files ---
         const exp = panel.tab('Export');
 
-        exp.append(button('Save Image',        () => pathtracer.saveImage()));
+        exp.append(button('Save Image', () => pathtracer.saveImage()));
+        if(import.meta.env.DEV){
+            const saveBtn = button('Save to Scene', () => this.saveToScene(pathtracer, sceneParams, saveBtn));
+            saveBtn.dataset.label = 'Save to Scene';
+            exp.append(saveBtn);
+        }
         exp.append(button('Download Settings', () => this.downloadSettings(pathtracer, sceneParams)));
 
         //one unified autosave for the live view
@@ -275,9 +289,9 @@ class UI{
         }
     }
 
-    //regenerate settings.js (engine knob values + scene params + camera pose)
-    //and trigger a browser download. Same format/output as before.
-    downloadSettings(pathtracer, sceneParams){
+    //regenerate a scene's settings.js source (engine knob values + scene params
+    //+ camera pose) from the current live GUI state. Shared by Download and Save.
+    settingsText(pathtracer, sceneParams){
         let contents = '';
         contents += serializeUiParams(engineKnobs, this.values);
         contents += `\n\n\n`;
@@ -290,7 +304,40 @@ class UI{
         } else {
             contents += `export default {uiParams: uiParams, location:location};`;
         }
+        return contents;
+    }
 
+    //the current scene folder, read from the page's <script src=".../example/<scene>/main.js">
+    sceneName(){
+        let s = document.querySelector('script[src*="/example/"]');
+        let m = s && s.getAttribute('src').match(/example\/([^/]+)\//);
+        return m ? m[1] : null;
+    }
+
+    //flash a transient label on a button, then restore its permanent one
+    flash(btn, msg){
+        btn.textContent = msg;
+        setTimeout(() => { btn.textContent = btn.dataset.label; }, 1200);
+    }
+
+    //write the current settings straight into the scene's settings.js via the
+    //dev-server endpoint (see vite.config.js). Dev only; Vite then hot-reloads.
+    saveToScene(pathtracer, sceneParams, btn){
+        let scene = this.sceneName();
+        if(!scene){ this.flash(btn, 'No scene?'); return; }
+        fetch('/__save-settings', {
+            method:  'POST',
+            headers: {'Content-Type': 'application/json'},
+            body:    JSON.stringify({scene, contents: this.settingsText(pathtracer, sceneParams)}),
+        }).then(r => r.json()).then(
+            res => this.flash(btn, res.ok ? 'Saved!' : 'Failed'),
+            ()  => this.flash(btn, 'Failed'),
+        );
+    }
+
+    //trigger a browser download of the regenerated settings.js (offline fallback)
+    downloadSettings(pathtracer, sceneParams){
+        let contents = this.settingsText(pathtracer, sceneParams);
         let file = new File([contents], 'settingsNew.js', {type: 'javascript'});
         let link = document.createElement('a');
         let url  = URL.createObjectURL(file);
