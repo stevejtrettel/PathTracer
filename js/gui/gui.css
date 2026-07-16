@@ -251,6 +251,50 @@
    restart accumulation. Tabs/hamburger stay clickable to watch progress. */
 .gui.rendering .gui-body { pointer-events: none; opacity: 0.45; }
 
+/* shader compile-error overlay (see ErrorOverlay.js) */
+.shader-error {
+  display: none;
+  flex-direction: column;
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  max-width: min(760px, calc(100vw - 24px));
+  max-height: 60vh;
+  z-index: 100;
+  background: rgba(30, 10, 10, 0.94);
+  border: 1px solid rgba(255, 120, 120, 0.55);
+  border-radius: 6px;
+  color: #ffd9d9;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+.shader-error-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-weight: 600;
+  color: #ff9a9a;
+  border-bottom: 1px solid rgba(255, 120, 120, 0.3);
+}
+.shader-error-close {
+  background: none;
+  border: none;
+  color: #ff9a9a;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.shader-error-body {
+  margin: 0;
+  padding: 10px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre;
+  tab-size: 4;
+}
+
 /* Stop Render: only visible while an HD render runs; sits outside the locked
    bodies so it stays clickable. Styled as an abort (red). */
 .gui-stop {
