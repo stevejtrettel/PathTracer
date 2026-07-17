@@ -2,8 +2,7 @@
 //The TRIANGLE sdf
 //-------------------------------------------------
 
-//an equilateral triangle prism; rotation now lives in the frame
-//(the old mat3 orientation field is gone: use makeFrame(pos, axis, angle))
+//an equilateral triangle prism; rotate it via the frame (makeFrame(pos, axis, angle))
 
 struct Triangle{
     Frame frame;

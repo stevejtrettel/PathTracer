@@ -24,7 +24,7 @@ Vector normalVec( Vector tv, Sphere sphere ){
     return Vector(tv.pos, dir);
 }
 
-//auxilary function for writing trace()
+//auxiliary function for writing trace()
 //works in world space: center = frame.pos, world radius = scale*radius
 vec2 intersectRay_Sphere( Vector tv, Sphere sphere ){
     vec3 p = tv.pos - sphere.frame.pos;

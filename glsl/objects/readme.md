@@ -1,8 +1,7 @@
-These are objects meant to be used in "tracer"
+These are objects meant to be used in "tracer".
 
-The "BasicShapes" are imported into every program
-so is computations
+`objectAPI.glsl`, `computations.glsl`, and the shapes listed in `basic/_basic.glsl`
+are included in every scene automatically (see `tracer/setupShader.glsl`).
 
-Other shapes always state at the top of their file WHICH SHAPES THEY DEPEND ON
-you need to be sure to import these as well, before importing the shape you want
-
+Every other object must be included explicitly by a scene. Files state at the
+top which other files they depend on — include those first.

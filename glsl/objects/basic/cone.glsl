@@ -6,14 +6,12 @@ struct Cone{
     Frame frame;
     float height;
     float base;
-//this is an extra parameter letting you extend the top
-    float flare;
+    float flare; //top radius = flare*base
     Material mat;
 };
 
 
-
-//auxilary function (From IQ) which is the truncated cone:
+//auxiliary function (from IQ) which is the truncated cone:
 float sdCappedCone( vec3 p, float h, float r1, float r2 )
 {
     vec2 q = vec2( length(p.xz), p.y );

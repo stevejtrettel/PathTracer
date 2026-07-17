@@ -1,17 +1,3 @@
-
-
-float sdf_tetrahedron(vec3 p) {
-    p *= 0.5;
-    return max(
-    // Vertical bound
-    abs(p.y) - 0.5,
-
-    // Horizontal bound
-    max(abs(p.x) * 0.866025 + p.z * 0.5, -p.z) - 0.25 * abs(0.5 - p.y)
-    ) * 2.0;
-}
-
-
 //-------------------------------------------------
 //The TETRAHEDRON sdf
 //-------------------------------------------------
@@ -20,6 +6,18 @@ struct Tetrahedron{
     Frame frame;
     Material mat;
 };
+
+
+float sdf_tetrahedron(vec3 p) {
+    p *= 0.5;
+    return max(
+    // vertical bound
+    abs(p.y) - 0.5,
+
+    // horizontal bound
+    max(abs(p.x) * 0.866025 + p.z * 0.5, -p.z) - 0.25 * abs(0.5 - p.y)
+    ) * 2.0;
+}
 
 
 //the local-frame sdf: the unit-sized shape at the origin

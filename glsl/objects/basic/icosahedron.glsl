@@ -1,6 +1,16 @@
-
 #include ./gdf.glsl
 
+//-------------------------------------------------
+//The ICOSAHEDRON sdf
+//-------------------------------------------------
+
+struct Icosahedron{
+    Frame frame;
+    Material mat;
+};
+
+
+//face-normal slabs via the GDF machinery (r is consumed by fGDFEnd)
 float fIcosahedron(vec3 p, float r) {
     fGDFBegin
     fGDF(GDFVector3) fGDF(GDFVector4) fGDF(GDFVector5) fGDF(GDFVector6)
@@ -14,16 +24,6 @@ float sdf_icosahedron(vec3 p) {
     p *= 1./scale;
     return fIcosahedron(p, 1.0) * scale;
 }
-
-
-//-------------------------------------------------
-//The ICOSAHEDRON sdf
-//-------------------------------------------------
-
-struct Icosahedron{
-    Frame frame;
-    Material mat;
-};
 
 
 //the local-frame sdf: the unit-sized shape at the origin
