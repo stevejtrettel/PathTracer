@@ -94,7 +94,7 @@ class OrbitControls{
     orbit(dx, dy){
         //--- azimuth: yaw about world +Y, unclamped ---
         let yaw = new Matrix3().setFromMatrix4(
-            new Matrix4().makeRotationAxis(new Vector3(0, 1, 0), dx * this.orbitSpeed)   // FLIP sign to invert
+            new Matrix4().makeRotationAxis(new Vector3(0, 1, 0), -dx * this.orbitSpeed)   // FLIP sign to invert
         );
         this.applyRig(yaw);
 
