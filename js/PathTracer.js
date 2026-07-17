@@ -55,12 +55,17 @@ class PathTracer{
         //mouse orbit (adapted from the PathTracerGLSL repo): drag orbits the
         //look-point, pinch dollies. Writes the same position/facing the keyboard
         //uses, so the two compose. Suspended during an HD render (the lock).
+        //the shader shifts every camera by the legacy CAMERA_OFFSET
+        //(glsl/tracer/2Space/camera.glsl); subtract it here so the orbit
+        //pivot's VISUAL location is the scene target (the origin by default)
+        const CAMERA_OFFSET = [-2, 0, 6];
+        const target = (this.settings.target ?? [0, 0, 0]).map((t, i) => t - CAMERA_OFFSET[i]);
+
         this.orbitEnabled = true;
         this.orbit = new OrbitControls(this.canvas, this.controls, {
             onChange: () => { this.tracer.updateUniforms({facing: this.controls.facing, location: this.controls.position}); this.reset(); },
-            target:    this.settings.target ?? [0, 0, 0],
-            enabled:   () => this.orbitEnabled && !this.rendering,
-            focalDist: () => this.tracer.material.uniforms.focalLength.value,
+            target:   target,
+            enabled:  () => this.orbitEnabled && !this.rendering,
         });
     }
 

@@ -23,12 +23,11 @@ class OrbitControls{
         this.controls = controls;              // KeyControls: owns .position, .facing
         this.onChange = opts.onChange;         // push uniforms + reset accumulation
         this.enabled  = opts.enabled;          // () => bool (toggle + render lock)
-        this.focalDist = opts.focalDist ?? (() => 1);  // () => current focus distance
-                                               // (used to re-anchor the pivot on drag start)
 
-        //orbit pivot: a fixed target point (default origin). Scenes are built
-        //around the origin, so orbiting there keeps the subject centered. A
-        //per-scene settings.target can override it.
+        //orbit pivot: a FIXED target point, the same in every scene. Scenes are
+        //built around the origin, so orbiting there keeps the subject centered.
+        //PathTracer passes the target pre-compensated for the shader's legacy
+        //CAMERA_OFFSET, so the pivot's on-screen location really is the target.
         this.pivot = new Vector3().fromArray(opts.target ?? [0, 0, 0]);
 
         //mirrors the OrbitControls.ts settings
@@ -57,10 +56,8 @@ class OrbitControls{
         this.dragging = true;
         this.lastX = e.clientX;
         this.lastY = e.clientY;
-        //fix the pivot at the look-point for the whole drag, so the subject you
-        //grabbed stays centered even as position/forward change
-        let d = Math.max(this.focalDist(), 1);
-        this.pivot.copy(this.controls.position).addScaledVector(this.forward(), d);
+        //(the pivot is fixed — re-anchoring it per drag, e.g. at the focus
+        //distance, made orbit feel different in every scene)
     }
 
     onMove(e){

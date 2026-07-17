@@ -1,0 +1,29 @@
+let uiParams = {
+    aperture: 0,
+    focalLength: 14.92,
+    exposure: 1,
+    focusHelp: false,
+    fov: 42,
+    scratch1: 0.3,   //fractal detail: box-fold iterations (preview ~29, crank to 1.0 for ~60)
+    scratch2: 0.5,
+    scratch3: 0.5,
+    scratch4: 0.5,   //ceiling light intensity
+}
+
+export {uiParams};
+
+
+//starting pose (borrowed from kleinianLimit — same fractal family; reframe live
+//with the orbit/fly controls + Copy Pose)
+let position = [-7.227914966664514,3.425884297140259,-1.6402922666599955];
+
+let facing = [0.5033094254767588,0.2018349458086483,-0.840203711534576,-0.022809702559965866,0.9751028501200707,0.22057685544210714,0.8638051514636849,-0.09185361363616258,0.49538225035482514];
+
+let location = {
+    position: position,
+    facing: facing
+};
+
+export {location};
+
+export default {uiParams: uiParams, location:location};
