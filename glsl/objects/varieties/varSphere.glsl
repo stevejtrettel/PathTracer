@@ -1,24 +1,22 @@
-
 //----------------------------------------------------------------------------------------------
-// ADJUSTABLE VARIETY IN SPHERICAL BOUNDING BOX:
-// before including this file need to provide the function:
-// T varEqn(T x, T y, T z)
-//----------------------------------------------------------------------------------------------------
-
+// ADJUSTABLE VARIETY IN A SPHERE
+// before including this file, provide the function:
+// T varSphere_Eqn(T x, T y, T z)   //the defining equation, in dual numbers
+//----------------------------------------------------------------------------------------------
 
 //gradient (xyz) and value (w) of the defining equation
 VARIETY_DATA(varSphere_Data, varSphere_Eqn)
 
 //-------------------------------------------------
 // Building a variety that is thick
-// ------------------------------------------------
+//-------------------------------------------------
 
 struct VarSphere{
     //placement in the world
     Frame frame;
-    //the bounding sphere
+    //radius of the bounding sphere
     float radius;
-    //smoothing between bounding sphere and variety
+    //smoothing between the bounding sphere and the variety
     float smoothing;
     //scale of the variety on the inside
     float scale;
@@ -42,19 +40,15 @@ float sdf( vec3 p, VarSphere var ){
     float dist = DE(val, gradLength);
 
     //adjust to account for thickness of surface
-    //thickness.x = inside, thickness.y = outisde
+    //thickness.x = inside, thickness.y = outside
     dist=abs(dist+var.thickness.x)-var.thickness.x-var.thickness.y;
 
-    // //bounding sphere
+    //clip to the bounding sphere
     float bboxDist = length(p)-var.radius;
-
-    //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
 
-    //return dist;
     return dist;
 }
-
 
 
 //local bounding radius: bounding sphere, padded for the smax rounding and the

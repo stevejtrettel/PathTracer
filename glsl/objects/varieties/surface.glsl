@@ -1,18 +1,16 @@
-
 //----------------------------------------------------------------------------------------------
-// ADJUSTABLE VARIETY:
-//
-//----------------------------------------------------------------------------------------------------
-
+// ADJUSTABLE SURFACE, CUSTOM BOUND: an infinitesimally thin variety
+// before including this file, provide TWO functions:
+// T surface_Eqn(T x, T y, T z)     //the defining equation, in dual numbers
+// float surface_bBox( vec3 pos )   //sdf of the bounding region that clips it
+//----------------------------------------------------------------------------------------------
 
 //gradient (xyz) and value (w) of the defining equation
 VARIETY_DATA(surface_Data, surface_Eqn)
 
-
-
 //-------------------------------------------------
-// Building a variey that is infinitesimally thin
-// -------------------------
+// Building a variety that is infinitesimally thin
+//-------------------------------------------------
 
 struct Surface{
     Frame frame;
@@ -35,11 +33,10 @@ float sdf( vec3 p, Surface surf ){
 
     dist=abs(dist);
 
-    //bounding sphere
+    //clip to the bounding region
     float bboxDist = surface_bBox(p);
     dist = max(dist,bboxDist);
 
-    // return dist;
     return dist;
 }
 
@@ -92,6 +89,3 @@ void setData( inout Path path, Surface surf ){
     }
 
 }
-
-
-

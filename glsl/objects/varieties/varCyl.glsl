@@ -1,44 +1,32 @@
-
 //----------------------------------------------------------------------------------------------
-// ADJUSTABLE VARIETY IN RECTANGULAR BOUNDING BOX:
-// before including this file need to provide the function:
-// T varEqn(T x, T y, T z)
-//----------------------------------------------------------------------------------------------------
-
+// ADJUSTABLE VARIETY IN A CYLINDER
+// before including this file, provide the function:
+// T varCyl_Eqn(T x, T y, T z)   //the defining equation, in dual numbers
+// depends on: objects/computations.glsl (bCyl) — always included
+//----------------------------------------------------------------------------------------------
 
 //gradient (xyz) and value (w) of the defining equation
 VARIETY_DATA(varCyl_Data, varCyl_Eqn)
 
 //-------------------------------------------------
 // Building a variety that is thick
-// ------------------------------------------------
+//-------------------------------------------------
 
 struct VarCyl{
-//placement in the world
+    //placement in the world
     Frame frame;
-//the bounding cylinder
-    vec2 cyl;//dims.x=rad, dims.y=height
-//smoothing between bounding sphere and variety
+    //the bounding cylinder: cyl.x = radius, cyl.y = half-height
+    vec2 cyl;
+    //smoothing between the bounding cylinder and the variety
     float smoothing;
-//scale of the variety on the inside
+    //scale of the variety on the inside
     float scale;
-//thickness.x = inside thickness, thickness.y = outside thickness
+    //thickness.x = inside thickness, thickness.y = outside thickness
     vec2 thickness;
-//the material
+    //the material
     Material mat;
 };
 
-
-
-//dist to bounding box
-float bCyl(vec3 pos, vec2 cyl){
-
-    float r = length(pos.xz)-cyl.x;
-    float h = abs(pos.y)-cyl.y;
-    float bboxDist = max(r,h);
-
-    return bboxDist;
-}
 
 //the point-level sdf (local coordinates)
 float sdf( vec3 p, VarCyl var ){
@@ -53,19 +41,15 @@ float sdf( vec3 p, VarCyl var ){
     float dist = DE(val, gradLength);
 
     //adjust to account for thickness of surface
-    //thickness.x = inside, thickness.y = outisde
+    //thickness.x = inside, thickness.y = outside
     dist=abs(dist+var.thickness.x)-var.thickness.x-var.thickness.y;
 
-    // //bounding box
+    //clip to the bounding cylinder
     float bboxDist = bCyl(p,var.cyl);
-
-    //adjust for the bounding box
     dist = smax(dist,bboxDist,var.smoothing);
 
-    //return dist;
     return dist;
 }
-
 
 
 //local bounding radius: cylinder (rad,height) extent, padded for the smax

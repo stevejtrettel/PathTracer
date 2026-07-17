@@ -1,34 +1,24 @@
-
 //----------------------------------------------------------------------------------------------
-// ADJUSTABLE VARIETY:
-// ALL THAT NEEDS TO BE CHANGED IS THE FUNCTION SURF: THE REST AUTOMATICALLY UPDATES FROM THIS
-//----------------------------------------------------------------------------------------------------
-
+// ADJUSTABLE SURFACE IN A BOX: an infinitesimally thin variety
+// before including this file, provide the function:
+// T surfBox_Eqn(T x, T y, T z)   //the defining equation, in dual numbers
+// depends on: objects/computations.glsl (bBox) — always included
+//----------------------------------------------------------------------------------------------
 
 //gradient (xyz) and value (w) of the defining equation
 VARIETY_DATA(surfBox_Data, surfBox_Eqn)
 
-
-
 //-------------------------------------------------
-// Building a variey that is infinitesimally thin
-// -------------------------
+// Building a variety that is infinitesimally thin
+//-------------------------------------------------
 
 struct SurfBox{
     Frame frame;
+    //half-widths of the bounding box
     vec3 box;
     float scale;
     Material mat;
 };
-
-
-//dist to bounding box
-float bBox(vec3 pos, vec3 box){
-    vec3 q = abs(pos) -box;
-    float bboxDist =  length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
-    return bboxDist;
-}
-
 
 
 //the point-level sdf (local coordinates)
@@ -45,7 +35,7 @@ float sdf( vec3 p, SurfBox surf ){
 
     dist=abs(dist);
 
-    //bounding box
+    //clip to the bounding box
     float bboxDist = bBox(p,surf.box);
     dist = max(dist,bboxDist);
 
@@ -104,6 +94,3 @@ void setData( inout Path path, SurfBox surf ){
     }
 
 }
-
-
-

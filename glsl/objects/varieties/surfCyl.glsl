@@ -1,36 +1,25 @@
-
 //----------------------------------------------------------------------------------------------
-// ADJUSTABLE VARIETY:
-// ALL THAT NEEDS TO BE CHANGED IS THE FUNCTION SURF: THE REST AUTOMATICALLY UPDATES FROM THIS
-//----------------------------------------------------------------------------------------------------
-
+// ADJUSTABLE SURFACE IN A CYLINDER: an infinitesimally thin variety
+// before including this file, provide the function:
+// T surfCyl_Eqn(T x, T y, T z)   //the defining equation, in dual numbers
+// depends on: objects/computations.glsl (bCyl) — always included
+//----------------------------------------------------------------------------------------------
 
 //gradient (xyz) and value (w) of the defining equation
 VARIETY_DATA(surfCyl_Data, surfCyl_Eqn)
 
-
-
 //-------------------------------------------------
-// Building a variey that is infinitesimally thin
-// -------------------------
+// Building a variety that is infinitesimally thin
+//-------------------------------------------------
 
 struct SurfCyl{
     Frame frame;
+    //the bounding cylinder: cyl.x = radius, cyl.y = half-height
     vec2 cyl;
     float scale;
     Material mat;
 };
 
-
-//dist to bounding box
-float bCyl(vec3 pos, vec2 cyl){
-
-    float r = length(pos.xz)-cyl.x;
-    float h = abs(pos.y)-cyl.y;
-    float bboxDist = max(r,h);
-
-    return bboxDist;
-}
 
 //the point-level sdf (local coordinates)
 float sdf( vec3 p, SurfCyl surf ){
@@ -46,7 +35,7 @@ float sdf( vec3 p, SurfCyl surf ){
 
     dist=abs(dist);
 
-    //bounding cylinder
+    //clip to the bounding cylinder
     float bboxDist = bCyl(p,surf.cyl);
     dist = max(dist,bboxDist);
 
@@ -105,6 +94,3 @@ void setData( inout Path path, SurfCyl surf ){
     }
 
 }
-
-
-

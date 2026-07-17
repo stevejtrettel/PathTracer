@@ -1,7 +1,7 @@
 //-------------------------------------------------
 // COMPUTATIONS FOR CREATING OBJECTS
-// every function here  is only used in basicObject and compoundObject
-// these should never appear outside this folder
+// shared helpers (op* combinators, bounding shapes, cylinderDist)
+// used by the object files; included in every scene (see tracer/setupShader.glsl)
 //-------------------------------------------------
 
 
@@ -104,6 +104,31 @@ float opExtrusion(in float sdf, in float pz, in float h){
 
 
 
+
+
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+//=====BOUNDING SHAPES
+//used by the varieties (varBox/varCyl/surfBox/surfCyl)
+//-------------------------------------------------
+//-------------------------------------------------
+
+
+//signed distance to a box: box = half-widths
+float bBox(vec3 pos, vec3 box){
+    vec3 q = abs(pos) - box;
+    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
+
+
+//distance bound for a cylinder: cyl.x = radius, cyl.y = half-height
+float bCyl(vec3 pos, vec2 cyl){
+    float r = length(pos.xz)-cyl.x;
+    float h = abs(pos.y)-cyl.y;
+    return max(r,h);
+}
 
 
 

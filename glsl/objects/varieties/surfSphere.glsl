@@ -1,21 +1,19 @@
-
 //----------------------------------------------------------------------------------------------
-// ADJUSTABLE VARIETY:
-// ALL THAT NEEDS TO BE CHANGED IS THE FUNCTION SURF: THE REST AUTOMATICALLY UPDATES FROM THIS
-//----------------------------------------------------------------------------------------------------
-
+// ADJUSTABLE SURFACE IN A SPHERE: an infinitesimally thin variety
+// before including this file, provide the function:
+// T surfSphere_Eqn(T x, T y, T z)   //the defining equation, in dual numbers
+//----------------------------------------------------------------------------------------------
 
 //gradient (xyz) and value (w) of the defining equation
 VARIETY_DATA(surfSphere_Data, surfSphere_Eqn)
 
-
-
 //-------------------------------------------------
-// Building a variey that is infinitesimally thin
-// -------------------------
+// Building a variety that is infinitesimally thin
+//-------------------------------------------------
 
 struct SurfSphere{
     Frame frame;
+    //radius of the bounding sphere
     float radius;
     float scale;
     Material mat;
@@ -36,11 +34,10 @@ float sdf( vec3 p, SurfSphere surf ){
 
     dist=abs(dist);
 
-    //bounding sphere
+    //clip to the bounding sphere
     float bboxDist = length(p)-surf.radius;
     dist = max(dist,bboxDist);
 
-    // return dist;
     return dist;
 }
 
@@ -97,6 +94,3 @@ void setData( inout Path path, SurfSphere surf ){
     }
 
 }
-
-
-
