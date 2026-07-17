@@ -1,6 +1,8 @@
-// Local math module: the three.js Vector/Matrix classes we use, copied verbatim
-// from three/src/math (see the individual files) so the app doesn't depend on
-// three for math. Behaviour is identical to `import { ... } from "three"`.
+// Local math module: trimmed copies of the three.js Vector/Matrix classes
+// (MIT License, Copyright 2010-2023 three.js authors — see the note in each
+// file). Only the slice of the API this project calls is kept; the kept
+// method implementations are verbatim three.js, so behaviour matches
+// `import { ... } from "three"` exactly.
 export { Vector2 } from './Vector2.js';
 export { Vector3 } from './Vector3.js';
 export { Matrix3 } from './Matrix3.js';
