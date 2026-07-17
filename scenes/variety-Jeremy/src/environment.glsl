@@ -48,10 +48,9 @@ void buildEnvironment(){
     // THE WALLS
     //------------------------------------
     vec3 color;
-    float specularity, roughness, offset;
+    float roughness;
     //-----------GENERAL FOR THE WALLS -------------------------
     color=vec3(0.02);
-    specularity=0.;
     roughness=0.1;
 
 

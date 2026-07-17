@@ -17,33 +17,26 @@ SurfSphere surf;
 
 void buildObjects(){
 
-    vec3 pinkScatter = vec3(0.25,0.65,0.7);
+    vec3 tealScatter = vec3(0.25,0.65,0.7);
 
     surf.frame = makeFrame(vec3(-2,1.5,-2));
     surf.radius = 2.;
     surf.scale=10.;
-    surf.mat=makeDielectric(pinkScatter,0.5,0.2);
+    surf.mat=makeDielectric(tealScatter,0.5,0.2);
 
 }
 
-
-
-//-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
 
 
 //-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -57,7 +50,6 @@ float sdf_Objects( Vector tv ){
 //used in subsurface scattering: right now we keep scattering if we are inside of this object!
 bool inside_Object( Vector tv ){
     return false;
-    //return inside(tv,var);
 }
 
 
@@ -65,8 +57,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, surf);

@@ -21,6 +21,7 @@ void buildObjects(){
     vec3 clearGlass = vec3(0.3,0.05,0.05);
 
     //-------- BASE COCKTAIL GLASS  ----------------
+    //template object: copied into negroni below, not traced directly
     cGlass.frame=makeFrame(vec3(-1.,-0.15,-1.2));
     cGlass.radius=1.;
     cGlass.height=1.;
@@ -37,6 +38,7 @@ void buildObjects(){
 
 
     //-------- BASE BOTTLE ----------------
+    //template object: copied into gin/campari/vermouth below, not traced directly
     bottle.baseHeight=1.25;
     bottle.baseRadius=1.;
     bottle.neckHeight=1.;
@@ -83,6 +85,7 @@ void buildObjects(){
     vermouth.glass.neckHeight=2.25;
     vermouth.glass.smoothJoin=1.5;
     vermouth.cup=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
+    //alternate recipes (the last vermouth.drink assignment below wins):
     vermouth.drink=makeGlass(vec3(0.1,0.05,0.),1.3,0.99);
     //makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
     vermouth.fill=0.6;
@@ -94,21 +97,14 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -131,8 +127,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, negroni);

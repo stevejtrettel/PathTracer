@@ -26,11 +26,12 @@ void buildObjects(){
     dual.vertexRad =0.15;
 
 
-    vec3 pinkScatter = vec3(0.25,0.65,0.7);
-    vec3 greenGlass = vec3(0.3,0.05,0.2);
+    vec3 tealScatter = vec3(0.25,0.65,0.7);
+    vec3 magentaGlass = vec3(0.3,0.05,0.2);
 
 
-    Material polyMat = makeGlass(10.*pinkScatter,1.5,0.95);
+    Material polyMat = makeGlass(10.*tealScatter,1.5,0.95);
+//alternate materials:
 //    polyMat.refractionChance=0.;
 //    polyMat.subSurface=true;
 //    polyMat.meanFreePath=0.5*scratch2;
@@ -43,7 +44,7 @@ void buildObjects(){
     poly.vertexMat.absorbColor = 20.*vec3(0.235,0.75,0.8);
 
 
-//    Material dualMat = makeGlass(10.*greenGlass,1.5,0.95);
+//    Material dualMat = makeGlass(10.*magentaGlass,1.5,0.95);
 //    dualMat.refractionChance=0.;
 //    dualMat.subSurface=true;
 //    dualMat.meanFreePath=0.5*scratch2;
@@ -60,25 +61,19 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
     dist=min( dist, sdf(tv, poly) );
+//alternate: render the dual 16-cell
 //    dist=min( dist, sdf(tv, dual) );
     return dist;
 }
@@ -88,6 +83,7 @@ float sdf_Objects( Vector tv ){
 //used in subsurface scattering: right now we keep scattering if we are inside of this object!
 bool inside_Object( Vector tv ){
     return false;
+    //alternate: render the dual 16-cell
     //return inside(tv,poly)|| inside(tv,dual);
 }
 
@@ -97,10 +93,9 @@ bool inside_Object( Vector tv ){
 //-------------------------------------------------
 
 
-//put multiple copies of "setData"; one for each object in the scene.
-
 void setData_Objects(inout Path path){
     setData(path, poly);
+   //alternate: render the dual 16-cell
    // setData(path, dual);
 }
 

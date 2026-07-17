@@ -2,8 +2,8 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/shapes/bottle.glsl;
-#include ../../../glsl/objects/multiMaterial/bottleLiquid.glsl;
+#include ../../../glsl/objects/shapes/bottle.glsl
+#include ../../../glsl/objects/multiMaterial/bottleLiquid.glsl
 
 //set the names of objects contained in the scene
 Bottle bottle;
@@ -21,7 +21,7 @@ void buildObjects(){
     bottle.smoothJoin=0.3;
     bottle.bump=1.;
     bottle.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
-    //makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
+    //alternate: makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
 
 
     //-------- GIN BOTTLE ----------------
@@ -35,21 +35,14 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -63,6 +56,7 @@ float sdf_Objects( Vector tv ){
 //used in subsurface scattering: right now we keep scattering if we are inside of this object!
 bool inside_Object( Vector tv ){
     return false;
+    //alternate: scatter inside the bottle
     //return inside(tv,bottle);
 }
 
@@ -71,8 +65,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, gin);

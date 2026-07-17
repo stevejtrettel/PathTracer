@@ -1,6 +1,6 @@
 //-------------------------------------------------
 // OBJECTS OF THE SCENE
-// Combined: cubic surface (left) + blowup diagram plate (right)
+// Combined: cubic surface on pedestal (right) + blowup diagram plate standing vertical on pedestal (left)
 //-------------------------------------------------
 
 

@@ -24,6 +24,7 @@ void buildObjects(){
 
 
     donut.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.6,0.99);
+    //alternate material experiments:
     //donut.mat.diffuseColor=0.6*(vec3(1.)-4.*vec3(0.2,0.03,0.0));
     //donut.mat.absorbColor= 4.*0.01*vec3(0.2,0.04,0.0);
     //donut.mat.emitColor= scratch1*vec3(0.5,0.1,0.0);
@@ -53,21 +54,14 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -88,8 +82,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, layerDonut);

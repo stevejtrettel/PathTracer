@@ -14,7 +14,6 @@ void buildObjects(){
     float specularity, roughness;
     vec3 brownAbsorb=(vec3(1.)-vec3(204./255.,142./255.,105./255.));
     vec3 redAbsorb=vec3(0.2,1.,0.6);
-    vec3 whiskey=vec3(0.18,0.43,0.62);
 
 
 
@@ -24,6 +23,7 @@ void buildObjects(){
     mobius.width =0.4;
     mobius.thickness=0.04;
     mobius.offset=false;
+    //alternate material:
     //mobius.borderMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,scratch2);
 
     mobius.bandMat=makeGlass(30.*(0.75*brownAbsorb+0.5*redAbsorb),1.5,0.99);
@@ -33,6 +33,7 @@ void buildObjects(){
     mobius.bandMat.isotropicScatter=scratch1;
     mobius.bandMat.roughness=0.7;
 
+    //alternate material:
     //mobius.borderMat=makeMetal(vec3(0.02),specularity,0.4);
     mobius.borderMat=makeGlass(10.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
     mobius.borderMat.refractionChance=0.;
@@ -49,6 +50,7 @@ void buildObjects(){
     mobius2.thickness=0.04;
     mobius2.offset=true;
 
+    //alternate material:
     //mobius2.bandMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.1,scratch2);
     mobius2.bandMat=makeGlass(20.*vec3(1,0.6,0.3),1.5,0.99);
     mobius2.bandMat.refractionChance=0.;
@@ -63,6 +65,7 @@ void buildObjects(){
     mobius2.borderMat.meanFreePath=0.1;
     mobius2.borderMat.isotropicScatter=0.6;
     mobius2.borderMat.roughness=0.3;
+    //alternate material:
     //makeMetal(vec3(0.2),specularity,0.4);
 
 
@@ -71,21 +74,14 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -106,8 +102,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, mobius);

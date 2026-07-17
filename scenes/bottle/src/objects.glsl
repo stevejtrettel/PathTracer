@@ -2,7 +2,7 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/shapes/bottle.glsl;
+#include ../../../glsl/objects/shapes/bottle.glsl
 
 
 //set the names of objects contained in the scene
@@ -20,10 +20,9 @@ void buildObjects(){
     bottle.smoothJoin=0.3;
     bottle.bump=1.;
 
-    vec3 purpleScatter = vec3(0.25,0.65,0.4);
-    vec3 greenGlass = vec3(0.3,0.05,0.2);
+    vec3 greenScatter = vec3(0.25,0.65,0.4);
 
-    bottle.mat=makeGlass(1.5*purpleScatter,1.5,0.95);
+    bottle.mat=makeGlass(1.5*greenScatter,1.5,0.95);
     bottle.mat.refractionChance=0.;
     bottle.mat.subSurface=true;
     bottle.mat.meanFreePath=0.5*scratch2;
@@ -35,21 +34,14 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -70,8 +62,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, bottle);

@@ -18,6 +18,7 @@ void buildEnvironment(){
     float lightIntensity;
 
     //----------- LIGHT 1 -------------------------
+//alternate: sphere light (currently ceiling-only lighting)
 //    light.frame=makeFrame(vec3(-12,8,2));
 //    light.radius=0.5;
 //
@@ -29,7 +30,6 @@ void buildEnvironment(){
     // THE WALLS
     //------------------------------------
     vec3 color=0.3*vec3(171,203,240)/255.;//sky blue
-    float specularity=0.;
     float roughness=0.1;
 
     //----------- THE FLOOR -------------------------
@@ -82,6 +82,7 @@ float trace_Environment(Vector tv ){
 
     float dist=maxDist;
 
+   //alternate: sphere light (currently ceiling-only lighting)
    // dist = min(dist, trace(tv,light));
 
     dist=min(dist, trace(tv, bottomWall));
@@ -116,6 +117,7 @@ float sdf_Environment(Vector tv ){
 
 void setData_Environment( inout Path path ){
 
+   //alternate: sphere light (currently ceiling-only lighting)
    // setData(path, light);
 
     setData(path, bottomWall);

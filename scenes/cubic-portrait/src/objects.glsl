@@ -1,6 +1,6 @@
 //-------------------------------------------------
 // OBJECTS OF THE SCENE
-// Combined: cubic surface (left) + blowup diagram plate (right)
+// Combined: stretched cubic surface above blowup diagram plate on legs, both centered (portrait framing)
 //-------------------------------------------------
 
 
@@ -301,7 +301,7 @@ void buildObjects() {
     xzRot = mat2(ca, sa, -sa, ca);
     xzRotInv = mat2(ca, -sa, sa, ca);
 
-    // === SURFACE GROUP (left) ===
+    // === SURFACE GROUP ===
 
     surface.frame = makeFrame(SURFACE_POS);
     surface.scale = 1.0;
@@ -335,7 +335,7 @@ void buildObjects() {
     chain.le = 0.06;
     chain.mat = makeMetal(vec3(0.04, 0.04, 0.05), 0.3, 0.5);
 
-    // === PLATE GROUP (right, sitting on floor) ===
+    // === PLATE GROUP ===
 
     plate.frame = makeFrame(PLATE_POS);
     plate.sides = vec3(PLATE_RADIUS, 0.05, PLATE_RADIUS);
@@ -357,7 +357,7 @@ void buildObjects() {
     planarConics.radius = 0.02;
     planarConics.mat = makeMetal(vec3(0.85, 0.6, 0.15), 0.6, 0.2);
 
-    // === PLATE LEGS (glass cylinders at corners) ===
+    // === PLATE LEGS (glass cylinders — Cones with flare=1 — at corners) ===
     float legInset = PLATE_RADIUS - 0.15;
     float legMidY = FLOOR_Y + LEG_HEIGHT * 0.5;
     Material legMat = makeGlass(vec3(0.1, 0.05, 0.1), 1.5, 0.98);

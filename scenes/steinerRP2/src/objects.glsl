@@ -22,14 +22,14 @@ Variety var;
 
 void buildObjects(){
 
-    vec3 pinkScatter = vec3(0.25,0.65,0.7);
+    vec3 tealScatter = vec3(0.25,0.65,0.7);
 
     var.frame=makeFrame(vec3(-2,1.5,-2));
     var.smoothing =0.065;
     var.scale=1.;
     var.thickness = vec2(0.0075,0.0);
 
-    var.mat=makeGlass(30.*pinkScatter,1.5,0.99);
+    var.mat=makeGlass(30.*tealScatter,1.5,0.99);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.2*scratch2;
@@ -41,21 +41,14 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -76,8 +69,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, var);

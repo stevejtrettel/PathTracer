@@ -10,13 +10,12 @@ Bunny bunny;
 
 void buildObjects(){
 
-    vec3 pinkScatter = vec3(0.25,0.65,0.7);
-    vec3 greenGlass = vec3(0.3,0.05,0.2);
+    vec3 magentaGlass = vec3(0.3,0.05,0.2);
 
     bunny.frame=makeFrame(vec3(0,0,0));
     bunny.scale=2.;
 
-    bunny.mat=makeGlass(greenGlass,1.5,0.95);
+    bunny.mat=makeGlass(magentaGlass,1.5,0.95);
 
     bunny.mat.refractionChance=0.;
     bunny.mat.subSurface=true;
@@ -24,7 +23,7 @@ void buildObjects(){
     bunny.mat.isotropicScatter=scratch1;
     bunny.mat.roughness=0.0;
 
-//    //make the bunny glow
+//    //alternate: emissive bunny — make the bunny glow
 //    bunny.mat.diffuseColor=vec3(1);
 //    bunny.mat.absorbColor=vec3(0.1);
 //    bunny.mat.emitColor =  0.4*scratch2*vec3(1.,0.15,0.);
@@ -35,21 +34,14 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -62,7 +54,6 @@ float sdf_Objects( Vector tv ){
 
 //used in subsurface scattering: right now we keep scattering if we are inside of this object!
 bool inside_Object( Vector tv ){
-    //return false;
     return inside(tv,bunny);
 }
 
@@ -71,8 +62,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, bunny);

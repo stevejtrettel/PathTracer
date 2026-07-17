@@ -3,9 +3,6 @@
 //-------------------------------------------------
 
 #include ../../../glsl/objects/fractals/apollonianGasket.glsl
-//-------------------------------------------------
-// OBJECTS OF THE SCENE
-//-------------------------------------------------
 
 //set the names of objects contained in the scene
 Gasket gasket;
@@ -23,6 +20,7 @@ void buildObjects(){
     color= vec3(0.4,0.3,0.2);
     specularity=0.5;
     roughness=0.01;
+    //alternate materials:
     // gasket.mat= makeMetal(color,specularity,roughness);
     // makeDielectric(color,specularity,roughness);
     //  gasket.mat.surfaceEmit=0.1*vec3(0.02,0.02,0.04);
@@ -34,21 +32,14 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -68,8 +59,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, gasket);

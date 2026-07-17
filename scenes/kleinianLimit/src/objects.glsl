@@ -19,6 +19,8 @@ void buildObjects(){
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;
+
+    //alternate materials:
     //klein.mat=makeDielectric(color,specularity,roughness);
 
     klein.mat=makeGlass(7.*vec3(0.4,0.25,0.05),1.5,0.95);
@@ -33,7 +35,6 @@ void buildObjects(){
     //vec3(1)-0.9*vec3(0,0.65,0.35);
     //klein.mat.emitColor =  0.4*scratch2*vec3(1.,0.15,0.);
     //klein.mat.surfaceEmit =  0.1*scratch3*vec3(0.75,0.25,0.);
-    //vec3(0.01);
     //vec3(1)-0.9*vec3(0.3,0.2,0.6);
     klein.mat.refractionChance=0.;
     klein.mat.subSurface=true;
@@ -47,21 +48,14 @@ void buildObjects(){
 
 
 //-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
-
-
-//-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -81,8 +75,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, klein);

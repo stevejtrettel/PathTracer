@@ -2,8 +2,8 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/shapes/pint.glsl;
-#include ../../../glsl/objects/multiMaterial/beer.glsl;
+#include ../../../glsl/objects/shapes/pint.glsl
+#include ../../../glsl/objects/multiMaterial/beer.glsl
 
 //set the names of objects contained in the scene
 Pint pint;
@@ -27,28 +27,21 @@ void buildObjects(){
     beer.drink.subSurface=true;
     beer.drink.meanFreePath=0.1;
     beer.drink.isotropicScatter=0.;
-    //beer.drink.roughness=0.9;
+    //alternate: beer.drink.roughness=0.9;
 
 }
 
-
-
-//-------------------------------------------------
-//DO WE RENDER THEM?
-//-------------------------------------------------
 
 
 //-------------------------------------------------
 //Finding the Objects
 //-------------------------------------------------
 
-//copy as many lines of dist=min(dist, trace(tv, NEW_OBJ)), one for each object to be traced
 float trace_Objects( Vector tv ){
     float dist=maxDist;
     return dist;
 }
 
-//copy as many lines of dist=min(dist, sdf(tv, NEW_OBJ)), one for each object in the scene
 float sdf_Objects( Vector tv ){
 
     float dist=maxDist;
@@ -69,8 +62,6 @@ bool inside_Object( Vector tv ){
 //Setting the Objects Data
 //-------------------------------------------------
 
-
-//put multiple copies of "setData"; one for each object in the scene.
 
 void setData_Objects(inout Path path){
     setData(path, beer);

@@ -36,7 +36,6 @@ void buildEnvironment(){
     //------------------------------------
 
     vec3 color=vec3(0.12, 0.12, 0.14);
-    float specularity=0.;
     float roughness=0.1;
 
     //----------- THE FLOOR -------------------------
