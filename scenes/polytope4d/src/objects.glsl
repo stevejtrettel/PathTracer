@@ -1,4 +1,4 @@
-#include ../../../glsl/objects/polytopes/Polytope4D.glsl
+#include ../../../glsl/objects/polytopes/polytope4D.glsl
 
 
 //-------------------------------------------------

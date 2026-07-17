@@ -2,7 +2,7 @@
 
 struct Polytope4D{
 
-//these will all be set by 'make hypercube' or 'make24' etc
+//these will all be set by makeHypercube() or make24Cell() etc
     vec4 nc;
     vec4 nd;
     vec4 pVec;
@@ -82,23 +82,6 @@ Polytope4D makePolytope4D(int type, vec4 coords){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //-------------------------------------------
 //CREATION FUNCTIONS FOR SPECIFIC POLYTOPES
 //-------------------------------------------
@@ -143,12 +126,6 @@ void set16Cell(inout Polytope4D poly){
 Polytope4D make16Cell(){
     return makePolytope4D(4, vec4(0,0,0,1));
 }
-
-
-
-
-
-
 
 
 void set120Cell(inout Polytope4D poly){

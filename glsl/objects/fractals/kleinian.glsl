@@ -15,12 +15,13 @@ struct Kleinian{
 
 //some background functions used in both:
 //sphere inversion
-bool SI=true;
-vec3 InvCenter=vec3(0,1,1);
+const bool SI=true;
+const vec3 InvCenter=vec3(0,1,1);
+//alternate inversion centers:
 //vec3(0.25,1,.5);
 //vec3(1,1,0.);
 
-float rad=0.8;
+const float rad=0.8;
 
 vec2 wrap(vec2 x, vec2 a, vec2 s){
     x -= s;
@@ -31,18 +32,19 @@ void TransA(inout vec3 z, inout float DF, float a, float b){
     float iR = 1. / dot(z,z);
     z *= -iR;
     z.x = -b - z.x; z.y = a + z.y;
-    DF *= iR;//max(1.,iR);
+    DF *= iR;
 }
 
 
 //This is the SEAHORSE FUNCTION
 // Jos Leys & Knighty https://www.shadertoy.com/view/XlVXzh
-vec2 box_size = vec2(-0.40445, 0.34) * 2.;
+const vec2 box_size = vec2(-0.40445, 0.34) * 2.;
 
 float SeahorseKleinian(vec3 z)
 {
 
     float t = 0.;
+    //alternate parameter values (the originals, used by JosKleinian below):
     //float KleinR = 1.95859103011179;
     //float KleinI = 0.0112785606117658;
     float KleinR = 1.5 + .39;
@@ -56,8 +58,6 @@ float SeahorseKleinian(vec3 z)
         d2=d*d;
         z=(rad*rad/d2)*z+InvCenter;
     }
-
-    // vec3 orbitTrap = vec3(1e20);
 
     float DE = 1e12;
     float DF = 1.;
@@ -80,20 +80,18 @@ float SeahorseKleinian(vec3 z)
         //If the iterated points enters a 2-cycle , bail out.
         if(dot(z-llz,z-llz) < 1e-5) {break;}
 
-        //Store prévious iterates
+        //Store previous iterates
         llz=lz; lz=z;
-
-        // orbitTrap = min(orbitTrap, z);
     }
 
     float y =  min(z.y, a - z.y);
     DE = min(DE, min(y, .3) / max(DF, 2.));
+    //SI distance correction, deliberately left disabled here; JosKleinian (below) runs with it enabled
     //    if (SI) {
     //        DE = DE * d2 / (rad + d * DE);
     //    }
 
     return 0.75*DE;
-    // return vec4(DE, orbitTrap);
 }
 
 
@@ -141,7 +139,7 @@ float  JosKleinian(vec3 z)
         //If the iterated points enters a 2-cycle , bail out.
         if(dot(z-llz,z-llz) < 1e-5) {break;}
 
-        //Store prévious iterates
+        //Store previous iterates
         llz=lz; lz=z;
     }
 

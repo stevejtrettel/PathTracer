@@ -2,7 +2,7 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/fractals/apolonianGasket.glsl
+#include ../../../glsl/objects/fractals/apollonianGasket.glsl
 //-------------------------------------------------
 // OBJECTS OF THE SCENE
 //-------------------------------------------------

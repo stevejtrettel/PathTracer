@@ -1,13 +1,13 @@
 
 
 
-float maxcomp(in vec3 p) { return max(p.x, max(p.y, p.z)); }
+float menger_maxcomp(in vec3 p) { return max(p.x, max(p.y, p.z)); }
 
 
-float sdBox(vec3 p, vec3 b)
+float menger_sdBox(vec3 p, vec3 b)
 {
     vec3  di = abs(p) - b;
-    float mc = maxcomp(di);
+    float mc = menger_maxcomp(di);
     return min(mc, length(max(di, 0.0)));
 }
 
@@ -15,11 +15,13 @@ float sdBox(vec3 p, vec3 b)
 float sdf_menger(in vec3 p)
 {
 
+    //cheap bounding cull: outside the sphere of radius 2, skip the iteration
+    //and return a conservative underestimate of the distance
     if(length(p)>2.){
         return length(p)-1.9;
     }
 
-    float d = sdBox(p, vec3(1.0));
+    float d = menger_sdBox(p, vec3(1.0));
 
     float s = 1.0;
     for (int m = 0; m < 7; ++m)
@@ -40,16 +42,8 @@ float sdf_menger(in vec3 p)
 }
 
 
-
-
-
-
-
-
-
-
 //-------------------------------------------------
-//The OBJECT sdf
+//The MENGER SPONGE sdf
 //-------------------------------------------------
 
 //the data of a menger sponge is its frame and size
