@@ -1,23 +1,24 @@
 # PathTracer
 
 A GPU path tracer for photorealistic mathematical rendering, written from scratch in GLSL,
-with a thin three.js/JavaScript harness. Images are produced by Monte Carlo integration over
-light paths, accumulated frame-by-frame in a full-screen shader.
+with a dependency-free raw-WebGL2 JavaScript harness. Images are produced by Monte Carlo
+integration over light paths, accumulated frame-by-frame in a full-screen shader.
 
 ## Running
 
 ```
 npm install
-npm run dev <scene-name>        # e.g.  npm run dev sphere
+npm run dev                     # serve everything; / is a gallery of all scenes
+npm run dev <scene-name>        # same, but open that scene  (e.g. npm run dev sphere)
+npm run build <scene-name>      # build one scene into dist/<scene-name>/
 ```
 
-Run `npm run dev` with no argument to list the available scenes.
-`npm run build <scene-name>` builds a scene into `dist/<scene-name>/`.
+Each scene is its own Vite page (`scenes/<name>/index.html`); the root `index.html`
+is a gallery linking to them all. Both are generated — after adding or removing a
+scene folder, run `node scripts/gen-pages.mjs` to regenerate them.
 
-Under the hood (`scripts/run-example.mjs`), the script rewrites the single
-script tag in `index.html` to point at `example/<scene-name>/main.js`, then
-launches vite — so `index.html` always reflects the last scene you ran, and
-editing the tag by hand still works too.
+`node scripts/render-test.mjs <scene>...` headlessly screenshots scenes into
+`render-tests/` — useful for checking nothing broke after engine changes.
 
 ## Architecture
 
@@ -84,15 +85,23 @@ void buildObjects(){
 
 ## Writing a scene
 
-A scene is a folder `example/<name>/` containing `main.js` plus `src/` with three files:
+A scene is a folder `scenes/<name>/` containing a boilerplate `main.js` (seven lines:
+import the three `src/` files, call `createScene`) plus `src/` with three files:
 
-**`src/settings.js`** — must default-export `{uiParams, location}`:
-- `uiParams`: `aperture, focalLength, exposure, focusHelp, fov, extra, extra2, extra3, extra4`
-  (all nine required; `extra`–`extra4` are free scene parameters wired to UI sliders)
-- `location`: `{position: [x,y,z], facing: [9 entries, row-major 3x3 rotation]}`
+**`src/settings.js`** — must default-export `{uiParams, location}`, optionally
+`params`, `sky`, and `aspect`:
+- `uiParams`: `aperture, focalLength, exposure, focusHelp, fov, scratch1..scratch4`
+  (`scratch1`–`scratch4` are free scene parameters wired to UI sliders)
+- `location`: `{position: [x,y,z], facing: [9 entries, 3x3 rotation]}`
+- `params` (optional): named scene knobs — each entry
+  `{name, label, min, max, step, value}` generates a GLSL uniform, a GUI slider,
+  and a line in saved settings; referenced by `name` in the scene's GLSL
+- `sky` (optional): `{type:'image', src}` (default `/assets/office.jpg`),
+  `{type:'solid', color}`, or `{type:'gradient', top, bottom}`
 
-Use the UI's **Download Settings** button to capture the current camera/parameters as a
-ready-made `settings.js`.
+In dev mode the UI's **Save to Scene** button writes the current camera/parameters
+straight back into the scene's `settings.js`; **Download Settings** downloads the
+same file, and **Copy Pose** puts just the camera pose on the clipboard.
 
 **`src/objects.glsl`** — must define:
 ```glsl
@@ -106,25 +115,25 @@ void  setData_Objects(inout Path path);
 **`src/environment.glsl`** — must define the analogous
 `buildEnvironment / trace_Environment / sdf_Environment / setData_Environment`.
 
-`main.js` is currently identical boilerplate in every scene — copy it from `example/sphere/`.
-Larger scenes may split generated geometry data into extra files (see the `cubic*` scenes'
-`scene2d.glsl`/`scene3d.glsl`) and `#include` them from `objects.glsl`.
+Larger scenes may split generated geometry data into extra files (see the `cubic*` scenes)
+and `#include` them from `objects.glsl`.
 
-The easiest start: copy `example/sphere/` wholesale, point `index.html` at it, and edit.
+The easiest start: copy `scenes/sphere/` wholesale, rename it, and run
+`node scripts/gen-pages.mjs` to give it a page and a gallery entry.
 
 ## Controls
 
-- Arrow keys: translate; `'`/`/`: up/down; WASD + QE: rotate
-- UI panel: camera (aperture / focal length / fov / exposure, with a focus-help overlay),
-  the four `extra` sliders, preview resolution, auto-save, and tiled "HD" panel rendering
-  for output larger than the screen.
-- **Save Image** downloads the current canvas; **Download Settings** downloads a
-  `settings.js` capturing the current camera and parameters.
+- Keyboard flying: arrow keys translate; `'`/`/` move up/down; WASD + QE rotate.
+  Hold Shift for a speed boost; the fly Speed slider lives on the Camera tab.
+- Mouse orbit (toggle on the Camera tab): drag to orbit the origin, pinch/scroll to zoom.
+- UI panel tabs: **Camera** (aperture / focal length / fov / exposure, focus-help
+  overlay, speed, orbit, Copy Pose / Save to Scene / Download Settings),
+  **Render** (preview scale, samples, Reset), **Export** (Save Image, Auto Save,
+  and tiled HD rendering with a Stop button for output larger than the screen).
+- A shader-error overlay reports GLSL compile errors in-page during development.
 
 ## Notes
 
-- The sky texture is currently hardcoded to `/assets/office.jpg` in
-  `js/shaderData/buildTraceShader.js`.
 - Every ray origin is offset by the legacy constant `CAMERA_OFFSET` in
   `glsl/tracer/2Space/camera.glsl`; saved scene settings were authored with it baked in.
-- `final/` holds finished renders; `assets/` holds environment textures.
+- Environment textures live in `public/assets/`.
