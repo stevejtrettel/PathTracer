@@ -328,9 +328,9 @@ void buildObjects() {
 
     // === CHAIN (hanging surface from above) ===
     chain.center = SURFACE_POS + vec3(0, 0, 0.3);
+    chain.R = 0.1;
     chain.yBottom = SURFACE_POS.y + 2.0 * STRETCH_H - chain.R * 2.0;  // overlap into top of ellipsoid
     chain.yTop = 15.0;  // off screen above
-    chain.R = 0.1;
     chain.r = 0.025;
     chain.le = 0.06;
     chain.mat = makeMetal(vec3(0.04, 0.04, 0.05), 0.3, 0.5);

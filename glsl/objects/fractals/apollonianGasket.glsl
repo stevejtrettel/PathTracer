@@ -16,7 +16,16 @@ struct Gasket{
 //NOTE: the radius multiply is a shape parameter (inversion radius), not placement
 float sdf( vec3 p, Gasket gasket ){
 
+    //the folded fractal is infinite and space-filling: clip it to the
+    //unit ball of the local frame so the object is actually bounded
+    float ballDist = length(p) - 1.;
+
     p=gasket.radius*p;
+
+    //conformal factor of the inversion below: distances computed in the
+    //inverted coordinates are stretched by 3/|p|^2, so the result must be
+    //scaled back by m/3 to be a true distance estimate
+    float m = dot(p,p);
 
     p /= dot(p,p);
     p += vec3(1.0);
@@ -36,8 +45,8 @@ float sdf( vec3 p, Gasket gasket ){
         scale *= k;
     }
     float  res = min(abs(p.z)+abs(p.x),min(abs(p.x)+abs(p.y),abs(p.y)+abs(p.z)))+0.2;
-    float dist= 0.25*res/scale;
-    return dist;
+    float dist= 0.25*res/scale * m/3.;
+    return max(dist, ballDist);
 }
 
 
