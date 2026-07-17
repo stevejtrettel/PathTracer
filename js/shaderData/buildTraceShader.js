@@ -11,7 +11,8 @@ import {knobUniformDecls, knobUniforms, withValues} from "./knobs.js";
 import {engineKnobs} from "./engineKnobs.js";
 
 
-//the sky a ray sees when it escapes, from settings.sky (default: office image):
+//the sky a ray sees when it escapes, from settings.sky (default: a dark
+//neutral solid — scenes opt into an image sky explicitly, see scenes/skyDemo):
 //  '/path.jpg'                                     image (shorthand)
 //  { type:'image',    src:'/path.jpg' }            image
 //  { type:'solid',    color:[r,g,b] }              flat color
@@ -21,7 +22,7 @@ const SKY_MODE = {image: 0, solid: 1, gradient: 2};
 //a plain DESCRIPTOR (no GL object): the uniforms are assembled before the WebGL
 //context exists, so PathTracer builds the actual sky texture from this later.
 function buildSky(sky){
-    if(sky === undefined) sky = {type: 'image', src: '/assets/office.jpg'};
+    if(sky === undefined) sky = {type: 'solid', color: [0.05, 0.05, 0.07]};
     if(typeof sky === 'string') sky = {type: 'image', src: sky};
 
     let mode = SKY_MODE[sky.type] ?? 0;

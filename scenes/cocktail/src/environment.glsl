@@ -1,132 +1,59 @@
 //-------------------------------------------------
 // ENVIRONMENT OF THE SCENE
+// a RoomBox (glsl/objects/environments/roomBox.glsl) plus lights
 //-------------------------------------------------
 
-
-
-//set the names of the lights:
+RoomBox room;
 Sphere light;
-
-//set the names of the walls:
-Plane bottomWall, topWall, leftWall, rightWall, backWall, frontWall;
-
 
 
 void buildEnvironment(){
 
-    vec3 lightColor;
-    float lightIntensity;
-
-    //----------- LIGHT 1 -------------------------
-    light.frame=makeFrame(vec3(-7,4,2));
-    light.radius=1.5;
-    lightColor= vec3(0.9);
-    lightIntensity=100.;
-    light.mat=makeLight(lightColor,lightIntensity);
-
-    //------------------------------------
-    // THE WALLS
-    //------------------------------------
+    //----------- THE ROOM -------------------------
+    room.low   = -1.;   room.high  = 14.;   //y of floor / ceiling
+    room.left  = -20.;   room.right = 8.5;   //x of left / right wall
+    room.front = -20.;   room.back  = 10.;   //z of front / back wall
 
     vec3 color=0.15*vec3(171,203,240)/255.;//sky blue
     float roughness=0.1;
 
-    //----------- THE FLOOR -------------------------
-    bottomWall.frame=makeFrameNormal(vec3(0,-1,0), vec3(0,1,0));
-    bottomWall.mat=makeDielectric(color,0.0,roughness);
+    room.floorMat = makeDielectric(color,0.0,roughness);
+    room.ceilMat  = makeLight(vec3(1,1,1),1.*scratch4);
+    room.leftMat  = makeDielectric(color,0.0,roughness);
+    room.rightMat = makeDielectric(color,0.0,roughness);
+    room.frontMat = makeDielectric(color,0.0,roughness);
+    room.backMat  = makeDielectric(color,0.0,roughness);
 
-    //----------- THE CEILING -------------------------
-    topWall.frame=makeFrameNormal(vec3(0,14,0), vec3(0,-1,0));
-    topWall.mat=makeLight(vec3(1,1,1),1.*scratch4);
-
-
-    //----------- THE FRONT -------------------------
-    frontWall.frame=makeFrameNormal(vec3(0,0,-20), vec3(0,0,1));
-    frontWall.mat=makeDielectric(color,0.0,roughness);
-
-
-    //----------- THE BACK -------------------------
-    backWall.frame=makeFrameNormal(vec3(0,0,10), vec3(0,0,-1));
-    backWall.mat=makeDielectric(color,0.0,roughness);
-
-
-    //----------- THE LEFT -------------------------
-    leftWall.frame=makeFrameNormal(vec3(-20,0,0), vec3(1,0,0));
-    leftWall.mat=makeDielectric(color,0.0,roughness);
-
-
-
-    //----------- THE RIGHT -------------------------
-    rightWall.frame=makeFrameNormal(vec3(8.5,0,0), vec3(-1,0,0));
-    rightWall.mat=makeDielectric(color,0.0,roughness);
+    //----------- LIGHT 1 -------------------------
+    light.frame=makeFrame(vec3(-7,4,2));
+    light.radius=1.5;
+    light.mat=makeLight(vec3(0.9),100.);
 
 }
-
-
-
-
-
-
-
-
-
 
 
 //-------------------------------------------------
 //Finding the Environment
 //-------------------------------------------------
 
-
 float trace_Environment(Vector tv ){
-
     float dist=maxDist;
-
     dist = min(dist, trace(tv,light));
-
-    dist=min(dist, trace(tv, bottomWall));
-    dist=min(dist, trace(tv, topWall));
-    dist=min(dist, trace(tv, frontWall));
-    dist=min(dist, trace(tv, backWall));
-    dist=min(dist, trace(tv, leftWall));
-    dist=min(dist, trace(tv, rightWall));
-
+    dist = min(dist, trace(tv,room));
     return dist;
-
 }
 
 float sdf_Environment(Vector tv ){
-
-    float dist=maxDist;
-
-    //nothing to raymarch!
-
-    return dist;
-
+    //nothing to raymarch
+    return maxDist;
 }
 
 
-
-
 //-------------------------------------------------
-//Setting the Walls Data
+//Setting the Environment Data
 //-------------------------------------------------
-
-
 
 void setData_Environment( inout Path path ){
-
     setData(path, light);
-
-    setData(path, bottomWall);
-
-    setData(path, topWall);
-
-    setData(path, frontWall);
-
-    setData(path, backWall);
-
-    setData(path, leftWall);
-
-    setData(path, rightWall);
-
+    setData(path, room);
 }

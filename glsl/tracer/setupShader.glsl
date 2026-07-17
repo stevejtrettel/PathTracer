@@ -11,3 +11,4 @@
 #include ../objects/objectAPI.glsl
 #include ../objects/computations.glsl
 #include ../objects/basic/_basic.glsl
+#include ../objects/environments/roomBox.glsl
