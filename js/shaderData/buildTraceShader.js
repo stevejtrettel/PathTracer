@@ -52,8 +52,8 @@ let buildTraceShader= function(sceneData, settings){
 
     //all tunable controls are knobs: the engine-owned camera/render/scratch
     //knobs (values from settings.uiParams) plus this scene's named params.
-    //One generator produces their GLSL uniform decls, three.js uniforms, GUI,
-    //and serialization (see js/shaderData/knobs.js).
+    //One generator produces their GLSL uniform decls, uniform objects, and
+    //serialization (see js/shaderData/knobs.js).
     let sceneParams = settings.params ?? [];
     let allKnobs = [...withValues(engineKnobs, uiParams), ...sceneParams];
 
@@ -65,7 +65,7 @@ let buildTraceShader= function(sceneData, settings){
 
     let tracerUniforms = {
 
-        //default resultion and framenumber
+        //default resolution and framenumber
         iResolution: {
             value: new Vector3(window.innerWidth, window.innerHeight, 0.)
         },

@@ -1,5 +1,5 @@
 import Panel from "./gui/Panel.js";
-import {el, control, toggle, button, numberField, select, section, collapsible} from "./gui/widgets.js";
+import {el, control, toggle, button, numberField, select, section, collapsible, isTypingTarget, fitAspect} from "./gui/widgets.js";
 import {serializeKnobs, serializeUiParams, withValues, toUniformValue} from "./shaderData/knobs.js";
 import {cameraKnobs, renderKnobs, scratchKnobs, engineKnobs} from "./shaderData/engineKnobs.js";
 
@@ -28,19 +28,6 @@ const ASPECTS = [
     ['portrait √2', 1/Math.SQRT2],
 ];
 
-// largest {x,y} box of the given width/height ratio that fits the window
-// (mirrors resolutionFor() in createScene.js; duplicated to avoid a circular
-// import, since createScene imports UI).
-function fitAspect(aspect){
-    let w = window.innerWidth, h = window.innerHeight;
-    if(aspect){
-        if(w / h > aspect) w = Math.round(h * aspect);
-        else               h = Math.round(w / aspect);
-    }
-    return {x: w, y: h};
-}
-
-
 class UI{
     constructor(pathtracer, stats){
 
@@ -48,9 +35,7 @@ class UI{
         //a field so 'x' still types normally.
         window.addEventListener('keydown', (e) => {
             if(e.key !== 'x' && e.key !== 'X') return;
-            let a = document.activeElement, tag = a && a.tagName;
-            if(tag === 'TEXTAREA' || tag === 'SELECT' ||
-               (tag === 'INPUT' && (a.type === 'number' || a.type === 'text'))) return;
+            if(isTypingTarget(document.activeElement)) return;
             pathtracer.saveImage();
         });
 
@@ -71,9 +56,23 @@ class UI{
         //the one place that knows a knob drives a uniform. Injected into every
         //widget as its onChange; also records the value for serialization.
         const wire = (knob) => (value) => {
+            //the HD render lock: CSS blocks pointer input, this blocks the
+            //keyboard paths (slider nudge keys, tab-focused controls)
+            if(pathtracer.rendering) return;
             this.values[knob.name] = value;   // stored as-is (array for color/vec2) for serialization
             pathtracer.tracer.updateUniforms({ [knob.name]: toUniformValue(knob, value) });
             pathtracer.reset();
+        };
+
+        //Save-to-Scene (dev only: the dev server does the write) + the offline
+        //Download fallback; the same pair appears on the Camera and Export tabs
+        const saveButtons = (tabBody) => {
+            if(import.meta.env.DEV){
+                const saveBtn = button('Save to Scene', () => this.saveToScene(pathtracer, sceneParams, saveBtn));
+                saveBtn.dataset.label = 'Save to Scene';
+                tabBody.append(saveBtn);
+            }
+            tabBody.append(button('Download Settings', () => this.downloadSettings(pathtracer, sceneParams)));
         };
 
         const panel = new Panel();
@@ -107,9 +106,7 @@ class UI{
         const refreshPose = () => {
             let p = pathtracer.controls.position;
             pose.textContent = `x ${p.x.toFixed(2)}   y ${p.y.toFixed(2)}   z ${p.z.toFixed(2)}`;
-            requestAnimationFrame(refreshPose);
         };
-        refreshPose();
 
         const home = pathtracer.settings.location;
         cam.append(button('Reset Camera', () => {
@@ -129,70 +126,57 @@ class UI{
         //straight over the pose in the scene's settings.js (skips the download)
         const copyBtn = button('Copy Pose', () => {
             navigator.clipboard.writeText(pathtracer.printLocation()).then(
-                () => { copyBtn.textContent = 'Copied!';     setTimeout(() => copyBtn.textContent = 'Copy Pose', 1000); },
-                () => { copyBtn.textContent = 'Copy failed'; setTimeout(() => copyBtn.textContent = 'Copy Pose', 1000); },
+                () => this.flash(copyBtn, 'Copied!'),
+                () => this.flash(copyBtn, 'Copy failed'),
             );
         });
+        copyBtn.dataset.label = 'Copy Pose';
         cam.append(copyBtn);
 
-        //Save to Scene: write the live settings/pose straight into the scene's
-        //settings.js (dev only — the dev server does the write). Download is the
-        //offline fallback (and the right tool in a build).
-        if(import.meta.env.DEV){
-            const saveBtn = button('Save to Scene', () => this.saveToScene(pathtracer, sceneParams, saveBtn));
-            saveBtn.dataset.label = 'Save to Scene';
-            cam.append(saveBtn);
-        }
-
-        //aim the camera here, then save the pose (settings.js) without leaving the tab
-        cam.append(button('Download Settings', () => this.downloadSettings(pathtracer, sceneParams)));
+        saveButtons(cam);
 
         //--- Render: quality + live image ---
         const ren = panel.tab('Render');
         for(let k of renKnobs) ren.append(control(k, wire(k)));   // maxBounces
 
         //render scale: the tracer/accumulate resolution as a fraction of the
-        //window. Full = native (resizes everything); Half/Quarter render smaller
-        //and let the display stretch them up (pixelated but fast) — Quarter is
-        //the old "preview".
-        ren.append(select('Scale', [['Full', 1], ['Half', 0.5], ['Quarter', 0.25]], 1, (scale) => {
-            let w = window.innerWidth, h = window.innerHeight;
-            if(scale === 1){
-                pathtracer.resize({x: w, y: h});
-            } else {
-                let r = {x: Math.floor(scale * w), y: Math.floor(scale * h)};
-                pathtracer.tracer.setSize(r);
-                pathtracer.accumulate.setSize(r);
-            }
+        //CURRENT canvas (so a chosen aspect is respected). Full = native;
+        //Half/Quarter render smaller and let the display stretch them up
+        //(pixelated but fast) — Quarter is the old "preview".
+        let viewScale = 1;
+        const applyScale = () => {
+            let base = pathtracer.size;
+            let r = {x: Math.max(1, Math.floor(viewScale * base.x)),
+                     y: Math.max(1, Math.floor(viewScale * base.y))};
+            pathtracer.tracer.setSize(r);
+            pathtracer.accumulate.setSize(r);
             pathtracer.reset();
+        };
+        ren.append(select('Scale', [['Full', 1], ['Half', 0.5], ['Quarter', 0.25]], 1, (scale) => {
+            viewScale = scale;
+            applyScale();
         }));
 
-        //live aspect ratio: re-fit the canvas to a preset ratio. Preselects the
-        //scene's settings.aspect (so cubic-portrait/landscape land on √2).
+        //live aspect ratio: re-fit the canvas to a preset ratio, keeping the
+        //current Scale. Preselects the scene's settings.aspect (so
+        //cubic-portrait/landscape land on √2).
         ren.append(select('Aspect', ASPECTS, pathtracer.settings.aspect ?? null,
-            (aspect) => pathtracer.resize(fitAspect(aspect))));
+            (aspect) => { pathtracer.resize(fitAspect(aspect)); applyScale(); }));
 
         //samples accumulated (live) + restart accumulation
         ren.append(section('Samples'));
         const spp = el('div', 'gui-pose');
         ren.append(spp);
         const refreshSpp = () => {
-            spp.textContent = `${Math.floor(pathtracer.tracer.material.uniforms.frameNumber.value)} spp`;
-            requestAnimationFrame(refreshSpp);
+            spp.textContent = `${Math.floor(pathtracer.frameCount)} spp`;
         };
-        refreshSpp();
         ren.append(button('Reset', () => pathtracer.reset()));
 
         //--- Export: produce files ---
         const exp = panel.tab('Export');
 
         exp.append(button('Save Image', () => pathtracer.saveImage()));
-        if(import.meta.env.DEV){
-            const saveBtn = button('Save to Scene', () => this.saveToScene(pathtracer, sceneParams, saveBtn));
-            saveBtn.dataset.label = 'Save to Scene';
-            exp.append(saveBtn);
-        }
-        exp.append(button('Download Settings', () => this.downloadSettings(pathtracer, sceneParams)));
+        saveButtons(exp);
 
         //one unified autosave for the live view
         exp.append(section('Auto Save'));
@@ -236,16 +220,23 @@ class UI{
             panel.el.classList.toggle('rendering', pathtracer.rendering);
             if(pathtracer.hd && pathtracer.hd.active){
                 let pr = pathtracer.tracer.material.uniforms.panelToRender.value;
-                let fn = Math.floor(pathtracer.tracer.material.uniforms.frameNumber.value);
+                let fn = Math.floor(pathtracer.frameCount);
                 hdInfo.textContent = `tile ${pr + 1}/${pathtracer.hd.N} · ${fn}/${pathtracer.hd.spp} spp`;
             } else {
                 let s = fullSize();
                 let p = pathtracer.planHD(s.w, s.h, hd.maxTile);
                 hdInfo.textContent = `${s.w}×${s.h} · ${p.root}×${p.root} · ${p.tileW}×${p.tileH} tiles`;
             }
-            requestAnimationFrame(refreshHd);
         };
-        refreshHd();
+
+        //one shared per-frame refresh for all live readouts (pose, spp, HD)
+        const refreshUI = () => {
+            refreshPose();
+            refreshSpp();
+            refreshHd();
+            requestAnimationFrame(refreshUI);
+        };
+        refreshUI();
 
         const adv = collapsible('Advanced');
         exp.append(adv);
@@ -329,7 +320,10 @@ class UI{
             headers: {'Content-Type': 'application/json'},
             body:    JSON.stringify({scene, contents: this.settingsText(pathtracer, sceneParams)}),
         }).then(r => r.json()).then(
-            res => this.flash(btn, res.ok ? 'Saved!' : 'Failed'),
+            res => {
+                if(!res.ok && res.error) console.error('Save to Scene failed: ' + res.error);
+                this.flash(btn, res.ok ? 'Saved!' : 'Failed');
+            },
             ()  => this.flash(btn, 'Failed'),
         );
     }

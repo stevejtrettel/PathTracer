@@ -25,7 +25,7 @@ const renderKnobs = [
 
 // Always-present live-tweak scratchpad dials -> Parameters/Scene folder
 const scratchKnobs = [
-    { name: 'scratch1',  label: 'scratch1',  min: 0, max: 1, step: 0.001, value: 0, group: 'scratch' },
+    { name: 'scratch1', label: 'scratch1', min: 0, max: 1, step: 0.001, value: 0, group: 'scratch' },
     { name: 'scratch2', label: 'scratch2', min: 0, max: 1, step: 0.001, value: 0, group: 'scratch' },
     { name: 'scratch3', label: 'scratch3', min: 0, max: 1, step: 0.001, value: 0, group: 'scratch' },
     { name: 'scratch4', label: 'scratch4', min: 0, max: 1, step: 0.001, value: 0, group: 'scratch' },

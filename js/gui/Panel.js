@@ -7,10 +7,11 @@
 // pure functions (see widgets.js); Panel just holds and switches them.
 
 import './gui.css';
-import {el} from './widgets.js';
+import {el, isTypingTarget} from './widgets.js';
 
 
-// persisted panel state (open + active tab index) across reloads
+// persisted panel state (open + active tab index) across reloads.
+// one key for all scenes: the panel looks the same wherever you are.
 const STORE = 'pt-gui';
 function loadState(){
     try { return JSON.parse(localStorage.getItem(STORE)) || {}; }
@@ -21,7 +22,7 @@ function loadState(){
 class Panel{
     constructor(){
         this.el     = el('div', 'gui');
-        this.toggle = el('button', 'gui-hamburger', '☰');   // ☰
+        this.toggle = el('button', 'gui-hamburger', '☰');
         this.panel  = el('div', 'gui-panel');
         this.strip  = el('div', 'gui-tabs');
 
@@ -45,9 +46,7 @@ class Panel{
         //types in number/text inputs). Camera keys use event.code so 'h' is free.
         window.addEventListener('keydown', (e) => {
             if(e.key !== 'h' && e.key !== 'H') return;
-            let a = document.activeElement, tag = a && a.tagName;
-            if(tag === 'TEXTAREA' || tag === 'SELECT' ||
-               (tag === 'INPUT' && (a.type === 'number' || a.type === 'text'))) return;
+            if(isTypingTarget(document.activeElement)) return;
             this.setOpen(!this.open);
         });
     }

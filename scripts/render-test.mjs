@@ -4,7 +4,7 @@
 //
 // usage: node scripts/render-test.mjs [--budget ms] <scene> [<scene>...]
 import { spawn, execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -23,9 +23,21 @@ for (let i = 0; i < args.length; i++) {
   else scenes.push(args[i]);
 }
 
+const scenesList = () =>
+  readdirSync(path.join(root, 'scenes'), { withFileTypes: true })
+    .filter((d) => d.isDirectory() && existsSync(path.join(root, 'scenes', d.name, 'main.js')))
+    .map((d) => `  ${d.name}`)
+    .join('\n');
+
 if (!scenes.length) {
   console.error('usage: node scripts/render-test.mjs [--budget ms] <scene> [<scene>...]');
   process.exit(1);
+}
+for (const scene of scenes) {
+  if (!existsSync(path.join(root, 'scenes', scene, 'main.js'))) {
+    console.error(`Scene not found: scenes/${scene}\n\nusage: node scripts/render-test.mjs [--budget ms] <scene> [<scene>...]\n\nScenes:\n${scenesList()}`);
+    process.exit(1);
+  }
 }
 if (!existsSync(chrome)) {
   console.error(`Chrome not found at ${chrome} (set CHROME_BIN)`);
@@ -42,12 +54,14 @@ async function waitForServer(url, tries = 40) {
   return false;
 }
 
+let anyFailed = false;
+
 for (const scene of scenes) {
-  // capture stdout so we can read the ACTUAL port vite bound to — it picks
-  // 5174+ when 5173 is taken (e.g. another project's dev server), and screenshotting
-  // a hardcoded :5173 would then shoot the wrong app.
-  // dev with no scene arg: serve the whole array without --open (headless), then
-  // screenshot the scene's own page below
+  // Boot `dev` with no scene arg: serve the whole array without --open
+  // (headless), then screenshot the scene's own page below. Capture stdout so
+  // we can read the ACTUAL port vite bound to — it picks 5174+ when 5173 is
+  // taken (e.g. another project's dev server), and screenshotting a hardcoded
+  // :5173 would then shoot the wrong app.
   const server = spawn('node', ['scripts/run-example.mjs', 'dev'], {
     cwd: root, stdio: ['ignore', 'pipe', 'pipe'], detached: true,
   });
@@ -60,21 +74,33 @@ for (const scene of scenes) {
       const m = out.match(/127\.0\.0\.1:(\d+)/);
       if (m) port = m[1]; else await sleep(500);
     }
-    if (!port) { console.error(`${scene}: dev server never reported a port`); continue; }
+    if (!port) {
+      console.error(`FAILED: ${scene}: dev server never reported a port`);
+      anyFailed = true;
+      continue;
+    }
     const url = `http://127.0.0.1:${port}/scenes/${scene}/`;
     if (!(await waitForServer(url))) {
-      console.error(`${scene}: dev server ${url} never came up`);
+      console.error(`FAILED: ${scene}: dev server ${url} never came up`);
+      anyFailed = true;
       continue;
     }
     const shot = path.join(outDir, `${scene}.png`);
-    execFileSync(chrome, [
-      '--headless=new', '--enable-unsafe-swiftshader',
-      '--window-size=400,300', `--virtual-time-budget=${budget}`,
-      `--screenshot=${shot}`, url,
-    ], { stdio: 'ignore' });
-    console.log(`${scene}: ${shot} (port ${port})`);
+    try {
+      execFileSync(chrome, [
+        '--headless=new', '--enable-unsafe-swiftshader',
+        '--window-size=400,300', `--virtual-time-budget=${budget}`,
+        `--screenshot=${shot}`, url,
+      ], { stdio: 'ignore' });
+      console.log(`${scene}: ${shot} (port ${port})`);
+    } catch (err) {
+      console.error(`FAILED: ${scene}: ${err.message}`);
+      anyFailed = true;
+    }
   } finally {
     try { process.kill(-server.pid); } catch {}
     await sleep(500);
   }
 }
+
+if (anyFailed) process.exitCode = 1;

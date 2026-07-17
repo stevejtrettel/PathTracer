@@ -1,11 +1,11 @@
 //-------------------------------------------------
 // SHADER ERROR OVERLAY
 //-------------------------------------------------
-// Wired to renderer.debug.onShaderError (see createScene.js). When a scene's
-// shader fails to compile/link, three would otherwise leave a silent black
-// canvas; this surfaces the GLSL error on-screen — the message plus the offending
-// lines from the COMPILED fragment source (three concatenates every include and
-// prepends a prefix, so a bare line number is useless without the source).
+// Called from ComputeShader._buildProgram when a program fails to link. A
+// failed shader would otherwise be a silent black canvas; this surfaces the
+// GLSL error on-screen — the message plus the offending lines from the
+// COMPILED fragment source (every #include is concatenated and shimFragment
+// prepends a header, so a bare line number is useless without the source).
 //
 // Note: the line is in the compiled shader, not mapped back to the original
 // .glsl include file — that (a full source map across vite-plugin-glsl) is a
@@ -71,24 +71,21 @@ function sourceSnippet(source, lines){
 }
 
 
-// the onShaderError handler: (gl, program, vertexShader, fragmentShader)
+// the link-failure handler: (gl, program, vertexShader, fragmentShader)
 export function showShaderError(gl, program, vs, fs){
-    let fragLog = gl.getShaderInfoLog(fs).trim();
-    let vertLog = gl.getShaderInfoLog(vs).trim();
-    let progLog = gl.getProgramInfoLog(program).trim();
+    let fragLog = (gl.getShaderInfoLog(fs) || '').trim();
+    let vertLog = (gl.getShaderInfoLog(vs) || '').trim();
+    let progLog = (gl.getProgramInfoLog(program) || '').trim();
     let log = fragLog || vertLog || progLog || 'Unknown shader link error.';
 
     //the failing shader is (almost always) the fragment shader here
     let source  = gl.getShaderSource(fs) || '';
     let snippet = fragLog ? sourceSnippet(source, errorLines(fragLog)) : '';
 
-    //keep the console output too (the hook replaces three's default logging)
-    console.error('THREE shader error:\n' + log + (snippet ? '\n\n' + snippet : ''));
+    //keep the console output too
+    console.error('Shader error:\n' + log + (snippet ? '\n\n' + snippet : ''));
 
     let el = ensureBox();
     el.style.display = 'flex';
     el.body.textContent = log + (snippet ? '\n\n' + snippet : '');
 }
-
-
-export default showShaderError;

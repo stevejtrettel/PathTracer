@@ -1,6 +1,7 @@
 import "../style.css";
 
 import FpsMeter from "./FpsMeter.js";
+import {fitAspect} from "./gui/widgets.js";
 
 import PathTracer from "./PathTracer.js";
 import UI from "./UI.js";
@@ -40,7 +41,7 @@ function createScene({environment, objects, settings}){
     //initial resolution: settings.aspect (width/height) fits the largest box
     //of that ratio inside the window; omitted -> fill the window. Aspect is
     //also editable live in the Render panel.
-    let res = resolutionFor(settings.aspect);
+    let res = fitAspect(settings.aspect);
 
     //build and run the path tracer
     let pathtracer = new PathTracer(shaders, settings, res);
@@ -48,25 +49,12 @@ function createScene({environment, objects, settings}){
 
     function animate(){
         requestAnimationFrame(animate);
-        stats.begin();
         pathtracer.newFrame();
         stats.end();
     }
     animate();
 
     return pathtracer;
-}
-
-
-//largest {x,y} box of the given width/height ratio that fits in the window
-function resolutionFor(aspect){
-    let w = window.innerWidth;
-    let h = window.innerHeight;
-    if(aspect){
-        if(w / h > aspect){ w = Math.round(h * aspect); }
-        else             { h = Math.round(w / aspect); }
-    }
-    return {x: w, y: h};
 }
 
 

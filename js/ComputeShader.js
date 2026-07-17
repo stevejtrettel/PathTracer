@@ -7,8 +7,9 @@ import {showShaderError} from "./gui/ErrorOverlay.js";
 //-------------------------------------------------
 // Runs a fragment shader over a fullscreen triangle into a float render target,
 // ping-ponging two targets so a pass can read its own previous output. This is
-// the whole GPGPU core — no three.js. The public interface is preserved exactly
-// so PathTracer/UI are unchanged:
+// the whole GPGPU core — no three.js. The public interface is a small ABI shim
+// kept from the three.js era (callers read/write uniform .value directly); all
+// callers are owned code, so it could be collapsed someday:
 //   material.uniforms[name].value   (read/written directly by callers)
 //   render() renderToScreen() getData() updateUniforms(obj) setSize(res)
 //
@@ -45,6 +46,9 @@ function shared(gl){
         let vs = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vs, VERT_SRC);
         gl.compileShader(vs);
+        if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+            console.error('vertex shader failed to compile: ' + (gl.getShaderInfoLog(vs) || ''));
+        }
         s = { vs, vao: gl.createVertexArray() };
         glShared.set(gl, s);
     }
@@ -87,10 +91,14 @@ class ComputeShader {
         gl.attachShader(program, fs);
         gl.linkProgram(program);
 
-        //surface GLSL errors on-screen (was three's renderer.debug.onShaderError)
+        //surface GLSL errors on-screen (see gui/ErrorOverlay.js)
         if(!gl.getProgramParameter(program, gl.LINK_STATUS)){
             showShaderError(gl, program, vs, fs);
         }
+
+        //the linked program keeps its own copy; the shader object can go
+        //(vs is shared across programs, so it stays)
+        gl.deleteShader(fs);
         return program;
     }
 
@@ -124,6 +132,9 @@ class ComputeShader {
         let fbo = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+        if(gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE){
+            console.error('float render target incomplete — is EXT_color_buffer_float supported?');
+        }
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         return { tex, fbo, w, h };
     }
@@ -131,7 +142,13 @@ class ComputeShader {
     updateUniforms(obj){
         for(let key in obj){
             if(this.material.uniforms[key]) this.material.uniforms[key].value = obj[key];
-            else this.material.uniforms[key] = { value: obj[key] };
+            else {
+                //creating a new entry is legitimate (e.g. wiring textures after
+                //construction) but a typo'd knob name would land here silently —
+                //warn when the shader has no such uniform either
+                if(!(key in this.uniforms)) console.warn(`ComputeShader: setting unknown uniform "${key}"`);
+                this.material.uniforms[key] = { value: obj[key] };
+            }
         }
     }
 

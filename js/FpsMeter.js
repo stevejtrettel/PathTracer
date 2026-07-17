@@ -1,10 +1,9 @@
 //-------------------------------------------------
 // FPS METER
 //-------------------------------------------------
-// Tiny replacement for three's Stats addon (the only reason we still imported
-// three/addons). Same interface the app used: `.dom`, `.showPanel()`, `.begin()`,
-// `.end()`. createScene wraps newFrame in begin()/end(); the UI hosts `.dom` in
-// the Help tab. Averages frames over ~500 ms.
+// Tiny frame-rate readout: createScene calls end() once per frame (the meter
+// measures the frame-to-frame interval, so that's all it needs); the UI hosts
+// `.dom` in the Help tab. Averages frames over ~500 ms.
 
 class FpsMeter {
     constructor(){
@@ -16,9 +15,6 @@ class FpsMeter {
         this._frames = 0;
         this._acc    = 0;
     }
-
-    showPanel(){}   // three-Stats API compatibility (no-op)
-    begin(){}
 
     end(){
         let now = performance.now();

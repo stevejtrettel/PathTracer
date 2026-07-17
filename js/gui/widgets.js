@@ -21,6 +21,28 @@ function el(tag, cls, text){
 }
 
 
+// true when focus is in a text-entry field, so global single-key shortcuts
+// (X to save, H to hide the panel) should not fire
+function isTypingTarget(a){
+    let tag = a && a.tagName;
+    return tag === 'TEXTAREA' || tag === 'SELECT' ||
+           (tag === 'INPUT' && (a.type === 'number' || a.type === 'text'));
+}
+
+
+// largest {x,y} box of the given width/height ratio that fits the window
+// (null aspect = fill the window). Used by createScene (initial size) and the
+// UI's Aspect selector.
+function fitAspect(aspect){
+    let w = window.innerWidth, h = window.innerHeight;
+    if(aspect){
+        if(w / h > aspect) w = Math.round(h * aspect);
+        else               h = Math.round(w / aspect);
+    }
+    return {x: w, y: h};
+}
+
+
 // pretty-print a slider value: ints bare, floats trimmed to 3 decimals
 function fmt(v){
     if(Number.isInteger(v)) return String(v);
@@ -187,7 +209,9 @@ function button(label, action){
     return b;
 }
 
-// a free-entry number field, fires onChange on commit (blur / enter)
+// a free-entry number field, fires onChange on commit (blur / enter).
+// a cleared or non-numeric field restores the last good value instead of
+// committing NaN.
 function numberField(label, value, onChange){
     let row = el('div', 'knob');
     row.append(el('label', 'knob-label', label));
@@ -195,7 +219,13 @@ function numberField(label, value, onChange){
     let input = el('input', 'knob-num');
     input.type  = 'number';
     input.value = value;
-    input.addEventListener('change', () => onChange(parseFloat(input.value)));
+    let lastGood = value;
+    input.addEventListener('change', () => {
+        let v = parseFloat(input.value);
+        if(!Number.isFinite(v)){ input.value = lastGood; return; }
+        lastGood = v;
+        onChange(v);
+    });
 
     row.append(input);
     return row;
@@ -240,4 +270,6 @@ function collapsible(title){
 }
 
 
-export {el, control, slider, toggle, colorPicker, xyPad, button, numberField, select, section, collapsible};
+//(slider/colorPicker/xyPad are exported as public widget surface even though
+//UI.js reaches them only through control())
+export {el, control, slider, toggle, colorPicker, xyPad, button, numberField, select, section, collapsible, isTypingTarget, fitAspect};

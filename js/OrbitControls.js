@@ -23,6 +23,8 @@ class OrbitControls{
         this.controls = controls;              // KeyControls: owns .position, .facing
         this.onChange = opts.onChange;         // push uniforms + reset accumulation
         this.enabled  = opts.enabled;          // () => bool (toggle + render lock)
+        this.focalDist = opts.focalDist ?? (() => 1);  // () => current focus distance
+                                               // (used to re-anchor the pivot on drag start)
 
         //orbit pivot: a fixed target point (default origin). Scenes are built
         //around the origin, so orbiting there keeps the subject centered. A

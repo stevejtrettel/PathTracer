@@ -25,7 +25,16 @@ class PathTracer{
         //working for saveImage; float render targets need EXT_color_buffer_float.
         this.canvas = document.createElement('canvas');
         this.gl = this.canvas.getContext('webgl2', {preserveDrawingBuffer: true});
-        this.gl.getExtension('EXT_color_buffer_float');
+        if(!this.gl || !this.gl.getExtension('EXT_color_buffer_float')){
+            const msg = !this.gl
+                ? 'WebGL2 is not available in this browser.'
+                : 'float render targets (EXT_color_buffer_float) are not supported.';
+            const div = document.createElement('div');
+            div.style.cssText = 'position:fixed;inset:0;display:grid;place-items:center;background:#111;color:#eee;font:16px system-ui;z-index:99';
+            div.textContent = 'PathTracer cannot start: ' + msg;
+            document.body.appendChild(div);
+            throw new Error(msg);
+        }
         document.body.appendChild(this.canvas);
         this.size = res;
         this._setCanvasSize(res);
@@ -49,8 +58,9 @@ class PathTracer{
         this.orbitEnabled = true;
         this.orbit = new OrbitControls(this.canvas, this.controls, {
             onChange: () => { this.tracer.updateUniforms({facing: this.controls.facing, location: this.controls.position}); this.reset(); },
-            target:   this.settings.target ?? [0, 0, 0],
-            enabled:  () => this.orbitEnabled && !this.rendering,
+            target:    this.settings.target ?? [0, 0, 0],
+            enabled:   () => this.orbitEnabled && !this.rendering,
+            focalDist: () => this.tracer.material.uniforms.focalLength.value,
         });
     }
 
@@ -64,8 +74,8 @@ class PathTracer{
 
     //build the sky WebGLTexture from a descriptor ({mode, src, color1, color2}).
     //1x1 white so the sampler is always complete; for image mode, an <img> loads
-    //and replaces it (matching three's TextureLoader defaults: flipY, mipmaps,
-    //linear-mipmap-linear, RGBA8/no sRGB decode), then restarts accumulation.
+    //and replaces it (flipY, mipmaps, trilinear filtering, RGBA8 with no sRGB
+    //decode — the shader does its own SRGBToLinear), then restarts accumulation.
     _makeSkyTexture(desc){
         let gl = this.gl;
         let tex = gl.createTexture();
@@ -86,12 +96,19 @@ class PathTracer{
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
                 this.reset();
             };
+            img.onerror = () => console.error('sky image failed to load: ' + desc.src);
             img.src = desc.src;
         }
         return tex;
     }
 
-    updateUniforms(){
+    //samples accumulated so far (the tracer's frame counter)
+    get frameCount(){
+        return this.tracer.material.uniforms.frameNumber.value;
+    }
+
+    //per-frame bookkeeping: advance the frame counters and poll the keyboard
+    tick(){
         this.tracer.material.uniforms.frameNumber.value +=1.;
         this.accumulate.material.uniforms.frameNumber.value += 1.;
 
@@ -109,7 +126,7 @@ class PathTracer{
 
     newFrame(){
 
-        this.updateUniforms();
+        this.tick();
 
         //render a new frame
         this.tracer.render();
@@ -125,7 +142,7 @@ class PathTracer{
 
          //if autosave is enabled: save when asked
         if(this.autoSave){
-            if(this.tracer.material.uniforms.frameNumber.value % this.autoSaveSPP == 0){
+            if(this.frameCount % this.autoSaveSPP == 0){
                 this.saveImage();
             }
         }
@@ -135,7 +152,7 @@ class PathTracer{
         if(this.hd && this.hd.active){
             let pr = this.tracer.material.uniforms.panelToRender.value;
             if(pr < this.hd.stopAfter){
-                if(this.tracer.material.uniforms.frameNumber.value >= this.hd.spp){
+                if(this.frameCount >= this.hd.spp){
                     let row = Math.floor(pr / this.hd.root), col = pr % this.hd.root;
                     this.saveImage(`hd_${this.hd.spp}spp_r${row}c${col}`);
                     this.tracer.material.uniforms.panelToRender.value = pr + 1;
@@ -162,7 +179,7 @@ class PathTracer{
             let month = date.getMonth() + 1;
             let hour = date.getHours();
             let minute = date.getMinutes();
-            name = `${this.tracer.material.uniforms.frameNumber.value}spp pathtrace ${month}-${day}-${hour}${minute}`;
+            name = `${this.frameCount}spp pathtrace ${month}-${day}-${hour}${minute}`;
         }
 
         let link = document.createElement('a');
@@ -192,6 +209,7 @@ class PathTracer{
     //saved as it finishes, so a crash mid-render only loses the current tile.
     //opts.tile renders ONLY that one tile (recovery); opts.maxTile caps tile px.
     startHDRender(finalW, finalH, spp, opts={}){
+        if(this.rendering) return;   //re-entry would clobber hdRestore with the tile size
         let plan = this.planHD(finalW, finalH, opts.maxTile);
         let start = (opts.tile != null) ? Math.min(Math.max(opts.tile, 0), plan.N - 1) : 0;
 

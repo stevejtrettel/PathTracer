@@ -7,8 +7,6 @@ class KeyControls{
         //execute update when a key is pressed automatically!
         document.addEventListener('keydown', e => this.down(e));
         document.addEventListener('keyup', e => this.up(e));
-        //keep track of if there was a change or not
-        this.needsUpdate = false;
 
         this.translateSpeed = 0.03;
         this.rotateSpeed = 0.007;   //fixed turn rate; independent of fly speed
@@ -38,7 +36,7 @@ class KeyControls{
             up:              { code: "KeyW", pressed: false, axis: new Vector3(1, 0, 0) },
             down:            { code: "KeyS", pressed: false, axis: new Vector3(-1,0, 0) },
             clockwise:       { code: "KeyE", pressed: false, axis: new Vector3(0, 0, 1) },
-            counterlockwise: { code: "KeyQ", pressed: false, axis: new Vector3(0, 0,-1) },
+            counterclockwise: { code: "KeyQ", pressed: false, axis: new Vector3(0, 0,-1) },
         }
 
         //set the original position and facing from the settings file
@@ -53,33 +51,31 @@ class KeyControls{
 
     down(event){
 
-        if(event.code == "ShiftLeft" || event.code == "ShiftRight") this.boosted = true;
+        if(event.code === "ShiftLeft" || event.code === "ShiftRight") this.boosted = true;
 
         for(const dir in this.translate){
-            if(this.translate[dir].code == event.code){
+            if(this.translate[dir].code === event.code){
                 this.translate[dir].pressed = true;
-                this.needsUpdate=true;
             }
         }
         for(const dir in this.rotate){
-            if(this.rotate[dir].code == event.code){
+            if(this.rotate[dir].code === event.code){
                 this.rotate[dir].pressed = true;
-                this.needsUpdate=true;
             }
         }
     }
 
     up(event){
 
-        if(event.code == "ShiftLeft" || event.code == "ShiftRight") this.boosted = false;
+        if(event.code === "ShiftLeft" || event.code === "ShiftRight") this.boosted = false;
 
         for(const dir in this.translate){
-            if(this.translate[dir].code == event.code){
+            if(this.translate[dir].code === event.code){
                 this.translate[dir].pressed = false;
             }
         }
         for(const dir in this.rotate){
-            if(this.rotate[dir].code == event.code){
+            if(this.rotate[dir].code === event.code){
                 this.rotate[dir].pressed = false;
             }
         }
