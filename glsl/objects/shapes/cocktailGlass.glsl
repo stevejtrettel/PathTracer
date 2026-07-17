@@ -5,8 +5,9 @@
 //-------------------------------------------------
 
 
-//the distance function here will be used again in future functions, where knowing "inside" will be helpful.
-//thus the first distance function has an inout telling you if you are inside the glass
+//the distance function here is reused by other objects (see multiMaterial/cocktail.glsl),
+//where knowing the distance to the enclosed volume is helpful: the out parameter
+//insideGlass returns the sdf of the glass's interior cavity
 
 struct CocktailGlass{
     Frame frame;
@@ -19,7 +20,7 @@ struct CocktailGlass{
 
 
 //takes a position in the glass's LOCAL coordinates
-float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
+float cocktailGlassDistance(vec3 p, CocktailGlass glass, out float insideGlass){
 
     vec3 pos=p;
 
@@ -30,8 +31,6 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
 
     float inside=cylinderDist(q,glass.radius-glass.thickness,glass.height,0.05);
 
-    //insideTheGlass=(inside<0.)?true:false;
-
     //the glass
     float dist= max(outside,-inside);
 
@@ -39,7 +38,7 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass,inout float insideDist){
     q=pos+vec3(0,glass.height-1.75*glass.base/2.5,0.);
     float ball=length(q)-2.*glass.base/2.5;
 
-    insideDist=inside;
+    insideGlass=inside;
     return smax(dist,-ball,0.2);
 }
 

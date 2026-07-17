@@ -19,7 +19,7 @@ struct Pint{
 
 
 //takes a position in the pint's LOCAL coordinates
-float pintDistance(vec3 pos, Pint pint, out float insideBottle){
+float pintDistance(vec3 pos, Pint pint, out float insideGlass){
 
     //position is already relative to the center (local coordinates)
     vec3 pOut = pos;
@@ -29,9 +29,8 @@ float pintDistance(vec3 pos, Pint pint, out float insideBottle){
 
     //get the second one: shifted up by 2*thickness (was center+=vec3(0,2.*thickness,0))
     vec3 pIn=pos-vec3(0,2.*pint.thickness,0)-vec3(0,0.4,0);
-    insideBottle=sdCappedCone(pIn, pint.height+0.2, pint.base-pint.thickness, pint.flare*(pint.base-pint.thickness));
-    //return outerWall;
-    return smax(outerWall,-insideBottle,0.1);
+    insideGlass=sdCappedCone(pIn, pint.height+0.2, pint.base-pint.thickness, pint.flare*(pint.base-pint.thickness));
+    return smax(outerWall,-insideGlass,0.1);
 
 }
 
