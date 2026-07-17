@@ -17,8 +17,8 @@ struct Mobius{
 //hand-written initObject (two materials, so OBJECT_INIT does not apply)
 void initObject( out Mobius obj ){
     obj.frame = IDENTITY_FRAME;
-    zeroMat(obj.bandMat);
-    zeroMat(obj.borderMat);
+    initMat(obj.bandMat);
+    initMat(obj.borderMat);
 }
 
 

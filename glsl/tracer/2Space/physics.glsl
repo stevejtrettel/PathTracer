@@ -1,7 +1,7 @@
 
 
 
-//reflect the unit tangent vector u off the surface with unit normal n
+//reflect the unit tangent vector v off the surface with unit normal n
 Vector vReflect(Vector v, Vector n){
     return add(multiplyScalar(-2.0 * vDot(v, n), n), v);
 }
@@ -15,15 +15,11 @@ Vector vRefract(Vector incident, Vector normal, float n){
     float cosX=-vDot(normal, incident);
     float sinT2=n*n* (1.0 - cosX * cosX);
 
+    //total internal reflection: no refracted ray exists.
+    //return a zero vector (callers check for TIR via Fresnel before refracting)
     if (sinT2>1.){
-        //just returning a nonsense value here as we should never have refraction when TIR
         return Vector(incident.pos,vec3(0.,0.,0.));
-        //incident;
-    }//TIR
-
-    // reflect(incident,normal);}
-    //Vector(incident.pos,vec3(0.,0.,0.));}//TIR
-    //if we are not in this case, then there is no refraction, but instead total internal reflection
+    }
 
     float cosT=sqrt(1.0 - sinT2);
     vec3 dir=n*incident.dir+(n * cosX - cosT) * normal.dir;
@@ -56,7 +52,6 @@ float FresnelReflectAmount(float n, Vector normal, Vector incident, float f0, fl
     float ret = clamp(r0+(1.0-r0)*x*x*x*x*x,0.,1.);
 
     // adjust reflect multiplier for object reflectivity
-    //return mix(f0, f90, ret);
     return  f0 + (f90-f0)*ret;
 }
 

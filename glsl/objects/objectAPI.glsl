@@ -35,7 +35,7 @@
 #define OBJECT_INIT(Type)                                       \
 void initObject( out Type obj ){                                \
     obj.frame = IDENTITY_FRAME;                                 \
-    zeroMat(obj.mat);                                           \
+    initMat(obj.mat);                                           \
 }
 
 

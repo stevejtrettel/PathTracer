@@ -33,11 +33,9 @@ vec3 newFrame(vec2 fragCoord ){
     //build the scene
     buildScene();
 
-    //do one trace out into the scene
+    //do one trace out into the scene, adjusted by the exposure
     vec3 col = pathTrace(path);
-    float adjust = 1.;
-    //do the adjustments from this and exposure
-    return adjust * exposure * col;
+    return exposure * col;
 
 }
 

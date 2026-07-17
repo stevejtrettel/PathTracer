@@ -27,8 +27,9 @@ uniform float panelToRender;
 
 
 // constants
-float PI=3.1415926;
-float pi = 3.14159;
+//(one value of pi, under two names: the sdf_gallery files use lowercase `pi`)
+const float PI = 3.14159265;
+const float pi = PI;
 float EPSILON=0.001;
 float AT_THRESH=0.002;
 int maxMarchSteps=2000;

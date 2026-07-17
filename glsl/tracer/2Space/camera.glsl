@@ -46,7 +46,7 @@ Camera buildCamFromUniforms(){
 //pinhole camera setup
 Vector initializeRay(vec2 fragCoord, float FOV){
 
-    // The ray starts at the camera position (a uniform)
+    // the ray starts at the origin; cameraRay() below moves it into world position
     vec3 rayPosition = ORIGIN;
 
     // calculate subpixel camera jitter for anti aliasing
@@ -62,7 +62,7 @@ Vector initializeRay(vec2 fragCoord, float FOV){
     //move z-distance for fov:
     float z=-1./ tan(radians(FOV * 0.5));
 
-    // -1 to +1 on x,y axis. 1 unit away on the z axis
+    // -1 to +1 on the x,y axis, at the fov-determined distance z
     vec3 rayTarget = vec3(planeCoords, z);
 
 
@@ -149,8 +149,8 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
     tv=Vector(pos,dir);
 
     //rotate position to be in the right spot
-    //THIS IS A HACK: BASED ON LENS BEING CENTERED AT ORIGIN
-    //to be corect should first translate to origin; do this, then translate back
+    //THIS IS A HACK: based on the lens being centered at the origin.
+    //to be correct, should first translate to the origin, rotate, then translate back
     tv.pos=facing*tv.pos;
 
     //translate by the right amount

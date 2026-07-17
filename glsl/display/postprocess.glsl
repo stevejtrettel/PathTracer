@@ -1,3 +1,8 @@
+//-------------------------------------------------
+// Tone mapping + gamma for the display shader.
+// display.glsl uses ACESFilm + gammaCorrect; Uncharted2 and the exact
+// piecewise LinearToSRGB/SRGBToLinear are kept as swappable alternates.
+//-------------------------------------------------
 
 vec3 LessThan(vec3 f, float value)
 {
@@ -46,6 +51,7 @@ vec3 ACESFilm(vec3 x)
     return clamp((x*(a*x + b)) / (x*(c*x + d) + e), 0.0f, 1.0f);
 }
 
+//alternate tone map (unused by default; swap in via display.glsl)
 vec3 Uncharted2(in vec3 color) {
     color *= 2.0;
 
@@ -53,8 +59,7 @@ vec3 Uncharted2(in vec3 color) {
     float D = 0.20, E = 0.02, F = 0.30;
     color = (((A * color + C * B) * color + D * E) / ((A * color + B) * color + D * F)) - E / F;
 
-    //float whiteMax = 4.0;
-    //color /= (((A * whiteMax + C * B) * whiteMax + D * E) / ((A * whiteMax + B) * whiteMax + D * F)) - E / F;
+    //1.9335 is the precomputed white-point normalization (whiteMax = 4.0)
     color *= 1.9335;
 
     return color;

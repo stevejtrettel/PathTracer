@@ -1,8 +1,11 @@
 //------------------------------------------------
 //The LOCAL DATA Struct
+// everything the tracer needs to know about the surface the path just hit:
+// filled in by the scene's setData functions (see objects/objectAPI.glsl and
+// 3Materials/setImpactData.glsl), consumed by scatter() and updateFromSurface()
 //-------------------------------------------------
 
-struct localData{
+struct LocalData{
 
     bool isPhysical;
     bool isSky;
@@ -29,7 +32,7 @@ struct localData{
 };
 
 
-void initializeData(inout localData dat){
+void initializeData(inout LocalData dat){
     dat.subSurface=false;
     dat.isSky=false;
     dat.isPhysical=true;
@@ -57,28 +60,30 @@ void initializeData(inout localData dat){
 
 //-------------------------------------------------
 //The Path Struct
+// the full state of one light path as it bounces through the scene:
+// pixel accumulates the color collected so far (from emitters and the sky);
+// light is the throughput — how much any light found from here on
+// contributes, attenuated at each surface/volume interaction.
 //-------------------------------------------------
 
 
 struct Path{
 
     Vector tv;
-    vec3 pixel;//pixel color
-    vec3 light;//light along path
+    vec3 pixel;//color collected so far along the path
+    vec3 light;//throughput: attenuation applied to any light found from here on
 
-    int type;//type of ray: 1=Diffuse, 2=Specular, 3=Refract
-    float prob;//probability this type of ray was chosen;
-    vec3 absorb;
-    vec3 emit;
+    int type;//type of ray chosen at the last scatter: 1=Diffuse, 2=Specular, 3=Refract
+    float prob;//probability that ray type was chosen (throughput is divided by this)
+    vec3 absorb;//absorption color of the medium currently being traversed
+    vec3 emit;//emission color of the medium currently being traversed
     float distance; //distance traveled on a bounce
     float totalDistance;// accumulated distance traveled along a ray.
     float numScatters;//num of scattering events, when this is the useful metric instead of distance
-    localData dat;
+    LocalData dat;
 
     bool keepGoing;
     bool subSurface;
-
-    vec3 debug;
 
 };
 
@@ -103,7 +108,6 @@ Path initializePath(Vector tv){
 
     initializeData(path.dat);
 
-    path.debug=vec3(0.);
     path.absorb=vec3(0.);
     path.emit = vec3(0);
     return path;

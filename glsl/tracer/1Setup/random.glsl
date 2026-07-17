@@ -14,10 +14,7 @@ uint seed;
 
 //--- the function we call in main() which sets seed
 uint randomSeed(vec2 fCoord,float frame){
-
-    uint seed = uint(uint(fCoord.x) * uint(1973) + uint(fCoord.y) * uint(925277) + uint(frame) * uint(26699)) | uint(1);
-    return seed;
-
+    return uint(uint(fCoord.x) * uint(1973) + uint(fCoord.y) * uint(925277) + uint(frame) * uint(26699)) | uint(1);
 }
 
 
@@ -53,7 +50,7 @@ float randomFloat(float a,float b){
 vec3 randomUnitVec3()
 {
     float z = randomFloat() * 2.0f - 1.0f;
-    float a = randomFloat() * 6.28;
+    float a = randomFloat() * 2.*PI;
     float r = sqrt(1.0f - z * z);
     float x = r * cos(a);
     float y = r * sin(a);

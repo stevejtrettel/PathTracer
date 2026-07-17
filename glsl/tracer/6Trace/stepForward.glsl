@@ -7,16 +7,15 @@
 
 
 void stepForward(inout Path path){
-    bool insideVar=false;
     float distance=maxDist;
 
     //do the raytracing: now distance is set to closest object
     distance=raytrace( path.tv, distance );
 
-    //do the raymarching, with distance threshhold from above
+    //do the raymarching, with distance threshold from above
     distance=raymarch( path.tv, distance );
 
-    //dist now stores shortest distance between tracing and marching
+    //distance now stores the shorter of the traced and marched results
     //move to this point of intersection
     path.distance=distance;
     path.totalDistance+=distance;

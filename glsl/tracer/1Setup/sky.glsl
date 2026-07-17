@@ -44,6 +44,8 @@ vec3 SRGBToLinear(vec3 rgb)
 //-------------------------------------------------
 
 
+//plain spherical coordinates (unused by the tracer itself: skyTex uses the
+//seam-free variant below; kept as the simpler reference version)
 vec2 toSphCoords(vec3 v){
     float theta=atan(-v.z,v.x);
     float phi=acos(v.y);

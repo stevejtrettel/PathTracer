@@ -1,4 +1,4 @@
-void setObjectInAir(inout localData dat, bool inside, Vector normal, Material mat){
+void setObjectInAir(inout LocalData dat, bool inside, Vector normal, Material mat){
 
     //set the material
     dat.renderMaterial=mat.render;
@@ -14,7 +14,7 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
     if(inside){
         //we are inside
         dat.normal=negate(normal);
-        //IOR is current/enteing
+        //IOR is current/entering
         dat.IOR=mat.IOR/1.;
         dat.reflectEmit = mat.emitColor;
         dat.reflectAbsorb=mat.absorbColor;
@@ -28,7 +28,7 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
     else{
         //we are outside
         dat.normal=normal;
-        //IOR is current/enteing
+        //IOR is current/entering
         dat.IOR=1./mat.IOR;
         dat.reflectAbsorb=vec3(0.);
         dat.refractAbsorb=mat.absorbColor;
@@ -43,7 +43,7 @@ void setObjectInAir(inout localData dat, bool inside, Vector normal, Material ma
 
 
 
-void setSurfaceInMat(inout localData dat, float side, Vector normal, Material surf,Material mat){
+void setSurfaceInMat(inout LocalData dat, float side, Vector normal, Material surf,Material mat){
 
     //set the material
     dat.renderMaterial=surf.render;
@@ -81,7 +81,7 @@ void setSurfaceInMat(inout localData dat, float side, Vector normal, Material su
 
 
 //inside of one material, but ran into another
-void setMaterialInterface(inout localData dat, Material current, Material neighbor, Material dominant ){
+void setMaterialInterface(inout LocalData dat, Material current, Material neighbor, Material dominant ){
 
     dat.renderMaterial=true;
 
@@ -96,12 +96,14 @@ void setMaterialInterface(inout localData dat, Material current, Material neighb
     dat.surfDiffuse=dominant.diffuseColor;
     dat.surfSpecular=dominant.specularColor;
     dat.surfEmit=dominant.surfaceEmit;
-    //dat.surfRoughness=dominant.roughness;
+    //note: roughness deliberately comes from the ENTERING material below, not
+    //the dominant one. Callers that want the dominant roughness override it
+    //after this call (see multiMaterial/bottleLiquid.glsl).
 
 
     //------VOLUME PROPERTIES------------------------
 
-    //IOR is current/enteing
+    //IOR is current/entering
     dat.IOR=current.IOR/neighbor.IOR;
 
     //subsurface is set by the entering material, as this is where we would scatter

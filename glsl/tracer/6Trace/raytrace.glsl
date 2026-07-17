@@ -16,7 +16,7 @@ float raytrace(Vector tv, float stopDist){
         return dist- EPSILON/2.;
     }
 
-    //otherwise, return the threshhold
+    //otherwise, return the threshold
     return stopDist;
 }
 

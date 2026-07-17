@@ -23,7 +23,7 @@ struct BottleLiquid{
 //uses the standard setMaterialInterface(current, neighbor, dominant),
 //then overrides roughness with the dominant material's (the helper
 //takes it from the neighbor, which would zero it against air).
-void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout localData dat,BottleLiquid liquid){
+void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout LocalData dat,BottleLiquid liquid){
 
     float eps=2.*EPSILON;
     float drink=max(drinkSide,drinkTop);

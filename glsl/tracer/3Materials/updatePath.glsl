@@ -3,7 +3,10 @@
 
 
 //-------------------------------------------------
-// The NEW FUNCTIONS
+// UPDATING THE PATH COLOR
+// after each bounce these pick up color/attenuation from the medium
+// just traversed, the surface just hit, or the sky. Called from
+// pathTrace() in 6Trace/pathTrace.glsl.
 //-------------------------------------------------
 
 
@@ -16,12 +19,8 @@ void updateFromVolume(inout Path path){
     }
 }
 
-//right now this is the same as update from volume
-//but in the future may likely be different
+//like updateFromVolume, but the medium can also emit along the walk
 void updateFromSubSurf(inout Path path){
-
-    //vec3 totAbsorb=pow(vec3(1)-path.absorb,vec3(abs(path.numScatters)));
-    //path.light *= totAbsorb;
 
     vec3 beersLaw = path.absorb*path.distance;
     vec3 emitAmt = path.emit*path.distance;
@@ -79,7 +78,7 @@ void focusCheck(inout Path path){
         if(distToFocalPlane<0.03){
             path.pixel+=vec3(0,1,1);
         }
-        if(distToFocalPlane<0.12){
+        else if(distToFocalPlane<0.12){
             path.pixel+=vec3(0,1,0);
         }
         else if(distToFocalPlane<0.25){

@@ -14,12 +14,10 @@ uniform sampler2D accTex;
 
 vec4 newFrame(ivec2 pixelCoord){
     return texelFetch(newTex, pixelCoord,0);
-    //return texture(newTex, fragCoord / iResolution.xy);
 }
 
 vec4 accFrame(ivec2 pixelCoord){
     return texelFetch(accTex, pixelCoord, 0);
-    //return texture(accTex, fragCoord / iResolution.xy);
 }
 
 

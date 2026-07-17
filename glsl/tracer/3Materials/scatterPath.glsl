@@ -82,8 +82,7 @@ void scatter( inout Path path){
             //its a diffuse ray
             path.prob=path.dat.probDiffuse;
 
-            //if the material subsurface scatters, and we
-            //have NOT JUST scattered this way
+            //if the material subsurface scatters, enter it
             if(path.dat.subSurface){
                 path.subSurface=true;
                 path.type=3;//we are entering material
@@ -109,10 +108,6 @@ void scatter( inout Path path){
 
         //----set the new vector and push off the surface
         path.tv=newDir;
-
-        //which side to push the point: in or out rel the normal?
-        //float side=(path.type == 3) ?-1.:1.;
-        //nudge(path.tv, multiplyScalar(side, normal), 5.*EPSILON);
         flow(path.tv,10.*EPSILON);
 
     }

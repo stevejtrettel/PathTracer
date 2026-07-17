@@ -22,8 +22,8 @@ struct Material{
 };
 
 
-void zeroMat(inout Material mat){
-    //initializes material:
+void initMat(inout Material mat){
+    //initialize to the default material: pure white diffuse, no specular/refraction
     mat.render=true;
     mat.subSurface=false;
     mat.surfaceEmit=vec3(0.);
@@ -42,13 +42,15 @@ void zeroMat(inout Material mat){
 
 
 
-//HAVE NOT SET BACK COLORS OF ANY OF THESE MATERIALS NEED TO DO IT BY HAND
+//note: none of the constructors below set the back colors (diffuseColorBack /
+//specularColorBack); they stay at the initMat default of white. Set them by
+//hand after construction if a two-sided material needs them.
 
 //------Metals--------------
 
 
 void setMetal(inout Material mat, vec3 color, float specularity,float roughness){
-    zeroMat(mat);//initialize
+    initMat(mat);//initialize
     mat.diffuseColor=color;
     mat.specularColor=vec3(2.)+0.8*color;
     mat.roughness=roughness;
@@ -76,7 +78,7 @@ Material makeMetal(vec3 color, float specularity, float roughness){
 
 
 void setDielectric(inout Material mat, vec3 color, float specularity, float roughness){
-    zeroMat(mat);//initialize
+    initMat(mat);//initialize
 
     mat.diffuseColor=color;
     mat.specularColor=vec3(0.9);
@@ -101,7 +103,7 @@ Material makeDielectric(vec3 color, float specularity, float roughness){
 Material air(vec3 absorbColor){
 
     Material mat;
-    zeroMat(mat);
+    initMat(mat);
     mat.render=false;
     mat.absorbColor=absorbColor;
 
@@ -116,7 +118,7 @@ Material air(vec3 absorbColor){
 
 void setGlass(inout Material mat, vec3 color, float IOR,float refractivity){
 
-    zeroMat(mat);//initialize
+    initMat(mat);//initialize
     mat.render=true;
 
     mat.specularColor=vec3(1.);
@@ -125,10 +127,11 @@ void setGlass(inout Material mat, vec3 color, float IOR,float refractivity){
 
     mat.IOR=IOR;
 
+    //refractivity of the glass; the leftover probability is split 90/10
+    //between specular reflection and diffuse scattering
     mat.refractionChance=refractivity;
     float remainder=1.-refractivity;
     mat.specularChance=0.9*remainder;
-    // mat.diffuseChance=0.1*remainder;
 
 }
 
@@ -142,10 +145,10 @@ void setGlass(inout Material mat, vec3 color, float IOR){
 
 
 //control of transparency
-Material makeGlass(vec3 color, float IOR,float specularity){
+Material makeGlass(vec3 color, float IOR,float refractivity){
     Material mat;
 
-    setGlass(mat, color,IOR,specularity);
+    setGlass(mat, color,IOR,refractivity);
     return mat;
 }
 
@@ -162,7 +165,7 @@ Material makeGlass(vec3 color, float IOR){
 
 Material makeLight(vec3 color,float intensity){
     Material mat;
-    zeroMat(mat);//initialize
+    initMat(mat);//initialize
 
 
     mat.surfaceEmit=intensity*color;
@@ -171,7 +174,7 @@ Material makeLight(vec3 color,float intensity){
 }
 
 void setLight(inout Material mat, vec3 color,float intensity){
-    zeroMat(mat);//initialize
+    initMat(mat);//initialize
 
     mat.surfaceEmit=intensity*color;
 
