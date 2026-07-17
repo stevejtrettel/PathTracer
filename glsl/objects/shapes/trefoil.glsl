@@ -1,7 +1,7 @@
 
 
 
-mat3 RotMat(vec3 axis, float angle)
+mat3 trefoil_RotMat(vec3 axis, float angle)
 {
     // http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
     axis = normalize(axis);
@@ -14,7 +14,7 @@ mat3 RotMat(vec3 axis, float angle)
     oc*axis.z*axis.x-axis.y*s,  oc*axis.y*axis.z+axis.x*s,  oc*axis.z*axis.z+c);
 }
 
-float dstFar = 100.;
+const float dstFar = 100.;
 
 float trefoil_PrBox2Df (vec2 p, vec2 b)
 {
@@ -39,7 +39,6 @@ float trefoil_ObjDf (vec3 p, float r)
     q.xz = trefoil_Rot2D (q.xz, 1.5 * a);
     q.xz = trefoil_Rot2D (q.xz, - PI * (floor (atan (q.z, q.x) / PI + 0.5)));
     q.x -= 1.;
-    //q.y = a - aa;
     d = length (trefoil_PrBox2Df (q.xz, vec2 (0.2))) - 0.05;
     if (d < dMin) { dMin = d; }
     return 0.4 * dMin;
@@ -51,7 +50,7 @@ float sdf_trefoil(vec3 p)
         return length(p)-1.9;
     }
 
-    p *= RotMat(vec3(1.,0.,0.), PI/2.);
+    p *= trefoil_RotMat(vec3(1.,0.,0.), PI/2.);
     const float scale = 0.18;
     p *= 1. / scale;
     return trefoil_ObjDf(p, 2.5) * scale;
@@ -59,7 +58,7 @@ float sdf_trefoil(vec3 p)
 
 
 //-------------------------------------------------
-//The OBJECT sdf
+//The TREFOIL sdf
 //-------------------------------------------------
 
 struct Trefoil{

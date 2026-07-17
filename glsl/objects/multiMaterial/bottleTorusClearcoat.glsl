@@ -2,18 +2,17 @@
 
 
 //-------------------------------------------------
-// The LAYEERDONUT sdf
+// The BOTTLE TORUS CLEARCOAT sdf
 //-------------------------------------------------
 
 struct BottleTorusClearcoat{
     BottleTorus inner;
     BottleTorus outer;
-//Sphere outer;
 };
 
 
 
-//overload of sdf for the cocktail struct
+//overload of sdf for the BottleTorusClearcoat struct
 float sdf( Vector tv, BottleTorusClearcoat donut){
 
     float innerDist = sdf(tv, donut.inner);
@@ -26,8 +25,8 @@ float sdf( Vector tv, BottleTorusClearcoat donut){
 }
 
 
-bool inside(Vector tv, BottleTorusClearcoat layerdonut){
-    return inside(tv,layerdonut.inner);
+bool inside(Vector tv, BottleTorusClearcoat donut){
+    return inside(tv,donut.inner);
 }
 
 

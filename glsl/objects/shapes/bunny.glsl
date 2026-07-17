@@ -12,12 +12,12 @@ struct Bunny{
 
 
 
-//auxilary function from shadertoy, sdf to bunny
+//auxiliary function from shadertoy, sdf to bunny
 float sdBunny(vec3 p,float size) {
     p=p/(size);
     p=vec3(p.x,-p.z,p.y);
 
-    //sdf is undefined outside the unit sphere, uncomment to witness the abominations
+    //the sdf is garbage outside the unit sphere; this guard clips it (remove it to witness the abominations)
     if (length(p) > 1.) {
         return length(p)-.8;
     }

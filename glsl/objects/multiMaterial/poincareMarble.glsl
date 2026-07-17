@@ -12,10 +12,7 @@ struct PoincareMarble{
 
 PoincareMarble createPoincareMarble(Material dodMat, Material glassMat ){
 
-    float thickness = 0.04;
-
     PoincareMarble obj;
-    //obj.dod = buildHypDod();
     obj.dod = buildHypDod(0.4);
     obj.dod.mat = dodMat;
 
@@ -25,7 +22,7 @@ PoincareMarble createPoincareMarble(Material dodMat, Material glassMat ){
 }
 
 
-//overload of sdf for the cocktail struct
+//overload of sdf for the PoincareMarble struct
 float sdf( Vector tv, PoincareMarble marble){
 
     float innerDist = sdf(tv, marble.dod);
@@ -70,8 +67,8 @@ void setData(inout Path path, PoincareMarble marble){
 
 
     else {
-        //----if we hit the outer variety, inside the glass
-        //the only way to hit the surface of the outer variety is if we are at an outer/glass interface:
+        //----if we hit the dodecahedron, inside the glass
+        //the only way to hit the surface of the dodecahedron is if we are at a dodecahedron/glass interface:
 
         //get outward pointing normal to this shell
         normal = normalVec(path.tv, marble.dod);
@@ -79,14 +76,14 @@ void setData(inout Path path, PoincareMarble marble){
         //figure out if we are incoming or outgoing:
         bool insideOuterMat = dot(path.tv.dir,normal.dir)>0.;
 
-        //if we are outgoing: we are leaving the variety material and going into the glass
+        //if we are outgoing: we are leaving the dodecahedron material and going into the glass
         if (insideOuterMat) {
             path.dat.normal=negate(normal);
             setMaterialInterface(path.dat, marble.dod.mat, marble.glass.mat, marble.dod.mat);
         }
 
         else {
-            //if we are ingoing: we are leaving the clear glass and going into the variety
+            //if we are ingoing: we are leaving the clear glass and going into the dodecahedron
             path.dat.normal=normal;
             setMaterialInterface(path.dat, marble.glass.mat, marble.dod.mat, marble.dod.mat);
         }

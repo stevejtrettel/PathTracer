@@ -22,7 +22,7 @@ struct Bottle{
 
 //----distance and normal functions
 
-//auxilary function calculating bottle distance, and giving inside/outside info
+//auxiliary function calculating bottle distance, and giving inside/outside info
 //takes a position in the bottle's LOCAL coordinates
 float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
 
@@ -37,7 +37,7 @@ float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
 
     float neck=cylinderDist(q,bottle.neckRadius,bottle.neckHeight,bottle.rounded);
 
-    //give the subtraction of these:
+    //give the smooth union of these:
     float theBottle=opMinDist(base, neck,bottle.smoothJoin);
 
     if(bottle.bump!=0.){

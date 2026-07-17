@@ -1,6 +1,6 @@
 
 //-------------------------------------------------
-// A variety in a glass sphere
+// A variety in a glass box
 // ------------------------------------------------
 
 struct VarBoxGlass{
@@ -8,7 +8,7 @@ struct VarBoxGlass{
     Box glass;
 };
 
-//create one starting from a variety and some glass: (set the sphere size appropriately)
+//create one starting from a variety and some glass: (set the box size appropriately)
 VarBoxGlass createVarBoxGlass(VarBox var, Material glassMat){
 
     VarBoxGlass marble;

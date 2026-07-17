@@ -23,7 +23,7 @@ struct BottleLiquid{
 //uses the standard setMaterialInterface(current, neighbor, dominant),
 //then overrides roughness with the dominant material's (the helper
 //takes it from the neighbor, which would zero it against air).
-void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout localData dat,BottleLiquid cocktail){
+void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout localData dat,BottleLiquid liquid){
 
     float eps=2.*EPSILON;
     float drink=max(drinkSide,drinkTop);
@@ -31,18 +31,18 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
 
     if(abs(cup)<eps){
         //we hit the glass surface
-        Vector normal=normalVec(tv,cocktail.glass);
+        Vector normal=normalVec(tv,liquid.glass);
 
         if(cup>0.){
             //hit from outside the glass
             dat.normal=normal;
             if(abs(drink)>eps||drinkTop>0.){
                 //far from the drink: air -> cup
-                setMaterialInterface(dat, airMat, cocktail.cup, cocktail.cup);
+                setMaterialInterface(dat, airMat, liquid.cup, liquid.cup);
             }
             else{
                 //against the drink: drink -> cup
-                setMaterialInterface(dat, cocktail.drink, cocktail.cup, cocktail.cup);
+                setMaterialInterface(dat, liquid.drink, liquid.cup, liquid.cup);
             }
         }
         else{
@@ -50,14 +50,14 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
             dat.normal=negate(normal);
             if(abs(drink)>eps){
                 //far from the drink: cup -> air
-                setMaterialInterface(dat, cocktail.cup, airMat, cocktail.cup);
+                setMaterialInterface(dat, liquid.cup, airMat, liquid.cup);
             }
             else{
                 //entering the drink: cup -> drink
-                setMaterialInterface(dat, cocktail.cup, cocktail.drink, cocktail.cup);
+                setMaterialInterface(dat, liquid.cup, liquid.drink, liquid.cup);
             }
         }
-        dat.surfRoughness=cocktail.cup.roughness;
+        dat.surfRoughness=liquid.cup.roughness;
     }
 
     else{
@@ -65,14 +65,14 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
         if(drinkTop>0.){
             //from above: air -> drink
             dat.normal=Vector(tv.pos,vec3(0,1,0));
-            setMaterialInterface(dat, airMat, cocktail.drink, cocktail.drink);
+            setMaterialInterface(dat, airMat, liquid.drink, liquid.drink);
         }
         else{
             //from below: drink -> air
             dat.normal=Vector(tv.pos,vec3(0,-1,0));
-            setMaterialInterface(dat, cocktail.drink, airMat, cocktail.drink);
+            setMaterialInterface(dat, liquid.drink, airMat, liquid.drink);
         }
-        dat.surfRoughness=cocktail.drink.roughness;
+        dat.surfRoughness=liquid.drink.roughness;
     }
 }
 
@@ -83,21 +83,21 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout loca
 
 
 
-float sdf(Vector tv, BottleLiquid gin){
+float sdf(Vector tv, BottleLiquid liquid){
 
     float drinkSide;
 
-    //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
+    //sets the distance to the glass part of the cup; drinkSide gets the sdf of its interior (the drink volume)
     //bottleDistance works in the glass's local frame; rescale distances to world
-    float cup=gin.glass.frame.scale * bottleDistance(toLocal(gin.glass.frame, tv.pos),gin.glass,drinkSide);
-    drinkSide *= gin.glass.frame.scale;
+    float cup=liquid.glass.frame.scale * bottleDistance(toLocal(liquid.glass.frame, tv.pos),liquid.glass,drinkSide);
+    drinkSide *= liquid.glass.frame.scale;
 
     //distance to the top of the drink
     //right now no fill=exactly bottom of the glass
 
-    float drinkTop=tv.pos.y-gin.glass.frame.pos.y;
+    float drinkTop=tv.pos.y-liquid.glass.frame.pos.y;
 
-    drinkTop-=gin.glass.baseHeight*gin.fill;
+    drinkTop-=liquid.glass.baseHeight*liquid.fill;
 
     //distance to drink is intersection of inside dist and this top
     float drink=max(drinkSide,drinkTop);
@@ -106,27 +106,27 @@ float sdf(Vector tv, BottleLiquid gin){
 }
 
 
-bool inside(Vector tv,BottleLiquid gin){
-    return inside(tv,gin.glass);
+bool inside(Vector tv,BottleLiquid liquid){
+    return inside(tv,liquid.glass);
 }
 
 
-void setData(inout Path path, BottleLiquid gin){
+void setData(inout Path path, BottleLiquid liquid){
 
     float drinkSide;
 
-    //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
+    //sets the distance to the glass part of the cup; drinkSide gets the sdf of its interior (the drink volume)
     //bottleDistance works in the glass's local frame; rescale distances to world
-    float cup=gin.glass.frame.scale * bottleDistance(toLocal(gin.glass.frame, path.tv.pos),gin.glass,drinkSide);
-    drinkSide *= gin.glass.frame.scale;
+    float cup=liquid.glass.frame.scale * bottleDistance(toLocal(liquid.glass.frame, path.tv.pos),liquid.glass,drinkSide);
+    drinkSide *= liquid.glass.frame.scale;
 
 
     //distance to the top of the drink
     //right now no fill=exactly bottom of the glass
 
-    float drinkTop=path.tv.pos.y-gin.glass.frame.pos.y;
+    float drinkTop=path.tv.pos.y-liquid.glass.frame.pos.y;
 
-    drinkTop-=gin.glass.baseHeight*gin.fill;
+    drinkTop-=liquid.glass.baseHeight*liquid.fill;
 
     //distance to drink is intersection of inside dist and this top
     float drink=max(drinkSide,drinkTop);
@@ -135,7 +135,7 @@ void setData(inout Path path, BottleLiquid gin){
     float dist=min(abs(cup),abs(drink));
 
     if(dist<5.*EPSILON){
-        setTheData(cup,drinkSide,drinkTop,path.tv,path.dat,gin);
+        setTheData(cup,drinkSide,drinkTop,path.tv,path.dat,liquid);
     }
 
 }

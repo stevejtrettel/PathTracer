@@ -32,11 +32,11 @@ float bottleTorusDistance(vec3 pos, BottleTorus donut, out float insideBottle){
     //get torus portion
     float base = sdTorus(torusPos, donut.outer, donut.inner);
 
-    //get cone1 portion:
+    //the cone portion:
     float donutTop = donut.flare*donut.base;
     float neck =sdCappedCone(conePos, 0.8*donut.height, donut.base, donutTop);
 
-    //give the subtraction of these:
+    //give the smooth union of these:
     float theBottle=opMinDist( base, neck, donut.smoothing );
 
     //make the shell
@@ -47,14 +47,6 @@ float bottleTorusDistance(vec3 pos, BottleTorus donut, out float insideBottle){
     theBottle=opMaxDist(theBottle,top,donut.thickness);
 
     return theBottle;
-
-    //
-    //    //chop off the top:
-    //    float top=q.y-bottle.neckHeight/3.;
-    //
-    //    theBottle=opMaxDist(theBottle,top,bottle.thickness);
-    //
-    //    return abs(smin(torusDist,coneDist,donut.smoothing))-donut.thickness;
 }
 
 

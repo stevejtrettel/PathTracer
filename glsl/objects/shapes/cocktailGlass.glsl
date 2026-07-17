@@ -79,24 +79,3 @@ void setData(inout Path path, CocktailGlass glass){
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

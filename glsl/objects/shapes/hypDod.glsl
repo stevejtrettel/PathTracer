@@ -9,7 +9,6 @@
 // 2) a size of sphere to delete from the center
 // this is converted into a distance in the ball model, and then the 12 spheres
 // describing its faces are computed
-//RIGHT NOW JUST GIVING D AND R DIRECTLY: NEED TO CHANGE THIS!
 
 struct HypDod{
     Frame frame;
@@ -56,8 +55,6 @@ float sdf( vec3 pos, HypDod dod ){
 
     //for each sphere, find the SDF for the outside
     //then, intersect them.
-    float r = dod.r;
-    float d = dod.d;
 
     //these are the unit directions
     vec3 v1 = normalize(vec3(0.,1.,1.618));

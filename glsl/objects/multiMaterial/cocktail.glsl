@@ -23,7 +23,7 @@ bool inDrink( Vector tv, Cocktail cocktail){
     drinkSide *= cocktail.glass.frame.scale;
 
     //distance to the top of the drink
-    //right now direcly in the center of the cup
+    //right now directly in the center of the cup
     float drinkTop = tv.pos.y-cocktail.glass.frame.pos.y-cocktail.glass.height/3.;
 
     //distance to drink is intersection of inside dist and this top
@@ -40,13 +40,13 @@ float sdf( Vector tv, Cocktail cocktail){
 
     float drinkSide;
 
-    //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
+    //sets the distance to the glass part of the cup; drinkSide gets the sdf of its interior (the drink volume)
     //cocktailGlassDistance works in the glass's local frame; rescale distances to world
     float cup = cocktail.glass.frame.scale * cocktailGlassDistance(toLocal(cocktail.glass.frame, tv.pos), cocktail.glass, drinkSide);
     drinkSide *= cocktail.glass.frame.scale;
 
     //distance to the top of the drink
-    //right now direcly in the center of the cup
+    //right now directly in the center of the cup
     float drinkTop = tv.pos.y-cocktail.glass.frame.pos.y-cocktail.glass.height/3.;
 
     //distance to drink is intersection of inside dist and this top
@@ -65,13 +65,13 @@ void setData(inout Path path, Cocktail cocktail){
 
     float drinkSide;
 
-    //sets the distance to the glass part of the cup, and a boolean to say if you are inside of it
+    //sets the distance to the glass part of the cup; drinkSide gets the sdf of its interior (the drink volume)
     //cocktailGlassDistance works in the glass's local frame; rescale distances to world
     float cup=cocktail.glass.frame.scale * cocktailGlassDistance(toLocal(cocktail.glass.frame, path.tv.pos),cocktail.glass,drinkSide);
     drinkSide *= cocktail.glass.frame.scale;
 
     //distance to the top of the drink
-    //right now direcly in the center of the cup
+    //right now directly in the center of the cup
     float drinkTop=path.tv.pos.y-cocktail.glass.frame.pos.y-cocktail.glass.height/3.;
 
     //distance to drink is intersection of inside dist and this top

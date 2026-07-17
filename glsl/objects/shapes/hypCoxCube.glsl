@@ -8,7 +8,6 @@
 // 2) a size of sphere to delete from the center
 // this is converted into a distance in the ball model, for the center of spheres and then the radius of the 6 spheres
 // describing its faces are computed
-//RIGHT NOW JUST GIVING D AND R DIRECTLY: NEED TO CHANGE THIS!
 
 struct HypCoxCube{
     Frame frame;
@@ -25,8 +24,6 @@ HypCoxCube buildCoxCube(float dihedral ){
 
     //half the dihedral angle theta
     float theta2 = 3.14159/(dihedral);
-    //I THINK IT SHOULD BE THIS?!
-    //float theta2 = 3.14159/dihedral;
 
     float denom = 2.*sin(theta2)*sin(theta2);
     cube.d = 1./sqrt(1.-1./denom);
@@ -63,8 +60,6 @@ float sdf( vec3 pos, HypCoxCube cube ){
 
     //for each sphere, find the SDF for the outside
     //then, intersect them.
-    float r = cube.r;
-    float d = cube.d;
 
     //these are the unit directions
     vec3 v1 = vec3(1,0,0);

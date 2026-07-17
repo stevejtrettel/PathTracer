@@ -1,6 +1,6 @@
 
 //-------------------------------------------------
-// A variety with a glass clearcoat, bounded by a sphere
+// A variety with a glass clearcoat, bounded by a box
 // ------------------------------------------------
 
 struct VarBoxClearcoat{
@@ -8,7 +8,7 @@ struct VarBoxClearcoat{
     VarBox clearcoat;
 };
 
-//create one starting from a variety and some glass: (set the sphere size appropriately)
+//create one starting from a variety and some glass: (set the box size appropriately)
 VarBoxClearcoat createVarBoxClearcoat(VarBox var, Material coatMat, float coatThickness){
 
     VarBoxClearcoat obj;

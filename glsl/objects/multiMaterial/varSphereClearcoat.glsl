@@ -8,7 +8,7 @@ struct VarSphereClearcoat{
     VarSphere clearcoat;
 };
 
-//create one starting from a variety and some glass: (set the sphere size appropriately)
+//create one starting from a variety, a coat material, and a coat thickness: (set the sphere size appropriately)
 VarSphereClearcoat createVarSphereClearcoat(VarSphere var, Material coatMat, float coatThickness){
 
     VarSphereClearcoat obj;

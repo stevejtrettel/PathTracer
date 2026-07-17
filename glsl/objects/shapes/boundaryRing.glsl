@@ -6,7 +6,7 @@
 //   float cubicF(vec3 p)       — evaluates the cubic polynomial
 //   vec3 cubicGrad(vec3 p)     — evaluates the analytic gradient
 //   float sceneBBox(vec3 pos)  — bounding SDF
-// Also expects cached globals: _cachedVal, _cachedGrad, _cachedBBox
+// Also expects cached globals: _cachedVal, _cachedGrad, _cachedBBox, _cachedPos
 // (cached values are in the object's LOCAL frame: the scene must localize
 //  the query point with toLocal(obj.frame, ...) before filling the cache)
 //----------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ float surfaceDist(vec3 pos, float scale) {
     vec3 scaled = scale * pos;
     float val = cubicF(scaled);
     vec3 grad = cubicGrad(scaled) * scale;
-    // Project surface gradient orthogonal to sphere normal
+    // Project surface gradient orthogonal to the bounding-sdf normal
     vec3 nb = normalize(pos);
     grad -= dot(grad, nb) * nb;
     return abs(val) / max(length(grad), 1e-6);
@@ -40,7 +40,7 @@ float sdf(vec3 p, BoundaryRing ring) {
 // Fast path using cached values (called from sdf_Objects only)
 float sdf_cached(BoundaryRing ring) {
     vec3 grad = _cachedGrad * ring.scale;
-    // Project surface gradient orthogonal to sphere normal
+    // Project surface gradient orthogonal to the bounding-sdf normal
     vec3 nb = normalize(_cachedPos);
     grad -= dot(grad, nb) * nb;
     float dSurf = abs(_cachedVal) / max(length(grad), 1e-6);

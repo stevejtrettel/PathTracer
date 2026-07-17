@@ -62,10 +62,10 @@ vec2 sdMobius(vec3 rP, float radius, float width, float thickness, float twists,
 
     tc *= rot2(a*twists/2.); // Twisting the toroidal plane itself.
     float taperInput = offset ? tc.y : tc.x;//choose original or offset
-    float taper = smoothstep(0., 1., abs(taperInput)/dim.x)*.5 + .5; // Holowing out the center.
+    float taper = smoothstep(0., 1., abs(taperInput)/dim.x)*.5 + .5; // Hollowing out the center.
     vec2 torInput = offset ? dim.yx : dim;
     float tor = sBoxS(tc, torInput*vec2(1, taper), .01); // Creating the central strip.
-    tor = smax(tor, -hole, .01); // Boring out the wholes.
+    tor = smax(tor, -hole, .01); // Boring out the holes.
 
     // Outer band coordinates.
     if(offset){tc.y = abs(tc.y) - dim.x - dim.y;}
@@ -209,9 +209,6 @@ void setData( inout Path path, Mobius mobius){
         //set the material
         setObjectInAir(path.dat, side, normal, mobius.borderMat);
     }
-
-
-    //PROBABLY NEED TO DO A BETTER JOB HERE AND DEAL WITH THE SEPARATE
 
 }
 

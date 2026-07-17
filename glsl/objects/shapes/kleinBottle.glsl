@@ -31,7 +31,7 @@ float sdKlein(vec3 p, float thickness){
 
     // SIDE HANDLE (stretched XZ cylinder)
     float sideHandle_hollow = max(max(abs(length(q.xz)-0.5+0.25*y)-thickness,q.y-1.0),-q.y-2.0);
-    //only if we are cutting a hole later
+    //deliberate alternate: a SOLID side handle, for subtracting from the mid base to cut an entry hole
     //float sideHandle_solid  = max(max(length(q.xz)-0.5+0.25*y,q.y-1.0),-q.y-2.0);
     //union with the side handle
     d = min(d,sideHandle_hollow);
@@ -44,7 +44,6 @@ float sdKlein(vec3 p, float thickness){
     // MID BASE: (stretched XZ torus)
     q = p;
     float midBase = max(max(abs(length(q.xz)-1.5+1.25*y),q.y-1.0),-q.y-2.0)-thickness;
-    //newTube = max(newTube, -sideHandle_solid);//cut out a disk for the entry tube
     //union with the base
     d = min(d,midBase);
 
