@@ -10,6 +10,8 @@ Archive Link: https://web.archive.org/web/20191113080801/https://www.shadertoy.c
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: smin (tracer/1Setup/math.glsl)
+
 //----------------------------------------------------------------
 
 vec2 sdSegment(vec3 a, vec3 b, vec3 p) {

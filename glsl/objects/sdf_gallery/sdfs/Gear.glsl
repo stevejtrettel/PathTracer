@@ -9,6 +9,8 @@ Link: https://www.shadertoy.com/view/Msl3Rn
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: pi (tracer/1Setup/uniforms.glsl)
+
 #ifndef gear_glsl
 #define gear_glsl
 

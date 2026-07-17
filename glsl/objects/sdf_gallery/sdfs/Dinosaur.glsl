@@ -10,6 +10,8 @@ Archive Link: https://web.archive.org/web/20191107163057/https://www.shadertoy.c
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: smin, smax (float versions, tracer/1Setup/math.glsl); the vec2 smin overload below is local
+
 vec2 hash2(float n) {
   return fract(sin(vec2(n, n + 1.0)) * vec2(13.5453123, 31.1459123));
 }

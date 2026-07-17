@@ -9,6 +9,8 @@ Link: https://www.shadertoy.com/view/XldSDs
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: smin (tracer/1Setup/math.glsl)
+
 // 2x2 matrix rotation. Note the absence of "cos." It's there, but in disguise,
 // and comes courtesy of Fabrice Neyret's "ouside the box" thinking. :)
 mat2 r2(float th) {

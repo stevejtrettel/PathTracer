@@ -23,6 +23,8 @@ Link: N/A
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ******************************************************************************/
 
+// uses host globals: pi (tracer/1Setup/uniforms.glsl)
+
 #ifndef knob_glsl
 #define knob_glsl
 

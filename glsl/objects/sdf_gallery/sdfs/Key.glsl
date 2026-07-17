@@ -9,8 +9,6 @@ Link: https://www.shadertoy.com/view/wssBDf
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
-#define PI 3.141592
-
 mat2 rot(float a) { return mat2(cos(a), sin(a), -sin(a), cos(a)); }
 
 float cyl(vec3 p, float r, float h) {

@@ -9,6 +9,8 @@ Link: https://www.shadertoy.com/view/wlKXWc
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: PI (tracer/1Setup/uniforms.glsl)
+
 #ifndef cable_glsl
 #define cable_glsl
 

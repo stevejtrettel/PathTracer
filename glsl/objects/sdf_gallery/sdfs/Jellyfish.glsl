@@ -9,6 +9,8 @@ Link: https://www.shadertoy.com/view/4sXBRn
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: pi (tracer/1Setup/uniforms.glsl)
+
 #ifndef jelly_glsl
 #define jelly_glsl
 

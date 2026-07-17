@@ -26,7 +26,7 @@ Link: https://www.shadertoy.com/view/wsGczG
 #define MAX_STEPS     120.0
 #define SHADOW_STEPS  30.0
 
-float stretch, gunsUp, gunsForward, edWalk, edTwist, edDown, edShoot, doorOpen, glow;
+float stretch, gunsUp, gunsForward, edWalk = 0., edTwist = 0., edDown = 0., edShoot = 0., doorOpen, glow;
 
 //#define AA  // Enable this line if your GPU can take it!
 

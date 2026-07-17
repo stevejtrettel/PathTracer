@@ -10,6 +10,8 @@ Archive Link: https://web.archive.org/web/20191106150158/https://www.shadertoy.c
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: pi (tracer/1Setup/uniforms.glsl)
+
 #ifndef temple_glsl
 #define temple_glsl
 

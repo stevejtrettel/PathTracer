@@ -1,10 +1,11 @@
+//the gallery object is chosen by swapping this include: each sdfs/ file provides float sdf(vec3 p), and only ONE can be compiled at a time (their internal helper names collide)
 #include ./sdfs/Vase.glsl
 
 //-------------------------------------------------
 //The OBJECT sdf
 //-------------------------------------------------
 
-//the data of a gallery object is its frame
+//the data of a gallery object is its frame and its material
 struct Object{
     Frame frame;
     Material mat;

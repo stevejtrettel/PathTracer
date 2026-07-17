@@ -9,6 +9,8 @@ Link: https://www.shadertoy.com/view/3lG3Dc
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: sq (tracer/1Setup/math.glsl)
+
 #ifndef teapot_glsl
 #define teapot_glsl
 
@@ -42,7 +44,7 @@ float teapot_smax( float a, float b)
     return teapot_smax(a,b,0.1);
 }
 
-//I ALREADY HAVE THIS EARLIER IN THE CODE...
+//uses the host's sq() from tracer/1Setup/math.glsl
 //float sq(float x){return x*x;}
 
 float TorusSDF(float x, float y, float z, float R, float r)

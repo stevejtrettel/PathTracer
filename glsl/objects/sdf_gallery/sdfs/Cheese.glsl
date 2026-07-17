@@ -9,6 +9,8 @@ Link: https://www.shadertoy.com/view/3dfGzr
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: pi (tracer/1Setup/uniforms.glsl)
+
 mat3 RotMat(vec3 axis, float angle) {
   // http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
   axis = normalize(axis);

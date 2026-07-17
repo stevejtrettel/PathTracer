@@ -79,6 +79,7 @@ float board(vec2 v){//read buffer for piece at this position
   if(max(abs(v.x),abs(v.y))>4.0)return 0.;
 
   //NUMBER IS DETERMINING CHESS PIECE
+  //intentional: this pathtracer has no buffer input, so every square reports piece type 5 (rook) -- hence all pieces render as rooks
   return 5.0;
   //return get(v+vec2(4.)).r;
 }

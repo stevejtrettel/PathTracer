@@ -9,6 +9,8 @@ Link: https://www.shadertoy.com/view/wdGXzK
  This work is licensed also under CC BY-NC-SA 3.0 by NVIDIA CORPORATION.
  ******************************************************************************/
 
+// uses host globals: smin (tracer/1Setup/math.glsl)
+
 #ifndef cybertruck_glsl
 #define cybertruck_glsl
 

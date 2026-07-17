@@ -12,7 +12,7 @@ Link: https://www.shadertoy.com/view/WdXfRS
 #ifndef castle_glsl
 #define castle_glsl
 
-float t;
+float t = 0.;
 float aa;
 
 mat2 rot(float a) { float c = cos(a); float s = sin(a); return mat2(c,s,-s,c);}
