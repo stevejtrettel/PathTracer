@@ -11,3 +11,6 @@
 #include torus.glsl
 #include cone.glsl
 #include triangle.glsl
+#include cylinder.glsl
+#include capsule.glsl
+#include ellipsoid.glsl

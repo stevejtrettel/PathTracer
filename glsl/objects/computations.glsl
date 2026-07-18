@@ -98,6 +98,41 @@ float opExtrusion(in float sdf, in float pz, in float h){
 
 
 
+//--- combine two sdfs -----------------------------------------------
+//(hard union/intersection are just min()/max() on the distances)
+
+//SUBTRACTION: carve B out of A (result surface = A minus B)
+float opSubtractDist(float distA, float distB){ return max(distA, -distB); }
+//smooth subtraction with blend radius k
+float opSubtractDist(float distA, float distB, float k){ return opMaxDist(distA, -distB, k); }
+//the matching normal blend for the smooth version
+vec3 opSubtractVec(float distA, vec3 nvecA, float distB, vec3 nvecB, float k){
+    return opMaxVec(distA, nvecA, -distB, -nvecB, k);
+}
+
+//ROUNDING: inflate a surface by r (r>0 rounds outward)
+float opRound(float dist, float r){ return dist - r; }
+
+
+//--- fold/repeat the DOMAIN (call on p BEFORE the sdf) ---------------
+
+//MIRROR across the coordinate planes (fold to the positive octant/half)
+vec3 opSymX(vec3 p){ p.x = abs(p.x); return p; }
+vec3 opSymY(vec3 p){ p.y = abs(p.y); return p; }
+vec3 opSymZ(vec3 p){ p.z = abs(p.z); return p; }
+vec3 opSymXZ(vec3 p){ p.xz = abs(p.xz); return p; }
+
+//INFINITE repetition on a grid of spacing s (one copy of the shape per cell)
+vec3 opRep(vec3 p, vec3 s){ return p - s*round(p/s); }
+
+//LIMITED repetition: a (2*lim+1) grid of spacing s, centered at the origin
+vec3 opRepLim(vec3 p, float s, vec3 lim){ return p - s*clamp(round(p/s), -lim, lim); }
+
+//ELONGATE: pull a shape apart by h along each axis (cheap; exact for convex shapes)
+vec3 opElongate(vec3 p, vec3 h){ return p - clamp(p, -h, h); }
+
+
+
 
 
 
