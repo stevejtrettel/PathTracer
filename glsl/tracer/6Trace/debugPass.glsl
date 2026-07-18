@@ -116,9 +116,18 @@ vec3 debugPass(int mode, Path path){
         vec3 lit = albedo * (0.25 + 0.35*(0.5+0.5*n.y)
                              + 0.55*clamp(0.5+0.5*dot(n, -cam.dir), 0., 1.));  // real albedo, cheap shading
         if(mode == 7){ return lit; }                                   // lit preview
-        // mode 8: focus peaking — surfaces near the camera's focal distance glow over the preview
-        float peak = 1.0 - smoothstep(0.0, dbgFocusBand, abs(path.totalDistance - focalLength));
-        return mix(lit, vec3(0.2, 1.0, 0.9), 0.85 * peak);
+        // mode 8: focus peaking — concentric focus zones over a GRAYSCALE preview, so
+        // the zone colours read clearly. The overlay strength is graduated (vivid at the
+        // sharp focal plane, faint far out), so the scene stays grayscale with colour
+        // concentrated where focus matters. cyan = sharp, green -> yellow -> red = out.
+        float ad = abs(path.totalDistance - focalLength) / max(dbgFocusBand, 0.02);
+        float gray = dot(lit, vec3(0.299, 0.587, 0.114));   // desaturated scene
+        vec3  fcol; float amt;                              // zone colour + overlay strength
+        if(ad < 1.0)      { fcol = vec3(0.1, 1.0, 1.0);  amt = 0.75; }  // cyan: sharp focus
+        else if(ad < 2.5) { fcol = vec3(0.2, 1.0, 0.3);  amt = 0.55; }  // green: near
+        else if(ad < 5.0) { fcol = vec3(1.0, 0.9, 0.2);  amt = 0.38; }  // yellow: mid
+        else              { fcol = vec3(1.0, 0.35, 0.25); amt = 0.0; }   // out of focus: plain gray
+        return mix(vec3(gray), fcol, amt);
     }
 
     //--- MARCH-INTERNALS modes: the sdf_Scene march, with the analytic hit as a stop.

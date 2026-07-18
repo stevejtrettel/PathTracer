@@ -192,9 +192,11 @@ small `select` widget to `js/gui/widgets.js`, or (v1) a labeled int stepper. A
   lit preview supersedes it.)
 - **Focus peaking (8)** replaces the old destructive in-loop `focusCheck` (removed
   from `pathTrace.glsl` + `updatePath.glsl`, `focusHelp` knob retired): a
-  non-destructive lit preview with surfaces near the camera's `focalLength` glowing
-  cyan (band width = `dbgFocusBand`). Dial focal length in the Camera tab, see the
-  focal plane.
+  non-destructive lit preview with **concentric focus zones** (cyan = sharp focal
+  plane, fading green → yellow → red as it defocuses), scaled by `dbgFocusBand`.
+  Its control (a **Focus Peaking toggle + Focus Band** knob) lives in the **Camera
+  tab** with the lens controls, not the Debug dropdown — it's a camera aid. Dial
+  focal length above it and watch the zones move.
 - **Bound shells (9)** shows each object's bounding volume as a solid shell. It needs
   one hook in the object macro (`OBJECT_LOCATORS_B`): when `uDebugMode == 9` the world
   sdf returns the bound as its surface, so marching hits the shells; no-bound objects

@@ -66,7 +66,8 @@ class UI{
         };
 
         //Save-to-Scene (dev only: the dev server does the write) + the offline
-        //Download fallback; the same pair appears on the Camera and Export tabs
+        //Download fallback. Both persist the whole scene (knobs + pose); they live
+        //only on the Export tab (the single home for output/persistence).
         const saveButtons = (tabBody) => {
             if(import.meta.env.DEV){
                 const saveBtn = button('Save to Scene', () => this.saveToScene(pathtracer, sceneParams, saveBtn));
@@ -92,6 +93,21 @@ class UI{
         //--- Camera: lens knobs + live pose readout + reset ---
         const cam = panel.tab('Camera');
         for(let k of camKnobs) cam.append(control(k, wire(k)));
+
+        //focus peaking: a camera aid, so it sits with the lens controls (focalLength
+        //above). The toggle flips the focus-peaking debug lens (uDebugMode 8); the band
+        //knob sets its zone width. Concentric zones (cyan=sharp .. red=out) over a
+        //lit preview — dial focal length above and watch the focus zones move.
+        const focusBandKnob = dbgKnobs.find((k) => k.name === 'dbgFocusBand');
+        cam.append(section('Focus Aid'));
+        cam.append(toggle({label: 'Focus Peaking', value: this.values.uDebugMode === 8}, (on) => {
+            if(pathtracer.rendering) return;
+            let v = on ? 8 : 0;
+            this.values.uDebugMode = v;
+            pathtracer.tracer.updateUniforms({ uDebugMode: v });
+            pathtracer.reset();
+        }));
+        cam.append(control(focusBandKnob, wire(focusBandKnob)));
 
         //fly speed: a live multiplier on the keyboard move/turn steps. Drives
         //engine state directly (not a knob/uniform), so it isn't serialized.
@@ -134,27 +150,23 @@ class UI{
         copyBtn.dataset.label = 'Copy Pose';
         cam.append(copyBtn);
 
-        saveButtons(cam);
-
         //--- Debug: cheap one-shot preview + diagnostic lenses (see debugPass.glsl) ---
         const dbg = panel.tab('Debug');
         const modeKnob  = dbgKnobs.find((k) => k.name === 'uDebugMode');
         const scaleKnob = dbgKnobs.find((k) => k.name === 'dbgHeatScale');
-        const focusKnob = dbgKnobs.find((k) => k.name === 'dbgFocusBand');
+        //focus peaking (mode 8) lives in the Camera tab with the lens controls.
         dbg.append(select('Mode', [
             ['Off (path trace)', 0],
             ['Lit Preview',      7],
             ['Albedo',           6],
             ['Normals',          1],
             ['Depth',            4],
-            ['Focus Peaking',    8],
             ['Cost Heatmap',     2],
             ['DE Quality',       3],
             ['Overstep',         5],
             ['Bound Shells',     9],
         ], this.values.uDebugMode, wire(modeKnob)));
         dbg.append(control(scaleKnob, wire(scaleKnob)));   // heatmap step scale
-        dbg.append(control(focusKnob, wire(focusKnob)));   // focus-peaking band width
 
         //--- Render: quality + live image ---
         const ren = panel.tab('Render');
@@ -191,7 +203,7 @@ class UI{
         const refreshSpp = () => {
             spp.textContent = `${Math.floor(pathtracer.frameCount)} spp`;
         };
-        ren.append(button('Reset', () => pathtracer.reset()));
+        ren.append(button('Reset Samples', () => pathtracer.reset()));
 
         //--- Export: produce files ---
         const exp = panel.tab('Export');
