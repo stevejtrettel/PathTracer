@@ -57,9 +57,6 @@ float sdf( Vector tv, Cocktail cocktail){
     //distance to drink is intersection of inside dist and this top
     float drink = max(drinkSide, drinkTop);
 
-    //make the total distance:
-    float dist = min( abs(cup), abs(drink) );
-
     return min(cup, drink);
 }
 
@@ -81,9 +78,6 @@ void setData(inout Path path, Cocktail cocktail){
 
     //distance to drink is intersection of inside dist and this top
     float drink=max(drinkSide,drinkTop);
-
-    //make the total distance:
-    float dist=min(abs(cup),abs(drink));
 
     Vector normal;
     float eps=AT_THRESH;
