@@ -184,16 +184,22 @@ small `select` widget to `js/gui/widgets.js`, or (v1) a labeled int stepper. A
 
 ## Build status
 
-- **Slice 1 — BUILT** (matcap preview, normals, cost heatmap, DE quality). The
-  scaffold lives in `glsl/tracer/6Trace/debugPass.glsl`, forked at
-  `traceShader.glsl` `newFrame()`, driven by the `debug` knob group
-  (`uDebugMode`, `dbgHeatScale`) with a Debug tab in the GUI. Verified: mode 0 is
-  pixel-identical to before; DE-quality reads green on true SDFs (primitives) and
-  warm on imperfect DEs (varieties), matcap gives a clean noise-free preview.
-- **Known limitation**: the debug pass marches `sdf_Scene`, so objects that render
-  *only* via analytic `trace()` and don't contribute to `sdf_Scene` (sphere,
-  plane, roomBox) don't appear in the debug views. Fine for SDF authoring (the
-  point is marched fields); worth a later "trace pass" variant if needed.
+- **Slices 1 + 2 — BUILT** (8 modes). Scaffold in `glsl/tracer/6Trace/debugPass.glsl`,
+  forked at `traceShader.glsl` `newFrame()`, driven by the `debug` knob group
+  (`uDebugMode` 0–8, `dbgHeatScale`) with a Debug tab in the GUI.
+    - **Surface modes** (matcap, normals, depth, albedo, lit preview) reuse
+      `stepForward()` — the real raytrace + raymarch first hit — so they show every
+      object with real materials/normals.
+    - **March-internals modes** (cost heatmap, DE quality, overstep) use `dbgMarch()`,
+      which takes the analytic hit (`trace_Scene`) as a stop distance and marches
+      `sdf_Scene` up to it — so analytic surfaces appear too, at their true cost (a
+      clear analytic hit is reached on the first step → ~1 step, converged, exact).
+  Verified: mode 0 pixel-identical to before; matcap shows the analytic roomBox as
+  clean clay; heatmap shows the marched variety expensive (yellow) vs the analytic
+  room cheap (dark), with the variety's bounding region visible as a cost halo;
+  DE-quality green on true SDFs / analytic surfaces, warm on imperfect variety DEs.
+- **Analytic-trace objects now appear in all modes** (the earlier `sdf_Scene`-only
+  limitation is resolved) because both families mirror the real first hit.
 
 ## Build order
 

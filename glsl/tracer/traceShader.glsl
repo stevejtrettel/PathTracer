@@ -38,7 +38,7 @@ vec3 newFrame(vec2 fragCoord ){
     //tracer — per pixel, once, coherent — so with debug off (mode 0) the path-trace
     //and march loops are untouched. See glsl/tracer/6Trace/debugPass.glsl.
     if(uDebugMode != 0){
-        return debugPass(uDebugMode, tv);
+        return debugPass(uDebugMode, path);
     }
 
     //do one trace out into the scene, adjusted by the exposure

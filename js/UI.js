@@ -143,9 +143,13 @@ class UI{
         dbg.append(select('Mode', [
             ['Off (path trace)', 0],
             ['Matcap Preview',   1],
+            ['Albedo',           7],
+            ['Lit Preview',      8],
             ['Normals',          2],
+            ['Depth',            5],
             ['Cost Heatmap',     3],
             ['DE Quality',       4],
+            ['Overstep',         6],
         ], this.values.uDebugMode, wire(modeKnob)));
         dbg.append(control(scaleKnob, wire(scaleKnob)));   // heatmap step scale
 
