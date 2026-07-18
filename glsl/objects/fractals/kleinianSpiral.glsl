@@ -2,16 +2,16 @@
 //-------------------------------------------------
 // KLEINIAN SPIRAL LIMIT SET
 //
-// a sheared-and-folded Kleinian group limit set (the "spiral" variant).
-// distinct from objects/fractals/kleinian.glsl: this one has a shear term,
-// an exponential separation line, wrap period sqrt(2), and NO sphere
-// inversion. distance estimator + orbit trap ported from a Shadertoy in the
-// Jos Leys / Knighty Kleinian lineage; the surrounding renderer (AO, fog,
+// a sheared-and-folded Kleinian group limit set (the "spiral" variant). the
+// outlier of our Kleinians (cf. kleinianSeahorse / kleinianEscape): this one has
+// a shear term, an exponential separation line, wrap period sqrt(2), and NO
+// sphere inversion. distance estimator + orbit trap ported from a Shadertoy in
+// the Jos Leys / Knighty Kleinian lineage; the surrounding renderer (AO, fog,
 // clouds, bloom, DOF) is discarded — our path tracer supplies all of that.
 //
-// the orbit trap (closest-approach values accumulated during iteration)
-// drives the surface color: the object's own mat.diffuseColor is the base
-// tint, the trap modulates it. see ks_trapColor + the custom setData below.
+// COLORING lives in the scene: the object exposes the orbit trap via orbitTrap()
+// (closest-approach values accumulated during iteration); the scene recolors in
+// a setData followup. see [[shadertoy-integration]].
 //-------------------------------------------------
 
 
@@ -33,12 +33,9 @@ const int   KS_FINAL_ITER  = 16;
 // raymarcher never overshoots the surface. tune by eye (the Shadertoy used 0.24).
 const float KS_FUDGE       = 0.24;
 
-// orbit-trap palette (rgb + weight); mix strength blends toward the base tint
-const float KS_ORBIT_STRENGTH = 0.6392111;
-const vec4  KS_ORBIT_X = vec4(0.0,      1.0,      0.164706, 1.0);
-const vec4  KS_ORBIT_Y = vec4(1.0,      0.533333, 0.0,      1.0);
-const vec4  KS_ORBIT_Z = vec4(0.603922, 0.164706, 0.776471, 1.0);
-const vec4  KS_ORBIT_R = vec4(0.262745, 0.482353, 1.0,      0.29412);
+//COLORING lives in the scene: the object exposes the raw orbit trap via
+//orbitTrap() below, and the scene recolors in a setData followup. see
+//[[shadertoy-integration]].
 
 
 //the data of the spiral: frame, material, a detail knob, and an optional clip
@@ -155,30 +152,14 @@ Vector normalVec( Vector tv, KleinianSpiral obj ){
 }
 
 
-//map the captured orbit trap to a color: the object's own diffuseColor is the
-//base tint, the trap modulates it (mirrors the Shadertoy's orbitColor()).
-vec3 ks_trapColor( vec4 trap, KleinianSpiral obj ){
-    trap.w = sqrt(trap.w);
-    vec3 c = KS_ORBIT_X.rgb*KS_ORBIT_X.a*trap.x
-           + KS_ORBIT_Y.rgb*KS_ORBIT_Y.a*trap.y
-           + KS_ORBIT_Z.rgb*KS_ORBIT_Z.a*trap.z
-           + KS_ORBIT_R.rgb*KS_ORBIT_R.a*trap.w;
-    return clamp(mix(obj.mat.diffuseColor, 3.0*c, KS_ORBIT_STRENGTH), 0.0, 1.0);
+//SHADING PROBE: the orbit trap (closest-approach values) at a local point.
+//the scene calls this in its recolor followup to tint the surface however it
+//likes. evaluated once per hit, so the cost is fine.
+vec4 orbitTrap( vec3 p, KleinianSpiral obj ){
+    ks_de(p, obj.boxIterations, true);   // fills ksTrap
+    return ksTrap;
 }
 
 
-//custom setData: evaluate the trap once at the hit point, tint a copy of the
-//material's diffuseColor with it, then set the standard object-in-air data.
-void setData( inout Path path, KleinianSpiral obj ){
-    if( at(path.tv, obj) ){
-        vec3 q = toLocal(obj.frame, path.tv.pos);
-        ks_de(q, obj.boxIterations, true);          // fills ksTrap
-
-        Material m = obj.mat;
-        m.diffuseColor = ks_trapColor(ksTrap, obj);
-
-        Vector normal = normalVec(path.tv, obj);
-        bool side = inside(path.tv, obj);
-        setObjectInAir(path.dat, side, normal, m);
-    }
-}
+//standard flat-material setData (uses obj.mat); the scene overrides the color
+OBJECT_SETDATA(KleinianSpiral)

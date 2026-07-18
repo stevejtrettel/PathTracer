@@ -4,9 +4,9 @@ let uiParams = {
     exposure: 1,
     focusHelp: false,
     fov: 42,
-    scratch1: 0.877,
-    scratch2: 0.557,
-    scratch3: 0.368,
+    scratch1: 0.5,
+    scratch2: 0.5,
+    scratch3: 0.5,
     scratch4: 0.5,
 }
 
@@ -24,4 +24,10 @@ let location = {
 
 export {location};
 
-export default {uiParams: uiParams, location:location};
+
+//named knob: the fold offset that morphs the gasket (was the scratch1 coupling)
+export const params = [
+    { name: 'foldOffset', label: 'Fold Offset', min: 0.0, max: 1.0, step: 0.001, value: 0.877 },
+];
+
+export default {uiParams: uiParams, location: location, params: params};

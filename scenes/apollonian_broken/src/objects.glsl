@@ -16,6 +16,7 @@ void buildObjects(){
     //----------- GASKET -------------------------
     gasket.frame=makeFrame(vec3(0,1.8,0));
     gasket.radius=1.;
+    gasket.foldOffset=foldOffset;   //named GUI knob: morphs the gasket
 
     color= vec3(0.4,0.3,0.2);
     specularity=0.5;

@@ -2,18 +2,19 @@
 //The APOLLONIAN GASKET sdf
 //-------------------------------------------------
 
-//the data of a gasket is its frame and radius
+//the data of a gasket is its frame, radius, and fold offset
+//  radius     : inversion radius (a shape parameter, not placement)
+//  foldOffset : shifts the fold each iteration -> morphs the gasket.
+//               (was hardcoded to the `scratch1` uniform; now a scene-set field)
 struct Gasket{
     Frame frame;
     float radius;
+    float foldOffset;
     Material mat;
 };
 
 
 //the local-frame sdf
-//NOTE: the fractal's shape is coupled to the global uniform `scratch1`
-//(the "scratch1" slider in the UI shifts the fold offset each iteration)
-//NOTE: the radius multiply is a shape parameter (inversion radius), not placement
 float sdf( vec3 p, Gasket gasket ){
 
     //the folded fractal is infinite and space-filling: clip it to the
@@ -36,7 +37,7 @@ float sdf( vec3 p, Gasket gasket ){
 
     for( int i=0; i<10;i++ )
     {
-        p = -1.0 + 2.0*fract(0.5*p+scratch1);
+        p = -1.0 + 2.0*fract(0.5*p+gasket.foldOffset);
 
         float r2 = dot(p,p);
 

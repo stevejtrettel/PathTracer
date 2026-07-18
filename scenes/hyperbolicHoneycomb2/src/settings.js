@@ -4,7 +4,7 @@ let uiParams = {
     exposure: 1.3,
     focusHelp: false,
     fov: 66,
-    scratch1: 0.6,   //fold depth: honeycomb detail toward the ideal boundary
+    scratch1: 0.5,
     scratch2: 0.5,
     scratch3: 0.5,
     scratch4: 0.5,
@@ -41,4 +41,10 @@ let location = {
 
 export {location};
 
-export default {uiParams: uiParams, location: location, sky: sky};
+
+//named knob: fold depth (how deep toward the ideal boundary the honeycomb resolves)
+export const params = [
+    { name: 'foldDepth', label: 'Fold Depth', type: 'int', min: 20, max: 180, step: 1, value: 120 },
+];
+
+export default {uiParams: uiParams, location: location, sky: sky, params: params};

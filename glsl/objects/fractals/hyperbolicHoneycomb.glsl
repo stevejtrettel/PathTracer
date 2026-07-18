@@ -51,26 +51,19 @@ const float HC_FLOOR_LINE    = 2.22972;
 // edge tubes. tune by eye (the Shadertoy marched with 1.0 + refine steps).
 const float HC_FUDGE         = 0.9;
 
-// --- material ids ---
-const int HC_MAT_NONE   = -1;
-const int HC_MAT_SEG_A  = 0;
-const int HC_MAT_SEG_B  = 1;
-const int HC_MAT_SEG_C  = 2;
-const int HC_MAT_SEG_D  = 3;
-const int HC_MAT_VERTEX = 4;
-const int HC_MAT_FACE   = 5;
-const int HC_MAT_FLOOR  = 6;
+// --- region ids (returned by region(); the scene maps them to colors) ---
+const int HC_NONE   = -1;
+const int HC_SEG_A  = 0;
+const int HC_SEG_B  = 1;
+const int HC_SEG_C  = 2;
+const int HC_SEG_D  = 3;
+const int HC_VERTEX = 4;
+const int HC_FACE   = 5;
+const int HC_FLOOR  = 6;
 
-// --- palette (edit these to recolor the honeycomb) ---
-const vec3 HC_COL_SEG_A   = vec3(0.55, 0.24, 0.13);
-const vec3 HC_COL_SEG_B   = vec3(0.08, 0.38, 0.40);
-const vec3 HC_COL_SEG_C   = vec3(0.06, 0.18, 0.20);
-const vec3 HC_COL_SEG_D   = vec3(0.46, 0.32, 0.18);
-const vec3 HC_COL_VERTEX  = vec3(0.76, 0.66, 0.50);
-const vec3 HC_COL_FACE    = vec3(0.40, 0.40, 0.65);
-const vec3 HC_COL_FLOOR_1 = vec3(0.34, 0.13, 0.09);
-const vec3 HC_COL_FLOOR_2 = vec3(0.06, 0.25, 0.28);
-const vec3 HC_COL_FLOOR_L = vec3(0.72, 0.55, 0.30);
+//COLORING lives in the scene: the object exposes region() and the floor grid
+//pattern floorTint() below; the scene recolors in a setData followup. see
+//[[shadertoy-integration]].
 
 struct HcMap{ float d; int mat; };
 
@@ -226,13 +219,13 @@ vec2 hc_boundaryToAffine(vec2 p){
 HcMap hc_mapScene(vec3 worldP, int foldIter){
     HcMap res;
     res.d = 1e6;
-    res.mat = HC_MAT_NONE;
+    res.mat = HC_NONE;
 
     if(worldP.z <= 0.0) return res;
 
     //the ideal-boundary floor
     res.d = worldP.z - HC_FLOOR_Z;
-    res.mat = HC_MAT_FLOOR;
+    res.mat = HC_FLOOR;
 
     //fold into the fundamental chamber
     vec3 p = hc_toAffine(worldP);
@@ -262,42 +255,38 @@ HcMap hc_mapScene(vec3 worldP, int foldIter){
     float dV = hc_toEuclid(hV, z);
     float dF = hc_toEuclid(hF, z);
 
-    if(dA < res.d){ res.d = dA; res.mat = HC_MAT_SEG_A; }
-    if(dB < res.d){ res.d = dB; res.mat = HC_MAT_SEG_B; }
-    if(dC < res.d){ res.d = dC; res.mat = HC_MAT_SEG_C; }
-    if(dD < res.d){ res.d = dD; res.mat = HC_MAT_SEG_D; }
-    if(dV < res.d){ res.d = dV; res.mat = HC_MAT_VERTEX; }
-    if(dF < res.d){ res.d = dF; res.mat = HC_MAT_FACE; }
+    if(dA < res.d){ res.d = dA; res.mat = HC_SEG_A; }
+    if(dB < res.d){ res.d = dB; res.mat = HC_SEG_B; }
+    if(dC < res.d){ res.d = dC; res.mat = HC_SEG_C; }
+    if(dD < res.d){ res.d = dD; res.mat = HC_SEG_D; }
+    if(dV < res.d){ res.d = dV; res.mat = HC_VERTEX; }
+    if(dF < res.d){ res.d = dF; res.mat = HC_FACE; }
     return res;
 }
 
 
 // -----------------------------------------------------------------------------
-// per-cell coloring
+// shading probes (consumed by the scene's recolor followup)
 // -----------------------------------------------------------------------------
 
-//the procedural floor grid (fixed-width lines; the original's fwidth AA does not
-//survive path-traced sampling, so we use a fixed soft edge instead)
-vec3 hc_floorColor(vec2 worldXY, int foldIter){
+//which region is this local point nearest? (HC_SEG_A .. HC_FLOOR, or HC_NONE)
+int region( vec3 p, HyperbolicHoneycomb obj ){
+    return hc_mapScene(p, obj.foldIterations).mat;
+}
+
+//the floor grid pattern, tinted by scene-supplied colors: two checker tints and
+//a line color. (fixed-width lines; the original's fwidth AA does not survive
+//path-traced sampling, so we use a fixed soft edge.) call from the scene when
+//region()==HC_FLOOR.
+vec3 floorTint( vec2 worldXY, HyperbolicHoneycomb obj, vec3 c1, vec3 c2, vec3 cLine ){
     vec2 p = hc_boundaryToAffine(worldXY);
     int parity;
-    if(!hc_foldBoundary(p, parity, foldIter)) return HC_COL_FLOOR_L;
-    vec3 col = (parity == 0) ? HC_COL_FLOOR_1 : HC_COL_FLOOR_2;
+    if(!hc_foldBoundary(p, parity, obj.foldIterations)) return cLine;
+    vec3 col = (parity == 0) ? c1 : c2;
     float edge  = hc_boundaryMirrorDist(p);
     float width = 0.0015 * HC_FLOOR_LINE;
     float aa    = 0.5 * width;
-    return mix(col, HC_COL_FLOOR_L, 1.0 - smoothstep(width - aa, width + aa, edge));
-}
-
-vec3 hc_matColor(HcMap m, vec3 worldP, int foldIter){
-    if(m.mat == HC_MAT_SEG_A)  return HC_COL_SEG_A;
-    if(m.mat == HC_MAT_SEG_B)  return HC_COL_SEG_B;
-    if(m.mat == HC_MAT_SEG_C)  return HC_COL_SEG_C;
-    if(m.mat == HC_MAT_SEG_D)  return HC_COL_SEG_D;
-    if(m.mat == HC_MAT_VERTEX) return HC_COL_VERTEX;
-    if(m.mat == HC_MAT_FACE)   return HC_COL_FACE;
-    if(m.mat == HC_MAT_FLOOR)  return hc_floorColor(worldP.xy, foldIter);
-    return HC_COL_FLOOR_1;
+    return mix(col, cLine, 1.0 - smoothstep(width - aa, width + aa, edge));
 }
 
 
@@ -328,18 +317,5 @@ Vector normalVec( Vector tv, HyperbolicHoneycomb obj ){
 }
 
 
-//custom setData: re-evaluate the map at the hit point to recover the material
-//id, set the palette color into a copy of the material, then standard in-air data
-void setData( inout Path path, HyperbolicHoneycomb obj ){
-    if( at(path.tv, obj) ){
-        vec3 q = toLocal(obj.frame, path.tv.pos);
-        HcMap m = hc_mapScene(q, obj.foldIterations);
-
-        Material mat = obj.mat;
-        mat.diffuseColor = hc_matColor(m, q, obj.foldIterations);
-
-        Vector normal = normalVec(path.tv, obj);
-        bool side = inside(path.tv, obj);
-        setObjectInAir(path.dat, side, normal, mat);
-    }
-}
+//standard flat-material setData (uses obj.mat); the scene overrides the color
+OBJECT_SETDATA(HyperbolicHoneycomb)

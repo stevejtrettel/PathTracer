@@ -1,8 +1,7 @@
 //-------------------------------------------------
 // ENVIRONMENT OF THE SCENE
-// NO RoomBox: the original spiral fades to a flat sky. rays that escape (past
-// the maxDist cutoff set in objects.glsl) show the sky set in settings.js. one
-// key light sphere adds shading depth.
+// darker gradient sky so the colorful gasket pops; one warm key light in the
+// shadertoy's light direction
 //-------------------------------------------------
 
 Sphere light;
@@ -10,9 +9,10 @@ Sphere light;
 
 void buildEnvironment(){
 
-    light.frame  = makeFrame(vec3(-7, 8, 2));
-    light.radius = 1.0;
-    light.mat    = makeLight(vec3(0.95, 0.92, 0.85), 160.*lightIntensity);
+    //shadertoy key light direction ld0 = normalize(-12, 2, -7)
+    light.frame  = makeFrame(vec3(-3.4, 0.56, -2.0));
+    light.radius = 0.6;
+    light.mat    = makeLight(vec3(1.0, 0.9, 0.7), 24.);
 
 }
 

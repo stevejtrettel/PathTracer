@@ -2,10 +2,10 @@
 // OBJECTS OF THE SCENE
 //-------------------------------------------------
 
-#include ../../../glsl/objects/fractals/kleinian.glsl
+#include ../../../glsl/objects/fractals/kleinianSeahorse.glsl
 
 //set the names of objects contained in the scene
-Kleinian klein;
+KleinianSeahorse klein;
 
 void buildObjects(){
 
@@ -16,6 +16,8 @@ void buildObjects(){
     vec3 whiskey=vec3(0.18,0.43,0.62);
 
     klein.frame=makeFrame(vec3(0,0,-3));
+    klein.iterations = 50;        //the compact seahorse limit set (raise for more detail)
+    klein.offset = vec3(0.0);     //no placement offset
     color= 0.7*vec3(0.3,0.2,0.6);
     specularity=0.2;
     roughness=0.01;

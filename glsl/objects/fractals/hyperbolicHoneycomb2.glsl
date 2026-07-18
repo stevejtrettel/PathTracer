@@ -48,19 +48,19 @@ const int   HC2_FOLD3_ITER      = 70;   // floor-pattern fold depth
 // DEs here are honest; a mild fudge keeps the marcher off the thin edges
 const float HC2_FUDGE = 0.9;
 
-// --- palette (edit to recolor) ---
-const vec3 HC2_BASE_COLOR   = vec3(0.67451);
-const float HC2_ORBIT_STR   = 0.55319;
-const vec3 HC2_BG_COLOR     = vec3(0.172549, 0.235294, 0.294118);
-const vec3 HC2_SEG_A = vec3(0.811765, 0.733333, 0.325490);
-const vec3 HC2_SEG_B = vec3(0.000000, 0.486275, 0.729412);
-const vec3 HC2_SEG_C = vec3(0.647059, 0.866667, 0.843137);
-const vec3 HC2_SEG_D = vec3(0.717647, 0.415686, 0.847059);
-const vec3 HC2_FACE  = vec3(0.835294, 0.647059, 0.784314);
-const vec3 HC2_VERT  = vec3(0.909804, 0.937255, 0.976471);
-const vec3 HC2_FLOOR_1 = vec3(0.968627, 1.000000, 0.600000);
-const vec3 HC2_FLOOR_2 = vec3(0.552941, 0.380392, 0.521569);
-const vec3 HC2_FLOOR_L = vec3(0.0);
+// --- region ids (returned by region(); the scene maps them to colors) ---
+const int HC2_NONE  = -1;
+const int HC2_SEG_A = 0;
+const int HC2_SEG_B = 1;
+const int HC2_SEG_C = 2;
+const int HC2_SEG_D = 3;
+const int HC2_VERT  = 4;   // (HC2_VERTEX is taken by the Minkowski vertex vec4)
+const int HC2_FACE  = 5;
+const int HC2_FLOOR = 6;
+
+//COLORING lives in the scene: the object exposes region() and the floor grid
+//pattern floorTint() below; the scene recolors in a setData followup. see
+//[[shadertoy-integration]].
 
 
 //the data of the honeycomb: frame, material (roughness/specular; per-cell diffuse
@@ -234,12 +234,12 @@ vec3 hc2_planeToSphere(vec2 p){
     return vec3(2.0*p, r2 - 1.0) / (1.0 + r2);
 }
 
-//the final surface color at a hit point (segments / vertex / face / floor grid)
-vec3 hc2_color(vec3 pos, int foldIter){
+//which region is this local point nearest? (HC2_SEG_A .. HC2_FLOOR, or HC2_NONE)
+int region( vec3 pos, HyperbolicHoneycomb2 obj ){
     float h = pos.z - HC2_FLOOR_Z;
     float r;
     vec4 q = hc2_toHyperboloid(pos, r);
-    if(!hc2_fold4d(q, foldIter)) return HC2_BG_COLOR;
+    if(!hc2_fold4d(q, obj.foldIterations)) return HC2_NONE;
 
     float qV, qA, qB, qC, qD;
     hc2_getDots(q, qV, qA, qB, qC, qD);
@@ -254,27 +254,29 @@ vec3 hc2_color(vec3 pos, int foldIter){
     float d = min(min(dF, dV), min(min(dA, dB), min(dC, dD)));
     d = min(d, h);
 
-    vec3 color = HC2_SEG_A;
-    if(d == dB) color = HC2_SEG_B;
-    if(d == dC) color = HC2_SEG_C;
-    if(d == dD) color = HC2_SEG_D;
-    if(d == dV) color = HC2_VERT;
-    if(d == dF) color = HC2_FACE;
+    if(d == h)  return HC2_FLOOR;
+    if(d == dB) return HC2_SEG_B;
+    if(d == dC) return HC2_SEG_C;
+    if(d == dD) return HC2_SEG_D;
+    if(d == dV) return HC2_VERT;
+    if(d == dF) return HC2_FACE;
+    return HC2_SEG_A;
+}
 
-    if(d == h){
-        int count = 0;
-        vec3 folded = hc2_planeToSphere(pos.xy);
-        bool found = hc2_fold3d(folded, count);
-        color = found ? ((count % 2 == 0) ? HC2_FLOOR_1 : HC2_FLOOR_2) : HC2_FLOOR_L;
+//the floor grid pattern, tinted by scene-supplied colors (two checker tints and
+//a line color). call from the scene when region()==HC2_FLOOR.
+vec3 floorTint( vec2 xy, HyperbolicHoneycomb2 obj, vec3 c1, vec3 c2, vec3 cLine ){
+    int count = 0;
+    vec3 folded = hc2_planeToSphere(xy);
+    bool found = hc2_fold3d(folded, count);
+    vec3 col = found ? ((count % 2 == 0) ? c1 : c2) : cLine;
 
-        //fixed-width line (the original's fwidth AA does not survive path tracing)
-        float edge = hc2_distABCD(folded);
-        float aa = 0.5 * HC2_FLOOR_LINE_THICK;
-        float lineMask = 1.0 - smoothstep(HC2_FLOOR_LINE_THICK - aa,
-                                          HC2_FLOOR_LINE_THICK + aa, edge);
-        color = mix(color, HC2_FLOOR_L, lineMask);
-    }
-    return color;
+    //fixed-width line (the original's fwidth AA does not survive path tracing)
+    float edge = hc2_distABCD(folded);
+    float aa = 0.5 * HC2_FLOOR_LINE_THICK;
+    float lineMask = 1.0 - smoothstep(HC2_FLOOR_LINE_THICK - aa,
+                                      HC2_FLOOR_LINE_THICK + aa, edge);
+    return mix(col, cLine, lineMask);
 }
 
 
@@ -302,18 +304,5 @@ Vector normalVec( Vector tv, HyperbolicHoneycomb2 obj ){
 }
 
 
-//custom setData: recover the per-cell color at the hit, blended toward the base
-//tint (mirrors the original's mix(BASE_COLOR, baseColor(hit), ORBIT_STRENGTH))
-void setData( inout Path path, HyperbolicHoneycomb2 obj ){
-    if( at(path.tv, obj) ){
-        vec3 q = toLocal(obj.frame, path.tv.pos);
-        vec3 c = mix(HC2_BASE_COLOR, hc2_color(q, obj.foldIterations), HC2_ORBIT_STR);
-
-        Material mat = obj.mat;
-        mat.diffuseColor = clamp(c, 0.0, 1.0);
-
-        Vector normal = normalVec(path.tv, obj);
-        bool side = inside(path.tv, obj);
-        setObjectInAir(path.dat, side, normal, mat);
-    }
-}
+//standard flat-material setData (uses obj.mat); the scene overrides the color
+OBJECT_SETDATA(HyperbolicHoneycomb2)
