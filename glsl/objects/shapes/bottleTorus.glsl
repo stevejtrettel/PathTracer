@@ -58,5 +58,12 @@ float sdf( vec3 pos, BottleTorus donut ){
 
 }
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(BottleTorus)
+//local bounding cylinder: torus base at the origin plus the cone/neck stacked
+//above, about the y-axis (generous margins).
+float bound( vec3 p, BottleTorus donut ){
+    return bCyl(p, vec2(donut.outer + donut.inner + donut.thickness + 0.3,
+                        donut.outer + donut.inner + donut.height + 2.5 + donut.thickness));
+}
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(BottleTorus)

@@ -76,13 +76,12 @@ float sdf_polytope(vec3 pos,Polytope4D data) {
 //the local-frame sdf (size is a shape parameter, kept as before)
 float sdf( vec3 p, Polytope4D obj ){
     vec3 pos = p / obj.size;
-
-    if(length(pos)>2.5){
-        return length(pos)-2.4;
-    }
-
     return sdf_polytope(pos,obj);
 }
+
+//local bounding sphere: the stereographically-projected polytope lies within
+//radius 2.4 in the scaled frame = 2.4*size in local coords.
+float bound( vec3 p, Polytope4D obj ){ return length(p) - 2.4*obj.size; }
 
 
 //distance function that returns BOTH vertex and edge distance!
@@ -108,7 +107,7 @@ vec2 sdf_VE(vec3 p, Polytope4D obj){
 
 //at, inside, the Vector-level sdf, and normalVec from the standard interface
 //(no OBJECT_INIT: the type has edgeMat/vertexMat instead of a single mat field)
-OBJECT_LOCATORS(Polytope4D)
+OBJECT_LOCATORS_B(Polytope4D)
 OBJECT_NORMAL_FD(Polytope4D)
 
 

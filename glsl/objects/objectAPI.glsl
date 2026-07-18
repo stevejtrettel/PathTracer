@@ -39,17 +39,23 @@ void initObject( out Type obj ){                                \
 }
 
 
-// bound( Type ) is the object's BOUNDING RADIUS in its own LOCAL coordinates:
-// the world sdf skips the (possibly expensive) real sdf whenever the ray is
-// outside that sphere, returning the bound distance instead. BOUND_MARGIN keeps
-// that raw bound out of the hit band so the bounding sphere is never itself hit.
-// The default is huge (10000) — effectively unbounded, no behavior change — so a
-// type opts in by hand-writing its own `float bound( Type )` (in local units)
-// and using the *_B macros, which omit the default. Examples: Box, CubicSurface.
+// bound( vec3 p, Type ) is a cheap, conservative BOUNDING SDF in the object's own
+// LOCAL coordinates: a shape (sphere length(p)-R, box bBox(p,h), cylinder bCyl(p,c))
+// that is guaranteed never to overestimate the true distance. The world sdf traces
+// the bound and skips the (possibly expensive) real sdf whenever the ray is outside
+// it, returning the bound distance instead. BOUND_MARGIN keeps that raw bound out of
+// the hit band so the bounding shape is never itself hit.
+//
+// Opt-in rule: a FINITE object whose real sdf is meaningfully costlier than the bound
+// (fractals, varieties, gallery models, hyperbolic solids, glassware) hand-writes its
+// own `float bound( vec3 p, Type )` and uses the *_B macros. Cheap primitives (torus,
+// cone, the polyhedra) and INFINITE/tiled shapes (plane, honeycombs, kleinian tilings)
+// stay on the plain macro, which injects a no-op bound (always "inside" → never skips,
+// no behavior change). Examples of opt-ins: Box, CubicSurface, the varieties.
 #define OBJECT_LOCATORS_B(Type)                                 \
 float sdf( Vector tv, Type obj ){                               \
     vec3 local = toLocal(obj.frame, tv.pos);                    \
-    float b = obj.frame.scale * (length(local) - bound(obj));   \
+    float b = obj.frame.scale * bound( local, obj );            \
     if( b > BOUND_MARGIN ) return b;                            \
     return obj.frame.scale * sdf( local, obj );                 \
 }                                                               \
@@ -62,7 +68,7 @@ bool inside( Vector tv, Type obj ){                             \
 }
 
 #define OBJECT_LOCATORS(Type)                                   \
-float bound( Type obj ){ return 10000.; }                       \
+float bound( vec3 p, Type obj ){ return -1.0; }                 \
 OBJECT_LOCATORS_B(Type)
 
 
@@ -97,8 +103,8 @@ OBJECT_SETDATA(Type)
 
 
 // like OBJECT_API but omits the default bound(): the type hand-writes its own
-// `float bound( Type )` (local units) before this macro. Use for shapes with a
-// natural tight bound (see box.glsl, cubicSurface.glsl).
+// `float bound( vec3 p, Type )` (local coords) before this macro. Use for shapes
+// with a natural tight bound (see box.glsl, cubicSurface.glsl).
 #define OBJECT_API_B(Type)                                      \
 OBJECT_INIT(Type)                                               \
 OBJECT_LOCATORS_B(Type)                                         \

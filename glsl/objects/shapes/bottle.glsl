@@ -67,5 +67,13 @@ float sdf(vec3 pos, Bottle bottle){
     return bottleDistance(pos,bottle,trashFloat);
 }
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(Bottle)
+//local bounding cylinder: base cylinder plus the neck stacked above it, about the
+//y-axis. Half-height covers the neck top (base + up to ~1.4*neckHeight), radius the
+//base plus shell/rounding (generous margins).
+float bound( vec3 p, Bottle bottle ){
+    return bCyl(p, vec2(bottle.baseRadius + bottle.thickness + bottle.rounded + 0.3,
+                        bottle.baseHeight + 2.0*bottle.neckHeight + bottle.thickness + 0.5));
+}
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(Bottle)

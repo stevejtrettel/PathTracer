@@ -43,5 +43,11 @@ float sdf( vec3 pos, Pint pint ){
 
 }
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(Pint)
+//local bounding cylinder: the pint is a truncated cone about the y-axis, so a
+//cylinder covering its top radius and height contains it (generous margins).
+float bound( vec3 p, Pint pint ){
+    return bCyl(p, vec2(max(pint.base, pint.flare*pint.base) + 0.3, pint.height + 1.0));
+}
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(Pint)

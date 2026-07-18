@@ -46,10 +46,6 @@ float trefoil_ObjDf (vec3 p, float r)
 
 float sdf_trefoil(vec3 p)
 {
-    if(length(p)>2.){
-        return length(p)-1.9;
-    }
-
     p *= trefoil_RotMat(vec3(1.,0.,0.), PI/2.);
     const float scale = 0.18;
     p *= 1. / scale;
@@ -74,5 +70,9 @@ float sdf( vec3 p, Trefoil obj ){
     return sdf_trefoil(pos);
 }
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(Trefoil)
+//local bounding sphere: the trefoil tube lies within radius 1.9 in the scaled
+//frame = 1.9*size in local coords.
+float bound( vec3 p, Trefoil obj ){ return length(p) - 1.9*obj.size; }
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(Trefoil)

@@ -43,6 +43,11 @@ bool inside( Vector tv, Beer beer){
 //overload of sdf for the Beer struct
 float sdf( Vector tv, Beer beer){
 
+    //bounding cylinder: the whole drink lives inside the pint glass, so the glass's
+    //own bound contains the composite. skip the (medium) sdf when far.
+    float b = beer.glass.frame.scale * bound(toLocal(beer.glass.frame, tv.pos), beer.glass);
+    if( b > BOUND_MARGIN ) return b;
+
     float drinkSide;
 
     //sets the distance to the glass part of the cup; drinkSide gets the sdf of its interior (the drink volume)

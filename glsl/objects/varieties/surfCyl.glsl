@@ -43,8 +43,9 @@ float sdf( vec3 p, SurfCyl surf ){
 }
 
 
-//local bounding radius: the surface is hard-clipped to this cylinder (rad,height)
-float bound( SurfCyl surf ){ return length(surf.cyl); }
+//local bound: the clip cylinder itself. sdf = max(|surface|, bCyl(p,cyl)) >= bCyl,
+//so this is a conservative underestimate — tighter than a circumscribing sphere.
+float bound( vec3 p, SurfCyl surf ){ return bCyl(p, surf.cyl); }
 
 //the standard interface: initObject, at, inside, sdf, normalVec
 OBJECT_INIT(SurfCyl)

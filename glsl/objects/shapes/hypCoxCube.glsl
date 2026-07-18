@@ -97,5 +97,10 @@ float sdf( vec3 pos, HypCoxCube cube ){
 }
 
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(HypCoxCube)
+//local bound: the sdf starts at length(pos)-1 and is only ever max()'d larger
+//(carving face-spheres out of the unit ball), so the object is contained in the
+//unit sphere and this is the sdf's own first term — provably conservative.
+float bound( vec3 p, HypCoxCube cube ){ return length(p) - 1.0; }
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(HypCoxCube)

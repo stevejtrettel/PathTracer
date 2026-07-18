@@ -38,6 +38,11 @@ bool inDrink( Vector tv, Cocktail cocktail){
 //overload of sdf for the cocktail struct
 float sdf( Vector tv, Cocktail cocktail){
 
+    //bounding cylinder: the whole drink lives inside the cocktail glass, so the
+    //glass's own bound contains the composite. skip the (medium) sdf when far.
+    float b = cocktail.glass.frame.scale * bound(toLocal(cocktail.glass.frame, tv.pos), cocktail.glass);
+    if( b > BOUND_MARGIN ) return b;
+
     float drinkSide;
 
     //sets the distance to the glass part of the cup; drinkSide gets the sdf of its interior (the drink volume)

@@ -50,5 +50,10 @@ float sdf( vec3 p, Variety var ){
 }
 
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(Variety)
+//local bound: the clip region itself. The sdf is smax(surface, var_bBox, ...),
+//and smax >= max >= var_bBox, so var_bBox is a conservative underestimate — the
+//object is contained in the clip region, and this is the exact clip term reused.
+float bound( vec3 p, Variety var ){ return var_bBox(p); }
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(Variety)

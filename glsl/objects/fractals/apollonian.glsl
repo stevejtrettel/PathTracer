@@ -58,8 +58,12 @@ float sdf( vec3 p, Apollonian obj ){
     return apo_map(p, obj.r2, orb);
 }
 
+//local bounding sphere: the outer inversion maps the space-filling gasket into a
+//compact region near the origin. radius set generously; verified by render.
+float bound( vec3 p, Apollonian obj ){ return length(p) - 6.0; }
+
 OBJECT_INIT(Apollonian)
-OBJECT_LOCATORS(Apollonian)
+OBJECT_LOCATORS_B(Apollonian)
 
 
 //hand-written normalVec with the shadertoy's larger epsilon (0.002); the

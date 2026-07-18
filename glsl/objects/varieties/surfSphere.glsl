@@ -42,8 +42,8 @@ float sdf( vec3 p, SurfSphere surf ){
 }
 
 
-//local bounding radius: the surface is hard-clipped to this sphere
-float bound( SurfSphere surf ){ return surf.radius; }
+//local bounding sphere: the surface is hard-clipped to this sphere
+float bound( vec3 p, SurfSphere surf ){ return length(p) - surf.radius; }
 
 //the standard interface: initObject, at, inside, sdf, normalVec
 OBJECT_INIT(SurfSphere)

@@ -48,9 +48,15 @@ float sdf( vec3 p, CocktailGlass glass ){
     return cocktailGlassDistance(p, glass, trashFloat);
 }
 
-//the standard interface pieces: initObject, at, inside, sdf, normalVec
+//local bounding cylinder: the bowl (radius, height) plus the base ball below,
+//about the y-axis (generous margins).
+float bound( vec3 p, CocktailGlass glass ){
+    return bCyl(p, vec2(glass.radius + 0.3, glass.height + 2.0*glass.base + 1.0));
+}
+
+//the standard interface pieces: initObject, at, inside, sdf, normalVec (custom bound above)
 OBJECT_INIT(CocktailGlass)
-OBJECT_LOCATORS(CocktailGlass)
+OBJECT_LOCATORS_B(CocktailGlass)
 OBJECT_NORMAL_FD(CocktailGlass)
 
 //overload of location booleans

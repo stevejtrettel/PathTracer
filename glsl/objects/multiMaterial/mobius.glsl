@@ -96,7 +96,15 @@ float sdfBorder(vec3 p, Mobius mobius){
 
 //overload of sdf (world -> local through the frame)
 float sdf( Vector tv, Mobius mobius){
-    vec3 pos = toLocal(mobius.frame, tv.pos)/2.;
+    vec3 local = toLocal(mobius.frame, tv.pos);
+
+    //bounding sphere: the twisted toroidal band (major radius 2*radius in these
+    //coords) fits in this radius. skip the (medium) sdf when far.
+    float R = 2.0*(mobius.radius + mobius.width + 2.0*mobius.thickness) + 0.5;
+    float b = mobius.frame.scale * (length(local) - R);
+    if( b > BOUND_MARGIN ) return b;
+
+    vec3 pos = local/2.;
     vec2 dat = sdMobius(pos, mobius.radius, mobius.width, mobius.thickness,  mobius.twists,mobius.offset);
     //make the total distance:
     float dist = min( dat.x, dat.y );

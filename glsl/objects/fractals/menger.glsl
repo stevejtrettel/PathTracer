@@ -14,13 +14,6 @@ float menger_sdBox(vec3 p, vec3 b)
 
 float sdf_menger(in vec3 p)
 {
-
-    //cheap bounding cull: outside the sphere of radius 2, skip the iteration
-    //and return a conservative underestimate of the distance
-    if(length(p)>2.){
-        return length(p)-1.9;
-    }
-
     float d = menger_sdBox(p, vec3(1.0));
 
     float s = 1.0;
@@ -60,6 +53,10 @@ float sdf( vec3 p, MengerSponge obj ){
     return sdf_menger(pos);
 }
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(MengerSponge)
+//local bounding sphere: the sponge is the unit box carved down (extent sqrt(3)),
+//so radius 1.9 in the scaled frame = 1.9*size in local coords contains it.
+float bound( vec3 p, MengerSponge obj ){ return length(p) - 1.9*obj.size; }
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(MengerSponge)
 

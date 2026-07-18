@@ -20,8 +20,8 @@ float sdf( vec3 p, Cylinder cyl ){
     return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - cyl.rounded;
 }
 
-//local bounding radius: the far top rim + the rounding
-float bound( Cylinder cyl ){ return length(vec2(cyl.radius, cyl.height)) + cyl.rounded; }
+//local bounding sphere: the far top rim + the rounding
+float bound( vec3 p, Cylinder cyl ){ return length(p) - (length(vec2(cyl.radius, cyl.height)) + cyl.rounded); }
 
 //the standard interface (custom bound above)
 OBJECT_API_B(Cylinder)

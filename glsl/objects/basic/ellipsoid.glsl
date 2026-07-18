@@ -19,8 +19,8 @@ float sdf( vec3 p, Ellipsoid e ){
     return k0*(k0 - 1.0) / max(k1, 1e-7);
 }
 
-//local bounding radius: the largest semi-axis
-float bound( Ellipsoid e ){ return max(e.radii.x, max(e.radii.y, e.radii.z)); }
+//local bounding sphere: the largest semi-axis
+float bound( vec3 p, Ellipsoid e ){ return length(p) - max(e.radii.x, max(e.radii.y, e.radii.z)); }
 
 //the standard interface (custom bound above)
 OBJECT_API_B(Ellipsoid)

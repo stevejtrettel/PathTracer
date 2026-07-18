@@ -41,9 +41,13 @@ float sdf( vec3 p, Surface surf ){
 }
 
 
-//the standard interface: initObject, at, inside, sdf, normalVec
+//local bound: the clip region itself. sdf = max(|surface|, surface_bBox), so
+//surface_bBox is a conservative underestimate — the object is contained in it.
+float bound( vec3 p, Surface surf ){ return surface_bBox(p); }
+
+//the standard interface: initObject, at, inside, sdf, normalVec (custom bound above)
 OBJECT_INIT(Surface)
-OBJECT_LOCATORS(Surface)
+OBJECT_LOCATORS_B(Surface)
 OBJECT_NORMAL_FD(Surface)
 
 //setData for a two sided surface

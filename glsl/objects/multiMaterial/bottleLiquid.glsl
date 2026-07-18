@@ -85,6 +85,11 @@ void setTheData(float cup, float drinkSide,float drinkTop, Vector tv, inout Loca
 
 float sdf(Vector tv, BottleLiquid liquid){
 
+    //bounding cylinder: the whole drink lives inside the bottle, so the bottle's
+    //own bound contains the composite. skip the (medium) sdf when far.
+    float b = liquid.glass.frame.scale * bound(toLocal(liquid.glass.frame, tv.pos), liquid.glass);
+    if( b > BOUND_MARGIN ) return b;
+
     float drinkSide;
 
     //sets the distance to the glass part of the cup; drinkSide gets the sdf of its interior (the drink volume)

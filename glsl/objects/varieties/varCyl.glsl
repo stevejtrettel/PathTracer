@@ -52,9 +52,9 @@ float sdf( vec3 p, VarCyl var ){
 }
 
 
-//local bounding radius: cylinder (rad,height) extent, padded for the smax
-//rounding and the outward thickness so the soft edge is never clipped
-float bound( VarCyl var ){ return length(var.cyl) + var.smoothing + var.thickness.y; }
+//local bound: the clip cylinder itself. sdf = smax(surface, bCyl(p,cyl), ...) >= bCyl,
+//so this is a conservative underestimate — tighter than a circumscribing sphere.
+float bound( vec3 p, VarCyl var ){ return bCyl(p, var.cyl); }
 
 //the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
 OBJECT_API_B(VarCyl)

@@ -17,7 +17,10 @@ float sdBunny(vec3 p,float size) {
     p=p/(size);
     p=vec3(p.x,-p.z,p.y);
 
-    //the sdf is garbage outside the unit sphere; this guard clips it (remove it to witness the abominations)
+    //the sdf is garbage outside the unit sphere; this guard clips it (remove it to witness the abominations).
+    //NOTE: unlike other objects, this stays inline rather than moving to bound(): it is a DOMAIN GUARD, not
+    //just a bounding accelerator — the real sdf is invalid outside the ball, so it must never be evaluated
+    //there (a bound() early-out would still let the sdf run inside the BOUND_MARGIN band and paint garbage).
     if (length(p) > 1.) {
         return length(p)-.8;
     }

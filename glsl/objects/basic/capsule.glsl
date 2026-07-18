@@ -21,8 +21,8 @@ float sdf( vec3 p, Capsule cap ){
     return length(pa - ba*h) - cap.radius;
 }
 
-//local bounding radius: the farther endpoint plus the radius
-float bound( Capsule cap ){ return max(length(cap.a), length(cap.b)) + cap.radius; }
+//local bounding sphere: the farther endpoint plus the radius
+float bound( vec3 p, Capsule cap ){ return length(p) - (max(length(cap.a), length(cap.b)) + cap.radius); }
 
 //the standard interface (custom bound above)
 OBJECT_API_B(Capsule)

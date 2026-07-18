@@ -1,4 +1,9 @@
-# Bounding-volume acceleration: uniform system + rollout plan
+# Bounding-volume acceleration: uniform system + as-built record
+
+> **Status: implemented** (branch `refactor`, July 2026). Stages A–E below were
+> carried out and render-tested against baselines in `render-tests/baseline/`.
+> An "As built" section at the end records where reality differed from the plan.
+
 
 ## Goal
 
@@ -205,3 +210,46 @@ Baseline shots first: the affected scenes are already enumerated
   name collision, mirroring how `sdf(vec3, Object)` already calls `sdf(vec3)`.
 - No consumers of `bound()` exist outside `glsl/objects/` (verified), so the
   signature change is fully contained.
+
+---
+
+## As built — where reality differed from the plan
+
+- **Signature.** `bound()` became `float bound( vec3 p, Type )`, a bounding *sdf*
+  (not a radius). The plain-macro default is `return -1.0` (always "inside" → never
+  skips). Overloaded by struct type exactly like `sdf`, so no collisions across
+  objects in a scene.
+- **Stage A found 11 implementers, not 8.** Three new untracked basic shapes
+  (`cylinder`, `capsule`, `ellipsoid`, wired into every scene via `_basic.glsl`)
+  also used the old signature and were migrated.
+- **Stage B — cubic family skipped, deliberately.** `variety` and `surface` were
+  bounded (reusing their clip region), and `varBox/varCyl/surfBox/surfCyl` were
+  *tightened* from circumscribing spheres to exact `bBox`/`bCyl`. The cubic-line
+  family (`cubicLines`/`plateLines`/`planarConics`) was **not** given per-object
+  bounds: their scenes already do a superior scene-level group cull in
+  `objects.glsl` (`_cachedBBox = sceneBBox(...)`, one test skips the whole group)
+  and march via `sdf_cached`, bypassing the wrapper. A per-object bound there would
+  be dead code. They are bounded — by a better-fitting mechanism.
+- **Stage C — gallery uses a `GALLERY_BOUND` constant**, co-located with the
+  model's `#include` in `object.glsl`, rather than a per-file bound or struct field.
+  Reason: models don't share an extent (self-cullers range 1.5–3, 17 others
+  unknown), only one compiles at a time, and the scene never calls `initObject`
+  (a struct field would be undefined). The constant is always defined, one line to
+  tune, and set in the same edit that swaps the model. **Rule: it must be ≥ the
+  model's extent or the model clips.** Verified: Vase @2.0 and Serpinski @3.5.
+- **Stage D — apollonian radius corrected by render.** A field-reasoned guess of
+  2.5 visibly clipped the gasket; bumped to **6.0** and verified. Glassware uses
+  generous `bCyl` bounds from struct fields; the drink composites
+  (`beer`/`cocktail`/`bottleLiquid`) early-out via their exterior cup's bound, and
+  `bottleTorusClearcoat`/`poincareMarble` inherit acceleration for free by calling
+  their components' wrappers.
+- **Stage E — bunny kept its inline guard.** The other four culls (menger, trefoil,
+  kleinBottle, polytope4D) migrated to `bound()`, which also fixed a latent quirk:
+  the inline culls returned `length(p/size)-R` (overestimates Euclidean distance for
+  `size<1`, a march-overshoot risk), replaced by the correct `length(p)-R*size`.
+  **Bunny is the principled exception:** its sdf is *garbage outside the unit ball*,
+  so its guard is a DOMAIN guard, not just an accelerator — a `bound()` early-out
+  would still let the sdf run inside the `BOUND_MARGIN` band and paint garbage.
+  (menger and trefoil are not referenced by any current scene, so they compile via
+  the same pattern but weren't render-tested; kleinBottle/polytope4D, same pattern,
+  were.)

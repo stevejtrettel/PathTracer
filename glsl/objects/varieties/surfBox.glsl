@@ -43,8 +43,9 @@ float sdf( vec3 p, SurfBox surf ){
 }
 
 
-//local bounding radius: the surface is hard-clipped to this box (far corner)
-float bound( SurfBox surf ){ return length(surf.box); }
+//local bound: the clip box itself. sdf = max(|surface|, bBox(p,box)) >= bBox,
+//so this is a conservative underestimate — tighter than a circumscribing sphere.
+float bound( vec3 p, SurfBox surf ){ return bBox(p, surf.box); }
 
 //the standard interface: initObject, at, inside, sdf, normalVec
 OBJECT_INIT(SurfBox)

@@ -145,8 +145,14 @@ vec3 opElongate(vec3 p, vec3 h){ return p - clamp(p, -h, h); }
 
 //-------------------------------------------------
 //-------------------------------------------------
-//=====BOUNDING SHAPES
-//used by the varieties (varBox/varCyl/surfBox/surfCyl)
+//=====BOUNDING SHAPES  (box / cylinder signed distances)
+//
+// these serve TWO distinct roles in the object files; keep them straight:
+//   (1) a geometry CLIP baked into a local sdf, e.g. smax(surfaceDist, bBox(p,box)):
+//       this CHANGES the shape (cuts the object to the region). see varBox/surfBox.
+//   (2) a bounding SDF returned by a type's `bound( vec3 p, Type )` for the
+//       OBJECT_*_B acceleration: pure speed, never changes geometry. see objectAPI.glsl.
+// a type often uses the SAME box for both (clip up close, skip when far).
 //-------------------------------------------------
 //-------------------------------------------------
 
@@ -158,7 +164,7 @@ float bBox(vec3 pos, vec3 box){
 }
 
 
-//distance bound for a cylinder: cyl.x = radius, cyl.y = half-height
+//signed distance to a cylinder: cyl.x = radius, cyl.y = half-height
 float bCyl(vec3 pos, vec2 cyl){
     float r = length(pos.xz)-cyl.x;
     float h = abs(pos.y)-cyl.y;

@@ -116,5 +116,10 @@ float sdf( vec3 pos, HypDod dod ){
 }
 
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(HypDod)
+//local bound: the sdf starts at length(pos)-1 and is only ever max()'d larger
+//(carving face-spheres out of the unit ball), so the object is contained in the
+//unit sphere and this is the sdf's own first term — provably conservative.
+float bound( vec3 p, HypDod dod ){ return length(p) - 1.0; }
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(HypDod)

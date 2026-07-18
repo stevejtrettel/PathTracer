@@ -15,10 +15,6 @@ struct KleinBottle{
 
 float sdKlein(vec3 p, float thickness){
 
-    if(length(p)>6.){
-        return length(p)-5.9;
-    }
-
     //from https://www.shadertoy.com/view/4ltSW8
 
     float d = maxDist;
@@ -68,6 +64,10 @@ float sdf( vec3 p, KleinBottle klein ){
     return sdKlein(pos,klein.thickness*klein.size);
 }
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(KleinBottle)
+//local bounding sphere: the klein bottle lies within radius 5.9 in the scaled
+//frame = 5.9*size in local coords (the axis permutation preserves length).
+float bound( vec3 p, KleinBottle klein ){ return length(p) - 5.9*klein.size; }
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(KleinBottle)
 
