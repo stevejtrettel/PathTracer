@@ -1,123 +1,82 @@
-# Refactor roadmap
+# Project state & open items
 
-State as of July 2026, on branch `refactor` (all of the below discussed and agreed):
-the object library is fully migrated to the Frame system — every object is a struct
-with a `Frame frame` (similarity transform: rot/pos/scale), a hand-written **local**
-`sdf(vec3 p, Type obj)`, and `OBJECT_API(Type)` generating the world-facing interface.
-Convention: `vec3` argument = local coordinates, `Vector` argument = world ray state.
-Verification tool: `node scripts/render-test.mjs <scene...>` (headless Chrome screenshots
-into `render-tests/`).
+State as of July 2026 (branch `refactor`). The big refactors are **done**; this file is
+now a record of what's in place plus the handful of genuinely open items. For how to run,
+write a scene, or use the object API, see `readme.md`.
 
-Phases 3 and 4 were originally separate; discussion (July 2026) merged them — the
-"named scene params" and the "uniform descriptor table" are the same object. The full
-design is written up in **`docs/gui-design.md`**; the summary follows. Pilot scene =
-`sphere`.
+## Done
 
-## Phase 3/4 — the knob list (unified; next up)
+- **Object library on the Frame system.** Every object is a struct with a `Frame frame`
+  (similarity transform: rot/pos/scale), a hand-written **local** `sdf(vec3 p, Type obj)`,
+  and `OBJECT_API(Type)` generating the world-facing interface. Convention: `vec3` arg =
+  local coords, `Vector` arg = world ray state. Optional tight bounding via `float bound(Type)`
+  + the `*_B` macros (a real cull; baked into Box, CubicSurface, the surf*/var* families).
+- **Named-params knob system.** Every tunable control is one data object
+  `{name, label, type, min, max, step, value, group}`; one generator (`js/shaderData/knobs.js`)
+  emits the GLSL uniform, the GUI slider, and the `settings.js` serialization. Scenes declare
+  named params in `settings.js`; **44 of 45 scenes** use them (all but the parameterless
+  `skyDemo`) — the earlier `scratch1..4` convention was swept into labeled sliders (see below).
+  `scratch1..4` remain as always-present engine knobs for quick live experiments.
+- **Custom tabbed GUI** (Scene / Camera / Render / Export), a plain vanilla-JS renderer of
+  the knob list. `lil-gui` is gone.
+- **Raw-WebGL2 harness.** three.js fully removed; renderer in `js/ComputeShader.js`, math
+  vendored into `js/math/`. Details in `docs/webgl-migration.md`.
+- **Named-params sweep + collision lesson (July 2026).** The gallery had an unwritten
+  convention — scratch1 = `isotropicScatter`, scratch2 = `meanFreePath`, scratch4 = ceiling
+  light — repeated across ~34 scenes. Converted to named sliders (`sssScatter`, `sssDensity`,
+  `roomLight`, plus one-offs `rotation`/`emission`/`roughAmt`). NOTE for future knobs: a param
+  is a **global** in the assembled shader, so names must avoid collisions — `scatter` clashes
+  with the core `scatter()` fn, `light` with `Sphere light;`, `roughness` with locals.
 
-Every tunable control becomes one plain data object — a **knob**:
-`{name, label, type, min, max, step, value, group}`, with `type` ∈
-`float | bool | color(vec3) | vec2 | vec3`. One **generator** turns a list of knobs into
-the four things now hand-synced across five files: GLSL `uniform` decls, three.js uniform
-objects, lil-gui controls (each wired `onChange → updateUniforms + reset`), and the
-`settings.js` serialization on Download. The knob list is assembled from three sources:
+## The shadertoy fractal family (July 2026)
 
-- **camera** knobs (`fov`, `aperture`, `focalLength`, `exposure`, `focusHelp`) — engine-owned
-  default list, values overridden per scene from `settings`. (`maxBounces`, `group:'render'`,
-  already promoted to a uniform in commit 43e5e71 as the proof-of-concept.)
-- **scratch** knobs (`scratch1..4`, renamed from `extra1..4`) — engine-owned, always present.
-  These are a deliberate *live-tweak scratchpad*, NOT latent scene params: four generic,
-  always-there dials the user rewires constantly while iterating. Kept, not replaced.
-- **named** params — the scene's optional `settings.params`. Populated by *promotion*: tune
-  on scratch, and when a value is a keeper, graduate it into a named param (rename in GLSL,
-  move one line into settings). Scene tab starts scratch-only and accretes meaning.
+Seven shadertoys adapted into the tracer, all on a shared recipe:
+`kleinianSpiral`, `hyperbolicHoneycomb`, `hyperbolicHoneycomb2`, `kleinianSeahorse`,
+`breathe`, `apollonian`, `kleinianEscape` (source shadertoys kept under `shadertoys/`).
 
-Riding the same settings pass:
-- **Shared `createScene()` entry point**: the 35 `example/*/main.js` are all identical
-  (only `cubic-portrait`/`cubic-landscape` differ — a custom aspect ratio). One engine-side
-  entry; a scene folder becomes just its `src/` files. The aspect override moves into
-  `settings` (a Render control), so those two scenes stop being special.
-- **Per-scene sky texture**: hardcoded `/assets/office.jpg` in `buildTraceShader.js` →
-  `settings` entry.
+- **Recipe.** Extract only the SDF/DE and camera; discard the shadertoy's own renderer
+  (AO, fog, bloom, DOF, lighting) — our path tracer supplies that. New object file per shape
+  under `glsl/objects/fractals/`, standard object API. Fractal DEs overestimate, so bake a
+  fudge factor into the returned distance and tune by eye.
+- **Coloring convention.** Objects stay geometry-only and expose a *probe* —
+  `vec4/vec3 orbitTrap(vec3 p, obj)` or `int region(vec3 p, obj)` — and the scene owns the
+  palette, applied as a **followup to `setData`**:
+  ```glsl
+  void setData_Objects(inout Path path){
+      setData(path, obj);                          // geometry + flat base material
+      if( at(path.tv, obj) ){                      // recolor followup, scene-owned
+          vec3 p = toLocal(obj.frame, path.tv.pos);
+          path.dat.surfDiffuse = myColor(p);       // uses the probe; edit freely
+      }
+  }
+  ```
+  This keeps the `Material` struct unchanged (no core edits) while allowing position-dependent
+  color. Deform parameters (`time`, `KleinR/I`, `r2`, fold depth) are struct fields driven by
+  named params.
+- **Per-scene rendering knobs (not geometry!).** `maxDist` and `EPSILON` are mutable globals
+  settable in `buildObjects` — a shorter `maxDist` gives a ray-length cutoff (fade to sky),
+  a finer `EPSILON` lets the marcher see through a fractal's thin "haze" instead of reading it
+  as a solid wall. Infinite tilings can be carved to a finite hero block with a clip box.
+- **Camera conversion.** shadertoy EYE/TARGET/UP → our `position = EYE - CAMERA_OFFSET`,
+  `facing` rows `= [right | up | -forward]`. (Watch the basis arithmetic — a slip gives a
+  subtly-wrong pose.)
 
-Name-collision note: single letters (`a b c d`) are UNSAFE as global scratch uniforms —
-they shadow locals everywhere (`d`=829, `a`=712 uses across the GLSL). Multi-char names
-(`scratch1`, `extra1`) are collision-free; keep them.
+## Open / deferred
 
-## Phase 5 — custom tabbed GUI (later; a pure renderer swap)
-
-The knob list is the seam: a custom GUI is just a different *renderer* of the same list, so
-this decouples fully from the refactor above and changes no scene. Replace lil-gui with a
-custom vanilla-JS tabbed panel (no framework — stays consistent with the three.js/vanilla
-stack). A knob's `group` field routes it to a tab; each tab = its knob-group render plus
-optional hand-written action widgets. Tabs:
-
-- **Scene** — named params + scratch (knobs only)
-- **Camera** — lens knobs + pose readout / reset
-- **Render** — image geometry + quality: resolution, aspect ratio, preview, `maxBounces`
-  (mix of knobs and engine-action widgets)
-- **Export** — Save Image, Download Settings, autosave, and the whole HD-tile feature
-  (kept intact — a coupled "emit a final file" workflow)
-- **Help** — keybinding map + stats (the WASD/QE/arrow bindings are invisible today)
-
-Litmus that assigns Render vs Export: *does it change the picture you're looking at* (Render)
-*or produce a file* (Export). HD tiling is file-producing → Export, whole.
-
-## Deferred / smaller items
-
-- **Default bounding-box support in the object API (DONE July 2026)**: the cubic scenes
-  hand-rolled a bounding volume and every one hit the same trap — returning the raw bound
-  distance as the marched sdf makes the raymarcher (`abs(sdf) < EPSILON`) *hit the bound
-  itself*, rendering it as an opaque (glass) shell. Now a first-class, hit-safe feature:
-  every object type may define `float bound( Type )` — its bounding-sphere radius in LOCAL
-  coords — and the `OBJECT_LOCATORS` world sdf skips the real sdf (returning the bound
-  distance) whenever the ray is outside, with `BOUND_MARGIN` (0.05, > EPSILON) keeping the
-  raw bound out of the hit band. Default `bound()` = 10000 (effectively unbounded, no
-  behavior change); a type opts into a tight bound via the `*_B` macros (`OBJECT_API_B`).
-  Baked so far: `Box`, `CubicSurface`, and the whole variety/surface-in-a-shape family —
-  `SurfSphere`/`SurfBox`/`SurfCyl` (hard-clipped, exact bound) and `VarSphere`/`VarBox`/
-  `VarCyl` (smax-clipped, bound padded by `smoothing + thickness.y` so the soft edge isn't
-  clipped). These carry their bound as a struct field and run an expensive dual-number eval
-  *before* their internal bbox clamp, so bounding is a real cull. Follow-ups: `Surface`/
-  `Variety` (bounded by a scene-supplied bbox function, not a field — expose a radius),
-  `Kleinian` (limit set, needs a safe ball), and migrate the cubic scenes' hand-rolled
-  group bounds onto the feature (they share one cubicF eval across the group via caching, so
-  that needs a group-level bound, not just per-object).
-- **cubic-portrait still needs a camera aim**: renders near-black — the objects (a tall
-  x=0 stack: surface above plate on a pedestal) are mostly out of frame; lights are strong
-  (400+300) so it's framing, not brightness. Its `facing` needs re-aiming by eye — best done
-  interactively in the app (WASD + pose readout + Download Settings, all now in the GUI),
-  then paste the downloaded facing into settings.js. (FIXED July 2026: `cubicSurface` — its
-  camera pointed away from the origin; now `position=[2,1,5]` puts the effective camera at
-  (0,1,11) looking -z at the surface. `cubicPlane` — the diagram at x=0 rendered in the
-  corner because CAMERA_OFFSET.x=-2 shifts the effective camera; `position.x=2` recenters
-  it.)
-- **Dead `render_Environment` / `render_Objects` flags**: declared in every
-  scene's environment.glsl / objects.glsl but never read — `trace_Scene` always
-  traces both. Either wire them up (skip tracing when false) or delete them.
-  (Found during A4: setting `render_Environment=false` did nothing.)
-- **render-test staleness gotcha**: `vite-plugin-glsl` caches the inlined
-  `setupShader` transform, so editing an *included* `.glsl` (e.g. sky.glsl)
-  without touching the parent serves a stale shader. `rm -rf node_modules/.vite`
-  before render-testing GLSL-include changes; also kill stray dev servers first
-  (a squatter on :5173 makes render-test screenshot the wrong thing).
-
-- **apollonian_broken**: renders black; verified pre-existing (identical before the frame
-  migration). Suspects: the `extra`-slider coupling in the gasket sdf and the always-true
-  `at()`. Debug or delete the example.
-- **Orphan objects with no scene**: menger, trefoil, poincareMarble/hypDod (only used by
-  archived `final/seifertWeber`). Small demo scenes would keep them exercised by the
-  render-test panel (the icosahedron bug survived years because nothing rendered it).
-- **Cubic scenes' rotation machinery**: `rotXZ`/`standUp`/`plateRot` in the cubic scenes
-  mutate positions in a pseudo-world; could fold into the objects' frames and delete the
-  scene-level code. Do when next working on those scenes (behavior needs eyeballing).
-- **Glass shells don't inherit variety frames**: `createVar*Glass` places the shell with
-  `makeFrame(var.frame.pos)` (no rotation/scale inheritance). Fine today; revisit if a
-  scene rotates/scales a wrapped variety.
-- **Local-unit thresholds**: the surf* edge-band (0.005) and the gasket trace bail-out are
-  in local units post-migration — they scale *with* the object (arguably correct; noted in
-  code comments). Only matters for `frame.scale != 1`.
-- `pi` vs `PI` both exist (lowercase used by vendored sdf_gallery files) — unify only if
-  ever touching those files anyway. `package.json` has no name/version fields.
-- KeyControls moved to `event.code` — verify all 12 bindings by hand once (arrows,
-  `'`/`/` up/down, WASD + QE).
+- **cubic-portrait camera aim** — renders near-black; the x=0 object stack is mostly out of
+  frame. Re-aim `facing` by eye in the app (WASD + pose readout + Save to Scene).
+- **Cubic scenes' rotation machinery** — `rotXZ`/`standUp`/`plateRot` mutate positions in a
+  pseudo-world; could fold into object frames and delete the scene-level code (needs eyeballing).
+- **Glass shells don't inherit variety frames** — `createVar*Glass` places the shell with
+  `makeFrame(var.frame.pos)` (no rotation/scale). Fine today; revisit if a scene rotates a
+  wrapped variety.
+- **Local-unit thresholds** — the surf* edge-band (0.005) and the gasket bail-out are in local
+  units, so they scale *with* the object (arguably correct; only matters for `frame.scale != 1`).
+- **`pi` vs `PI`** both exist (lowercase used by vendored `sdf_gallery` files) — unify only if
+  touching those files anyway.
+- **Orphan library objects** — `menger`, `trefoil`, `poincareMarble`/`hypDod` have no scene.
+  Kept deliberately (library surface); a tiny demo scene each would keep them render-tested.
+- **render-test gotcha** — `vite-plugin-glsl` caches the inlined `setupShader`, so editing an
+  *included* `.glsl` without touching the parent serves a stale shader. `rm -rf node_modules/.vite`
+  before render-testing include changes; kill stray dev servers first (a squatter on :5173
+  makes render-test screenshot the wrong app).

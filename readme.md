@@ -90,12 +90,17 @@ import the three `src/` files, call `createScene`) plus `src/` with three files:
 
 **`src/settings.js`** — must default-export `{uiParams, location}`, optionally
 `params`, `sky`, and `aspect`:
-- `uiParams`: `aperture, focalLength, exposure, focusHelp, fov, scratch1..scratch4`
-  (`scratch1`–`scratch4` are free scene parameters wired to UI sliders)
+- `uiParams`: `aperture, focalLength, exposure, focusHelp, fov`, plus `scratch1..scratch4`
+  — four always-present generic dials for quick live experiments
 - `location`: `{position: [x,y,z], facing: [9 entries, 3x3 rotation]}`
-- `params` (optional): named scene knobs — each entry
-  `{name, label, min, max, step, value}` generates a GLSL uniform, a GUI slider,
-  and a line in saved settings; referenced by `name` in the scene's GLSL
+- `params` (optional but preferred): named scene knobs — each entry
+  `{name, label, type?, min, max, step, value}` generates a GLSL uniform, a **labeled**
+  GUI slider, and a line in saved settings; referenced by `name` in the scene's GLSL.
+  This is how keeper controls are exposed (every scene uses them); reach for `scratch`
+  only while iterating. A param is a **global uniform**, so pick a name that doesn't
+  collide with a function/variable (e.g. not `light`, `scatter`, `roughness`).
+  `type` defaults to `float`; `type:'int'` gives an integer slider (handy for
+  iteration-count knobs)
 - `sky` (optional): `{type:'image', src}` (default `/assets/office.jpg`),
   `{type:'solid', color}`, or `{type:'gradient', top, bottom}`
 
@@ -114,6 +119,23 @@ void  setData_Objects(inout Path path);
 
 **`src/environment.glsl`** — must define the analogous
 `buildEnvironment / trace_Environment / sdf_Environment / setData_Environment`.
+
+**Position-dependent color** (used by the fractal scenes): keep the object geometry-only and
+recolor in the scene as a followup to `setData`. The object exposes a *probe* — e.g.
+`vec4 orbitTrap(vec3 p, obj)` or `int region(vec3 p, obj)` — and `setData_Objects` overwrites
+`path.dat.surfDiffuse` after `setData` runs:
+```glsl
+void setData_Objects(inout Path path){
+    setData(path, obj);
+    if( at(path.tv, obj) ){
+        vec3 p = toLocal(obj.frame, path.tv.pos);
+        path.dat.surfDiffuse = myColor(p);   // palette lives here, in the scene
+    }
+}
+```
+This gives per-hit color without touching the `Material` struct. (Adapting shadertoy fractals
+follows the same idea — extract the SDF + camera, discard the shadertoy's renderer, expose a
+probe; see `ROADMAP.md` and the `glsl/objects/fractals/` files.)
 
 Larger scenes may split generated geometry data into extra files (see the `cubic*` scenes)
 and `#include` them from `objects.glsl`.

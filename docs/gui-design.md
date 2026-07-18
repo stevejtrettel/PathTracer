@@ -1,9 +1,9 @@
 # GUI / parameter system design
 
-Design agreed July 2026 (branch `refactor`). This is the plan for the knob-list refactor
-(Phase 3/4) and the custom tabbed GUI (Phase 5) in `ROADMAP.md`. Nothing here is built yet
-except `maxBounces` (commit 43e5e71), which is the first knob, wired the old hand-synced
-way as a proof that a promoted GLSL constant works as a live uniform.
+Design agreed July 2026 (branch `refactor`). **This is now IMPLEMENTED** — the knob-list
+generator (`js/shaderData/knobs.js`) and the custom tabbed GUI shipped, and all scenes use
+named params. This file is kept as the design rationale; a few code snippets below show the
+old hand-synced way (and `lil-gui`) it replaced.
 
 ## The problem
 
@@ -15,7 +15,7 @@ glsl/tracer/1Setup/uniforms.glsl   uniform float fov;
 js/shaderData/buildTraceShader.js  fov: { value: uiParams.fov }
 js/UI.js  (control)                cam.add(this.params,'fov',15,140,1).name('FOV').onChange(v=>{updateUniforms({fov:v}); reset()})
 js/UI.js  (printParams)            str += `fov: ${this.params.fov},\n`
-example/*/src/settings.js          fov: 29
+scenes/*/src/settings.js           fov: 29
 ```
 
 Change a range → four places drift. Add a param → five edits × up to 35 scenes.
