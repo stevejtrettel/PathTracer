@@ -184,9 +184,23 @@ small `select` widget to `js/gui/widgets.js`, or (v1) a labeled int stepper. A
 
 ## Build status
 
-- **Slices 1 + 2 — BUILT** (8 modes). Scaffold in `glsl/tracer/6Trace/debugPass.glsl`,
+- **Slices 1–3 — BUILT** (9 modes). Scaffold in `glsl/tracer/6Trace/debugPass.glsl`,
   forked at `traceShader.glsl` `newFrame()`, driven by the `debug` knob group
-  (`uDebugMode` 0–8, `dbgHeatScale`) with a Debug tab in the GUI.
+  (`uDebugMode` 0–9, `dbgHeatScale`, `dbgFocusBand`) with a Debug tab in the GUI.
+  Modes: 1 normals · 2 heatmap · 3 DE quality · 4 depth · 5 overstep · 6 albedo ·
+  7 lit preview · 8 focus peaking · 9 bound shells. (Plain matcap was dropped —
+  lit preview supersedes it.)
+- **Focus peaking (8)** replaces the old destructive in-loop `focusCheck` (removed
+  from `pathTrace.glsl` + `updatePath.glsl`, `focusHelp` knob retired): a
+  non-destructive lit preview with surfaces near the camera's `focalLength` glowing
+  cyan (band width = `dbgFocusBand`). Dial focal length in the Camera tab, see the
+  focal plane.
+- **Bound shells (9)** shows each object's bounding volume as a solid shell. It needs
+  one hook in the object macro (`OBJECT_LOCATORS_B`): when `uDebugMode == 9` the world
+  sdf returns the bound as its surface, so marching hits the shells; no-bound objects
+  (the -1e9 sentinel) return maxDist. That is the one debug branch in the object hot
+  path — a coherent uniform test (GPU-predicted, ~free), and it does not affect mode 0
+  (verified: varBox/cubic/primitives/bunny render identically).
     - **Surface modes** (matcap, normals, depth, albedo, lit preview) reuse
       `stepForward()` — the real raytrace + raymarch first hit — so they show every
       object with real materials/normals.
@@ -201,7 +215,7 @@ small `select` widget to `js/gui/widgets.js`, or (v1) a labeled int stepper. A
 - **Analytic-trace objects now appear in all modes** (the earlier `sdf_Scene`-only
   limitation is resolved) because both families mirror the real first hit.
 
-## Build order
+## Build order (as built: slices 1–3 done; below is the original plan)
 
 1. **Scaffold + Matcap preview + Normals + Cost heatmap + DE quality.** Stand up
    `debugPass`, the fork, and the `uDebugMode` knob, then these four modes (all share

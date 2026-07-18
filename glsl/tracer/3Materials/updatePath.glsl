@@ -70,26 +70,8 @@ void updateFromSky(inout Path path){
 
 
 
-void focusCheck(inout Path path){
-    if(focusHelp){
-
-        float distToFocalPlane = abs(path.totalDistance-focalLength);
-
-        if(distToFocalPlane<0.03){
-            path.pixel+=vec3(0,1,1);
-        }
-        else if(distToFocalPlane<0.12){
-            path.pixel+=vec3(0,1,0);
-        }
-        else if(distToFocalPlane<0.25){
-            path.pixel+=vec3(0.5,0.5,0.);
-        }
-        else if(distToFocalPlane<0.5){
-            path.pixel+=vec3(1.,0.,0.);
-        }
-    }
-
-}
+// (focus visualization retired from the path-trace loop — it now lives as a clean
+// non-destructive debug lens: uDebugMode == 8, focus peaking. See debugPass.glsl.)
 
 
 

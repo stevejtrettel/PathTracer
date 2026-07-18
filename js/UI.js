@@ -140,18 +140,21 @@ class UI{
         const dbg = panel.tab('Debug');
         const modeKnob  = dbgKnobs.find((k) => k.name === 'uDebugMode');
         const scaleKnob = dbgKnobs.find((k) => k.name === 'dbgHeatScale');
+        const focusKnob = dbgKnobs.find((k) => k.name === 'dbgFocusBand');
         dbg.append(select('Mode', [
             ['Off (path trace)', 0],
-            ['Matcap Preview',   1],
-            ['Albedo',           7],
-            ['Lit Preview',      8],
-            ['Normals',          2],
-            ['Depth',            5],
-            ['Cost Heatmap',     3],
-            ['DE Quality',       4],
-            ['Overstep',         6],
+            ['Lit Preview',      7],
+            ['Albedo',           6],
+            ['Normals',          1],
+            ['Depth',            4],
+            ['Focus Peaking',    8],
+            ['Cost Heatmap',     2],
+            ['DE Quality',       3],
+            ['Overstep',         5],
+            ['Bound Shells',     9],
         ], this.values.uDebugMode, wire(modeKnob)));
         dbg.append(control(scaleKnob, wire(scaleKnob)));   // heatmap step scale
+        dbg.append(control(focusKnob, wire(focusKnob)));   // focus-peaking band width
 
         //--- Render: quality + live image ---
         const ren = panel.tab('Render');

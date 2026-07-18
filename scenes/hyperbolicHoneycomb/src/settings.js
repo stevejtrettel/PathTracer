@@ -9,14 +9,16 @@ let uiParams = {
     scratch2: 0.5,
     scratch3: 0.5,
     scratch4: 0.5,
+    uDebugMode: 0,
+    dbgHeatScale: 128,
 }
 
 export {uiParams};
 
 
-let position = [2.5181224669675593,-0.7953664662092742,-5.5104049697421145];
+let position = [4.720546795680603,-1.399574809135772,-5.23721856348474];
 
-let facing = [-0.6712401965939518,-0.2787671810724618,0.6872026789312896,0.741471415025816,-0.23695087184908192,0.6281333225801269,-0.012235161467065912,0.930652138603287,0.3656185678191266]; 
+let facing = [0.45788706918621713,-0.24529196938024386,0.8548060284804831,0.8817714267485511,0.0005055741806194707,-0.47218210604658173,0.11540213738330656,0.9694285492437981,0.216403960212297]; 
 
 let location = {
 position: position,
@@ -25,10 +27,8 @@ facing: facing
 
 export {location};
 
-
-//named knob: fold depth (how deep toward the ideal boundary the honeycomb resolves)
 export const params = [
-    { name: 'foldDepth', label: 'Fold Depth', type: 'int', min: 10, max: 200, step: 1, value: 146 },
+    { name: 'foldDepth', type: 'int', label: 'Fold Depth', min: 10, max: 200, step: 1, value: 146 },
 ];
 
-export default {uiParams: uiParams, location: location, params: params};
+export default {uiParams: uiParams, location:location, params:params};

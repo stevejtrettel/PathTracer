@@ -12,9 +12,6 @@ vec3 pathTrace(Path path){
         //move forward until the next intersection, update LocalData
         stepForward(path);
 
-        //help with focusing
-        focusCheck(path);
-
         //pick up color from traveling through the medium we were just in.
         updateFromVolume(path);
 

@@ -13,7 +13,6 @@
 const cameraKnobs = [
     { name: 'aperture',    label: 'Aperture',     min: 0,  max: 2,   step: 0.001, value: 0,     group: 'camera' },
     { name: 'focalLength', label: 'Focal Length', min: 0,  max: 40,  step: 0.01,  value: 14.92, group: 'camera' },
-    { name: 'focusHelp',   label: 'Focus Help',   type: 'bool',      value: false,              group: 'camera' },
     { name: 'fov',         label: 'FOV',          min: 15, max: 140, step: 1,     value: 29,    group: 'camera' },
     { name: 'exposure',    label: 'Exposure',     min: 0,  max: 2,   step: 0.01,  value: 1,     group: 'camera' },
 ];
@@ -33,11 +32,12 @@ const scratchKnobs = [
 
 // Debug lenses -> Debug folder/tab. uDebugMode forks the tracer to a cheap one-shot
 // debug pass (see glsl/tracer/6Trace/debugPass.glsl and docs/debug-suite.md):
-//   0 off | 1 matcap | 2 normals | 3 cost heatmap | 4 DE quality
-//   5 depth | 6 overstep | 7 albedo | 8 lit preview
+//   0 off | 1 normals | 2 cost heatmap | 3 DE quality | 4 depth
+//   5 overstep | 6 albedo | 7 lit preview | 8 focus peaking | 9 bound shells
 const debugKnobs = [
-    { name: 'uDebugMode',   label: 'Mode',       type: 'int', min: 0, max: 8,   step: 1, value: 0,   group: 'debug' },
-    { name: 'dbgHeatScale', label: 'Heat Scale',              min: 8, max: 512, step: 1, value: 128, group: 'debug' },
+    { name: 'uDebugMode',   label: 'Mode',       type: 'int', min: 0,    max: 9,   step: 1,    value: 0,   group: 'debug' },
+    { name: 'dbgHeatScale', label: 'Heat Scale',              min: 8,    max: 512, step: 1,    value: 128, group: 'debug' },
+    { name: 'dbgFocusBand', label: 'Focus Band',              min: 0.05, max: 3,   step: 0.01, value: 0.4, group: 'debug' },
 ];
 
 // everything the engine declares, in shader-declaration order

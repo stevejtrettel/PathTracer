@@ -50,12 +50,19 @@ void initObject( out Type obj ){                                \
 // (fractals, varieties, gallery models, hyperbolic solids, glassware) hand-writes its
 // own `float bound( vec3 p, Type )` and uses the *_B macros. Cheap primitives (torus,
 // cone, the polyhedra) and INFINITE/tiled shapes (plane, honeycombs, kleinian tilings)
-// stay on the plain macro, which injects a no-op bound (always "inside" → never skips,
-// no behavior change). Examples of opt-ins: Box, CubicSurface, the varieties.
+// stay on the plain macro, which injects a no-op bound (the -1e9 sentinel: always
+// "inside" → never skips, no behavior change). Examples of opt-ins: Box, CubicSurface.
+//
+// Debug hook: with uDebugMode == 9 (the bound-shells lens, see debugPass.glsl) the
+// world sdf returns the bound itself as the surface — so marching hits the bounding
+// volumes. The -1e9 sentinel marks no-bound objects, which return maxDist (no shell).
+// This is the one debug branch in the object hot path; it is a coherent uniform test
+// (predicted, ~free) and does not affect mode 0.
 #define OBJECT_LOCATORS_B(Type)                                 \
 float sdf( Vector tv, Type obj ){                               \
     vec3 local = toLocal(obj.frame, tv.pos);                    \
     float b = obj.frame.scale * bound( local, obj );            \
+    if( uDebugMode == 9 ) return (b < -1e8) ? maxDist : b;      \
     if( b > BOUND_MARGIN ) return b;                            \
     return obj.frame.scale * sdf( local, obj );                 \
 }                                                               \
@@ -68,7 +75,7 @@ bool inside( Vector tv, Type obj ){                             \
 }
 
 #define OBJECT_LOCATORS(Type)                                   \
-float bound( vec3 p, Type obj ){ return -1.0; }                 \
+float bound( vec3 p, Type obj ){ return -1e9; }                 \
 OBJECT_LOCATORS_B(Type)
 
 
