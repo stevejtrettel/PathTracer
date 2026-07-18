@@ -31,7 +31,15 @@ const scratchKnobs = [
     { name: 'scratch4', label: 'scratch4', min: 0, max: 1, step: 0.001, value: 0, group: 'scratch' },
 ];
 
-// everything the engine declares, in shader-declaration order
-const engineKnobs = [...cameraKnobs, ...renderKnobs, ...scratchKnobs];
+// Debug lenses -> Debug folder/tab. uDebugMode forks the tracer to a cheap one-shot
+// debug pass (see glsl/tracer/6Trace/debugPass.glsl and docs/debug-suite.md):
+//   0 off (normal path trace) | 1 matcap preview | 2 normals | 3 cost heatmap | 4 DE quality
+const debugKnobs = [
+    { name: 'uDebugMode',   label: 'Mode',       type: 'int', min: 0, max: 4,   step: 1, value: 0,   group: 'debug' },
+    { name: 'dbgHeatScale', label: 'Heat Scale',              min: 8, max: 512, step: 1, value: 128, group: 'debug' },
+];
 
-export {cameraKnobs, renderKnobs, scratchKnobs, engineKnobs};
+// everything the engine declares, in shader-declaration order
+const engineKnobs = [...cameraKnobs, ...renderKnobs, ...scratchKnobs, ...debugKnobs];
+
+export {cameraKnobs, renderKnobs, scratchKnobs, debugKnobs, engineKnobs};

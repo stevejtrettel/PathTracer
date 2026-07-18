@@ -306,3 +306,23 @@
 }
 .gui-stop:hover { background: rgba(255, 90, 90, 0.22); border-color: #ff7a7a; }
 .gui.rendering .gui-stop { display: block; }
+
+/* FPS readout: minimal always-on overlay, upper-right, just left of the
+   hamburger (30px @ right:12px). Matches the hamburger's translucent chrome. */
+.fps-meter {
+  position: fixed;
+  top: 12px;
+  right: 50px;
+  z-index: 100;
+  height: 30px;
+  padding: 0 9px;
+  font: 12px/30px ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: #d8d8d8;
+  background: rgba(20, 20, 22, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  pointer-events: none;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}

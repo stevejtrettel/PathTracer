@@ -33,6 +33,14 @@ vec3 newFrame(vec2 fragCoord ){
     //build the scene
     buildScene();
 
+    //debug fork: a non-zero mode replaces path tracing with a cheap one-shot debug
+    //pass (preview shading / diagnostics). This is the ONLY debug branch in the
+    //tracer — per pixel, once, coherent — so with debug off (mode 0) the path-trace
+    //and march loops are untouched. See glsl/tracer/6Trace/debugPass.glsl.
+    if(uDebugMode != 0){
+        return debugPass(uDebugMode, tv);
+    }
+
     //do one trace out into the scene, adjusted by the exposure
     vec3 col = pathTrace(path);
     return exposure * col;

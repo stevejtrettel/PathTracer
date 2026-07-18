@@ -1,7 +1,7 @@
 import Panel from "./gui/Panel.js";
 import {el, control, toggle, button, numberField, select, section, collapsible, isTypingTarget, fitAspect} from "./gui/widgets.js";
 import {serializeKnobs, serializeUiParams, withValues, toUniformValue} from "./shaderData/knobs.js";
-import {cameraKnobs, renderKnobs, scratchKnobs, engineKnobs} from "./shaderData/engineKnobs.js";
+import {cameraKnobs, renderKnobs, scratchKnobs, debugKnobs, engineKnobs} from "./shaderData/engineKnobs.js";
 
 
 // camera keybindings, for the static Help map (mirrors js/KeyControls.js)
@@ -29,7 +29,7 @@ const ASPECTS = [
 ];
 
 class UI{
-    constructor(pathtracer, stats){
+    constructor(pathtracer){
 
         //X saves an image (S is the camera pitch-down key). Skip while typing in
         //a field so 'x' still types normally.
@@ -44,12 +44,13 @@ class UI{
         const camKnobs    = withValues(cameraKnobs,  uiParams);
         const renKnobs    = withValues(renderKnobs,  uiParams);
         const scrKnobs    = withValues(scratchKnobs, uiParams);
+        const dbgKnobs    = withValues(debugKnobs,   uiParams);
         const sceneParams = pathtracer.settings.params ?? [];
 
         //current knob values, seeded per-scene, kept live by wire() below so the
         //Download-Settings serialization sees exactly what the sliders show.
         this.values = {};
-        for(let k of [...camKnobs, ...renKnobs, ...scrKnobs, ...sceneParams]){
+        for(let k of [...camKnobs, ...renKnobs, ...scrKnobs, ...dbgKnobs, ...sceneParams]){
             this.values[k.name] = k.value;
         }
 
@@ -134,6 +135,19 @@ class UI{
         cam.append(copyBtn);
 
         saveButtons(cam);
+
+        //--- Debug: cheap one-shot preview + diagnostic lenses (see debugPass.glsl) ---
+        const dbg = panel.tab('Debug');
+        const modeKnob  = dbgKnobs.find((k) => k.name === 'uDebugMode');
+        const scaleKnob = dbgKnobs.find((k) => k.name === 'dbgHeatScale');
+        dbg.append(select('Mode', [
+            ['Off (path trace)', 0],
+            ['Matcap Preview',   1],
+            ['Normals',          2],
+            ['Cost Heatmap',     3],
+            ['DE Quality',       4],
+        ], this.values.uDebugMode, wire(modeKnob)));
+        dbg.append(control(scaleKnob, wire(scaleKnob)));   // heatmap step scale
 
         //--- Render: quality + live image ---
         const ren = panel.tab('Render');
@@ -247,7 +261,7 @@ class UI{
             pathtracer.startHDRender(s.w, s.h, hd.spp, {maxTile: hd.maxTile, tile: hd.tile});
         }));
 
-        //--- Help: static keybinding map + fps stats ---
+        //--- Help: static keybinding map ---
         const help = panel.tab('Help');
 
         help.append(section('Panel'));
@@ -270,14 +284,6 @@ class UI{
             mouseKeys.append(el('span', 'key', k), el('span', 'desc', d));
         }
         help.append(mouseKeys);
-
-        //host the fps meter here (createScene hands us stats instead of
-        //appending it to <body>). Strip its fixed positioning to sit in-flow.
-        if(stats){
-            stats.dom.style.position = 'static';
-            help.append(section('Performance'));
-            help.append(stats.dom);
-        }
     }
 
     //regenerate a scene's settings.js source (engine knob values + scene params

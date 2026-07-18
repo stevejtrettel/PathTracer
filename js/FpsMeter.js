@@ -2,8 +2,9 @@
 // FPS METER
 //-------------------------------------------------
 // Tiny frame-rate readout: createScene calls end() once per frame (the meter
-// measures the frame-to-frame interval, so that's all it needs); the UI hosts
-// `.dom` in the Help tab. Averages frames over ~500 ms.
+// measures the frame-to-frame interval, so that's all it needs) and mounts
+// `.dom` as an always-on overlay in the upper-right (.fps-meter in gui.css).
+// Averages frames over ~500 ms.
 
 class FpsMeter {
     constructor(){
