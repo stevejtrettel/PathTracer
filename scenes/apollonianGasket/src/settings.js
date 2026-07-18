@@ -4,10 +4,6 @@ let uiParams = {
     exposure: 1,
     focusHelp: false,
     fov: 42,
-    scratch1: 0.5,
-    scratch2: 0.5,
-    scratch3: 0.5,
-    scratch4: 0.5,
 }
 
 export {uiParams};
@@ -28,6 +24,11 @@ export {location};
 //named knob: the fold offset that morphs the gasket (was the scratch1 coupling)
 export const params = [
     { name: 'foldOffset', label: 'Fold Offset', min: 0.0, max: 1.0, step: 0.001, value: 0.877 },
+];
+
+//named GUI knobs (converted from scratch)
+export const params = [
+    { name: 'roomLight', label: 'Room Light', min: 0, max: 2, step: 0.01, value: 0.5 },
 ];
 
 export default {uiParams: uiParams, location: location, params: params};

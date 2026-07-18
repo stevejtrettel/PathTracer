@@ -18,7 +18,7 @@ void buildEnvironment(){
     float roughness=0.1;
 
     room.floorMat = makeDielectric(color,0.0,roughness);
-    room.ceilMat  = makeLight(vec3(1,1,1),1.*scratch4);
+    room.ceilMat  = makeLight(vec3(1,1,1),1.*roomLight);
     room.leftMat  = makeDielectric(color,0.0,roughness);
     room.rightMat = makeDielectric(color,0.0,roughness);
     room.frontMat = makeDielectric(color,0.0,roughness);

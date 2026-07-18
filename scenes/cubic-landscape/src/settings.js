@@ -4,10 +4,6 @@ focalLength: 14.92,
 exposure: 1,
 focusHelp: false,
 fov: 66,
-scratch1: 0.791,
-scratch2: 0.73,
-scratch3: 0.368,
-scratch4: 0.5,
 }
 
 export {uiParams};
@@ -28,4 +24,9 @@ export {location};
 //A-series landscape (√2 : 1): width/height ratio for the initial render size
 export const aspect = Math.SQRT2;
 
-export default {uiParams: uiParams, location:location, aspect:aspect};
+//named GUI knobs (converted from scratch)
+export const params = [
+    { name: 'rotation', label: 'Rotation', min: 0, max: 1, step: 0.01, value: 0.791 },
+];
+
+export default {uiParams: uiParams, location:location, aspect:aspect, params: params};

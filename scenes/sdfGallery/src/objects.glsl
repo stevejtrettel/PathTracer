@@ -26,9 +26,9 @@ void buildObjects(){
 
     obj.mat.refractionChance=0.;
     obj.mat.subSurface=true;
-    obj.mat.meanFreePath=0.5*scratch2;
-    obj.mat.isotropicScatter=scratch1;
-    obj.mat.roughness=scratch3;
+    obj.mat.meanFreePath=0.5*sssDensity;
+    obj.mat.isotropicScatter=sssScatter;
+    obj.mat.roughness= roughAmt;
 
 }
 

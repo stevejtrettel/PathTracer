@@ -4,10 +4,6 @@ let uiParams = {
     exposure: 1,
     focusHelp: false,
     fov: 62,
-    scratch1: 0.73,
-    scratch2: 0.84,
-    scratch3: 0.368,
-    scratch4: 0.5,
 }
 
 export {uiParams};
@@ -24,4 +20,9 @@ let location = {
 
 export {location};
 
-export default {uiParams: uiParams, location:location};
+//named GUI knobs (converted from scratch)
+export const params = [
+    { name: 'roomLight', label: 'Room Light', min: 0, max: 2, step: 0.01, value: 0.5 },
+];
+
+export default {uiParams: uiParams, location:location, params: params};

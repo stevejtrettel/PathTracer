@@ -34,7 +34,7 @@ void buildObjects(){
     donut.mat.refractionChance=0.0;
     donut.mat.subSurface=true;
     donut.mat.meanFreePath=0.02;
-    donut.mat.isotropicScatter=scratch3;
+    donut.mat.isotropicScatter=sssScatter;
     donut.mat.roughness=0.0;
 
 

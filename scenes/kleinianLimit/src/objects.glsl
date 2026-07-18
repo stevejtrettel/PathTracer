@@ -35,13 +35,13 @@ void buildObjects(){
     // klein.mat.diffuseColor=vec3(1);
     //klein.mat.absorbColor=vec3(0.1);
     //vec3(1)-0.9*vec3(0,0.65,0.35);
-    //klein.mat.emitColor =  0.4*scratch2*vec3(1.,0.15,0.);
+    //klein.mat.emitColor =  0.4*sssDensity*vec3(1.,0.15,0.);
     //klein.mat.surfaceEmit =  0.1*scratch3*vec3(0.75,0.25,0.);
     //vec3(1)-0.9*vec3(0.3,0.2,0.6);
     klein.mat.refractionChance=0.;
     klein.mat.subSurface=true;
-    klein.mat.meanFreePath=0.5*scratch2;
-    klein.mat.isotropicScatter=scratch1;
+    klein.mat.meanFreePath=0.5*sssDensity;
+    klein.mat.isotropicScatter=sssScatter;
     klein.mat.roughness=0.04;
 
 

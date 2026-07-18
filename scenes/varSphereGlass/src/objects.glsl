@@ -30,8 +30,8 @@ void buildObjects(){
     var.mat=makeGlass(30.*tealScatter,1.5,0.99);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
-    var.mat.meanFreePath=0.2*scratch2;
-    var.mat.isotropicScatter=scratch1;
+    var.mat.meanFreePath=0.2*sssDensity;
+    var.mat.isotropicScatter=sssScatter;
     var.mat.roughness=0.7;
 
     //make a glass material:

@@ -56,7 +56,7 @@ float sdf_Objects( Vector tv ){
 //used in subsurface scattering: right now we keep scattering if we are inside of this object!
 bool inside_Object( Vector tv ){
     return false;
-    //alternate: scatter inside the bottle
+    //alternate: sssScatter inside the bottle
     //return inside(tv,bottle);
 }
 

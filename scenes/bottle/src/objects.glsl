@@ -25,8 +25,8 @@ void buildObjects(){
     bottle.mat=makeGlass(1.5*greenScatter,1.5,0.95);
     bottle.mat.refractionChance=0.;
     bottle.mat.subSurface=true;
-    bottle.mat.meanFreePath=0.5*scratch2;
-    bottle.mat.isotropicScatter=scratch1;
+    bottle.mat.meanFreePath=0.5*sssDensity;
+    bottle.mat.isotropicScatter=sssScatter;
     bottle.mat.roughness=0.0;
 
 }

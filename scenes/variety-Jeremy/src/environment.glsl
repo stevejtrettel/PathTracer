@@ -18,7 +18,7 @@ void buildEnvironment(){
     float roughness=0.1;
 
     room.floorMat = makeDielectric(color,0.0,roughness);
-    room.ceilMat  = makeLight(vec3(1,1,1),5.*scratch4);
+    room.ceilMat  = makeLight(vec3(1,1,1),5.*roomLight);
     room.leftMat  = makeDielectric(color,0.0,roughness);
     room.leftMat.specularChance=0.5;
     room.rightMat = makeDielectric(color,0.0,roughness);
@@ -32,7 +32,7 @@ void buildEnvironment(){
 
     //----------- LIGHT 2 -------------------------
     light2.frame=makeFrame(vec3(-10,3,10));
-    light2.radius=2.*scratch4;
+    light2.radius=2.*roomLight;
     light2.mat=makeLight(vec3(1.),100.);
 
     //----------- LIGHT 3 -------------------------
