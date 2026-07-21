@@ -11,7 +11,7 @@
 
 // Camera lens controls -> Camera folder/tab
 const cameraKnobs = [
-    { name: 'aperture',    label: 'Aperture',     min: 0,  max: 2,   step: 0.001, value: 0,     group: 'camera' },
+    { name: 'aperture',    label: 'Aperture',     min: 0,  max: 0.3, step: 0.0005, value: 0,    group: 'camera' },
     { name: 'focalLength', label: 'Focal Length', min: 0,  max: 40,  step: 0.01,  value: 14.92, group: 'camera' },
     { name: 'fov',         label: 'FOV',          min: 15, max: 140, step: 1,     value: 29,    group: 'camera' },
     { name: 'exposure',    label: 'Exposure',     min: 0,  max: 2,   step: 0.01,  value: 1,     group: 'camera' },
@@ -21,6 +21,10 @@ const cameraKnobs = [
 const renderKnobs = [
     { name: 'maxBounces', label: 'Max Bounces', type: 'int', min: 1, max: 100, step: 1, value: 50, group: 'render' },
 ];
+
+// (The sphere marcher — over-relaxed enhanced sphere tracing with adaptive cone
+// epsilon — has no knobs: its ω and cone-epsilon are tuned constants baked into
+// glsl/tracer/6Trace/raymarch.glsl. See docs/marching.md.)
 
 // Always-present live-tweak scratchpad dials -> Parameters/Scene folder
 const scratchKnobs = [
@@ -37,7 +41,7 @@ const scratchKnobs = [
 const debugKnobs = [
     { name: 'uDebugMode',   label: 'Mode',       type: 'int', min: 0,    max: 9,   step: 1,    value: 0,   group: 'debug' },
     { name: 'dbgHeatScale', label: 'Heat Scale',              min: 8,    max: 512, step: 1,    value: 128, group: 'debug' },
-    { name: 'dbgFocusBand', label: 'Focus Band',              min: 0.05, max: 3,   step: 0.01, value: 0.4, group: 'debug' },
+    { name: 'dbgFocusBand', label: 'Focus Band',              min: 0.002, max: 2, step: 0.002, value: 0.1, group: 'debug' },
 ];
 
 // everything the engine declares, in shader-declaration order

@@ -210,6 +210,10 @@ small `select` widget to `js/gui/widgets.js`, or (v1) a labeled int stepper. A
       which takes the analytic hit (`trace_Scene`) as a stop distance and marches
       `sdf_Scene` up to it — so analytic surfaces appear too, at their true cost (a
       clear analytic hit is reached on the first step → ~1 step, converged, exact).
+      `dbgMarch()` mirrors the real `raymarch()` (over-relaxed sphere tracing +
+      adaptive cone epsilon), so these lenses measure the actual marcher — edit its
+      `MARCH_RELAX` / `MARCH_CONE` constants and the heatmap's step counts move (see
+      [marching.md](marching.md)).
   Verified: mode 0 pixel-identical to before; matcap shows the analytic roomBox as
   clean clay; heatmap shows the marched variety expensive (yellow) vs the analytic
   room cheap (dark), with the variety's bounding region visible as a cost halo;

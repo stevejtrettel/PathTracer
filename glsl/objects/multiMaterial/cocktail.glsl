@@ -100,7 +100,7 @@ void setData(inout Path path, Cocktail cocktail){
                 //we hit the cup from inside the drink
                 //cup is dominant material
                 path.dat.normal=normal;
-                setMaterialInterface(path.dat,cocktail.drink,cocktail.cup,cocktail.drink);
+                setMaterialInterface(path.dat,cocktail.drink,cocktail.cup,cocktail.cup);
             }
 
         }

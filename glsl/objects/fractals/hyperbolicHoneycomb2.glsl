@@ -45,8 +45,11 @@ const float HC2_FLOOR_Z         = 1.0e-3;
 const float HC2_FLOOR_LINE_THICK = 0.008;
 const int   HC2_FOLD3_ITER      = 70;   // floor-pattern fold depth
 
-// DEs here are honest; a mild fudge keeps the marcher off the thin edges
-const float HC2_FUDGE = 0.9;
+// DEs here are honest, so no fudge is needed — this stays 1.0. (A <1 factor here
+// once starved the fine cells near the ideal-boundary floor: they ran out of march
+// steps. The raymarcher's own over-relaxation + fallback handles step safety now;
+// see glsl/tracer/6Trace/raymarch.glsl.)
+const float HC2_FUDGE = 1.0;
 
 // --- region ids (returned by region(); the scene maps them to colors) ---
 const int HC2_NONE  = -1;

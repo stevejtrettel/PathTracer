@@ -29,8 +29,15 @@ void buildObjects(){
 
 //IQ cosine palette
 vec3 ksh_pal(float t, vec3 a, vec3 b, vec3 c, vec3 d){ return a + b*cos(6.28318*(c*t+d)); }
+//warm varied palette — as colorful as the original orbit-trap, but the hues are red,
+//orange, yellow and sage instead of the full rainbow. c=1 gives a full cycle (the
+//variability); the small blue amplitude/base keeps blue LOW so the cycle stays in the
+//warm->green range (red -> orange -> yellow -> sage) and never goes blue/cyan. The
+//red/green phase offset (d.g = 0.17) is what carries it through those hues.
 vec3 ksh_spectrum(float n){
-    return ksh_pal(n, vec3(0.5), vec3(0.5), vec3(1.0), vec3(0.0,0.33,0.67));
+    //a_b=0.30 lifts the blue floor and b_g=0.36 tames the green amplitude, so the
+    //green reads as a muted SAGE (desaturated) rather than a saturated lime.
+    return ksh_pal(n, vec3(0.5,0.48,0.30), vec3(0.45,0.36,0.10), vec3(1.0), vec3(0.0,0.17,0.0));
 }
 
 
@@ -66,8 +73,6 @@ void setData_Objects(inout Path path){
         vec3 p = toLocal(klein.frame, path.tv.pos);
         vec3 trap = orbitTrap(p, klein);
         vec3 base = ksh_spectrum(clamp(trap.y*2.0, 0.0, 1.0));
-        float boost = mix(1.0, 3.0, smoothstep(0.0, 0.4, trap.y));
-        path.dat.surfDiffuse = base;                 // colored albedo (safe, in [0,1])
-        path.dat.surfEmit    = base * (boost - 1.0); // the >1 glow as emission
+        path.dat.surfDiffuse = base;                 // warm muted albedo, no self-glow — lit by the scene light
     }
 }

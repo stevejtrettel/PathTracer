@@ -47,7 +47,9 @@ vec3 honeyColor( vec3 p ){
     if(r == HC2_VERT)   c = COL_VERTEX;
     if(r == HC2_FACE)   c = COL_FACE;
     if(r == HC2_FLOOR)  c = floorTint(p.xy, honey, COL_FLOOR_1, COL_FLOOR_2, COL_FLOOR_L);
-    return clamp(mix(BASE_TINT, c, TINT_STR), 0.0, 1.0);
+    //the palette colors are authored in sRGB; linearize (original's pow(color,GAMMA=2.2))
+    //so they're correct as LINEAR albedo — without this they wash to a pale purple haze
+    return pow(clamp(mix(BASE_TINT, c, TINT_STR), 0.0, 1.0), vec3(2.2));
 }
 
 

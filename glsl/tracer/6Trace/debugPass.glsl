@@ -65,24 +65,39 @@ vec3 dbgClay(vec3 base, vec3 n, vec3 rayDir){
 // distance, then we march sdf_Scene up to it (counting steps). Reports the hit, the
 // step count, the distance, and whether the winner was the analytic surface (reached
 // on the step that would overshoot the stop — so a clear analytic hit costs ~1 step).
+//
+// Mirrors raymarch() exactly (over-relaxed sphere tracing + adaptive cone epsilon,
+// MARCH_RELAX / MARCH_CONE from raymarch.glsl), plus the step count and the analytic-
+// vs-marched bookkeeping the diagnostic lenses need — so the cost heatmap / overstep /
+// DE modes measure the real marcher.
 bool dbgMarch(Vector tv, out vec3 hitPos, out int steps, out float total, out bool analytic){
     float stop = trace_Scene(tv);        // nearest analytic surface (or maxDist)
     float t = 0.;
+    float prevRadius = 0.;
+    float stepLength = 0.;
+    float sgn = (sdf_Scene(tv) < 0.) ? -1. : 1.;
     steps = 0;
     analytic = false;
     for(int i = 0; i < maxMarchSteps; i++){
         steps = i + 1;
-        float d = abs(sdf_Scene(tv));
-        if(d < EPSILON){ hitPos = tv.pos; total = t; return true; }      // marched (SDF) hit
-        d *= 0.9;                                                        // marchFactor
-        if(t + d >= stop){                                              // analytic surface first
+        float raw = sdf_Scene(tv);
+        float radius = abs(raw);
+        float signedRadius = sgn * raw;
+
+        bool sorFail = (MARCH_RELAX > 1.) && (prevRadius + radius < stepLength);
+        stepLength = sorFail ? (prevRadius - stepLength) : (signedRadius * MARCH_RELAX);
+        prevRadius = radius;
+        float eps = EPSILON * (1. + MARCH_CONE * t);
+
+        if(!sorFail && radius < eps){ hitPos = tv.pos; total = t; return true; }   // marched (SDF) hit
+        if(stepLength > 0. && t + stepLength >= stop){                            // analytic surface first
             analytic = true;
             flow(tv, stop - t);
             hitPos = tv.pos; total = stop; return true;
         }
-        t += d;
+        t += stepLength;
         if(t > maxDist){ break; }
-        flow(tv, d);
+        flow(tv, stepLength);
     }
     hitPos = tv.pos; total = t; return false;
 }
@@ -120,7 +135,7 @@ vec3 debugPass(int mode, Path path){
         // the zone colours read clearly. The overlay strength is graduated (vivid at the
         // sharp focal plane, faint far out), so the scene stays grayscale with colour
         // concentrated where focus matters. cyan = sharp, green -> yellow -> red = out.
-        float ad = abs(path.totalDistance - focalLength) / max(dbgFocusBand, 0.02);
+        float ad = abs(path.totalDistance - focalLength) / max(dbgFocusBand, 0.0002);
         float gray = dot(lit, vec3(0.299, 0.587, 0.114));   // desaturated scene
         vec3  fcol; float amt;                              // zone colour + overlay strength
         if(ad < 1.0)      { fcol = vec3(0.1, 1.0, 1.0);  amt = 0.75; }  // cyan: sharp focus
