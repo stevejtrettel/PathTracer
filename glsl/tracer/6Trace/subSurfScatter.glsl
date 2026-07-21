@@ -29,6 +29,15 @@ float bisect_Scatter(Vector tv, float dt){
 }
 
 
+//emission + Beer's-law absorption picked up over a segment of length dl of the walk
+//(the volume-rendering step). Guarded by volumeActive at the call sites, so a pure-
+//scattering medium skips it entirely.
+void absorbEmit(inout Path path, float dl){
+    path.pixel += path.light * path.emit * dl;
+    path.light  *= exp(-path.absorb * dl);
+}
+
+
 void subSurfScatter(inout Path path){
 
     int scatterSteps=1000;
@@ -44,13 +53,22 @@ void subSurfScatter(inout Path path){
     float rough=path.dat.isotropicScatter*path.dat.isotropicScatter;
     float mfp = path.dat.meanFreePath;
 
+    //absorption/emission are constant through the walk, so decide ONCE whether this
+    //medium has any volume interaction. For a pure-scattering medium (absorb=emit=0)
+    //the per-step Beer's law is exp(-0)=1 — pure waste — and roulette can't cull
+    //anyway, so skip all of it and let the walk terminate by exiting the object.
+    bool volumeActive = length(path.absorb) > 1e-4 || length(path.emit) > 1e-4;
+
 
     //do the subsurface scattering for the surface we are at
     for (int i = 0; i < scatterSteps; i++){
 
-        //choose the direction of scatter
+        //choose the direction of scatter. normalize the blend so the step below
+        //travels exactly flowDist along a UNIT direction — otherwise |dir|<1 makes
+        //the effective mean free path shrink (and depend on isotropicScatter, which
+        //should be an independent knob). Matches scatter() in scatterPath.glsl.
         randomDir=randomVector(temp.pos);
-        temp=mix(temp,randomDir,rough);
+        temp=vNormalize(mix(temp,randomDir,rough));
         //update tv's direction
         tv=temp;
         //choose the distance to flow: exponential dist with mean free path mfp
@@ -61,12 +79,12 @@ void subSurfScatter(inout Path path){
 
         //if we have left the object
         if(!inside_Object(temp)){
-            //tv is behind it, temp is in front: with distance flowDist
-            //find the distance
+            //tv is behind it, temp is in front: bisect to the boundary distance
             flowDist=bisect_Scatter(tv,flowDist);
-            //flow slightly farther so you get out
+            //pick up emission + absorption over this last (partial) segment
+            if(volumeActive){ absorbEmit(path, flowDist); }
+            //flow slightly farther so you get out, and land back on the surface
             flow(tv,flowDist-EPSILON/2.);
-            //set your new data, right back on the surface
             path.tv=tv;
             path.distance=depth+flowDist;
             path.numScatters=float(i);
@@ -74,12 +92,17 @@ void subSurfScatter(inout Path path){
             return;
         }
 
-        //if we are inside still:
-        //move ahead to this point:
+        //still inside: advance, then pick up emission + absorption over this segment.
+        //Applying Beer's law HERE (per step) rather than once at the end makes
+        //throughput decay as the walk goes deeper, so roulette below culls rays the
+        //medium would have absorbed anyway. Unbiased: the per-step exp(-absorb*dl)
+        //product equals a single exp(-absorb*total), and roulette boosts survivors —
+        //so the mean is unchanged, only wasted deep-ray work is saved.
         tv=temp;
         depth+=flowDist;
+        if(volumeActive){ absorbEmit(path, flowDist); }
 
-        //kill off rays
+        //kill off rays (now meaningful throughout: light has decayed with depth)
         roulette(path);
         if(!path.keepGoing){
             break;

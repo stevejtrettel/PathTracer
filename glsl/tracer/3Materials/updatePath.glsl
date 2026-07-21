@@ -19,21 +19,9 @@ void updateFromVolume(inout Path path){
     }
 }
 
-//like updateFromVolume, but the medium can also emit along the walk
-void updateFromSubSurf(inout Path path){
-
-    vec3 beersLaw = path.absorb*path.distance;
-    vec3 emitAmt = path.emit*path.distance;
-
-    if(length(beersLaw)>0.0001){
-        emitAmt *= exp( -beersLaw);
-        path.light *= exp( -beersLaw );
-    }
-
-    if(length(emitAmt)>0.0001){
-        path.pixel += path.light*emitAmt;
-    }
-}
+//(subsurface volume emission + absorption now happen per step inside
+//subSurfScatter() in 6Trace, so throughput decays with depth and roulette stays
+//useful throughout the walk — there is no separate end-of-walk pass here.)
 
 
 void updateFromSurface(inout Path path){

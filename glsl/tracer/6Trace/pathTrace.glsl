@@ -27,10 +27,9 @@ vec3 pathTrace(Path path){
             //do the subsurface scattering:
             //this leaves the ray at a new location and in a new direction,
             //still just outside the surface
+            //(subSurfScatter now does the volume emission + absorption per step,
+            //so there is no separate updateFromSubSurf pass)
             subSurfScatter(path);
-
-            //update the color from the trajectory
-            updateFromSubSurf(path);
 
             //reset the absorb color to the orig medium
             path.absorb=path.dat.reflectAbsorb;
