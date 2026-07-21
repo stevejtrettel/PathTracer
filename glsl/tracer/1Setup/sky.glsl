@@ -13,17 +13,6 @@ vec3 LessThan(vec3 f, float value)
 }
 
 
-vec3 LinearToSRGB(vec3 rgb)
-{
-    rgb = clamp(rgb, 0.0f, 1.0f);
-
-    return mix(
-    pow(rgb, vec3(1.0f / 2.4f)) * 1.055f - 0.055f,
-    rgb * 12.92f,
-    LessThan(rgb, 0.0031308f)
-    );
-}
-
 vec3 SRGBToLinear(vec3 rgb)
 {
     rgb = clamp(rgb, 0.0f, 1.0f);

@@ -15,10 +15,13 @@ Vector vRefract(Vector incident, Vector normal, float n){
     float cosX=-vDot(normal, incident);
     float sinT2=n*n* (1.0 - cosX * cosX);
 
-    //total internal reflection: no refracted ray exists.
-    //return a zero vector (callers check for TIR via Fresnel before refracting)
+    //total internal reflection: no refracted ray exists, so the ray reflects.
+    //Returning the reflected ray keeps vRefract total (always a valid direction).
+    //In practice callers gate refraction on Fresnel, which returns f90=1 under TIR
+    //and forces the specular branch, so this path isn't normally reached — but if it
+    //ever is, this is the physically correct ray instead of a degenerate zero vector.
     if (sinT2>1.){
-        return Vector(incident.pos,vec3(0.,0.,0.));
+        return vReflect(incident, normal);
     }
 
     float cosT=sqrt(1.0 - sinT2);

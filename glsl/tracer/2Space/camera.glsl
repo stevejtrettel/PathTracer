@@ -148,16 +148,18 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
     //update the tangent vector
     tv=Vector(pos,dir);
 
-    //rotate position to be in the right spot
-    //THIS IS A HACK: based on the lens being centered at the origin.
-    //to be correct, should first translate to the origin, rotate, then translate back
-    tv.pos=facing*tv.pos;
+    //carry the local ray (lens at the origin) into the world: rigid transform
+    //p_world = facing * p_local + camPos, dir_world = facing * dir_local. Rotating
+    //the aperture-jittered position about the origin is exact BECAUSE the lens
+    //center IS the local origin, so no translate-rotate-translate pivot is needed.
+    tv.pos = cam.facing * tv.pos;
 
-    //translate by the right amount
-    tv.pos+=cam.pos+CAMERA_OFFSET;
+    //translate by the right amount (CAMERA_OFFSET is the legacy world offset baked
+    //into every saved pose — see the note at the top of this file)
+    tv.pos += cam.pos + CAMERA_OFFSET;
 
-    //rotate by facing (a uniform)
-    tv=rotateByFacing(tv,cam.facing);
+    //rotate the direction to match
+    tv = rotateByFacing(tv, cam.facing);
 
     return tv;
 }

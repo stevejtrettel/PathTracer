@@ -32,6 +32,7 @@ void initMat(inout Material mat){
     mat.diffuseColorBack=vec3(1.);
     mat.specularColorBack=vec3(1.);
     mat.absorbColor=vec3(0.);
+    mat.emitColor=vec3(0.);   //volume emission along the ray (distinct from surfaceEmit); off by default
     mat.isotropicScatter=1.;
     mat.roughness=0.;
     mat.IOR=1.;
