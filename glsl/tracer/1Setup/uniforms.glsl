@@ -30,16 +30,16 @@ uniform float panelToRender;
 //(one value of pi, under two names: the sdf_gallery files use lowercase `pi`)
 const float PI = 3.14159265;
 const float pi = PI;
-float EPSILON=0.001;
-float AT_THRESH=0.002;
-int maxMarchSteps=2000;
-float maxDist=100.;
+const float EPSILON=0.001;
+const float AT_THRESH=0.002;
+const int maxMarchSteps=2000;
+const float maxDist=100.;
 
 //margin (> EPSILON) at which a bounded object switches from returning its
 //bounding-sphere distance to evaluating its real sdf. Keeps the raw bound out
 //of the hit band (abs(sdf) < EPSILON) so a bounding volume is never itself hit.
 //(see bound() in objects/objectAPI.glsl)
-float BOUND_MARGIN=0.05;
+const float BOUND_MARGIN=0.05;
 
 //throwaway sink for unused out-parameters (see shapes/bottle.glsl etc)
 float trashFloat;

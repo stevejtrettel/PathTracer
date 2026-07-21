@@ -15,8 +15,9 @@ three pieces, in order:
 
 The numbered stages:
 
-- **1Setup** — uniforms & constants, math helpers, dual-number machinery and
-  variety formulas (algVariety), random number generators, the sky.
+- **1Setup** — uniforms & constants, math helpers, the dual-number variety
+  engine (dualNumbers: autodiff + DE + invStereo; the surface catalogue itself
+  is opt-in per scene under objects/varieties/formulas/), RNG, the sky.
 - **2Space** — tangent vectors and Frames (geometry), reflection/refraction
   (physics), the camera.
 - **3Materials** — the Material, LocalData, and Path structs; setting surface

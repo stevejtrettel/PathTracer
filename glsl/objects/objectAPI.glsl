@@ -123,7 +123,7 @@ OBJECT_SETDATA(Type)
 // VARIETIES
 //
 // an algebraic variety file supplies its defining equation as a
-// dual-number function `T eqnFn(T x, T y, T z)` (see 1Setup/algVariety.glsl);
+// dual-number function `T eqnFn(T x, T y, T z)` (see 1Setup/dualNumbers.glsl);
 // VARIETY_DATA generates the standard evaluator
 //
 //     vec4 dataFn( vec3 p )   // xyz = gradient, w = value

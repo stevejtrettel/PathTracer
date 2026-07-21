@@ -4,6 +4,8 @@
 
 
 //need to choose a variety equation from our list!
+#include ../../../glsl/objects/varieties/formulas/barthSextic.glsl
+
 T varSphere_Eqn(T x, T y, T z){
     return barthSextic(x,y,z);
 }

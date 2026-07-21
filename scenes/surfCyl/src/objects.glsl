@@ -4,6 +4,8 @@
 
 
 //need to choose a variety equation from our list!
+#include ../../../glsl/objects/varieties/formulas/misc.glsl
+
 T surfCyl_Eqn(T x, T y, T z){
     return gyroid(x,y,z);
 }

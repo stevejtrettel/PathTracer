@@ -4,6 +4,8 @@
 
 
 //need to choose a variety equation from our list!
+#include ../../../glsl/objects/varieties/formulas/togliatti.glsl
+
 T var_Eqn(T x, T y, T z){
     return togliatti(x,y,z);
 }

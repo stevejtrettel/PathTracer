@@ -1,11 +1,15 @@
 # Algebraic variety formulas — reference
 
 Float-based (vec4, projective) versions of variety formulas collected from
-Shadertoy/Fragmentarium sources. These are NOT compiled into the shader:
-`algVariety.glsl` implements the ones in active use as dual-number (`T`)
-functions, and anything new must be translated the same way (replace
-products with `tmul`, squares with `tsqr`, etc. — see the existing pairs,
-e.g. `Labs7`/`float Labs7` or `endrassOctic`/`Endrass8`, for the pattern).
+Shadertoy/Fragmentarium sources. These are NOT compiled into the shader: the
+ported dual-number (`T`) catalogue lives in
+`glsl/objects/varieties/formulas/` (grouped by degree + gallery/misc), and the
+engine that runs them (`T` arithmetic, `DE`, `invStereo`) is in
+`glsl/tracer/1Setup/dualNumbers.glsl`. Anything new here must be translated to
+dual numbers the same way (replace products with `tmul`, squares with `tsqr`,
+etc. — see the existing pairs, e.g. `Labs7`/`float Labs7` or
+`endrassOctic`/`Endrass8`, for the pattern) and dropped into the right
+formulas file.
 
 Formulas here that have NOT yet been ported: Togliatti5/Dervish variants,
 Barth6T, Chmutov8/Chmutovn + the Cheby helpers, Sarti8, Endrass_8 (the

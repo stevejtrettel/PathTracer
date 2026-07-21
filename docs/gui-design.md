@@ -152,8 +152,9 @@ coupled workflow; splitting its geometry into Render isn't worth the cross-tab f
   dissolves cubic-portrait/landscape.
 - **A4** per-scene `settings.sky`: image / solid / gradient (`buildSky` + `getSky`).
 - **B** renamed the scratch dials `extra/extra2/extra3/extra4` → `scratch1..4` everywhere
-  (engineKnobs list, ~130 scene GLSL + settings files, and the two library files
-  `algVariety.glsl` / `apolonianGasket.glsl`). Behavior-frozen (values moved with names).
+  (engineKnobs list, ~130 scene GLSL + settings files, and two library files —
+  the variety formulas, since split out of the old `algVariety.glsl`, and
+  `apolonianGasket.glsl`). Behavior-frozen (values moved with names).
 - **C1** custom tabbed GUI as a renderer swap (lil-gui removed). `js/gui/`: `widgets.js`
   (pure builders `slider`/`toggle` + `control()` router + `el`/`button`/`numberField`/
   `select`/`section` furniture), `Panel.js` (hamburger-collapsed stateful shell), `gui.css`

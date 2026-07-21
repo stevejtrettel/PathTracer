@@ -3,11 +3,14 @@
 //-------------------------------------------------
 
 
-//need to choose a variety equation from our list!
+//need to choose a variety equation from our list! #include its formula file
+//(see glsl/objects/varieties/formulas/) and return it below.
+#include ../../../glsl/objects/varieties/formulas/cubics.glsl
+
 T var_Eqn(T x, T y, T z){
-    //alternate varieties:
-   // return goldman(x,y,z);
-    //return romanSurfaceVar(x,y,z);
+    //alternate varieties (add the matching #include to use):
+   // return goldman(x,y,z);          // formulas/misc.glsl
+    //return romanSurfaceVar(x,y,z);  // formulas/gallery.glsl
     return myCubic(x,y,z);
 }
 
