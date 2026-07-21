@@ -1,0 +1,60 @@
+//-------------------------------------------------
+// ENVIRONMENT OF THE SCENE
+// a dark room so the dispersed light pops, a pale floor to catch the caustic,
+// and a small very bright light placed BEHIND the prism (from the camera) so
+// rays refract through the glass toward it and separate into colours.
+//-------------------------------------------------
+
+RoomBox room;
+Sphere light;
+
+
+void buildEnvironment(){
+
+    //----------- THE ROOM (big + dark) -------------------------
+    room.low   = -2.;    room.high  = 26.;
+    room.left  = -30.;   room.right = 30.;
+    room.front = -30.;   room.back  = 16.;
+
+    vec3 dark = vec3(0.015);
+    float rough = 0.25;
+
+    room.floorMat = makeDielectric(vec3(0.55), 0.0, 0.35);  //pale floor: catches the rainbow caustic
+    room.ceilMat  = makeDielectric(dark, 0.0, rough);
+    room.leftMat  = makeDielectric(dark, 0.0, rough);
+    room.rightMat = makeDielectric(dark, 0.0, rough);
+    room.frontMat = makeDielectric(dark, 0.0, rough);
+    room.backMat  = makeDielectric(dark, 0.0, rough);
+
+    //----------- THE LIGHT (small, bright, behind the prism) ----
+    light.frame  = makeFrame(vec3(9, 4, -12));
+    light.radius = 6.0;
+    light.mat    = makeLight(vec3(1.0), lightPower);
+
+}
+
+
+//-------------------------------------------------
+// Finding the Environment
+//-------------------------------------------------
+
+float trace_Environment(Vector tv ){
+    float dist=maxDist;
+    dist = min(dist, trace(tv,light));
+    dist = min(dist, trace(tv,room));
+    return dist;
+}
+
+float sdf_Environment(Vector tv ){
+    return maxDist;
+}
+
+
+//-------------------------------------------------
+// Setting the Environment Data
+//-------------------------------------------------
+
+void setData_Environment( inout Path path ){
+    setData(path, light);
+    setData(path, room);
+}

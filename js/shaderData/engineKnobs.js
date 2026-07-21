@@ -20,6 +20,11 @@ const cameraKnobs = [
 // Render-quality controls -> Render folder/tab
 const renderKnobs = [
     { name: 'maxBounces', label: 'Max Bounces', type: 'int', min: 1, max: 100, step: 1, value: 50, group: 'render' },
+    // spectral dispersion strength. 0 = off: every ray runs at a fixed mid-wavelength
+    // with a white tint, so the tracer is byte-identical to the non-spectral one.
+    // >0 gives each ray a random wavelength (tinted throughput + wavelength-shifted
+    // IOR) so refraction separates colours — prism rainbows. See glsl/tracer/1Setup/spectral.glsl.
+    { name: 'dispersion', label: 'Dispersion', min: 0, max: 0.3, step: 0.005, value: 0, group: 'render' },
 ];
 
 // (The sphere marcher — over-relaxed enhanced sphere tracing with adaptive cone

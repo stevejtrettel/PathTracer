@@ -14,8 +14,8 @@ void setObjectInAir(inout LocalData dat, bool inside, Vector normal, Material ma
     if(inside){
         //we are inside
         dat.normal=negate(normal);
-        //IOR is current/entering
-        dat.IOR=mat.IOR/1.;
+        //IOR is current/entering (wavelength-dependent when dispersing; air side = 1)
+        dat.IOR=iorAt(mat.IOR)/1.;
         dat.reflectEmit = mat.emitColor;
         dat.reflectAbsorb=mat.absorbColor;
         dat.refractAbsorb=vec3(0.);
@@ -28,8 +28,8 @@ void setObjectInAir(inout LocalData dat, bool inside, Vector normal, Material ma
     else{
         //we are outside
         dat.normal=normal;
-        //IOR is current/entering
-        dat.IOR=1./mat.IOR;
+        //IOR is current/entering (wavelength-dependent when dispersing; air side = 1)
+        dat.IOR=1./iorAt(mat.IOR);
         dat.reflectAbsorb=vec3(0.);
         dat.refractAbsorb=mat.absorbColor;
         dat.reflectEmit=vec3(0.);
@@ -103,8 +103,8 @@ void setMaterialInterface(inout LocalData dat, Material current, Material neighb
 
     //------VOLUME PROPERTIES------------------------
 
-    //IOR is current/entering
-    dat.IOR=current.IOR/neighbor.IOR;
+    //IOR is current/entering (wavelength-dependent when dispersing)
+    dat.IOR=iorAt(current.IOR)/iorAt(neighbor.IOR);
 
     //subsurface is set by the entering material, as this is where we would scatter
     dat.subSurface=neighbor.subSurface;

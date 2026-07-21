@@ -1,0 +1,33 @@
+let uiParams = {
+    aperture: 0,
+    focalLength: 14.92,
+    exposure: 1,
+    fov: 34,
+    //this scene exists to show spectral dispersion, so ship with it ON.
+    //(Dispersion is an engine knob; 0 would be the plain non-spectral tracer.)
+    dispersion: 0.15,
+    maxBounces: 24,
+}
+
+export {uiParams};
+
+
+//camera (start from the sphere scene's pose; tuned by eye)
+let position = [-21.6, 11.3, 28.1];
+
+let facing = [0.8100377389035106, 0.15664458153457878, -0.5650675504997376, -0.02716274776054038, 0.9726473942724095, 0.23069293779628824, 0.5857482792855832, -0.17152119837163077, 0.7921359932631443];
+
+let location = {
+    position: position,
+    facing: facing
+};
+
+export {location};
+
+
+export const params = [
+    { name: 'ior',        label: 'Index of Refraction', min: 1.0, max: 2.5, step: 0.001, value: 1.52 },
+    { name: 'lightPower', label: 'Light Power',         min: 0,   max: 400, step: 1,     value: 45  },
+];
+
+export default {uiParams: uiParams, location:location, params:params};
