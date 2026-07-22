@@ -67,7 +67,7 @@ void buildObjects(){
     triang4.frame.rot = rotateZto(v1)*rotateAboutZ(1.57);
     triang4.side=4.*rad;
     triang4.thickness=0.1;
-    triang4.mat = makeGlass(vec3(1),1.2,0.95);
+    triang4.mat = makeGlass(vec3(1),1.2,1.);
 
 
 }

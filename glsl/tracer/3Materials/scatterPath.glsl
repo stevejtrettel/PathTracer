@@ -8,8 +8,19 @@
 
 void updateProbabilities( inout Path path ){
 
-    //update using Fresnel
-    if(path.dat.probSpecular!=0.){
+    //update using Fresnel. Runs for anything with an explicit specular floor OR an
+    //index mismatch at the interface. The IOR condition is what gives every
+    //dielectric its physical coat with no per-scene bookkeeping: glass is
+    //pure-Fresnel (specularChance == 0 — see setGlass), and subsurface materials
+    //(makeGlass + refractionChance = 0) have both lobe chances zero yet still
+    //present an IOR step, so they Fresnel-reflect ~4% like real wax/skin/glass.
+    //Deliberately NOT gated on probRefract: a refractive material with IOR == 1
+    //(the Luneburg rim, a dynamic-IOR medium wall where the field reaches 1) is an
+    //index-MATCHED interface — physically reflectionless — and Schlick's x^5
+    //grazing term does not vanish at n == 1, so running Fresnel there would paint
+    //phantom grazing reflections on a seamless boundary. Any real refractive step
+    //has IOR != 1 and is covered. Matte materials (walls: IOR == 1, no lobes) skip.
+    if(path.dat.probSpecular!=0. || path.dat.IOR!=1.){
         //always assume the normal is outward facing for the surface we are at
         Vector normal=path.dat.normal;
 
@@ -56,6 +67,15 @@ void scatter( inout Path path){
             path.absorb=path.dat.reflectAbsorb;
             path.emit=path.dat.reflectEmit;
             path.subSurface=false;
+
+            //CONDUCTOR FRESNEL TINT: the reflection carries the surface's specular
+            //colour (a metal's F0) head-on and whitens toward total reflection at
+            //grazing — per-channel Schlick, using the geometric incidence angle
+            //(path.tv is still the incident ray here). A no-op for white-specular
+            //materials (glass, plastic); this is what makes gold gold.
+            float cosI = clamp(-vDot(path.tv, normal), 0., 1.);
+            float gz = pow(1.-cosI, 5.);
+            path.dat.surfSpecular = mix(path.dat.surfSpecular, vec3(1.), gz);
 
             newDir=vReflect(path.tv, normal);
             newDir=vNormalize(mix(newDir, diffuseDir,rough2));

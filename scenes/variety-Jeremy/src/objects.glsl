@@ -29,7 +29,7 @@ void buildObjects(){
     var.thickness = vec2(0.02,0.0);
     var.smoothing =0.075;
 
-    var.mat=makeGlass(3.75*vec3(0.3,0.05,0.2),1.5,0.95);
+    var.mat=makeGlass(3.75*vec3(0.3,0.05,0.2),1.5,1.);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.2*sssDensity;

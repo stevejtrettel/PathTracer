@@ -21,7 +21,7 @@ void buildObjects(){
     donut.thickness = 0.08;
 
 
-    donut.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.6,0.99);
+    donut.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.6,1.);
     //alternate material experiments:
     //donut.mat.diffuseColor=0.6*(vec3(1.)-4.*vec3(0.2,0.03,0.0));
     //donut.mat.absorbColor= 4.*0.01*vec3(0.2,0.04,0.0);

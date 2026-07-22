@@ -13,7 +13,7 @@ void buildObjects(){
     sphere.frame=makeFrame(vec3(0,1.2,0));
     sphere.radius=2.;
 
-    sphere.mat=makeGlass(magentaGlass,ior,0.95);
+    sphere.mat=makeGlass(magentaGlass,ior,1.);
 
 //alternate materials:
 //    sphere.mat.refractionChance=0.;

@@ -28,7 +28,9 @@ export {location};
 
 export const params = [
     { name: 'ior',        label: 'Index of Refraction', min: 1.0, max: 2.5, step: 0.001, value: 1.52 },
-    { name: 'lightPower', label: 'Light Power',         min: 0,   max: 400, step: 1,     value: 45  },
+    //the light shrank 6.0 -> 1.5 in radius (16x less area) for crisp spectral bands;
+    //power scales up to keep the caustic bright
+    { name: 'lightPower', label: 'Light Power',         min: 0,   max: 2500, step: 5,    value: 720 },
 ];
 
 export default {uiParams: uiParams, location:location, params:params};

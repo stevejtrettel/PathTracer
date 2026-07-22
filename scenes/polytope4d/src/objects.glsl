@@ -30,7 +30,7 @@ void buildObjects(){
     vec3 magentaGlass = vec3(0.3,0.05,0.2);
 
 
-    Material polyMat = makeGlass(10.*tealScatter,1.5,0.95);
+    Material polyMat = makeGlass(10.*tealScatter,1.5,1.);
 //alternate materials:
 //    polyMat.refractionChance=0.;
 //    polyMat.subSurface=true;
@@ -44,7 +44,7 @@ void buildObjects(){
     poly.vertexMat.absorbColor = 20.*vec3(0.235,0.75,0.8);
 
 
-//    Material dualMat = makeGlass(10.*magentaGlass,1.5,0.95);
+//    Material dualMat = makeGlass(10.*magentaGlass,1.5,1.);
 //    dualMat.refractionChance=0.;
 //    dualMat.subSurface=true;
 //    dualMat.meanFreePath=0.5*scratch2;

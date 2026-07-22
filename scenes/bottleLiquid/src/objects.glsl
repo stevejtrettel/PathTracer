@@ -21,13 +21,13 @@ void buildObjects(){
     bottle.smoothJoin=0.3;
     bottle.bump=1.;
     bottle.mat=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
-    //alternate: makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
+    //alternate: makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,1.);
 
 
     //-------- GIN BOTTLE ----------------
     gin.glass=bottle;
     gin.cup = bottle.mat;
-    gin.drink=makeGlass(vec3(0.1,0.05,0.),1.3,0.99);
+    gin.drink=makeGlass(vec3(0.1,0.05,0.),1.3,1.);
     gin.fill=0.6;
 
 }

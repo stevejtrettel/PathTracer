@@ -26,7 +26,7 @@ void buildObjects(){
     //alternate material:
     //mobius.borderMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,sssDensity);
 
-    mobius.bandMat=makeGlass(30.*(0.75*brownAbsorb+0.5*redAbsorb),1.5,0.99);
+    mobius.bandMat=makeGlass(30.*(0.75*brownAbsorb+0.5*redAbsorb),1.5,1.);
     mobius.bandMat.refractionChance=0.;
     mobius.bandMat.subSurface=true;
     mobius.bandMat.meanFreePath=0.2*sssDensity;
@@ -35,7 +35,7 @@ void buildObjects(){
 
     //alternate material:
     //mobius.borderMat=makeMetal(vec3(0.02),specularity,0.4);
-    mobius.borderMat=makeGlass(10.*(brownAbsorb+0.25*redAbsorb),1.5,0.99);
+    mobius.borderMat=makeGlass(10.*(brownAbsorb+0.25*redAbsorb),1.5,1.);
     mobius.borderMat.refractionChance=0.;
     mobius.borderMat.subSurface=true;
     mobius.borderMat.meanFreePath=0.05;
@@ -52,14 +52,14 @@ void buildObjects(){
 
     //alternate material:
     //mobius2.bandMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.1,sssDensity);
-    mobius2.bandMat=makeGlass(20.*vec3(1,0.6,0.3),1.5,0.99);
+    mobius2.bandMat=makeGlass(20.*vec3(1,0.6,0.3),1.5,1.);
     mobius2.bandMat.refractionChance=0.;
     mobius2.bandMat.subSurface=true;
     mobius2.bandMat.meanFreePath=0.2*sssDensity;
     mobius2.bandMat.isotropicScatter=sssScatter;
     mobius2.bandMat.roughness=0.7;
 
-    mobius2.borderMat=makeGlass(0.5*vec3(1,0.6,0.3),1.5,0.99);
+    mobius2.borderMat=makeGlass(0.5*vec3(1,0.6,0.3),1.5,1.);
     mobius2.borderMat.refractionChance=0.;
     mobius2.borderMat.subSurface=true;
     mobius2.borderMat.meanFreePath=0.1;

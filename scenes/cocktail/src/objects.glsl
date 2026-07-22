@@ -22,11 +22,11 @@ void buildObjects(){
     cGlass.thickness=0.1;
     cGlass.base=0.3;
     //note: the Cocktail object only reads .cup/.drink; glass.mat is unused by the library
-    cGlass.mat=makeGlass(0.1*clearGlass,1.5,0.99);
+    cGlass.mat=makeGlass(0.1*clearGlass,1.5,1.);
 
     negroni.glass=cGlass;
-    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
-    negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,1.);
+    negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,1.);
 
 }
 

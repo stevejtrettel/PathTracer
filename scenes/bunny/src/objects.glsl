@@ -15,7 +15,7 @@ void buildObjects(){
     bunny.frame=makeFrame(vec3(0,0,0));
     bunny.scale=2.;
 
-    bunny.mat=makeGlass(magentaGlass,1.5,0.95);
+    bunny.mat=makeGlass(magentaGlass,1.5,1.);
 
     bunny.mat.refractionChance=0.;
     bunny.mat.subSurface=true;

@@ -25,12 +25,12 @@ void buildObjects(){
     //alternate materials:
     //klein.mat=makeDielectric(color,specularity,roughness);
 
-    klein.mat=makeGlass(7.*vec3(0.4,0.25,0.05),1.5,0.95);
-    //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
-    //makeGlass(7.*vec3(0.5,0.1,0.05),1.5,0.95);
-    //makeGlass(3.*vec3(0.3,0.05,0.2),1.5,0.95);
+    klein.mat=makeGlass(7.*vec3(0.4,0.25,0.05),1.5,1.);
+    //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,1.);
+    //makeGlass(7.*vec3(0.5,0.1,0.05),1.5,1.);
+    //makeGlass(3.*vec3(0.3,0.05,0.2),1.5,1.);
 
-    //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+    //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,1.);
 
     // klein.mat.diffuseColor=vec3(1);
     //klein.mat.absorbColor=vec3(0.1);

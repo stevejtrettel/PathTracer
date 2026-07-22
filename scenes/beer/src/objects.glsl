@@ -17,12 +17,12 @@ void buildObjects(){
     pint.flare=1.5;
     pint.thickness=0.01;
     pint.rounded=0.;
-    pint.mat=makeGlass(0.2*vec3(0.3,0.05,0.2),1.5,0.95);
+    pint.mat=makeGlass(0.2*vec3(0.3,0.05,0.2),1.5,1.);
 
 
     beer.glass=pint;
     beer.cup=beer.glass.mat;
-    beer.drink=makeGlass(2.5*vec3(0.03,0.15,0.9),1.2,0.99);
+    beer.drink=makeGlass(2.5*vec3(0.03,0.15,0.9),1.2,1.);
     beer.drink.refractionChance=0.;
     beer.drink.subSurface=true;
     beer.drink.meanFreePath=0.1;

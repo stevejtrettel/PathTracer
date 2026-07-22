@@ -20,9 +20,9 @@ void buildObjects(){
 
     //vec3 ice=vec3(1,0.8,0.5);
     vec3 ivory = vec3(0.75,0.85,1);
-    obj.mat=makeGlass(1.*ivory,1.5,0.95);
+    obj.mat=makeGlass(1.*ivory,1.5,1.);
 //alternate materials:
-//    obj.mat=makeGlass(tealScatter,1.5,0.95);
+//    obj.mat=makeGlass(tealScatter,1.5,1.);
 
     obj.mat.refractionChance=0.;
     obj.mat.subSurface=true;

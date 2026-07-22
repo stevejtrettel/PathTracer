@@ -26,9 +26,13 @@ void buildEnvironment(){
     room.frontMat = makeDielectric(dark, 0.0, rough);
     room.backMat  = makeDielectric(dark, 0.0, rough);
 
-    //----------- THE LIGHT (small, bright, behind the prism) ----
+    //----------- THE LIGHT (SMALL, bright, behind the prism) ----
+    //the source's angular size (seen from the prism) must be smaller than the
+    //dispersion fan (~14 degrees at dispersion 0.15) or the colours re-overlap
+    //into white. Radius 1.5 at ~15 units is ~11 degrees — bands resolve; the old
+    //radius-6 source subtended ~44 degrees and washed the spectrum out.
     light.frame  = makeFrame(vec3(9, 4, -12));
-    light.radius = 6.0;
+    light.radius = 1.5;
     light.mat    = makeLight(vec3(1.0), lightPower);
 
 }

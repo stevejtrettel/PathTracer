@@ -31,8 +31,8 @@ void buildObjects(){
 
     //--------  NEGRONI  ----------------
     negroni.glass=cGlass;
-    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,0.95);
-    negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
+    negroni.cup=makeGlass(0.1*vec3(0.3,0.05,0.2),1.5,1.);
+    negroni.drink=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,1.);
 
 
 
@@ -48,7 +48,7 @@ void buildObjects(){
     bottle.smoothJoin=0.3;
     bottle.frame=makeFrame(vec3(2,0.48,1));
     bottle.bump=0.5;
-    bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,0.99);
+    bottle.mat=makeGlass(0.1*vec3(0.3,0.05,0.08),1.5,1.);
 
 
     //-------- GIN BOTTLE ----------------
@@ -57,7 +57,7 @@ void buildObjects(){
     gin.glass.baseHeight=1.5;
     gin.glass.thickness=0.1;
     gin.cup=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
-    gin.drink=makeGlass(vec3(0.1,0.05,0.),1.3,0.99);
+    gin.drink=makeGlass(vec3(0.1,0.05,0.),1.3,1.);
     gin.fill=0.6;
     gin.glass.bump=1.;
 
@@ -70,8 +70,8 @@ void buildObjects(){
     campari.glass.baseHeight=3.5;
     campari.glass.neckHeight=0.75;
     campari.glass.smoothJoin=0.5;
-    campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,0.99);
-    campari.drink=makeGlass(2.5*redAbsorb,1.3,0.99);
+    campari.cup=makeGlass(0.1*vec3(0.3,0.05,0.05),1.5,1.);
+    campari.drink=makeGlass(2.5*redAbsorb,1.3,1.);
     campari.fill=0.5;
     campari.glass.bump=0.;
 
@@ -86,10 +86,10 @@ void buildObjects(){
     vermouth.glass.smoothJoin=1.5;
     vermouth.cup=makeGlass(0.5*vec3(0.3,0.05,0.08),1.5,0.92);
     //alternate recipes (the last vermouth.drink assignment below wins):
-    vermouth.drink=makeGlass(vec3(0.1,0.05,0.),1.3,0.99);
-    //makeGlass(0.3*vec3(0.1,0.05,0.),1.3,0.99);
+    vermouth.drink=makeGlass(vec3(0.1,0.05,0.),1.3,1.);
+    //makeGlass(0.3*vec3(0.1,0.05,0.),1.3,1.);
     vermouth.fill=0.6;
-    vermouth.drink=makeGlass(5.*brownAbsorb,1.3,0.99);
+    vermouth.drink=makeGlass(5.*brownAbsorb,1.3,1.);
     vermouth.glass.bump=1.;
 
 }

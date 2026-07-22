@@ -35,7 +35,7 @@ void buildObjects(){
     var.scale=5.;
     var.thickness = vec2(0.0075,0.0);
 
-    var.mat=makeGlass(30.*tealScatter,1.5,0.99);
+    var.mat=makeGlass(30.*tealScatter,1.5,1.);
     var.mat.refractionChance=0.;
     var.mat.subSurface=true;
     var.mat.meanFreePath=0.1;

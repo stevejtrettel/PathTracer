@@ -22,7 +22,7 @@ void buildObjects(){
 
     dod = buildHypDod();
 
-    dod.mat=makeGlass(6.*(brownAbsorb+0.25*redAbsorb),1.5,0.97);
+    dod.mat=makeGlass(6.*(brownAbsorb+0.25*redAbsorb),1.5,1.);
     dod.frame = makeFrame(vec3(1.5,-0.5,2.25));
     //alternate materials:
     //dod.mat = makeMetal(color,specularity,roughness);
@@ -37,8 +37,8 @@ void buildObjects(){
     //built but not currently rendered (kept as an alternate)
     dodE = buildHypDod(0.4);
     dodE.frame = makeFrame(vec3(-2,-0.5,2));
-    //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,0.99);
-    dodE.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
+    //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,1.);
+    dodE.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,1.);
     dodE.mat.refractionChance=0.;
     dodE.mat.subSurface=true;
     dodE.mat.meanFreePath=0.5*sssDensity;
@@ -46,7 +46,7 @@ void buildObjects(){
     dodE.mat.roughness=0.04;
 
     //alternate materials:
-    //dod.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,0.95);
+    //dod.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,1.);
     //dod.mat.refractionChance=0.;
     //dod.mat.subSurface=true;
     //dod.mat.meanFreePath=0.5*sssDensity;
@@ -54,8 +54,8 @@ void buildObjects(){
     //dod.mat.roughness=0.04;
     //
 
-    Material dodMat = makeGlass(30.*(brownAbsorb+0.25*redAbsorb),2.5,0.95);
-    Material glassMat = makeGlass(0.2*vec3(0.3,0.05,0.2),1.5,0.99);
+    Material dodMat = makeGlass(30.*(brownAbsorb+0.25*redAbsorb),2.5,1.);
+    Material glassMat = makeGlass(0.2*vec3(0.3,0.05,0.2),1.5,1.);
     poin = createPoincareMarble(dodMat, glassMat);
 
     //alternate materials:
@@ -71,7 +71,7 @@ void buildObjects(){
     //alternate materials:
     //makeMetal(color,specularity,roughness);
     //cube.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,sssDensity);
-    cube.mat=makeGlass(20.*(vec3(1)-vec3(0.6,0.1,0.5)),1.5,0.95);
+    cube.mat=makeGlass(20.*(vec3(1)-vec3(0.6,0.1,0.5)),1.5,1.);
     cube.mat.refractionChance=0.;
     cube.mat.subSurface=true;
     cube.mat.meanFreePath=0.5*sssDensity;

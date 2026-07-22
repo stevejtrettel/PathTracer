@@ -12,7 +12,7 @@ void buildObjects(){
     kB.frame=makeFrame(vec3(-2,1,-2));
     kB.size=1.;
     kB.thickness=0.05;
-    kB.mat = makeGlass(2.5*vec3(0.3,0.05,0.05),1.5,0.95);
+    kB.mat = makeGlass(2.5*vec3(0.3,0.05,0.05),1.5,1.);
 
 }
 
