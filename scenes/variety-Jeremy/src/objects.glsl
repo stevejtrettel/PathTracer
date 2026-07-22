@@ -30,11 +30,10 @@ void buildObjects(){
     var.smoothing =0.075;
 
     var.mat=makeGlass(3.75*vec3(0.3,0.05,0.2),1.5,1.);
-    var.mat.refractionChance=0.;
-    var.mat.subSurface=true;
-    var.mat.meanFreePath=0.2*sssDensity;
-    var.mat.isotropicScatter=sssScatter;
-    var.mat.roughness=0.2;
+    var.mat.surf.transmit=1.;
+    var.mat.interior.mfp=0.2*sssDensity;
+    var.mat.interior.blur=sssScatter;
+    var.mat.surf.roughness=0.2;
 
 }
 

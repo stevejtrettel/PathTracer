@@ -12,7 +12,7 @@
 //     room.low   = -1.;    room.high  = 14.;   //y of floor / ceiling
 //     room.left  = -20.;   room.right = 8.5;   //x of left / right wall
 //     room.front = -20.;   room.back  = 10.;   //z of front / back wall
-//     room.floorMat = makeDielectric(color, 0., 0.1);
+//     room.floorMat = makeMatte(color);
 //     room.ceilMat  = makeLight(vec3(1.), scratch4);
 //     ...and leftMat / rightMat / frontMat / backMat
 //

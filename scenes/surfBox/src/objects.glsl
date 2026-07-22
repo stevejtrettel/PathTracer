@@ -24,7 +24,7 @@ void buildObjects(){
     surf.frame = makeFrame(vec3(-2,1.5,-2));
     surf.box = vec3(1,1,1);
     surf.scale=10.;
-    surf.mat=makeDielectric(red,0.5,0.2);
+    surf.mat=makeGloss(red,0.5,0.2);
 
 
 }

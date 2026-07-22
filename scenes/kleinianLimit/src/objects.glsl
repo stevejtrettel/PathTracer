@@ -23,7 +23,7 @@ void buildObjects(){
     roughness=0.01;
 
     //alternate materials:
-    //klein.mat=makeDielectric(color,specularity,roughness);
+    //klein.mat=makeGloss(color,specularity,roughness);
 
     klein.mat=makeGlass(7.*vec3(0.4,0.25,0.05),1.5,1.);
     //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,1.);
@@ -32,17 +32,16 @@ void buildObjects(){
 
     //klein.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,1.);
 
-    // klein.mat.diffuseColor=vec3(1);
-    //klein.mat.absorbColor=vec3(0.1);
+    // klein.mat.surf.diffuse=vec3(1);
+    //klein.mat.interior.absorb=vec3(0.1);
     //vec3(1)-0.9*vec3(0,0.65,0.35);
-    //klein.mat.emitColor =  0.4*sssDensity*vec3(1.,0.15,0.);
-    //klein.mat.surfaceEmit =  0.1*scratch3*vec3(0.75,0.25,0.);
+    //klein.mat.interior.emit =  0.4*sssDensity*vec3(1.,0.15,0.);
+    //klein.mat.surf.emit =  0.1*scratch3*vec3(0.75,0.25,0.);
     //vec3(1)-0.9*vec3(0.3,0.2,0.6);
-    klein.mat.refractionChance=0.;
-    klein.mat.subSurface=true;
-    klein.mat.meanFreePath=0.5*sssDensity;
-    klein.mat.isotropicScatter=sssScatter;
-    klein.mat.roughness=0.04;
+    klein.mat.surf.transmit=1.;
+    klein.mat.interior.mfp=0.5*sssDensity;
+    klein.mat.interior.blur=sssScatter;
+    klein.mat.surf.roughness=0.04;
 
 
 }

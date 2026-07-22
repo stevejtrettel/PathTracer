@@ -23,11 +23,10 @@ void buildObjects(){
     beer.glass=pint;
     beer.cup=beer.glass.mat;
     beer.drink=makeGlass(2.5*vec3(0.03,0.15,0.9),1.2,1.);
-    beer.drink.refractionChance=0.;
-    beer.drink.subSurface=true;
-    beer.drink.meanFreePath=0.1;
-    beer.drink.isotropicScatter=0.;
-    //alternate: beer.drink.roughness=0.9;
+    beer.drink.surf.transmit=1.;
+    beer.drink.interior.mfp=0.1;
+    beer.drink.interior.blur=0.;
+    //alternate: beer.drink.surf.roughness=0.9;
 
 }
 

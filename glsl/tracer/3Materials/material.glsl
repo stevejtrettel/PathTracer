@@ -45,33 +45,45 @@ struct Material{
 };
 
 
-void initSurface(inout Surface s){
-    s.diffuse=vec3(1.);
-    s.specular=vec3(1.);
-    s.emit=vec3(0.);
-    s.transmitTint=vec3(1.);
-    s.roughness=0.;
-    s.gloss=0.;
-    s.transmit=0.;
-    s.coat=0.;
-    s.coatRoughness=0.;
-    s.film=0.;
-    s.filmIOR=1.33;
+//defaults built as CONSTRUCTOR LITERALS, never by writing fields through an
+//inout nested-struct member — that pattern (initSurface(mat.surf) on an
+//uninitialized local) miscompiles on some drivers, leaving garbage fields.
+//Field order matches the struct declarations above exactly.
+
+Surface defaultSurface(){
+    return Surface(
+        vec3(1.),   //diffuse
+        vec3(1.),   //specular
+        vec3(0.),   //emit
+        vec3(1.),   //transmitTint
+        0.,         //roughness
+        0.,         //gloss
+        0.,         //transmit
+        0.,         //coat
+        0.,         //coatRoughness
+        0.,         //film
+        1.33        //filmIOR
+    );
 }
 
-void initMedium(inout Medium m){
-    m.ior=1.;
-    m.absorb=vec3(0.);
-    m.emit=vec3(0.);
-    m.mfp=maxDist;
-    m.blur=1.;
+Medium defaultMedium(){
+    return Medium(
+        1.,         //ior
+        vec3(0.),   //absorb
+        vec3(0.),   //emit
+        maxDist,    //mfp
+        1.          //blur
+    );
 }
+
+void initSurface(inout Surface s){ s = defaultSurface(); }
+void initMedium(inout Medium m){ m = defaultMedium(); }
 
 //the default material: pure white matte
 void initMat(inout Material mat){
     mat.render=true;
-    initSurface(mat.surf);
-    initMedium(mat.interior);
+    mat.surf=defaultSurface();
+    mat.interior=defaultMedium();
 }
 
 

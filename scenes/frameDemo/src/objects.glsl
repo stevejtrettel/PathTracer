@@ -29,7 +29,7 @@ void buildObjects(){
 
     //blue tetrahedron balanced on an edge
     tet.frame = makeFrame( vec3(2.6, 0.9, 0.5), vec3(0.,0.,1.), 45., 0.9 );
-    tet.mat = makeDielectric( vec3(0.15, 0.3, 0.8), 0.3, 0.1 );
+    tet.mat = makeGloss( vec3(0.15, 0.3, 0.8), 0.3, 0.1 );
 
 }
 

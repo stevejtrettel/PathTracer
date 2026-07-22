@@ -85,7 +85,7 @@ void setData_Objects(inout Path path){
         // the wall refracts by the medium's own index just inside it, so the same
         // field n(p) governs the surface (Snell) and the interior (eikonal).
         Material m = cube.mat;
-        m.IOR = bhIndex(path.tv.pos);   // n_wall; setObjectInAir -> 1/n_wall in, n_wall out
+        m.interior.ior = bhIndex(path.tv.pos);   // n_wall; setObjectInAir -> 1/n_wall in, n_wall out
         setObjectInAir(path.dat, side, normal, m);
     }
 }

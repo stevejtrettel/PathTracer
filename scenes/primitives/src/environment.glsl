@@ -14,12 +14,12 @@ void buildEnvironment(){
     room.front = -14.;  room.back  =  8.;
 
     float rough = 0.3;
-    room.floorMat = makeDielectric(vec3(0.45),        0.0, rough);
+    room.floorMat = makeGloss(vec3(0.45),        0.0, rough);
     room.ceilMat  = makeLight(vec3(1.0), roomLight);
-    room.leftMat  = makeDielectric(vec3(0.55,0.32,0.32), 0.0, rough);
-    room.rightMat = makeDielectric(vec3(0.32,0.35,0.55), 0.0, rough);
-    room.frontMat = makeDielectric(vec3(0.4),         0.0, rough);
-    room.backMat  = makeDielectric(vec3(0.4),         0.0, rough);
+    room.leftMat  = makeGloss(vec3(0.55,0.32,0.32), 0.0, rough);
+    room.rightMat = makeGloss(vec3(0.32,0.35,0.55), 0.0, rough);
+    room.frontMat = makeGloss(vec3(0.4),         0.0, rough);
+    room.backMat  = makeGloss(vec3(0.4),         0.0, rough);
 
     light.frame  = makeFrame(vec3(-4, 10, 4));
     light.radius = 1.5;

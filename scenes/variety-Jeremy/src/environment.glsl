@@ -17,13 +17,13 @@ void buildEnvironment(){
     vec3 color=vec3(0.02);
     float roughness=0.1;
 
-    room.floorMat = makeDielectric(color,0.0,roughness);
+    room.floorMat = makeGloss(color,0.0,roughness);
     room.ceilMat  = makeLight(vec3(1,1,1),5.*roomLight);
-    room.leftMat  = makeDielectric(color,0.0,roughness);
-    room.leftMat.specularChance=0.5;
-    room.rightMat = makeDielectric(color,0.0,roughness);
-    room.frontMat = makeDielectric(color,0.0,roughness);
-    room.backMat  = makeDielectric(color,0.0,roughness);
+    room.leftMat  = makeGloss(color,0.0,roughness);
+    room.leftMat.surf.gloss=0.5;
+    room.rightMat = makeGloss(color,0.0,roughness);
+    room.frontMat = makeGloss(color,0.0,roughness);
+    room.backMat  = makeGloss(color,0.0,roughness);
 
     //----------- LIGHT 1 -------------------------
     light1.frame=makeFrame(vec3(7,5,10));

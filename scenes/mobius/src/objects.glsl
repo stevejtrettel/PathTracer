@@ -27,20 +27,18 @@ void buildObjects(){
     //mobius.borderMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,sssDensity);
 
     mobius.bandMat=makeGlass(30.*(0.75*brownAbsorb+0.5*redAbsorb),1.5,1.);
-    mobius.bandMat.refractionChance=0.;
-    mobius.bandMat.subSurface=true;
-    mobius.bandMat.meanFreePath=0.2*sssDensity;
-    mobius.bandMat.isotropicScatter=sssScatter;
-    mobius.bandMat.roughness=0.7;
+    mobius.bandMat.surf.transmit=1.;
+    mobius.bandMat.interior.mfp=0.2*sssDensity;
+    mobius.bandMat.interior.blur=sssScatter;
+    mobius.bandMat.surf.roughness=0.7;
 
     //alternate material:
     //mobius.borderMat=makeMetal(vec3(0.02),specularity,0.4);
     mobius.borderMat=makeGlass(10.*(brownAbsorb+0.25*redAbsorb),1.5,1.);
-    mobius.borderMat.refractionChance=0.;
-    mobius.borderMat.subSurface=true;
-    mobius.borderMat.meanFreePath=0.05;
-    mobius.borderMat.isotropicScatter=0.4;
-    mobius.borderMat.roughness=0.3;
+    mobius.borderMat.surf.transmit=1.;
+    mobius.borderMat.interior.mfp=0.05;
+    mobius.borderMat.interior.blur=0.4;
+    mobius.borderMat.surf.roughness=0.3;
 
 
     mobius2.frame=makeFrame(vec3(-5,1.5,-2));
@@ -53,18 +51,16 @@ void buildObjects(){
     //alternate material:
     //mobius2.bandMat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.1,sssDensity);
     mobius2.bandMat=makeGlass(20.*vec3(1,0.6,0.3),1.5,1.);
-    mobius2.bandMat.refractionChance=0.;
-    mobius2.bandMat.subSurface=true;
-    mobius2.bandMat.meanFreePath=0.2*sssDensity;
-    mobius2.bandMat.isotropicScatter=sssScatter;
-    mobius2.bandMat.roughness=0.7;
+    mobius2.bandMat.surf.transmit=1.;
+    mobius2.bandMat.interior.mfp=0.2*sssDensity;
+    mobius2.bandMat.interior.blur=sssScatter;
+    mobius2.bandMat.surf.roughness=0.7;
 
     mobius2.borderMat=makeGlass(0.5*vec3(1,0.6,0.3),1.5,1.);
-    mobius2.borderMat.refractionChance=0.;
-    mobius2.borderMat.subSurface=true;
-    mobius2.borderMat.meanFreePath=0.1;
-    mobius2.borderMat.isotropicScatter=0.6;
-    mobius2.borderMat.roughness=0.3;
+    mobius2.borderMat.surf.transmit=1.;
+    mobius2.borderMat.interior.mfp=0.1;
+    mobius2.borderMat.interior.blur=0.6;
+    mobius2.borderMat.surf.roughness=0.3;
     //alternate material:
     //makeMetal(vec3(0.2),specularity,0.4);
 

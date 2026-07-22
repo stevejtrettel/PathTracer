@@ -17,7 +17,7 @@ void buildObjects(){
 
     //opaque material (set to taste). the sdf's orbit trap is available via
     //orbitTrap() if you want to color it in a recolor followup.
-    form.mat = makeDielectric(vec3(0.85, 0.62, 0.52), 0.15, 0.3);
+    form.mat = makeGloss(vec3(0.85, 0.62, 0.52), 0.15, 0.3);
 
 }
 

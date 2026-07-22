@@ -24,7 +24,7 @@ void buildObjects(){
     surf.frame = makeFrame(vec3(-2,1.5,-2));
     surf.cyl = vec2(1,1);
     surf.scale=10.;
-    surf.mat=makeDielectric(tealScatter,0.5,0.2);
+    surf.mat=makeGloss(tealScatter,0.5,0.2);
 
 }
 

@@ -76,6 +76,25 @@ Material makeNeon(vec3 color, float power){
     return mat;
 }
 
+//a soap film: a THIN surface (use with setSurfaceInMat-style shell geometry)
+//whose reflectance is thin-film interference — thickness in nm, ~150-700 is
+//the visible sweet spot. True rainbows need spectral on; the un-reflected
+//light passes straight through. demo: demos/soapFilm.
+Material makeSoapFilm(float thickness){
+    Material mat; initMat(mat);
+    mat.surf.transmit=1.;
+    mat.surf.film=thickness;
+    return mat;
+}
+
+//a thin oily coating over an opaque base: iridized highlights (oil ~1.45)
+Material makeOilSlick(vec3 baseColor, float thickness){
+    Material mat = makeMatte(baseColor);
+    mat.surf.film=thickness;
+    mat.surf.filmIOR=1.45;
+    return mat;
+}
+
 
 //------ subsurface ---------------------------------------------------------
 // all on one axis: interior mfp (dense -> dilute) x surface finish

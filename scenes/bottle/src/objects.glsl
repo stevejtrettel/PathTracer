@@ -23,11 +23,10 @@ void buildObjects(){
     vec3 greenScatter = vec3(0.25,0.65,0.4);
 
     bottle.mat=makeGlass(1.5*greenScatter,1.5,1.);
-    bottle.mat.refractionChance=0.;
-    bottle.mat.subSurface=true;
-    bottle.mat.meanFreePath=0.5*sssDensity;
-    bottle.mat.isotropicScatter=sssScatter;
-    bottle.mat.roughness=0.0;
+    bottle.mat.surf.transmit=1.;
+    bottle.mat.interior.mfp=0.5*sssDensity;
+    bottle.mat.interior.blur=sssScatter;
+    bottle.mat.surf.roughness=0.0;
 
 }
 

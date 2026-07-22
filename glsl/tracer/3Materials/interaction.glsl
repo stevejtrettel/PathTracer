@@ -33,7 +33,7 @@ void setInteraction(inout LocalData dat, Surface surf, Medium front, Medium back
 
 void setObjectInAir(inout LocalData dat, bool inside, Vector normal, Material mat){
 
-    Medium air; initMedium(air);
+    Medium air = defaultMedium();
 
     if(inside){
         setInteraction(dat, mat.surf, mat.interior, air, negate(normal), -1.);

@@ -18,7 +18,7 @@ void buildObjects(){
     klein.offset = vec3(-0.86, 1.16, 1.76);
 
     //standard opaque dielectric; color comes from the orbit-trap followup below
-    klein.mat = makeDielectric(vec3(0.6), 0.15, 0.1);
+    klein.mat = makeGloss(vec3(0.6), 0.15, 0.1);
 
 }
 
@@ -74,7 +74,7 @@ void setData_Objects(inout Path path){
         vec3 trap = orbitTrap(p, klein);
         Material m = klein.mat;
         //warm muted albedo, no self-glow — lit by the scene light
-        m.diffuseColor = ksh_spectrum(clamp(trap.y*2.0, 0.0, 1.0));
+        m.surf.diffuse = ksh_spectrum(clamp(trap.y*2.0, 0.0, 1.0));
         applyMaterial(path, m);
     }
 }

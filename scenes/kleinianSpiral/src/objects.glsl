@@ -35,7 +35,7 @@ void buildObjects(){
     klein.clipSize   = vec3(0.8, 0.7, 0.8);    //half-extents (local units)
 
     //physics only; the color is set by the recolor followup below
-    klein.mat = makeDielectric(vec3(0.55, 0.5, 0.6), 0.2, 0.05);
+    klein.mat = makeGloss(vec3(0.55, 0.5, 0.6), 0.2, 0.05);
 
 }
 

@@ -17,17 +17,16 @@ void buildObjects(){
 
     bunny.mat=makeGlass(magentaGlass,1.5,1.);
 
-    bunny.mat.refractionChance=0.;
-    bunny.mat.subSurface=true;
-    bunny.mat.meanFreePath=0.5*sssDensity;
-    bunny.mat.isotropicScatter=sssScatter;
-    bunny.mat.roughness=0.0;
+    bunny.mat.surf.transmit=1.;
+    bunny.mat.interior.mfp=0.5*sssDensity;
+    bunny.mat.interior.blur=sssScatter;
+    bunny.mat.surf.roughness=0.0;
 
 //    //alternate: emissive bunny — make the bunny glow
-//    bunny.mat.diffuseColor=vec3(1);
-//    bunny.mat.absorbColor=vec3(0.1);
-//    bunny.mat.emitColor =  0.4*sssDensity*vec3(1.,0.15,0.);
-//    bunny.mat.surfaceEmit =  0.1*scratch3*vec3(0.75,0.25,0.);
+//    bunny.mat.surf.diffuse=vec3(1);
+//    bunny.mat.interior.absorb=vec3(0.1);
+//    bunny.mat.interior.emit =  0.4*sssDensity*vec3(1.,0.15,0.);
+//    bunny.mat.surf.emit =  0.1*scratch3*vec3(0.75,0.25,0.);
 
 }
 

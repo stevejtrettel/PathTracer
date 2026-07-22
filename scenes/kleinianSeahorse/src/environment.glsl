@@ -23,11 +23,11 @@ void buildEnvironment(){
     //faster to converge than a tiny sphere in an enclosed room. The warm walls
     //bounce it into the fractal's recesses.
     room.ceilMat  = makeLight(vec3(1.0, 0.9, 0.78), lightBrightness);
-    room.floorMat = makeDielectric(wall, 0.0, roughness);
-    room.leftMat  = makeDielectric(wall, 0.0, roughness);
-    room.rightMat = makeDielectric(wall, 0.0, roughness);
-    room.frontMat = makeDielectric(wall, 0.0, roughness);
-    room.backMat  = makeDielectric(wall, 0.0, roughness);
+    room.floorMat = makeGloss(wall, 0.0, roughness);
+    room.leftMat  = makeGloss(wall, 0.0, roughness);
+    room.rightMat = makeGloss(wall, 0.0, roughness);
+    room.frontMat = makeGloss(wall, 0.0, roughness);
+    room.backMat  = makeGloss(wall, 0.0, roughness);
 
 }
 

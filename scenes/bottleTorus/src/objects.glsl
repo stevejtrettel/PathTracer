@@ -23,17 +23,16 @@ void buildObjects(){
 
     donut.mat=makeGlass(0.3*vec3(0.3,0.05,0.2),1.6,1.);
     //alternate material experiments:
-    //donut.mat.diffuseColor=0.6*(vec3(1.)-4.*vec3(0.2,0.03,0.0));
-    //donut.mat.absorbColor= 4.*0.01*vec3(0.2,0.04,0.0);
-    //donut.mat.emitColor= scratch1*vec3(0.5,0.1,0.0);
-    //donut.mat.surfaceEmit=0.5*scratch2*vec3(0.3,0.3,0.0);
-    //donut.mat.specularChance=0.05;
-    //donut.mat.specularColor=vec3(1.)-donut.mat.absorbColor/3.;
-    donut.mat.refractionChance=0.0;
-    donut.mat.subSurface=true;
-    donut.mat.meanFreePath=0.02;
-    donut.mat.isotropicScatter=sssScatter;
-    donut.mat.roughness=0.0;
+    //donut.mat.surf.diffuse=0.6*(vec3(1.)-4.*vec3(0.2,0.03,0.0));
+    //donut.mat.interior.absorb= 4.*0.01*vec3(0.2,0.04,0.0);
+    //donut.mat.interior.emit= scratch1*vec3(0.5,0.1,0.0);
+    //donut.mat.surf.emit=0.5*scratch2*vec3(0.3,0.3,0.0);
+    //donut.mat.surf.gloss=0.05;
+    //donut.mat.surf.specular=vec3(1.)-donut.mat.interior.absorb/3.;
+    donut.mat.surf.transmit=1.;
+    donut.mat.interior.mfp=0.02;
+    donut.mat.interior.blur=sssScatter;
+    donut.mat.surf.roughness=0.0;
 
 }
 

@@ -19,12 +19,12 @@ void buildEnvironment(){
     vec3 dark = vec3(0.015);
     float rough = 0.25;
 
-    room.floorMat = makeDielectric(vec3(0.55), 0.0, 0.35);  //pale floor: catches the rainbow caustic
-    room.ceilMat  = makeDielectric(dark, 0.0, rough);
-    room.leftMat  = makeDielectric(dark, 0.0, rough);
-    room.rightMat = makeDielectric(dark, 0.0, rough);
-    room.frontMat = makeDielectric(dark, 0.0, rough);
-    room.backMat  = makeDielectric(dark, 0.0, rough);
+    room.floorMat = makeGloss(vec3(0.55), 0.0, 0.35);  //pale floor: catches the rainbow caustic
+    room.ceilMat  = makeGloss(dark, 0.0, rough);
+    room.leftMat  = makeGloss(dark, 0.0, rough);
+    room.rightMat = makeGloss(dark, 0.0, rough);
+    room.frontMat = makeGloss(dark, 0.0, rough);
+    room.backMat  = makeGloss(dark, 0.0, rough);
 
     //----------- THE LIGHT (SMALL, bright, behind the prism) ----
     //the source's angular size (seen from the prism) must be smaller than the

@@ -88,9 +88,9 @@ void setData(inout Path path, Beer beer){
 
     //compute the new isotropic scattering coefficient depending on point of entry:
     //its going to be the original, plus an exponentially decreasing term with characteristic width
-    float scatterDifference = 1.-beer.drink.isotropicScatter;
-    float foamScatter = beer.drink.isotropicScatter + scatterDifference * exp(-pow(abs(drinkTop/foamThickness),5.));
-    float foamFreePath = beer.drink.meanFreePath*(1.+3.*exp(-pow(abs(drinkTop/foamThickness),10.)));
+    float scatterDifference = 1.-beer.drink.interior.blur;
+    float foamScatter = beer.drink.interior.blur + scatterDifference * exp(-pow(abs(drinkTop/foamThickness),5.));
+    float foamFreePath = beer.drink.interior.mfp*(1.+3.*exp(-pow(abs(drinkTop/foamThickness),10.)));
     // float beerTop = path.tv.pos.y-beer.glass.frame.pos.y-beer.glass.height/2.+0.2;
 
     //distance to drink is intersection of inside dist and this top
@@ -132,8 +132,8 @@ void setData(inout Path path, Beer beer){
                 setMaterialInterface(path.dat,beer.cup,beer.drink,beer.drink);
 
                 //set parameters for foam
-                path.dat.isotropicScatter = foamScatter;
-                path.dat.meanFreePath = foamFreePath;
+                path.dat.blur = foamScatter;
+                path.dat.mfp = foamFreePath;
 
             }
         }
@@ -157,8 +157,8 @@ void setData(inout Path path, Beer beer){
             setObjectInAir(path.dat, false, normal, beer.drink);
 
             //set parameters for foam
-            path.dat.isotropicScatter = foamScatter;
-            path.dat.meanFreePath = foamFreePath;
+            path.dat.blur = foamScatter;
+            path.dat.mfp = foamFreePath;
 
         }
         else{

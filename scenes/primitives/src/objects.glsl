@@ -23,7 +23,7 @@ void buildObjects(){
     cap.a      = vec3(-0.8, 0.6, 0);
     cap.b      = vec3(0.8, 3.2, 0);
     cap.radius = 0.55;
-    cap.mat    = makeDielectric(vec3(0.2, 0.5, 0.85), 0.2, 0.1);
+    cap.mat    = makeGloss(vec3(0.2, 0.5, 0.85), 0.2, 0.1);
 
     //--- ellipsoid ---
     ell.frame = makeFrame(vec3(3.2, 1.1, 0));
@@ -32,7 +32,7 @@ void buildObjects(){
 
     //--- the bead (repeated on a grid in sdf_beads below) ---
     beads.radius = 0.22;
-    beads.mat    = makeDielectric(vec3(0.85, 0.3, 0.25), 0.1, 0.2);
+    beads.mat    = makeGloss(vec3(0.85, 0.3, 0.25), 0.1, 0.2);
 
 }
 

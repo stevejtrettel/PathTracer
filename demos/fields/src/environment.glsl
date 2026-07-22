@@ -1,8 +1,7 @@
 //-------------------------------------------------
-// ENVIRONMENT OF THE SCENE
-// a neutral room with a soft key light: bright enough to read the coat
-// highlights, dim enough that the grazing-angle Fresnel ramp on the floor-facing
-// silhouettes stays visible.
+// ENVIRONMENT — the field chart's room: brighter than the neutral reference
+// room, with warm/cool accent side walls (the metals-demo trick) so glossy and
+// metallic field spheres have something colored to reflect.
 //-------------------------------------------------
 
 RoomBox room;
@@ -16,15 +15,12 @@ void buildEnvironment(){
     room.left  = -18.;   room.right = 18.;
     room.front = -18.;   room.back  = 18.;
 
-    vec3 wall = vec3(0.10);
-    float rough = 0.3;
-
-    room.floorMat = makeDielectric(vec3(0.35), 0.0, 0.25);
+    room.floorMat = makeMatte(vec3(0.42));
     room.ceilMat  = makeLight(vec3(1.), roomLight);
-    room.leftMat  = makeDielectric(wall, 0.0, rough);
-    room.rightMat = makeDielectric(wall, 0.0, rough);
-    room.frontMat = makeDielectric(wall, 0.0, rough);
-    room.backMat  = makeDielectric(wall, 0.0, rough);
+    room.leftMat  = makeMatte(vec3(0.45, 0.22, 0.10));   //warm
+    room.rightMat = makeMatte(vec3(0.10, 0.22, 0.40));   //cool
+    room.frontMat = makeMatte(vec3(0.16));
+    room.backMat  = makeMatte(vec3(0.16));
 
     //----------- THE KEY LIGHT --------------------
     keyLight.frame  = makeFrame(vec3(8, 11, 9));

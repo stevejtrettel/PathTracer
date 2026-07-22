@@ -1,6 +1,7 @@
+// Soap-film demo: thin-shell bubbles with interference reflectance.
 import createScene from "../../js/createScene.js";
 
-import environment from "./src/environment.glsl";
+import environment from "../roughSweep/src/environment.glsl";
 import objects from "./src/objects.glsl";
 import settings from "./src/settings.js";
 

@@ -18,7 +18,7 @@ void buildObjects(){
     honey.foldIterations = foldDepth;
 
     //physics only; the per-cell color is set by the recolor followup below
-    honey.mat = makeDielectric(vec3(0.5), 0.2, 0.15);
+    honey.mat = makeGloss(vec3(0.5), 0.2, 0.15);
 
 }
 

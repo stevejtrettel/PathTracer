@@ -12,7 +12,7 @@ VARIETY_DATA(surface_Data, surface_Eqn)
 // Building a variety that is infinitesimally thin
 //-------------------------------------------------
 
-struct Surface{
+struct ThinSurface{
     Frame frame;
     float scale;
     Material mat;
@@ -20,7 +20,7 @@ struct Surface{
 
 
 //the point-level sdf (local coordinates)
-float sdf( vec3 p, Surface surf ){
+float sdf( vec3 p, ThinSurface surf ){
 
     //internal zoom of the defining equation
     vec3 scaledPos = surf.scale * p;
@@ -43,15 +43,15 @@ float sdf( vec3 p, Surface surf ){
 
 //local bound: the clip region itself. sdf = max(|surface|, surface_bBox), so
 //surface_bBox is a conservative underestimate — the object is contained in it.
-float bound( vec3 p, Surface surf ){ return surface_bBox(p); }
+float bound( vec3 p, ThinSurface surf ){ return surface_bBox(p); }
 
 //the standard interface: initObject, at, inside, sdf, normalVec (custom bound above)
-OBJECT_INIT(Surface)
-OBJECT_LOCATORS_B(Surface)
-OBJECT_NORMAL_FD(Surface)
+OBJECT_INIT(ThinSurface)
+OBJECT_LOCATORS_B(ThinSurface)
+OBJECT_NORMAL_FD(ThinSurface)
 
 //setData for a two sided surface
-void setData( inout Path path, Surface surf ){
+void setData( inout Path path, ThinSurface surf ){
 
     //if we are at the surface
     if(at(path.tv, surf)){
@@ -68,8 +68,8 @@ void setData( inout Path path, Surface surf ){
         bool onEdge = abs(surface_bBox(q))<0.005;
 
         if(onEdge){
-            //average of the two side colors
-            mat.diffuseColor=0.5*(mat.diffuseColor + mat.diffuseColorBack);
+            //average of the front color and the white back
+            mat.surf.diffuse=0.5*(mat.surf.diffuse + vec3(1.));
             //set the material
             setObjectInAir(path.dat, false, normal, mat);
         }
@@ -81,10 +81,10 @@ void setData( inout Path path, Surface surf ){
             //val positive is one side, val negative is the other;
 
             if(val<0.){
-                mat.diffuseColor=surf.mat.diffuseColorBack;
+                mat=makeMatte(vec3(1.));   //the BACK side: white (the old default look)
             }
             else{
-                mat.diffuseColor=surf.mat.diffuseColor;
+                mat=surf.mat;
             }
 
             bool side = inside(path.tv, surf);

@@ -17,7 +17,7 @@ void buildObjects(){
     klein.iterations = detail;
 
     //standard opaque material; color comes from the orbit-trap followup below
-    klein.mat = makeDielectric(vec3(0.75), 0.15, 0.1);
+    klein.mat = makeGloss(vec3(0.75), 0.15, 0.1);
 
 }
 

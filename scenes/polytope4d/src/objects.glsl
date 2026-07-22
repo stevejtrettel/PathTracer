@@ -32,29 +32,27 @@ void buildObjects(){
 
     Material polyMat = makeGlass(10.*tealScatter,1.5,1.);
 //alternate materials:
-//    polyMat.refractionChance=0.;
-//    polyMat.subSurface=true;
-//    polyMat.meanFreePath=0.5*scratch2;
-//    polyMat.isotropicScatter=scratch1;
-//    polyMat.roughness=0.0;
+//    polyMat.surf.transmit=1.;
+//    polyMat.interior.mfp=0.5*scratch2;
+//    polyMat.interior.blur=scratch1;
+//    polyMat.surf.roughness=0.0;
 
 //    poly.edgeMat = polyMat;
 //    poly.vertexMat = polyMat;
 
-    poly.vertexMat.absorbColor = 20.*vec3(0.235,0.75,0.8);
+    poly.vertexMat.interior.absorb = 20.*vec3(0.235,0.75,0.8);
 
 
 //    Material dualMat = makeGlass(10.*magentaGlass,1.5,1.);
-//    dualMat.refractionChance=0.;
-//    dualMat.subSurface=true;
-//    dualMat.meanFreePath=0.5*scratch2;
-//    dualMat.isotropicScatter=scratch1;
-//    dualMat.roughness=0.0;
+//    dualMat.surf.transmit=1.;
+//    dualMat.interior.mfp=0.5*scratch2;
+//    dualMat.interior.blur=scratch1;
+//    dualMat.surf.roughness=0.0;
 //
 //    dual.edgeMat = dualMat;
 //    dual.vertexMat = dualMat;
 //
-//    dual.vertexMat.absorbColor = 20.*vec3(0.3,0.1,0.2);
+//    dual.vertexMat.interior.absorb = 20.*vec3(0.3,0.1,0.2);
 
 }
 

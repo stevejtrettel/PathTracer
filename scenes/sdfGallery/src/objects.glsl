@@ -15,7 +15,7 @@ void buildObjects(){
 
     obj.frame=makeFrame(vec3(0,-0.4,0));
     //alternate materials:
-    //obj.mat=makeDielectric(vec3(0.6,0.55,0.5),0.2,0.5);
+    //obj.mat=makeGloss(vec3(0.6,0.55,0.5),0.2,0.5);
 
 
     //vec3 ice=vec3(1,0.8,0.5);
@@ -24,11 +24,10 @@ void buildObjects(){
 //alternate materials:
 //    obj.mat=makeGlass(tealScatter,1.5,1.);
 
-    obj.mat.refractionChance=0.;
-    obj.mat.subSurface=true;
-    obj.mat.meanFreePath=0.5*sssDensity;
-    obj.mat.isotropicScatter=sssScatter;
-    obj.mat.roughness= roughAmt;
+    obj.mat.surf.transmit=1.;
+    obj.mat.interior.mfp=0.5*sssDensity;
+    obj.mat.interior.blur=sssScatter;
+    obj.mat.surf.roughness= roughAmt;
 
 }
 

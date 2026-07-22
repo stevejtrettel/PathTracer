@@ -16,7 +16,7 @@ void buildObjects(){
     gasket.r2 = morph;
 
     //standard opaque material; color comes from the orbit-trap followup below
-    gasket.mat = makeDielectric(vec3(0.7), 0.15, 0.1);
+    gasket.mat = makeGloss(vec3(0.7), 0.15, 0.1);
 
 }
 

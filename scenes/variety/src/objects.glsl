@@ -36,15 +36,14 @@ void buildObjects(){
     var.thickness = vec2(0.0075,0.0);
 
     var.mat=makeGlass(30.*tealScatter,1.5,1.);
-    var.mat.refractionChance=0.;
-    var.mat.subSurface=true;
-    var.mat.meanFreePath=0.1;
+    var.mat.surf.transmit=1.;
+    var.mat.interior.mfp=0.1;
     //alternate: drive from the scratch sliders
     //0.2*scratch2;
-    var.mat.isotropicScatter=0.7;
+    var.mat.interior.blur=0.7;
     //alternate: drive from the scratch sliders
     //scratch1;
-    var.mat.roughness=0.7;
+    var.mat.surf.roughness=0.7;
 
 }
 

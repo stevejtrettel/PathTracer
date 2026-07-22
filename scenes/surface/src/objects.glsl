@@ -18,7 +18,7 @@ float surface_bBox(vec3 pos){
 #include ../../../glsl/objects/varieties/surface.glsl
 
 //set the names of objects contained in the scene
-Surface surf;
+ThinSurface surf;
 
 void buildObjects(){
 
@@ -26,7 +26,7 @@ void buildObjects(){
 
     surf.frame = makeFrame(vec3(-2,1.5,-2));
     surf.scale=10.;
-    surf.mat=makeDielectric(tealScatter,0.5,0.2);
+    surf.mat=makeGloss(tealScatter,0.5,0.2);
 
 }
 

@@ -69,8 +69,8 @@ void setData( inout Path path, SurfSphere surf ){
         bool onEdge = (abs(rad-surf.radius)<0.005);
 
         if(onEdge){
-            //average of the two side colors
-            mat.diffuseColor=0.5*(mat.diffuseColor + mat.diffuseColorBack);
+            //average of the front color and the white back
+            mat.surf.diffuse=0.5*(mat.surf.diffuse + vec3(1.));
             //set the material
             setObjectInAir(path.dat, false, normal, mat);
         }
@@ -82,10 +82,10 @@ void setData( inout Path path, SurfSphere surf ){
             //val positive is one side, val negative is the other;
 
             if(val<0.){
-                mat.diffuseColor=surf.mat.diffuseColorBack;
+                mat=makeMatte(vec3(1.));   //the BACK side: white (the old default look)
             }
             else{
-                mat.diffuseColor=surf.mat.diffuseColor;
+                mat=surf.mat;
             }
 
             bool side = inside(path.tv, surf);

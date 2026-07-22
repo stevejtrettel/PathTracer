@@ -33,7 +33,7 @@ void initializeData(inout LocalData dat){
     dat.isPhysical=true;
     dat.renderMaterial=true;
     dat.side=1.;
-    initSurface(dat.surf);
+    dat.surf=defaultSurface();
     dat.IOR=1.;
     dat.reflectAbsorb=vec3(0.);
     dat.reflectEmit=vec3(0.);

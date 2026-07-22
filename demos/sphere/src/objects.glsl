@@ -16,11 +16,10 @@ void buildObjects(){
     sphere.mat=makeGlass(magentaGlass,ior,1.);
 
 //alternate materials:
-//    sphere.mat.refractionChance=0.;
-//    sphere.mat.subSurface=true;
-//    sphere.mat.meanFreePath=0.5*scratch2;
-//    sphere.mat.isotropicScatter=scratch1;
-//    sphere.mat.roughness=0.0;
+//    sphere.mat.surf.transmit=1.;
+//    sphere.mat.interior.mfp=0.5*scratch2;
+//    sphere.mat.interior.blur=scratch1;
+//    sphere.mat.surf.roughness=0.0;
 
 }
 

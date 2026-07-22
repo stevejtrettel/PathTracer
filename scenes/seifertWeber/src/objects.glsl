@@ -27,11 +27,10 @@ void buildObjects(){
     //alternate materials:
     //dod.mat = makeMetal(color,specularity,roughness);
     //    dod.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,sssDensity);
-    //    dod.mat.refractionChance=0.;
-    //    dod.mat.subSurface=true;
-    //    dod.mat.meanFreePath=0.5*sssDensity;
-    //    dod.mat.isotropicScatter=sssScatter;
-    //    dod.mat.roughness=0.04;
+    //    dod.mat.surf.transmit=1.;
+    //    dod.mat.interior.mfp=0.5*sssDensity;
+    //    dod.mat.interior.blur=sssScatter;
+    //    dod.mat.surf.roughness=0.04;
 
 
     //built but not currently rendered (kept as an alternate)
@@ -39,19 +38,17 @@ void buildObjects(){
     dodE.frame = makeFrame(vec3(-2,-0.5,2));
     //dod.mat=makeGlass(3.*(brownAbsorb+0.25*redAbsorb),1.2,1.);
     dodE.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,1.);
-    dodE.mat.refractionChance=0.;
-    dodE.mat.subSurface=true;
-    dodE.mat.meanFreePath=0.5*sssDensity;
-    dodE.mat.isotropicScatter=sssScatter;
-    dodE.mat.roughness=0.04;
+    dodE.mat.surf.transmit=1.;
+    dodE.mat.interior.mfp=0.5*sssDensity;
+    dodE.mat.interior.blur=sssScatter;
+    dodE.mat.surf.roughness=0.04;
 
     //alternate materials:
     //dod.mat=makeGlass(20.*(0.5*brownAbsorb+0.5*redAbsorb),1.5,1.);
-    //dod.mat.refractionChance=0.;
-    //dod.mat.subSurface=true;
-    //dod.mat.meanFreePath=0.5*sssDensity;
-    //dod.mat.isotropicScatter=sssScatter;
-    //dod.mat.roughness=0.04;
+    //dod.mat.surf.transmit=1.;
+    //dod.mat.interior.mfp=0.5*sssDensity;
+    //dod.mat.interior.blur=sssScatter;
+    //dod.mat.surf.roughness=0.04;
     //
 
     Material dodMat = makeGlass(30.*(brownAbsorb+0.25*redAbsorb),2.5,1.);
@@ -59,11 +56,10 @@ void buildObjects(){
     poin = createPoincareMarble(dodMat, glassMat);
 
     //alternate materials:
-    //    poin.dod.mat.refractionChance=0.;
-    //    poin.dod.mat.subSurface=true;
-    //    poin.dod.mat.meanFreePath=0.5*sssDensity;
-    //    poin.dod.mat.isotropicScatter=sssScatter;
-    //    poin.dod.mat.roughness=0.04;
+    //    poin.dod.mat.surf.transmit=1.;
+    //    poin.dod.mat.interior.mfp=0.5*sssDensity;
+    //    poin.dod.mat.interior.blur=sssScatter;
+    //    poin.dod.mat.surf.roughness=0.04;
 
 
     //built but not currently rendered (kept as an alternate)
@@ -72,11 +68,10 @@ void buildObjects(){
     //makeMetal(color,specularity,roughness);
     //cube.mat = makeGlass(0.5*vec3(0.3,0.05,0.05),1.5,sssDensity);
     cube.mat=makeGlass(20.*(vec3(1)-vec3(0.6,0.1,0.5)),1.5,1.);
-    cube.mat.refractionChance=0.;
-    cube.mat.subSurface=true;
-    cube.mat.meanFreePath=0.5*sssDensity;
-    cube.mat.isotropicScatter=sssScatter;
-    cube.mat.roughness=0.04;
+    cube.mat.surf.transmit=1.;
+    cube.mat.interior.mfp=0.5*sssDensity;
+    cube.mat.interior.blur=sssScatter;
+    cube.mat.surf.roughness=0.04;
 
 
 }

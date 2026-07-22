@@ -23,8 +23,8 @@ void buildObjects(){
     roughness=0.01;
     //alternate materials:
     // gasket.mat= makeMetal(color,specularity,roughness);
-    // makeDielectric(color,specularity,roughness);
-    //  gasket.mat.surfaceEmit=0.1*vec3(0.02,0.02,0.04);
+    // makeGloss(color,specularity,roughness);
+    //  gasket.mat.surf.emit=0.1*vec3(0.02,0.02,0.04);
     gasket.mat=makeGlass(vec3(1)-0.9*vec3(0,0.65,0.35),1.2,0.8);
 
 

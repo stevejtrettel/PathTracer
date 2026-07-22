@@ -11,7 +11,7 @@ Plane floor;
 void buildEnvironment(){
 
     floor.frame = makeFrameNormal(vec3(0,-1,0), vec3(0,1,0));
-    floor.mat = makeDielectric(vec3(0.4), 0.1, 0.2);
+    floor.mat = makeGloss(vec3(0.4), 0.1, 0.2);
 
 }
 
