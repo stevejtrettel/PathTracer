@@ -24,6 +24,10 @@ struct Surface{
     float transmit;       //fraction of non-reflected light that crosses
     float coat;           //white lacquer lobe: 0 = none, 1 = full clearcoat (n=1.5)
     float coatRoughness;  //blurs only the coat (satin finishes)
+    float film;           //thin-film thickness in nm (0 = off): replaces the base
+                          //Fresnel with two-beam interference — soap bubbles, oil
+                          //slicks; true rainbows need spectral on
+    float filmIOR;        //index of the film itself (soap/water ~1.33, oil ~1.45)
 };
 
 struct Medium{
@@ -51,6 +55,8 @@ void initSurface(inout Surface s){
     s.transmit=0.;
     s.coat=0.;
     s.coatRoughness=0.;
+    s.film=0.;
+    s.filmIOR=1.33;
 }
 
 void initMedium(inout Medium m){
@@ -205,4 +211,13 @@ Material withCoat(Material mat, float coat, float coatRoughness){
 
 Material withCoat(Material mat){
     return withCoat(mat, 1., 0.);
+}
+
+//stochastic blend: the hit is material b with probability t, else a. The
+//probability IS the coverage fraction, so the mix is energy-correct with no
+//weights. Composes with material fields — make t a function of position for
+//dust in the crevices, patina, worn paint.
+Material mixMaterial(Material a, Material b, float t){
+    if(randomFloat() < t){ return b; }
+    return a;
 }

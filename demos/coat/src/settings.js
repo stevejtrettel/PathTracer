@@ -24,7 +24,7 @@ export {location};
 
 export const params = [
     { name: 'coatRough',  label: 'Coat Rough',  min: 0, max: 1,   step: 0.01, value: 0.0 },
-    { name: 'lightPower', label: 'Light Power', min: 0, max: 400, step: 1,    value: 60 },
+    { name: 'lightPower', label: 'Light Power', min: 0, max: 400, step: 1,    value: 150 },
     { name: 'roomLight',  label: 'Room Light',  min: 0, max: 2,   step: 0.01, value: 0.25 },
 ];
 

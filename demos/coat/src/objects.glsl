@@ -3,8 +3,11 @@
 // two rows of spheres sweeping the coat 0 -> 1 left to right:
 //   FRONT row: matte cherry — the WET-STONE test: bare matte on the left, full
 //     clearcoat (white Fresnel: ~4% head-on, mirror at grazing) on the right.
-//   BACK row: gold, roughness 0.35 — the LACQUERED-METAL test: brushed gold
-//     picking up a polished white coat over its soft colored highlights.
+//   BACK row: gold, roughness 0.6 — the LACQUERED-METAL test. NOTE: on a metal
+//     the coat's only strong tell is SHARPNESS (crisp white highlights over the
+//     blurry brushed base): the base is already fully specular, and at grazing
+//     both rows converge (conductor whitening and the coat's Fresnel each go to
+//     white). Hence the deliberately rough base and the bright key light.
 // coatRough blurs only the coat (satin finishes); the base roughness is fixed.
 //-------------------------------------------------
 
@@ -27,7 +30,7 @@ void buildObjects(){
 
         goldRow[i].frame  = makeFrame(vec3(x, 1.05, -2.5));
         goldRow[i].radius = 1.05;
-        goldRow[i].mat    = withCoat(makeGold(0.35), coatAmt, coatRough);
+        goldRow[i].mat    = withCoat(makeGold(0.6), coatAmt, coatRough);
     }
 
 }

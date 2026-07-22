@@ -17,11 +17,30 @@
 //-------------------------------------------------
 
 
-//a facet tilted away from the incident ray can't physically be struck: mirror
+//an orthonormal tangent pair for n (branch on the dominant axis for stability)
+void tangentFrame(vec3 n, out vec3 t1, out vec3 t2){
+    vec3 a = abs(n.x) > 0.9 ? vec3(0,1,0) : vec3(1,0,0);
+    t1 = normalize(cross(n, a));
+    t2 = cross(n, t1);
+}
+
+//the microfacet: GAUSSIAN-distributed slopes (the naive Beckmann). Peaked at
+//the smooth normal with soft tails, so a light's reflection reads as a bright
+//core with falloff — a uniform-direction jitter instead gives a plateau of
+//tilts, which renders as a flat DISK of highlight with a hard edge. The 1/2
+//compensates reflection's angle-doubling, keeping the roughness knob near the
+//old model's visual scale.
+//A facet tilted away from the incident ray can't physically be struck: mirror
 //it about the normal axis (same tilt, opposite azimuth), falling back to the
 //smooth normal if it still faces away.
 Vector sampleFacet(Vector incident, Vector normal, float rough2){
-    Vector m = vNormalize(mix(normal, randomVector(incident.pos), rough2));
+    if(rough2 < 1e-5){ return normal; }
+
+    vec3 t1; vec3 t2;
+    tangentFrame(normal.dir, t1, t2);
+    vec2 slope = 0.5*rough2*randomGaussian2D();
+    Vector m = Vector(normal.pos, normalize(normal.dir + slope.x*t1 + slope.y*t2));
+
     if(vDot(incident, m) >= 0.){
         m = vNormalize(sub(multiplyScalar(2.*vDot(m, normal), normal), m));
         if(vDot(incident, m) >= 0.){ m = normal; }
@@ -34,6 +53,21 @@ Vector sampleFacet(Vector incident, Vector normal, float rough2){
 Vector aboveHorizon(Vector v, Vector normal){
     if(vDot(v, normal) < 0.){ return vReflect(v, normal); }
     return v;
+}
+
+//reflectance of a thin film (index nf, thickness d in nm): two-beam Airy
+//interference between the front- and back-boundary reflections. Under hero-
+//wavelength spectral this ray's waveLength picks out one λ, and accumulation
+//integrates the rainbow; with spectral off (λ pinned mid-band) the bands are
+//angle-only. d = 0 gives R = 0 — a vanishing film reflects nothing.
+float thinFilmReflect(float cosI, float nf, float d){
+    float sin2 = (1. - cosI*cosI)/(nf*nf);          //Snell: angle inside the film
+    float cosF = sqrt(max(1. - sin2, 0.));
+    float r0 = (nf - 1.)/(nf + 1.);  r0 *= r0;      //one boundary's reflectance
+    float R  = r0 + (1. - r0)*pow(1. - cosI, 5.);
+    float lambda = mix(700., 380., waveLength);     //this ray's wavelength, nm
+    float phi = 4.*PI*nf*d*cosF/lambda;             //optical path difference
+    return clamp(2.*R*(1. - cos(phi)) / (1. + R*R - 2.*R*cos(phi)), 0., 1.);
 }
 
 
@@ -71,6 +105,13 @@ void scatter( inout Path path ){
     if(surf.gloss!=0. || path.dat.IOR!=1.){
         F=FresnelReflectAmount(path.dat.IOR, path.tv, facet, surf.gloss, 1.);
     }
+    //a thin film REPLACES the base Fresnel: interference decides the specular
+    //share. On a thin surface (IOR ratio 1) it is the only reflectance; over
+    //an opaque base it iridizes the highlights (oil slick on asphalt).
+    if(surf.film>0.){
+        float cosI=clamp(-vDot(path.tv, facet), 0., 1.);
+        F=thinFilmReflect(cosI, surf.filmIOR, surf.film);
+    }
     float probSpecular=(1.-probCoat)*F;
     float probTransmit=(1.-probCoat)*(1.-F)*surf.transmit;
     //diffuse takes the remainder
@@ -91,8 +132,10 @@ void scatter( inout Path path ){
 
         path.dat.surf.specular=vec3(1.);
 
-        Vector coatFacet=sampleFacet(path.tv, normal, surf.coatRoughness*surf.coatRoughness);
+        float coatRough2=surf.coatRoughness*surf.coatRoughness;
+        Vector coatFacet=sampleFacet(path.tv, normal, coatRough2);
         newDir=aboveHorizon(vReflect(path.tv, coatFacet), normal);
+        newDir=vNormalize(mix(newDir, diffuseDir, coatRough2*coatRough2));
 
     }
 
@@ -122,6 +165,11 @@ void scatter( inout Path path ){
             newDir=vReflect(newDir, sampleFacet(newDir, normal, rough2));
         }
         newDir=aboveHorizon(newDir, normal);
+        //CONVERGE TO DIFFUSE: as roughness -> 1 the facet picture hands the
+        //direction to the cosine hemisphere — a maximally rough surface is
+        //matte. rough^4 leaves the peaked highlight untouched at low/mid
+        //roughness.
+        newDir=vNormalize(mix(newDir, diffuseDir, rough2*rough2));
 
     }
 
@@ -140,6 +188,8 @@ void scatter( inout Path path ){
         //an extreme facet tilt can refract back above the geometric horizon:
         //mirror it below
         if(vDot(newDir, normal) > 0.){ newDir=vReflect(newDir, normal); }
+        //converge to Lambert TRANSMISSION at roughness 1 (translucent paper)
+        newDir=vNormalize(mix(newDir, negate(diffuseDir), rough2*rough2));
 
     }
 

@@ -117,22 +117,30 @@ void mediumWalk(inout Path path){
         //ray, dat.IOR = n_inside/n_outside (TIR-capable)
         setData_Scene(path);
 
-        float F = FresnelReflectAmount(path.dat.IOR, path.tv, path.dat.normal, 0., 1.);
+        //the boundary has the surface's FINISH: strike a facet of it, shared
+        //by the Fresnel test and both outcomes. This is what separates matte
+        //subsurface (wax, clay — rough exit) from polished (jade, porcelain,
+        //marble — mirror-smooth exit) with the same interior.
+        float exitRough2 = path.dat.surf.roughness*path.dat.surf.roughness;
+        Vector facet = sampleFacet(path.tv, path.dat.normal, exitRough2);
+
+        float F = FresnelReflectAmount(path.dat.IOR, path.tv, facet, 0., 1.);
         if(randomFloat() < F){
             //trapped on the very last try: terminate (rare) rather than force
             //an exit through a possibly-TIR interface
             if(walkTry == 7){ path.keepGoing = false; return; }
             //reflect back inside and keep walking; the exit data's reflect
-            //side IS the interior
-            path.tv = vReflect(path.tv, path.dat.normal);
+            //side IS the interior (aboveHorizon keeps the bounce inward)
+            path.tv = aboveHorizon(vReflect(path.tv, facet), path.dat.normal);
             nudge(path.tv, path.dat.normal, 5.*EPSILON);
             path.absorb = path.dat.reflectAbsorb;
             path.emit   = path.dat.reflectEmit;
         }
         else{
-            //leave: refract at the exit (the physical bend), enter the outside
-            //medium, and push off the surface
-            path.tv = vRefract(path.tv, path.dat.normal, path.dat.IOR);
+            //leave: refract at the exit (the physical bend, blurred by the
+            //facet), enter the outside medium, and push off the surface
+            path.tv = vRefract(path.tv, facet, path.dat.IOR);
+            if(vDot(path.tv, path.dat.normal) > 0.){ path.tv = vReflect(path.tv, path.dat.normal); }
             path.absorb = path.dat.refractAbsorb;
             path.emit   = path.dat.refractEmit;
             nudge(path.tv, path.dat.normal, -5.*EPSILON);
