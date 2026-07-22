@@ -19,6 +19,16 @@ struct Material{
     float IOR;
     float specularChance;
     float refractionChance;
+    //the COAT tier (docs/material-system.md §3): an optional WHITE Fresnel lobe
+    //above every other lobe — a zero-thickness lacquer at fixed n=1.5. coat is the
+    //strength (0 = none, 1 = full physical clearcoat: ~4% head-on, mirror at
+    //grazing); coatRoughness blurs only the coat's reflection (satin finishes).
+    float coat;
+    float coatRoughness;
+    //tint picked up when a ray CROSSES the surface (the refract lobe). White = the
+    //physical default for volumes (Beer's law owns color in the interior); set it
+    //on THIN surfaces (lampshades, leaves) where there is no interior to absorb.
+    vec3 transmitTint;
 };
 
 
@@ -39,6 +49,9 @@ void initMat(inout Material mat){
     mat.meanFreePath=1.;
     mat.specularChance=0.;
     mat.refractionChance=0.;
+    mat.coat=0.;
+    mat.coatRoughness=0.;
+    mat.transmitTint=vec3(1.);
 }
 
 

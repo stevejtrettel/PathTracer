@@ -4,36 +4,46 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 // Thin vite wrapper — no more rewriting index.html. Each scene is its own Vite
-// page (scenes/<name>/index.html).
+// page (scenes/<name>/index.html or demos/<name>/index.html — demos/ holds
+// reference/test scenes, not art; see docs/material-system.md §9).
 //   npm run dev            serve the whole array (/ is the gallery)
-//   npm run dev <name>     serve the array and open /scenes/<name>/
+//   npm run dev <name>     serve the array and open that scene's page
 //   npm run build <name>   build just that scene into dist/<name>/  (SCENE env -> vite.config)
 //   npm run preview <name> preview dist/<name>/
 const [, , mode, scene] = process.argv;
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+const SCENE_ROOTS = ['scenes', 'demos'];
+
+// which top-level folder holds this scene (scene names are unique across roots)
+const sceneRoot = (name) =>
+  SCENE_ROOTS.find((r) => existsSync(path.join(root, r, name, 'main.js')));
+
 const scenesList = () =>
-  readdirSync(path.join(root, 'scenes'), { withFileTypes: true })
-    .filter((d) => d.isDirectory() && existsSync(path.join(root, 'scenes', d.name, 'main.js')))
-    .map((d) => `  ${d.name}`)
-    .join('\n');
+  SCENE_ROOTS.flatMap((r) =>
+    existsSync(path.join(root, r))
+      ? readdirSync(path.join(root, r), { withFileTypes: true })
+          .filter((d) => d.isDirectory() && existsSync(path.join(root, r, d.name, 'main.js')))
+          .map((d) => `  ${d.name}${r === 'demos' ? '  (demo)' : ''}`)
+      : []
+  ).join('\n');
 
 if ((mode === 'build' || mode === 'preview') && !scene) {
   console.error(`Usage: npm run ${mode} <scene>\n\nScenes:\n${scenesList()}`);
   process.exit(1);
 }
-if (scene && !existsSync(path.join(root, 'scenes', scene, 'main.js'))) {
-  console.error(`Scene not found: scenes/${scene}\n\nScenes:\n${scenesList()}`);
+if (scene && !sceneRoot(scene)) {
+  console.error(`Scene not found: ${scene} (looked in ${SCENE_ROOTS.join('/, ')}/)\n\nScenes:\n${scenesList()}`);
   process.exit(1);
 }
 
 const env = { ...process.env };
 let viteArgs;
-if (mode === 'build') { viteArgs = ['build']; env.SCENE = scene; }
-else if (mode === 'preview') { viteArgs = ['preview']; env.SCENE = scene; }
+if (mode === 'build') { viteArgs = ['build']; env.SCENE = scene; env.SCENE_ROOT = sceneRoot(scene); }
+else if (mode === 'preview') { viteArgs = ['preview']; env.SCENE = scene; env.SCENE_ROOT = sceneRoot(scene); }
 else { // dev: serve the whole array; open the scene if one was named
   viteArgs = ['--host', '127.0.0.1'];
-  if (scene) viteArgs.push('--open', `/scenes/${scene}/`);
+  if (scene) viteArgs.push('--open', `/${sceneRoot(scene)}/${scene}/`);
 }
 
 const child = spawn('npx', ['vite', ...viteArgs], { stdio: 'inherit', cwd: root, env });

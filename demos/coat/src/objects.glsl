@@ -1,0 +1,73 @@
+//-------------------------------------------------
+// OBJECTS — COAT SWEEP (docs/material-system.md §3, Tier 1)
+// two rows of spheres sweeping the coat 0 -> 1 left to right:
+//   FRONT row: matte cherry — the WET-STONE test: bare matte on the left, full
+//     clearcoat (white Fresnel: ~4% head-on, mirror at grazing) on the right.
+//   BACK row: gold, roughness 0.35 — the LACQUERED-METAL test: brushed gold
+//     picking up a polished white coat over its soft colored highlights.
+// coatRough blurs only the coat (satin finishes); the base roughness is fixed.
+// Works in both roughness models (this page uses the engine default).
+//-------------------------------------------------
+
+const int NUM = 7;
+Sphere matteRow[NUM];
+Sphere goldRow[NUM];
+
+
+void buildObjects(){
+
+    vec3 cherry = vec3(0.55, 0.08, 0.10);
+
+    for(int i = 0; i < NUM; i++){
+        float x = -7.2 + 2.4*float(i);
+        float coatAmt = float(i)/float(NUM - 1);   //0 -> 1
+
+        matteRow[i].frame  = makeFrame(vec3(x, 1.05, 2.));
+        matteRow[i].radius = 1.05;
+        matteRow[i].mat    = makeDielectric(cherry, 0.0, 0.0);
+        matteRow[i].mat.coat = coatAmt;
+        matteRow[i].mat.coatRoughness = coatRough;
+
+        goldRow[i].frame  = makeFrame(vec3(x, 1.05, -2.5));
+        goldRow[i].radius = 1.05;
+        goldRow[i].mat    = makeGold(0.35);
+        goldRow[i].mat.coat = coatAmt;
+        goldRow[i].mat.coatRoughness = coatRough;
+    }
+
+}
+
+
+//-------------------------------------------------
+// Finding the Objects  (spheres are analytic: traced, not marched)
+//-------------------------------------------------
+
+float trace_Objects( Vector tv ){
+    float dist=maxDist;
+    for(int i = 0; i < NUM; i++){
+        dist = min(dist, trace(tv, matteRow[i]));
+        dist = min(dist, trace(tv, goldRow[i]));
+    }
+    return dist;
+}
+
+float sdf_Objects( Vector tv ){
+    return maxDist;
+}
+
+
+bool inside_Object( Vector tv ){
+    return false;
+}
+
+
+//-------------------------------------------------
+// Setting the Objects Data
+//-------------------------------------------------
+
+void setData_Objects(inout Path path){
+    for(int i = 0; i < NUM; i++){
+        setData(path, matteRow[i]);
+        setData(path, goldRow[i]);
+    }
+}

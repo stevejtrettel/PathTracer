@@ -41,6 +41,12 @@ void updateFromSurface(inout Path path){
         if (path.type == 2){
             path.light *=  path.dat.surfSpecular;
         }
+        //crossing rays pick up the transmit tint — white (a strict no-op) for
+        //volumes, where Beer's law owns the color; set on THIN surfaces
+        //(lampshades, leaves) that have no interior to absorb in.
+        if (path.type == 3){
+            path.light *=  path.dat.transmitTint;
+        }
 
     }
 

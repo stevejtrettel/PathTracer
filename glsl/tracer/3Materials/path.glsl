@@ -22,6 +22,10 @@ struct LocalData{
     float probDiffuse;
     float probSpecular;
     float probRefract;
+    float probCoat;      //computed per event in updateProbabilities (angle-dependent)
+    float coat;          //coat strength from the material (0 = none)
+    float coatRoughness;
+    vec3 transmitTint;   //tint applied when a ray crosses the surface (refract lobe)
     float IOR;
     vec3 refractAbsorb;
     vec3 reflectAbsorb;
@@ -51,6 +55,10 @@ void initializeData(inout LocalData dat){
     dat.probDiffuse=1.;
     dat.probRefract=0.;
     dat.probSpecular=0.;
+    dat.probCoat=0.;
+    dat.coat=0.;
+    dat.coatRoughness=0.;
+    dat.transmitTint=vec3(1.);
 }
 
 

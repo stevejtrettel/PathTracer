@@ -313,19 +313,28 @@ class UI{
         contents += `\n\n\n`;
         contents += pathtracer.printLocation();
         contents += `\n\n`;
+        let exportKeys = ['uiParams: uiParams', 'location: location'];
         if(sceneParams.length){
             contents += serializeKnobs(sceneParams, this.values);
             contents += `\n\n`;
-            contents += `export default {uiParams: uiParams, location:location, params:params};`;
-        } else {
-            contents += `export default {uiParams: uiParams, location:location};`;
+            exportKeys.push('params: params');
         }
+        //preserve the non-GUI settings fields (sky, aspect, defines) — the
+        //regenerated file used to silently drop them (skyDemo lost its sky on
+        //Save; a demo scene would lose its engine #defines).
+        for(let key of ['sky', 'aspect', 'defines']){
+            if(pathtracer.settings[key] !== undefined){
+                contents += `let ${key} = ${JSON.stringify(pathtracer.settings[key])};\n`;
+                exportKeys.push(`${key}: ${key}`);
+            }
+        }
+        contents += `\nexport default {${exportKeys.join(', ')}};`;
         return contents;
     }
 
-    //the current scene folder, from the page URL (each scene is /scenes/<name>/)
+    //the current scene folder, from the page URL (/scenes/<name>/ or /demos/<name>/)
     sceneName(){
-        let m = window.location.pathname.match(/\/scenes\/([^/]+)\//);
+        let m = window.location.pathname.match(/\/(?:scenes|demos)\/([^/]+)\//);
         return m ? m[1] : null;
     }
 

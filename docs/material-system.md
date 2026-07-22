@@ -326,15 +326,47 @@ only because the specular branch always wins); the swapped
 normal/incident argument names at the `FresnelReflectAmount` call site
 (harmless, `vDot` symmetric, but a trap).
 
-## 8. Open decisions
+## 8. Decisions — ALL APPROVED (July 22 2026)
 
-- **Microfacet roughness (§4)** — the biggest look change; wants an A/B
-  demo scene before committing the corpus. (Recommend: build the demo,
-  judge by eye.)
-- **Coat tier (§3)** — recommend yes; fixed n=1.5, two knobs.
-- **Exit Fresnel/TIR on the walk (§5)** — recommend yes, bundled with the
-  owed SSS re-tune.
-- **IOR onto Medium + interface-as-(Surface, MedA, MedB)** — recommend
-  yes; this is the restructuring that makes multi-material scenes
-  compositional and retires the dominant-material juggling.
-- **Ambient medium hook** — recommend yes, opt-in, zero-cost when absent.
+Microfacet roughness (§4, judged via A/B demo), multi-bounce microfacets
+(§6b), coat tier (§3), exit Fresnel/TIR on the walk (§5), IOR onto Medium +
+interface-as-(Surface, MedA, MedB), ambient medium hook: **yes to all.**
+Fluorescence: skipped. Polarization: shelf.
+
+## 9. Implementation plan (approved sequence)
+
+**Principle: new behavior is OPT-IN until migration.** Every
+behavior-changing mechanism lands behind a gate (scene-injected `#define`
+or additive field whose default is a no-op), so all existing art scenes
+stay byte-identical while the new model is evaluated. Defaults flip only
+in the migration phase, after the looks are approved by eye.
+
+**Phase 1 — mechanism + reference demos (now):**
+1. A new top-level **`demos/`** folder: scenes that exist as *references*
+   — material configuration tests, parameter charts, A/B comparisons —
+   not art. (Later also camera/lens tests.) Same page machinery as
+   `scenes/`, separate gallery section.
+2. Engine, staged, each verified against the untouched corpus:
+   - **Coat tier**: `coat`/`coatRoughness` Material fields + the Tier-1
+     lobe; additive, `coat = 0` is a no-op. `transmitTint` likewise.
+   - **Microfacet + multi-bounce roughness**: gated
+     (`MICROFACET_ROUGHNESS`); demos compare mix-blur vs single-bounce
+     (horizon-flip) vs multi-bounce, on glass and gold, roughness swept.
+   - **Walk exit Fresnel/TIR**: gated (`SSS_EXIT_FRESNEL`); implemented in
+     the pathTrace walk-resume loop (the normal comes free from
+     `setData_Scene` after the walk returns — no sdf-gradient needed, and
+     it works for trace-analytic objects too).
+   - **Ambient medium hook** (`SCENE_AMBIENT_MEDIUM`): scatter/emit loop
+     inside `stepForward`'s straight branch, `!inside_Object` guarded;
+     opt-in, compiled out otherwise.
+3. Demo scenes for each: roughness A/B pair, coat sweep, SSS exit A/B,
+   fog/god-rays.
+
+**Phase 2 — idiomatic shortcuts** (once looks are approved): the
+constructor family — metal/glass/subsurface/fog/matte etc. — designed
+around the winning mechanisms (§7 has the census-driven candidates).
+
+**Phase 3 — migration**: flip gated defaults, port the 56 scenes to the
+shortcuts, literal Surface/Medium struct split + IOR-onto-Medium
+restructure of `setImpactData` (behavior-frozen plumbing, done last when
+scenes are being touched anyway), SSS re-tune + baseline re-bake.

@@ -57,10 +57,20 @@ let buildTraceShader= function(sceneData, settings){
     let sceneParams = settings.params ?? [];
     let allKnobs = [...withValues(engineKnobs, uiParams), ...sceneParams];
 
+    //scene-injected compile-time switches: settings.defines = ['NAME', ...] each
+    //become a #define at the very TOP of the shader — above every tracer chunk —
+    //so gated engine code compiled BEFORE the scene chunk (e.g. scatterPath.glsl's
+    //MICROFACET_ROUGHNESS) can see them. The scene-hook pattern (#ifndef SCENE_…
+    //in 6Trace) covers hooks AFTER the scene chunk; this covers the ones before.
+    let defineList = settings.defines ?? [];
+    let defineBlock = defineList.length
+        ? `//--- scene defines ---\n` + defineList.map((d) => `#define ${d}`).join('\n') + `\n\n`
+        : '';
+
     //inject the uniform declarations at the TOP: camera knobs are used inside
     //the setup chunk (camera.glsl), so they must be declared before it.
     let knobDecls = `//--- generated uniforms (knobs) ---\n` + knobUniformDecls(allKnobs) + `\n`;
-    let tracerShader = knobDecls.concat(setupShaderChunk).concat(sceneShaderChunk).concat(traceShaderChunk);
+    let tracerShader = defineBlock.concat(knobDecls).concat(setupShaderChunk).concat(sceneShaderChunk).concat(traceShaderChunk);
 
 
     let tracerUniforms = {

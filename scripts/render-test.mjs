@@ -23,19 +23,26 @@ for (let i = 0; i < args.length; i++) {
   else scenes.push(args[i]);
 }
 
+const SCENE_ROOTS = ['scenes', 'demos'];
+const sceneRoot = (name) =>
+  SCENE_ROOTS.find((r) => existsSync(path.join(root, r, name, 'main.js')));
+
 const scenesList = () =>
-  readdirSync(path.join(root, 'scenes'), { withFileTypes: true })
-    .filter((d) => d.isDirectory() && existsSync(path.join(root, 'scenes', d.name, 'main.js')))
-    .map((d) => `  ${d.name}`)
-    .join('\n');
+  SCENE_ROOTS.flatMap((r) =>
+    existsSync(path.join(root, r))
+      ? readdirSync(path.join(root, r), { withFileTypes: true })
+          .filter((d) => d.isDirectory() && existsSync(path.join(root, r, d.name, 'main.js')))
+          .map((d) => `  ${d.name}${r === 'demos' ? '  (demo)' : ''}`)
+      : []
+  ).join('\n');
 
 if (!scenes.length) {
   console.error('usage: node scripts/render-test.mjs [--budget ms] <scene> [<scene>...]');
   process.exit(1);
 }
 for (const scene of scenes) {
-  if (!existsSync(path.join(root, 'scenes', scene, 'main.js'))) {
-    console.error(`Scene not found: scenes/${scene}\n\nusage: node scripts/render-test.mjs [--budget ms] <scene> [<scene>...]\n\nScenes:\n${scenesList()}`);
+  if (!sceneRoot(scene)) {
+    console.error(`Scene not found: ${scene} (looked in ${SCENE_ROOTS.join('/, ')}/)\n\nusage: node scripts/render-test.mjs [--budget ms] <scene> [<scene>...]\n\nScenes:\n${scenesList()}`);
     process.exit(1);
   }
 }
@@ -79,7 +86,7 @@ for (const scene of scenes) {
       anyFailed = true;
       continue;
     }
-    const url = `http://127.0.0.1:${port}/scenes/${scene}/`;
+    const url = `http://127.0.0.1:${port}/${sceneRoot(scene)}/${scene}/`;
     if (!(await waitForServer(url))) {
       console.error(`FAILED: ${scene}: dev server ${url} never came up`);
       anyFailed = true;

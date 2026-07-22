@@ -34,9 +34,12 @@ Vector vRefract(Vector incident, Vector normal, float n){
 
 
 
-float FresnelReflectAmount(float n, Vector normal, Vector incident, float f0, float f90)
+float FresnelReflectAmount(float n, Vector incident, Vector normal, float f0, float f90)
 {
     //n=ratio of indices of refraction, current/entering
+    //(parameter order matches the call sites — incident ray first, then normal.
+    //vDot is symmetric so the math never cared, but the old signature had them
+    //swapped relative to every caller, which was a trap.)
 
     // Schlick aproximation
     float r0 = (n-1.)/(n+1.);

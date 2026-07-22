@@ -10,6 +10,9 @@ void setObjectInAir(inout LocalData dat, bool inside, Vector normal, Material ma
     dat.probDiffuse=1.-mat.specularChance-mat.refractionChance;
     dat.probSpecular=mat.specularChance;
     dat.probRefract=mat.refractionChance;
+    dat.coat=mat.coat;
+    dat.coatRoughness=mat.coatRoughness;
+    dat.transmitTint=mat.transmitTint;
 
     //record the side for later resampling (applyMaterial): -1 inside, +1 outside
     //(same convention as setSurfaceInMat's side argument)
@@ -82,6 +85,9 @@ void setSurfaceInMat(inout LocalData dat, float side, Vector normal, Material su
     dat.probDiffuse=1.-surf.specularChance-surf.refractionChance;
     dat.probSpecular=surf.specularChance;
     dat.probRefract=surf.refractionChance;
+    dat.coat=surf.coat;
+    dat.coatRoughness=surf.coatRoughness;
+    dat.transmitTint=surf.transmitTint;
 
     //both sides of surface leave to same ambient material
     dat.reflectAbsorb=mat.absorbColor;
@@ -120,6 +126,9 @@ void setMaterialInterface(inout LocalData dat, Material current, Material neighb
     dat.probSpecular=dominant.specularChance;
     dat.probRefract=dominant.refractionChance;
     dat.probDiffuse=1.-dat.probRefract-dat.probSpecular;
+    dat.coat=dominant.coat;
+    dat.coatRoughness=dominant.coatRoughness;
+    dat.transmitTint=dominant.transmitTint;
 
     //set the surface properties of the dominant material
     dat.surfDiffuse=dominant.diffuseColor;

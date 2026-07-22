@@ -10,7 +10,12 @@ float bisect_Scatter(Vector tv, float dt){
     float testDist=dt;
     Vector temp;
 
-    for(int i=0;i<10;i++){
+    //16 halvings, not 10: the precision is dt/2^N, and dt is a full exponential
+    //step — at mean free paths near 1 a 10-halving exit could land farther from
+    //the surface than AT_THRESH, so the follow-up setData found no surface at
+    //the exit point (stale LocalData, garbage bounce). 16 keeps the landing
+    //inside AT_THRESH for any step this tracer can take.
+    for(int i=0;i<16;i++){
 
         //divide the step size in half
         testDist=testDist/2.;
