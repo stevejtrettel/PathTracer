@@ -90,11 +90,14 @@ bool dbgMarch(Vector tv, out vec3 hitPos, out int steps, out float total, out bo
         float eps = EPSILON * (1. + MARCH_CONE * t);
 
         if(!sorFail && radius < eps){ hitPos = tv.pos; total = t; return true; }   // marched (SDF) hit
-        if(stepLength > 0. && t + stepLength >= stop){                            // analytic surface first
+        //analytic-first exit mirrors raymarch: only the SAFE sphere may clear the
+        //stop (the relaxed step is speculative — see the comment in raymarch.glsl)
+        if(!sorFail && t + radius >= stop){                                       // analytic surface first
             analytic = true;
             flow(tv, stop - t);
             hitPos = tv.pos; total = stop; return true;
         }
+        if(t + stepLength > stop){ stepLength = signedRadius; }                   // clamp to the safe step near the stop
         t += stepLength;
         if(t > maxDist){ break; }
         flow(tv, stepLength);
@@ -112,6 +115,11 @@ vec3 debugPass(int mode, Path path){
         Vector tv = cam;
         vec3 hitPos; int steps; float total; bool analytic;
         if(!dbgMarch(tv, hitPos, steps, total, analytic)){ return getSky(cam.dir); }
+        //analytic surfaces are not shells — show them as a dim backdrop. (Clay-shading
+        //them is wrong AND undefined: dbgNormal differentiates sdf_Scene, which is
+        //constant maxDist at an analytic hit in a scene with no bounded objects —
+        //normalize(0) = NaN painted the whole screen one flat colour.)
+        if(analytic){ return vec3(0.06); }
         return dbgClay(vec3(0.45, 0.6, 0.9), dbgNormal(hitPos, cam.dir), cam.dir);  // bluish shells
     }
 

@@ -82,9 +82,25 @@ float raymarch(Vector tv, float stopDist){
             return t + signedRadius - EPSILON;
         }
 
+        //analytic stop: exit ONLY when the SAFE (unrelaxed) sphere clears it —
+        //radius is a true lower bound, so no marched surface can precede the stop.
+        //Exiting on the RELAXED step instead is wrong: it is a speculative over-step
+        //whose skip-guard (sorFail) runs on the NEXT sample, and an early exit never
+        //takes that sample — so a marched surface sitting just in front of the
+        //analytic one (glassware on the floor) gets silently skipped at grazing
+        //angles. (Verified: cup-on-floor lost its whole bottom band this way.)
+        if(!sorFail && t + radius > stopDist){
+            return stopDist;
+        }
+        //a relaxed step about to cross the stop can't be validated by the overlap
+        //test (there is no next sample past an exit) — take the safe full step.
+        if(t + stepLength > stopDist){
+            stepLength = signedRadius;
+        }
+
         t += stepLength;
         if(t > stopDist){
-            return stopDist;
+            return stopDist;   //unreachable but for float noise; keep as the net
         }
 
         flow(tv, stepLength);   //stepLength may be negative on a fallback retreat

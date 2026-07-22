@@ -31,7 +31,13 @@ uniform float panelToRender;
 const float PI = 3.14159265;
 const float pi = PI;
 const float EPSILON=0.001;
-const float AT_THRESH=0.002;
+//hit-classification band for at()/setData. CONTRACT: must contain every point the
+//marcher can land on, or setData silently sets nothing and the bounce reuses stale
+//LocalData. raymarch accepts a hit at radius < EPSILON*(1 + MARCH_CONE*t) and backs
+//off by EPSILON, so the landing can sit at |sdf| up to ~EPSILON*(2 + MARCH_CONE*t);
+//with MARCH_CONE = 0.005 and t up to maxDist = 100 that is 0.0025 — hence 0.003.
+//(was 0.002, which distant grazing hits could exceed.)
+const float AT_THRESH=0.003;
 const int maxMarchSteps=2000;
 const float maxDist=100.;
 

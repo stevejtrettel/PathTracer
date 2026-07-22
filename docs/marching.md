@@ -35,6 +35,16 @@ a stop distance for shapes with a closed-form intersection (spheres, planes, the
 room box), then `raymarch()` marches the SDF only up to that stop. Cheap analytic
 shapes are already exact and fast; the marcher's job is the hard fields.
 
+**The stop must only be taken off the SAFE sphere.** An over-relaxed step is a
+speculative guess — its skip-guard (the sorFail overlap test) runs on the *next*
+sample. Exiting "analytic surface first" because the relaxed step crossed the stop
+skips that validation, and a marched surface sitting just in front of an analytic
+one gets silently dropped (a glass resting on the floor loses its whole bottom band
+at grazing camera angles — found July 2026 in the cocktail/bottle scenes). The
+marcher therefore exits on `t + radius > stopDist` (radius is a true lower bound,
+so nothing marched can precede the stop), and a relaxed step that would cross the
+stop is clamped back to the plain full step. `dbgMarch` mirrors the same rule.
+
 ## The marcher
 
 `raymarch()` is over-relaxed sphere tracing with adaptive cone epsilon — two

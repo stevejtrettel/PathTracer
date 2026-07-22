@@ -41,6 +41,7 @@ float sdf( Vector tv, Cocktail cocktail){
     //bounding cylinder: the whole drink lives inside the cocktail glass, so the
     //glass's own bound contains the composite. skip the (medium) sdf when far.
     float b = cocktail.glass.frame.scale * bound(toLocal(cocktail.glass.frame, tv.pos), cocktail.glass);
+    if( uDebugMode == 9 ) return b;   //bound-shells lens (mirrors OBJECT_LOCATORS_B)
     if( b > BOUND_MARGIN ) return b;
 
     float drinkSide;

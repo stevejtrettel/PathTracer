@@ -21,8 +21,10 @@ float sdBunny(vec3 p,float size) {
     //NOTE: unlike other objects, this stays inline rather than moving to bound(): it is a DOMAIN GUARD, not
     //just a bounding accelerator — the real sdf is invalid outside the ball, so it must never be evaluated
     //there (a bound() early-out would still let the sdf run inside the BOUND_MARGIN band and paint garbage).
+    //p is in RESCALED coords here, so the distance must be scaled back to world units: without the size
+    //factor the guard OVERestimates for size < 1 (tunneling) and underestimates for size > 1 (slow).
     if (length(p) > 1.) {
-        return length(p)-.8;
+        return size*(length(p)-.8);
     }
     //neural networks can be really compact... when they want to be
     vec4 f00=sin(p.y*vec4(-3.02,1.95,-3.42,-.60)+p.z*vec4(3.08,.85,-2.25,-.24)-p.x*vec4(-.29,1.16,-3.74,2.89)+vec4(-.71,4.50,-3.24,-3.50));
@@ -63,5 +65,14 @@ float sdf( vec3 p, Bunny bunny ){
     return sdBunny(p,bunny.scale);
 }
 
-//the standard interface: initObject, at, inside, sdf, normalVec, setData
-OBJECT_API(Bunny)
+//bounding sphere. The 0.85 leans on the same containment the inline guard has
+//always asserted (bunny inside radius 0.8*scale — the shadertoy's own far-field
+//bound), plus a hair of margin. This is IN ADDITION to the domain guard above,
+//which must stay (see its comment): bound() gives the far-field skip + the mode-9
+//shell; the guard keeps the neural net off garbage inputs inside the margin band.
+float bound( vec3 p, Bunny bunny ){
+    return length(p) - 0.85*bunny.scale;
+}
+
+//the standard interface: initObject, at, inside, sdf, normalVec, setData (custom bound above)
+OBJECT_API_B(Bunny)

@@ -102,6 +102,7 @@ float sdf( Vector tv, Mobius mobius){
     //coords) fits in this radius. skip the (medium) sdf when far.
     float R = 2.0*(mobius.radius + mobius.width + 2.0*mobius.thickness) + 0.5;
     float b = mobius.frame.scale * (length(local) - R);
+    if( uDebugMode == 9 ) return b;   //bound-shells lens (mirrors OBJECT_LOCATORS_B)
     if( b > BOUND_MARGIN ) return b;
 
     vec3 pos = local/2.;

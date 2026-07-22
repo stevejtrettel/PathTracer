@@ -85,6 +85,24 @@ dynamic wall (IOR-1, seamless exit) — but it still uses a smooth (unclamped) f
 `IN_MEDIUM_REGION(inside lens)`. Previously it clamped and survived on a mild kink;
 now it follows the one contract like everything else.
 
+### What a curved ray can and cannot see (two silent contracts)
+
+1. **Analytic-only surfaces are invisible inside a medium.** `odeMarch` finds
+   surfaces solely by an `sdf_Scene` sign change along the bent curve — `trace_Scene`
+   is (correctly) never consulted, since a straight-line intersection is meaningless
+   on a bent ray. Every current scene satisfies this by construction: the global
+   black holes are sky-only, and the bounded media (cube, Luneburg) end at their
+   walls, so the straight raytrace+raymarch resumes outside and sees the analytic
+   room. But it is a real constraint: **a scene that immerses trace-only geometry
+   (a RoomBox, an analytic Sphere) inside a medium region will silently lose those
+   surfaces.** Give such geometry an sdf, or keep it outside the medium.
+
+2. **The leapfrog step is curvature-adaptive, not sdf-aware.** A sign-change test
+   cannot see a thin shell that one step crosses *and* exits — the bisection only
+   refines a crossing that was detected. No current scene puts thin marched shells
+   deep inside a medium; if one ever does, the hardening is a step clamp
+   `h ≤ max(|sdf_Scene|, h_min)` so steps shrink near marched surfaces.
+
 ## The demo scenes
 
 | scene | medium | boundary | backdrop |
