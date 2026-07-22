@@ -44,6 +44,7 @@ void setData_Objects(inout Path path){}
 // The curved-light medium: MP potential U = 1 + sum M_i/r_i, optical index n = U^2.
 //-------------------------------------------------
 
+#define SCENE_INDEX_FIELD   //scene hook: replaces the engine's n==1 default (docs/material-fields.md)
 float indexField(vec3 p){
     float U = 1.;
     for(int i = 0; i < N_HOLES; i++){

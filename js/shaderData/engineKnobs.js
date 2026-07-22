@@ -20,10 +20,12 @@ const cameraKnobs = [
 // Render-quality controls -> Render folder/tab
 const renderKnobs = [
     { name: 'maxBounces', label: 'Max Bounces', type: 'int', min: 1, max: 100, step: 1, value: 50, group: 'render' },
-    // spectral dispersion strength. 0 = off: every ray runs at a fixed mid-wavelength
-    // with a white tint, so the tracer is byte-identical to the non-spectral one.
-    // >0 gives each ray a random wavelength (tinted throughput + wavelength-shifted
-    // IOR) so refraction separates colours — prism rainbows. See glsl/tracer/1Setup/spectral.glsl.
+    // spectral rendering: the master switch. ON gives each ray a random wavelength
+    // (tinted throughput, integrated by the accumulator); OFF pins the mid-wavelength
+    // with a white tint, byte-identical to the non-spectral tracer. `dispersion` is
+    // the STRENGTH of the wavelength->IOR shift (prism rainbows) and does nothing
+    // until spectral is on. See glsl/tracer/1Setup/spectral.glsl.
+    { name: 'spectral',   label: 'Spectral',   type: 'bool', value: false, group: 'render' },
     { name: 'dispersion', label: 'Dispersion', min: 0, max: 0.3, step: 0.005, value: 0, group: 'render' },
 ];
 

@@ -13,11 +13,13 @@
 // dT/dt = n·∇n (Sharma-Kumar-Ghatak). Separable ⇒ kick-drift-kick conserves the
 // invariant |T| = n over long paths (black-hole orbits) at ONE gradient eval/step.
 //
-// The scene supplies the field `float indexField(vec3 p)` (1.0 = vacuum). Static
-// metric null geodesics are n = √(g_space/g_time), so this bends light for
-// graded-index optics AND black holes (Majumdar-Papapetrou = U²). Scenes with no
-// medium keep the default indexField()==1 ⇒ inMedium() is always false ⇒ this file
-// is never entered ⇒ byte-identical to the straight tracer.
+// A medium scene supplies the field `float indexField(vec3 p)` (1.0 = vacuum),
+// announced with `#define SCENE_INDEX_FIELD` above the definition (a scene hook —
+// see docs/material-fields.md; the default below stands down). Static metric null
+// geodesics are n = √(g_space/g_time), so this bends light for graded-index optics
+// AND black holes (Majumdar-Papapetrou = U²). Scenes with no medium say nothing:
+// the default indexField()==1 ⇒ inMedium() is always false ⇒ this file is never
+// entered ⇒ byte-identical to the straight tracer.
 //
 // BOUNDED-MEDIUM CONTRACT (one unified pattern — see IN_MEDIUM_REGION below):
 // A medium confined to a shape (a lens, a block of graded glass) provides
@@ -50,6 +52,13 @@
 #define ODE_DTOL 0.05          // max fractional change of n per step (strong-field accuracy)
 #endif
 
+
+// scene hook: the engine default (no medium anywhere). This file compiles after
+// the scene chunk, so a scene's `#define SCENE_INDEX_FIELD` + its own indexField
+// replace it — same pattern as IN_MEDIUM_REGION below.
+#ifndef SCENE_INDEX_FIELD
+float indexField(vec3 p){ return 1.; }
+#endif
 
 float odeIndex(vec3 p){ return max(indexField(p), 1e-3); }   // physical n ≥ 0; fp floor
 

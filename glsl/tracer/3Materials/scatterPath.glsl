@@ -53,7 +53,6 @@ void scatter( inout Path path){
 
             //its a specular ray
             path.type=2;
-            path.prob=path.dat.probSpecular;
             path.absorb=path.dat.reflectAbsorb;
             path.emit=path.dat.reflectEmit;
             path.subSurface=false;
@@ -67,7 +66,6 @@ void scatter( inout Path path){
 
             //its a refractive ray
             path.type=3;
-            path.prob=path.dat.probRefract;
             path.absorb=path.dat.refractAbsorb;
             path.emit=path.dat.refractEmit;
             path.subSurface=false;
@@ -80,7 +78,6 @@ void scatter( inout Path path){
         else {
 
             //its a diffuse ray
-            path.prob=path.dat.probDiffuse;
 
             //if the material subsurface scatters, enter it
             if(path.dat.subSurface){
@@ -102,9 +99,13 @@ void scatter( inout Path path){
         }
 
 
-        //fix up the path probability:
-        path.prob=max(path.prob, 0.001);
-        path.light /= path.prob;
+        //NO 1/probability boost here: the lobe probabilities ARE the lobes' energy
+        //fractions (updateProbabilities sets probSpecular to the Fresnel reflectance,
+        //and the others share what remains), so the sampling weight and the lobe
+        //energy cancel exactly — the throughput picks up only the lobe's colour in
+        //updateFromSurface. Dividing by the probability double-counts the lobe energy
+        //(a 1/F ~ 20x boost per specular event: glass glows white). The old uncapped
+        //roulette happened to renormalize any throughput > 1 and masked this.
 
         //----set the new vector and push off the surface
         path.tv=newDir;
@@ -117,7 +118,6 @@ void scatter( inout Path path){
 
         //we are passing through: so "refraction"
         path.type=3;
-        path.prob=1.;//no other choices
         path.absorb=path.dat.refractAbsorb;
         path.emit=path.dat.refractEmit;
         path.subSurface=false;

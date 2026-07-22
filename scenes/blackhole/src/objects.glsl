@@ -44,6 +44,7 @@ void setData_Objects(inout Path path){}
 // The curved-light medium: n(r) = (1 + M/r)^2, everywhere.
 //-------------------------------------------------
 
+#define SCENE_INDEX_FIELD   //scene hook: replaces the engine's n==1 default (docs/material-fields.md)
 float indexField(vec3 p){
     float r = max(length(p - BH_C), 1e-4);   // floor r: r=0 is the singularity (NaN guard, not physics)
     float U = 1. + mass / r;

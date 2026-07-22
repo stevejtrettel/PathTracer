@@ -74,7 +74,6 @@ struct Path{
     vec3 light;//throughput: attenuation applied to any light found from here on
 
     int type;//type of ray chosen at the last scatter: 1=Diffuse, 2=Specular, 3=Refract
-    float prob;//probability that ray type was chosen (throughput is divided by this)
     vec3 absorb;//absorption color of the medium currently being traversed
     vec3 emit;//emission color of the medium currently being traversed
     float distance; //distance traveled on a bounce
@@ -104,7 +103,6 @@ Path initializePath(Vector tv){
     path.subSurface=false;
 
     path.type=1;
-    path.prob=1.;
 
     initializeData(path.dat);
 

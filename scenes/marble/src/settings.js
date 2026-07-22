@@ -25,8 +25,9 @@ export {location};
 //slider, and a line in the downloaded settings. Referenced by name in
 //objects.glsl / environment.glsl.
 export const params = [
-    { name: 'ior', label: 'Index of Refraction', min: 1.0, max: 2.5, step: 0.001, value: 1.5 },
-    { name: 'roomLight', label: 'Room Light', min: 0, max: 2, step: 0.01, value: 0.5 },
+    { name: 'roomLight', label: 'Room Light', min: 0, max: 2, step: 0.01, value: 1 },
+    { name: 'grainFreq', label: 'Grain Frequency', min: 0.5, max: 8, step: 0.01, value: 3 },
+    { name: 'polish', label: 'Polish', min: 0, max: 1, step: 0.01, value: 0.25 },
 ];
 
 export default {uiParams: uiParams, location:location, params:params};

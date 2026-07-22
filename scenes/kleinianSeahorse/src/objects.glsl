@@ -69,14 +69,12 @@ bool inside_Object( Vector tv ){
 
 void setData_Objects(inout Path path){
     setData(path, klein);                            // geometry + flat base material
-    if( at(path.tv, klein) ){                        // orbit-trap recolor followup
+    if( at(path.tv, klein) ){                        // orbit-trap material field (see docs/material-fields.md)
         vec3 p = toLocal(klein.frame, path.tv.pos);
         vec3 trap = orbitTrap(p, klein);
-        vec3 base = ksh_spectrum(clamp(trap.y*2.0, 0.0, 1.0));
-        path.dat.surfDiffuse = base;                 // warm muted albedo, no self-glow — lit by the scene light
+        Material m = klein.mat;
+        //warm muted albedo, no self-glow — lit by the scene light
+        m.diffuseColor = ksh_spectrum(clamp(trap.y*2.0, 0.0, 1.0));
+        applyMaterial(path, m);
     }
 }
-
-//no curved-light medium in this scene (n === 1 everywhere: straight transport).
-//A medium scene overrides this with its effective refractive index field.
-float indexField(vec3 p){ return 1.; }

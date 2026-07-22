@@ -21,13 +21,10 @@ let location = {
 export {location};
 
 
-//named knob: the fold offset that morphs the gasket (was the scratch1 coupling)
+//named GUI knobs: the fold offset that morphs the gasket (was the scratch1
+//coupling) plus the room light (converted from scratch)
 export const params = [
     { name: 'foldOffset', label: 'Fold Offset', min: 0.0, max: 1.0, step: 0.001, value: 0.877 },
-];
-
-//named GUI knobs (converted from scratch)
-export const params = [
     { name: 'roomLight', label: 'Room Light', min: 0, max: 2, step: 0.01, value: 0.5 },
 ];
 

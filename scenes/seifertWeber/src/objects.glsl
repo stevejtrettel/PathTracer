@@ -117,7 +117,3 @@ void setData_Objects(inout Path path){
     setData(path,poin);
     setData(path, dod);
 }
-
-//no curved-light medium in this scene (n === 1 everywhere: straight transport).
-//A medium scene overrides this with its effective refractive index field.
-float indexField(vec3 p){ return 1.; }

@@ -32,6 +32,7 @@ void buildObjects(){
 // (it stays real out to r = R*sqrt(2)); confinement is geometric via IN_MEDIUM_REGION
 // below, NOT a clamp to 1. A clamp would leave a slope KINK at the rim that odeForce's
 // central difference smears — see the bounded-medium contract in odeMarch.glsl.
+#define SCENE_INDEX_FIELD   //scene hook: replaces the engine's n==1 default (docs/material-fields.md)
 float indexField(vec3 p){
     float rn = length(p - LENS_C) / LENS_R;   // normalized radius, 0 at center, 1 at rim
     return sqrt(max(2. - rn*rn, 0.));

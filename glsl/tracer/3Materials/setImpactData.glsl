@@ -11,6 +11,10 @@ void setObjectInAir(inout LocalData dat, bool inside, Vector normal, Material ma
     dat.probSpecular=mat.specularChance;
     dat.probRefract=mat.refractionChance;
 
+    //record the side for later resampling (applyMaterial): -1 inside, +1 outside
+    //(same convention as setSurfaceInMat's side argument)
+    dat.side = inside ? -1. : 1.;
+
     if(inside){
         //we are inside
         dat.normal=negate(normal);
@@ -43,7 +47,32 @@ void setObjectInAir(inout LocalData dat, bool inside, Vector normal, Material ma
 
 
 
+//-------------------------------------------------
+// MATERIAL FIELDS (see docs/material-fields.md)
+// re-apply a freshly sampled Material at the current hit, reusing the
+// normal/side the standard setData already computed. This is the sanctioned way
+// for a scene to make material data vary over a surface: after setData(path,obj),
+// sample/override any fields of a Material as a function of position (and, under
+// dispersion, waveLength) and hand it here — all the interface bookkeeping
+// (two-sidedness, flipped normal, IOR ratio, volume handoff) stays in
+// setObjectInAir. Object-in-air hits only; multi-material objects resample
+// before their own setMaterialInterface call instead.
+//-------------------------------------------------
+
+void applyMaterial(inout Path path, Material mat){
+    bool isInside = (path.dat.side < 0.);
+    //dat.normal is stored back-facing (flipped when inside); recover the geometric one
+    //(if/else, not ?: — GLSL ES has no ternary on struct types)
+    Vector geomNormal = path.dat.normal;
+    if(isInside){ geomNormal = negate(path.dat.normal); }
+    setObjectInAir(path.dat, isInside, geomNormal, mat);
+}
+
+
+
 void setSurfaceInMat(inout LocalData dat, float side, Vector normal, Material surf,Material mat){
+
+    dat.side=side;
 
     //set the material
     dat.renderMaterial=surf.render;

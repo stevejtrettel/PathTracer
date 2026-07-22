@@ -49,6 +49,7 @@ float bhIndex(vec3 p){
 // jump in the index. A discontinuous index would make odeMarch's central-difference
 // ∇n explode at the wall (banding); keeping it smooth avoids that, and the ray only
 // ever curves while IN_MEDIUM_REGION says it is inside the glass.
+#define SCENE_INDEX_FIELD   //scene hook: replaces the engine's n==1 default (docs/material-fields.md)
 float indexField(vec3 p){
     return bhIndex(p);
 }

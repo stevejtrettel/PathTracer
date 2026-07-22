@@ -22,10 +22,11 @@ vec3 newFrame(vec2 fragCoord ){
     // initialize the random number seed from pixel and frame
     seed = randomSeed(fragCoord, frameNumber);
 
-    //spectral dispersion: this ray's wavelength. Random across the visible band when
-    //dispersing; a fixed mid-wavelength (no shift, neutral tint) when off — the branch
-    //also means OFF consumes no extra random, so it stays byte-identical. See spectral.glsl.
-    waveLength = (dispersion > 0.) ? randomFloat() : 0.5;
+    //spectral rendering: this ray's wavelength. Random across the visible band when
+    //the spectral toggle is on; a fixed mid-wavelength (no shift, neutral tint) when
+    //off — the branch also means OFF consumes no extra random, so it stays
+    //byte-identical. See spectral.glsl.
+    waveLength = spectral ? randomFloat() : 0.5;
 
     //set up the camera:
     Camera cam=buildCamFromUniforms();
@@ -35,10 +36,10 @@ vec3 newFrame(vec2 fragCoord ){
     Vector tv=cameraRay(fragCoord, cam);
     Path path=initializePath(tv);
 
-    //tint the throughput by the wavelength (only while dispersing; else stays vec3(1)).
+    //tint the throughput by the wavelength (only while spectral; else stays vec3(1)).
     //The tint averages to white over the spectrum, so non-refractive surfaces keep
     //their RGB and only refraction separates colours.
-    if(dispersion > 0.){ path.light = spectralWeight(waveLength); }
+    if(spectral){ path.light = spectralWeight(waveLength); }
 
     //build the scene
     buildScene();

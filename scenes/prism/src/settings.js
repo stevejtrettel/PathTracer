@@ -3,8 +3,9 @@ let uiParams = {
     focalLength: 14.92,
     exposure: 1,
     fov: 34,
-    //this scene exists to show spectral dispersion, so ship with it ON.
-    //(Dispersion is an engine knob; 0 would be the plain non-spectral tracer.)
+    //this scene exists to show spectral dispersion, so ship with it ON:
+    //spectral is the master switch, dispersion the strength of the IOR shift.
+    spectral: true,
     dispersion: 0.15,
     maxBounces: 24,
 }

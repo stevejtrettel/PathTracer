@@ -13,9 +13,12 @@
 // waveLength in [0,1] spans the visible band (0 ~ red end, 1 ~ violet end); it is
 // set once per pixel/frame in newFrame (traceShader.glsl), like `seed`.
 //
-// GATE: controlled by the `dispersion` render uniform. At dispersion == 0 the
-// caller pins waveLength = 0.5 and path.light = vec3(1), and iorAt() returns the
-// base index unchanged — so the tracer is byte-identical to the non-spectral one.
+// GATE: the `spectral` bool render uniform is the master switch. When it is off
+// the caller pins waveLength = 0.5 and path.light = vec3(1), and iorAt() returns
+// the base index unchanged — so the tracer is byte-identical to the non-spectral
+// one. `dispersion` is purely the STRENGTH of the wavelength->IOR shift; spectral
+// on + dispersion == 0 still samples wavelengths (tint noise that averages back
+// to the same image) but separates no colours.
 //-------------------------------------------------
 
 
@@ -39,6 +42,18 @@ vec3 spectralWeight(float t){
 // wavelength (0.5) is the base index, so a mid-wavelength ray OR dispersion == 0
 // returns baseIOR exactly. Apply only to MATERIAL indices in setImpactData; the
 // air side (a literal 1.0) is left undispersed.
+//
+// The shift scales with the material's REFRACTIVITY (baseIOR - 1), as physical
+// dispersion does (Cauchy's B term grows with n): dense glass separates colours
+// strongly, weak media weakly, and a material with baseIOR == 1 — no refractive
+// interface at all, the initMat default — disperses not at all, continuously
+// rather than as a special case. This also makes it impossible for n(λ) to dip
+// below 1 (for dispersion < 1, the shift is at most a fraction of n-1), which
+// matters: a constant shift once pushed plain diffuse materials' red-end index
+// BELOW 1, and the Fresnel update then found phantom total internal reflection —
+// probSpecular saturated and the diffuse colour washed out of the render.
+// The 2·(baseIOR-1) normalization makes n = 1.5 reference glass behave exactly
+// like the old constant shift, so tuned scenes (prism, at 1.52) keep their look.
 float iorAt(float baseIOR){
-    return baseIOR + dispersion * (waveLength - 0.5);
+    return baseIOR + dispersion * 2.*(baseIOR - 1.) * (waveLength - 0.5);
 }
