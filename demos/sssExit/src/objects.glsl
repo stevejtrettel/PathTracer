@@ -1,12 +1,10 @@
 //-------------------------------------------------
-// OBJECTS — SUBSURFACE EXIT-FRESNEL A/B (docs/material-system.md §5)
-// one row of subsurface spheres sweeping meanFreePath left (dense, waxy) to
-// right (dilute, glassy). This page runs the LEGACY walk (rays leave the
-// boundary with no Fresnel); demos/sssExitFresnel loads the SAME src with
-// settings.defines = ['SSS_EXIT_FRESNEL'], adding the internal Fresnel/TIR
-// bounce-back at the boundary — watch for deeper saturation and the glow
-// concentrating near edges, and for the dilute (right) end drifting toward how
-// plain glass renders.
+// OBJECTS — SUBSURFACE SWEEP (docs/material-system.md §5)
+// one row of subsurface spheres sweeping the mean free path left (dense,
+// waxy) to right (dilute, glassy). The walk has Fresnel/TIR at the boundary
+// from inside, so the dilute end limits toward plain glass and the dense end
+// glows near its edges. `absorbFor` sets the interior so the medium shows the
+// chosen tint after one mean free path of travel.
 //-------------------------------------------------
 
 const int NUM = 6;
@@ -15,21 +13,17 @@ Sphere row[NUM];
 
 void buildObjects(){
 
-    vec3 tealScatter = vec3(0.25, 0.65, 0.7);
+    vec3 wax = vec3(0.75, 0.45, 0.30);   //tint shown per unit of travel
 
     for(int i = 0; i < NUM; i++){
         float x = -6. + 2.4*float(i);
         //mfp sweep, geometric: 0.04 -> ~1.3 (waxy-dense to dilute)
-        float mfp = 0.04*pow(2., float(i));
+        float mfp = 0.04*pow(2., float(i))*sssDensity;
 
         row[i].frame  = makeFrame(vec3(x, 1.05, 0.));
         row[i].radius = 1.05;
 
-        row[i].mat = makeGlass(absorbStrength*tealScatter, 1.5, 1.);
-        row[i].mat.refractionChance = 0.;
-        row[i].mat.subSurface       = true;
-        row[i].mat.meanFreePath     = mfp*sssDensity;
-        row[i].mat.isotropicScatter = sssScatter;
+        row[i].mat = makeSubsurface(absorbStrength*absorbFor(wax, 1.), 1.5, mfp, sssScatter);
     }
 
 }

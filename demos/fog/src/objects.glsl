@@ -25,7 +25,7 @@ void buildObjects(){
         float x = -3.5 + 3.5*float(i);
         blockers[i].frame  = makeFrame(vec3(x, 2.2 + 1.4*float(i), 3.));
         blockers[i].radius = 1.2;
-        blockers[i].mat    = makeDielectric(vec3(0.25), 0.0, 0.2);
+        blockers[i].mat    = makeMatte(vec3(0.25));
     }
 
 }

@@ -1,90 +1,125 @@
+//-------------------------------------------------
+// MATERIALS  (docs/material-system.md)
+//
+// A Material is a SURFACE response plus an interior MEDIUM:
+//   Surface — everything angular, consumed at an interface (tints, roughness,
+//             the lobe knobs). The scatter event tree reads only this.
+//   Medium  — everything with units of 1/length plus the refractive index,
+//             consumed along segments between interfaces (Beer absorption,
+//             volume emission, the scattering walk).
+// Fresnel at any interface comes from the RATIO of the two adjacent media —
+// see interaction.glsl. Diffuse reflection is the shortcut for "interior too
+// dense to walk"; glass is the ballistic (mfp = maxDist) limit of the walk.
+//-------------------------------------------------
 
-//-------------------------------------------------
-//The MATERIAL Struct
-//-------------------------------------------------
+
+struct Surface{
+    vec3  diffuse;        //tint of the diffuse lobe
+    vec3  specular;       //specular tint: F0 for conductors, white for dielectrics
+    vec3  emit;           //surface emission
+    vec3  transmitTint;   //tint on crossing — white for volumes (Beer owns color);
+                          //set it on THIN surfaces (lampshades, leaves)
+    float roughness;      //microfacet jitter, shared by all base lobes
+    float gloss;          //artistic Fresnel floor (0 = fully physical)
+    float transmit;       //fraction of non-reflected light that crosses
+    float coat;           //white lacquer lobe: 0 = none, 1 = full clearcoat (n=1.5)
+    float coatRoughness;  //blurs only the coat (satin finishes)
+};
+
+struct Medium{
+    float ior;            //refractive index (dispersed via iorAt)
+    vec3  absorb;         //Beer extinction, 1/length
+    vec3  emit;           //volume emission, 1/length
+    float mfp;            //scatter mean free path (maxDist = ballistic: no walk)
+    float blur;           //phase width: 0 = forward, 1 = isotropic
+};
 
 struct Material{
-    bool render;
-    bool subSurface;
-    vec3 surfaceEmit;
-    vec3 diffuseColor;
-    vec3 specularColor;
-    vec3 diffuseColorBack;
-    vec3 specularColorBack;
-    vec3 absorbColor;
-    vec3 emitColor;
-    float roughness;
-    float isotropicScatter;
-    float meanFreePath;
-    float IOR;
-    float specularChance;
-    float refractionChance;
-    //the COAT tier (docs/material-system.md §3): an optional WHITE Fresnel lobe
-    //above every other lobe — a zero-thickness lacquer at fixed n=1.5. coat is the
-    //strength (0 = none, 1 = full physical clearcoat: ~4% head-on, mirror at
-    //grazing); coatRoughness blurs only the coat's reflection (satin finishes).
-    float coat;
-    float coatRoughness;
-    //tint picked up when a ray CROSSES the surface (the refract lobe). White = the
-    //physical default for volumes (Beer's law owns color in the interior); set it
-    //on THIN surfaces (lampshades, leaves) where there is no interior to absorb.
-    vec3 transmitTint;
+    bool    render;
+    Surface surf;
+    Medium  interior;
 };
 
 
+void initSurface(inout Surface s){
+    s.diffuse=vec3(1.);
+    s.specular=vec3(1.);
+    s.emit=vec3(0.);
+    s.transmitTint=vec3(1.);
+    s.roughness=0.;
+    s.gloss=0.;
+    s.transmit=0.;
+    s.coat=0.;
+    s.coatRoughness=0.;
+}
+
+void initMedium(inout Medium m){
+    m.ior=1.;
+    m.absorb=vec3(0.);
+    m.emit=vec3(0.);
+    m.mfp=maxDist;
+    m.blur=1.;
+}
+
+//the default material: pure white matte
 void initMat(inout Material mat){
-    //initialize to the default material: pure white diffuse, no specular/refraction
     mat.render=true;
-    mat.subSurface=false;
-    mat.surfaceEmit=vec3(0.);
-    mat.diffuseColor=vec3(1.);
-    mat.specularColor=vec3(1.);
-    mat.diffuseColorBack=vec3(1.);
-    mat.specularColorBack=vec3(1.);
-    mat.absorbColor=vec3(0.);
-    mat.emitColor=vec3(0.);   //volume emission along the ray (distinct from surfaceEmit); off by default
-    mat.isotropicScatter=1.;
-    mat.roughness=0.;
-    mat.IOR=1.;
-    mat.meanFreePath=1.;
-    mat.specularChance=0.;
-    mat.refractionChance=0.;
-    mat.coat=0.;
-    mat.coatRoughness=0.;
-    mat.transmitTint=vec3(1.);
+    initSurface(mat.surf);
+    initMedium(mat.interior);
 }
 
 
+//-------------------------------------------------
+// HELPERS
+//-------------------------------------------------
 
-//note: none of the constructors below set the back colors (diffuseColorBack /
-//specularColorBack); they stay at the initMat default of white. Set them by
-//hand after construction if a two-sided material needs them.
-
-//------Metals--------------
-
-
-//CONDUCTOR F0 MODEL: specularColor is the metal's reflectance AT NORMAL INCIDENCE
-//(its measured F0 — always <= 1), and the engine whitens the specular tint toward
-//total reflection at grazing (per-channel Schlick, see scatter()). That whitening
-//is what turns "shiny yellow" into gold. The old model's specularColor of
-//vec3(2)+0.8*color was an energy AMPLIFIER (tint > 1) — invisible under the old
-//uncapped roulette, faithfully (and wrongly) brightening once transport was fixed.
-//`specularity` stays a naive probability knob: 1 = pure conductor; < 1 leaves a
-//colored diffuse remainder (artistic "dirty metal"), energy-conserving either way.
-void setMetal(inout Material mat, vec3 color, float specularity,float roughness){
-    initMat(mat);//initialize
-    mat.diffuseColor=color;
-    mat.specularColor=color;
-    mat.roughness=roughness;
-    mat.specularChance=specularity;
-    mat.refractionChance=0.;
+//the extinction coefficient that shows `tint` after traveling `depth` through
+//the medium: absorbFor(vec3(0.2,0.7,0.8), 0.5) = "this color at half a unit".
+//Replaces hand-scaled magic constants like 30.*tealScatter.
+vec3 absorbFor(vec3 tint, float depth){
+    return -log(max(tint, vec3(0.0001)))/depth;
 }
 
 
-//measured F0 colours (linear) for the named metals below
-//note: most metals are nearly COLOURLESS — silver/aluminum are bright neutrals,
-//iron/chrome dark neutrals, differing in brightness not hue. The strongly coloured
-//conductors are gold, copper, and their alloys (brass, bronze).
+//-------------------------------------------------
+// CONSTRUCTORS — matte / gloss / metal / plastic / glass / subsurface / light
+//-------------------------------------------------
+
+//pure diffuse: what walls actually are
+Material makeMatte(vec3 color){
+    Material mat; initMat(mat);
+    mat.surf.diffuse=color;
+    return mat;
+}
+
+//ARTISTIC gloss floor (no physical index): `gloss` is the head-on reflectance,
+//ramping to 1 at grazing. Direct art control — rooms and props are tuned in
+//these terms.
+Material makeGloss(vec3 color, float gloss, float roughness){
+    Material mat; initMat(mat);
+    mat.surf.diffuse=color;
+    mat.surf.gloss=gloss;
+    mat.surf.roughness=roughness;
+    return mat;
+}
+
+//CONDUCTOR F0 MODEL: specular is the metal's reflectance at normal incidence
+//(measured F0, always <= 1); the engine whitens it toward total reflection at
+//grazing (per-channel Schlick in scatter()) — that whitening is what turns
+//"shiny yellow" into gold. specularity < 1 leaves a colored diffuse remainder
+//(artistic "dirty metal"), energy-conserving either way.
+Material makeMetal(vec3 color, float specularity, float roughness){
+    Material mat; initMat(mat);
+    mat.surf.diffuse=color;
+    mat.surf.specular=color;
+    mat.surf.gloss=specularity;
+    mat.surf.roughness=roughness;
+    return mat;
+}
+
+//measured F0 colours (linear). Most metals are nearly COLOURLESS (silver and
+//aluminum bright neutrals, iron and chrome dark ones); the strongly coloured
+//conductors are gold, copper, and their alloys.
 const vec3 GOLD_F0     = vec3(1.000, 0.766, 0.336);
 const vec3 COPPER_F0   = vec3(0.955, 0.637, 0.538);
 const vec3 BRASS_F0    = vec3(0.910, 0.778, 0.423);
@@ -94,17 +129,6 @@ const vec3 ALUMINUM_F0 = vec3(0.913, 0.921, 0.925);
 const vec3 IRON_F0     = vec3(0.560, 0.570, 0.580);
 const vec3 CHROME_F0   = vec3(0.550, 0.556, 0.554);
 
-Material makeMetal(vec3 color, float specularity, float roughness){
-
-    Material mat;
-
-    setMetal(mat,color,specularity,roughness);
-
-    return mat;
-
-}
-
-//the named metals: pure conductors (specularity 1) at their measured F0, one knob
 Material makeGold(float roughness)    { return makeMetal(GOLD_F0,     1., roughness); }
 Material makeCopper(float roughness)  { return makeMetal(COPPER_F0,   1., roughness); }
 Material makeBrass(float roughness)   { return makeMetal(BRASS_F0,    1., roughness); }
@@ -114,170 +138,71 @@ Material makeAluminum(float roughness){ return makeMetal(ALUMINUM_F0, 1., roughn
 Material makeIron(float roughness)    { return makeMetal(IRON_F0,     1., roughness); }
 Material makeChrome(float roughness)  { return makeMetal(CHROME_F0,   1., roughness); }
 
-
-
-
-
-//------Dielectrics --------------
-
-
-
-void setDielectric(inout Material mat, vec3 color, float specularity, float roughness){
-    initMat(mat);//initialize
-
-    mat.diffuseColor=color;
-    mat.specularColor=vec3(0.9);
-    mat.roughness=roughness;
-    mat.specularChance=specularity;
-    mat.refractionChance=0.;
-
-}
-
-Material makeDielectric(vec3 color, float specularity, float roughness){
-
-    Material mat;
-
-    setDielectric(mat,color,specularity,roughness);
-
-    return mat;
-
-}
-
-
-
-//------Plastics (physical clearcoat) --------------
-//
-// THREE TIERS of shiny-opaque material (see also the pure-Fresnel note in setGlass):
-//   makeDielectric — ARTISTIC: `specularity` is a hand-tuned gloss floor
-//     (mix(specularity, 1, grazing)); no real IOR. Rooms/walls are tuned in these
-//     terms; keep using it wherever direct artistic control of gloss is the point.
-//   makePlastic  — PHYSICAL: specularChance stays 0 and the IOR alone sets the coat
-//     via the Fresnel gate in updateProbabilities (~4% head-on at n=1.5, full
-//     Schlick ramp at grazing — floors go mirror-like at shallow angles for free).
-//     The coat is untinted (specularColor 1): Fresnel decides the amount.
-//   makeGlass    — the physical coat PLUS transmission (see setGlass).
-//
-// Single-scatter coat caveat: the lobe mixture attenuates the diffuse substrate by
-// (1-F) once; a real clearcoat does it twice (light enters AND exits the coat,
-// (1-F)^2 plus internal bounces). Visually minor at plastic IORs; noted, not modeled.
-
-void setPlastic(inout Material mat, vec3 color, float roughness, float IOR){
-    initMat(mat);//initialize
-
-    mat.diffuseColor=color;
-    mat.specularColor=vec3(1.);
-    mat.roughness=roughness;
-    mat.IOR=IOR;
-    //specularChance stays 0 and refractionChance stays 0: the IOR != 1 term of the
-    //Fresnel gate supplies the coat, and the refract branch is unreachable.
-}
-
-void setPlastic(inout Material mat, vec3 color, float roughness){
-    setPlastic(mat, color, roughness, 1.5);
-}
-
+//PHYSICAL shiny-opaque: no gloss floor — the interior index alone supplies the
+//coat via the Fresnel gate in scatter() (~4% head-on at n=1.5, mirror at
+//grazing). transmit stays 0: the interior is never entered, its ior only
+//shapes the reflection.
 Material makePlastic(vec3 color, float roughness, float IOR){
-    Material mat;
-    setPlastic(mat, color, roughness, IOR);
+    Material mat; initMat(mat);
+    mat.surf.diffuse=color;
+    mat.surf.roughness=roughness;
+    mat.interior.ior=IOR;
     return mat;
 }
 
-//default coat: n = 1.5 (acrylic-ish)
 Material makePlastic(vec3 color, float roughness){
     return makePlastic(color, roughness, 1.5);
 }
 
+//PURE-FRESNEL GLASS: reflectance from the index alone (gloss stays 0), the
+//rest crosses into the interior. `clarity` is the frost knob: after Fresnel,
+//that fraction refracts and the remainder scatters diffusely (1 = clear).
+//absorb is the interior extinction — use absorbFor(tint, depth) to set it.
+Material makeGlass(vec3 absorb, float IOR, float clarity){
+    Material mat; initMat(mat);
+    mat.surf.transmit=clarity;
+    mat.interior.ior=IOR;
+    mat.interior.absorb=absorb;
+    return mat;
+}
 
+Material makeGlass(vec3 absorb, float IOR){
+    return makeGlass(absorb, IOR, 1.);
+}
 
-Material air(vec3 absorbColor){
+//SUBSURFACE: glass whose interior scatters — the walk runs when a transmitted
+//ray enters a medium with mfp < maxDist, with Fresnel/TIR at the boundary from
+//inside (mediumWalk.glsl). As mfp -> maxDist this IS makeGlass.
+Material makeSubsurface(vec3 absorb, float IOR, float mfp, float blur){
+    Material mat; initMat(mat);
+    mat.surf.transmit=1.;
+    mat.interior.ior=IOR;
+    mat.interior.absorb=absorb;
+    mat.interior.mfp=mfp;
+    mat.interior.blur=blur;
+    return mat;
+}
 
-    Material mat;
-    initMat(mat);
-    mat.render=false;
-    mat.absorbColor=absorbColor;
-
+//LIGHTS: surface emission
+Material makeLight(vec3 color, float power){
+    Material mat; initMat(mat);
+    mat.surf.emit=power*color;
     return mat;
 }
 
 
+//-------------------------------------------------
+// MODIFIERS — compose on any base material
+//-------------------------------------------------
 
-//----- Glass --------------
-
-
-
-void setGlass(inout Material mat, vec3 color, float IOR,float refractivity){
-
-    initMat(mat);//initialize
-    mat.render=true;
-
-    mat.specularColor=vec3(1.);
-    mat.diffuseColor=vec3(1.);
-    mat.absorbColor=vec3(color);
-
-    mat.IOR=IOR;
-
-    //PURE-FRESNEL GLASS: specularChance stays 0, so updateProbabilities' f0 mapping
-    //mix(specularChance, 1, schlick) reduces to the physical Schlick reflectance
-    //from the IOR alone (4% head-on for n=1.5). A nonzero specularChance here is a
-    //reflectance FLOOR stacked ON TOP of Fresnel — the old 0.9*(1-refractivity)
-    //value made n=1.5 glass reflect 8.3% head-on, twice physical, and read "too
-    //reflective". The floor semantics remain right for PLASTIC coats (setDielectric),
-    //not for glass.
-    //
-    //refractivity is now an honest FROST knob: after Fresnel takes its share, the
-    //non-reflected light refracts with this fraction and scatters diffusely (white)
-    //with the remainder. 1.0 = physically clear glass; 0.95 = 5% matte frost.
-    mat.refractionChance=refractivity;
-    mat.specularChance=0.;
-
-}
-
-
-
-void setGlass(inout Material mat, vec3 color, float IOR){
-
-    //default glass is CLEAR (frost is opt-in via the 3-arg version)
-    setGlass(mat,color,IOR,1.0);
-
-}
-
-
-//control of transparency
-Material makeGlass(vec3 color, float IOR,float refractivity){
-    Material mat;
-
-    setGlass(mat, color,IOR,refractivity);
+//a white Fresnel lacquer over the base: car paint (over metal), wet stone
+//(over darkened matte), varnish (over material-field wood).
+Material withCoat(Material mat, float coat, float coatRoughness){
+    mat.surf.coat=coat;
+    mat.surf.coatRoughness=coatRoughness;
     return mat;
 }
 
-
-//overload for default transparency (clear — frost is opt-in)
-Material makeGlass(vec3 color, float IOR){
-    return makeGlass(color,IOR,1.0);
+Material withCoat(Material mat){
+    return withCoat(mat, 1., 0.);
 }
-
-
-
-//------Lights --------------
-
-
-Material makeLight(vec3 color,float intensity){
-    Material mat;
-    initMat(mat);//initialize
-
-
-    mat.surfaceEmit=intensity*color;
-
-    return mat;
-}
-
-void setLight(inout Material mat, vec3 color,float intensity){
-    initMat(mat);//initialize
-
-    mat.surfaceEmit=intensity*color;
-
-}
-
-
-
-

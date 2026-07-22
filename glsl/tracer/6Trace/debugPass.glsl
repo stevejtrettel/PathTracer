@@ -133,7 +133,7 @@ vec3 debugPass(int mode, Path path){
         vec3 n = path.dat.normal.dir;                                   // real per-object normal
         if(mode == 1){ return 0.5 + 0.5*n; }                           // normals: xyz -> rgb
         if(mode == 4){ return vec3(exp(-0.15 * path.totalDistance)); } // depth: near = bright
-        vec3 albedo = path.dat.surfDiffuse;
+        vec3 albedo = path.dat.surf.diffuse;
         if(mode == 6){ return albedo; }                                // albedo: flat surface colour
 
         vec3 lit = albedo * (0.25 + 0.35*(0.5+0.5*n.y)

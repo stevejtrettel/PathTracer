@@ -1,7 +1,3 @@
-
-
-
-
 //-------------------------------------------------
 // UPDATING THE PATH COLOR
 // after each bounce these pick up color/attenuation from the medium
@@ -19,10 +15,6 @@ void updateFromVolume(inout Path path){
     }
 }
 
-//(subsurface volume emission + absorption now happen per step inside
-//subSurfScatter() in 6Trace, so throughput decays with depth and roulette stays
-//useful throughout the walk — there is no separate end-of-walk pass here.)
-
 
 void updateFromSurface(inout Path path){
 
@@ -30,22 +22,22 @@ void updateFromSurface(inout Path path){
     if(path.dat.renderMaterial){
 
         //add in emissive lighting
-        if (length(path.dat.surfEmit)>0.001){
-            path.pixel += path.light * path.dat.surfEmit;
+        if (length(path.dat.surf.emit)>0.001){
+            path.pixel += path.light * path.dat.surf.emit;
         }
 
-        //pick up some surface color upon reflection
+        //pick up the chosen lobe's tint — the ONLY place throughput changes at
+        //a surface (the probabilities already carried the energy fractions).
+        //Crossing rays pick up transmitTint: white (a no-op) for volumes, where
+        //Beer's law owns the color; set on THIN surfaces (lampshades, leaves).
         if (path.type == 1){
-            path.light *=  path.dat.surfDiffuse;
+            path.light *=  path.dat.surf.diffuse;
         }
         if (path.type == 2){
-            path.light *=  path.dat.surfSpecular;
+            path.light *=  path.dat.surf.specular;
         }
-        //crossing rays pick up the transmit tint — white (a strict no-op) for
-        //volumes, where Beer's law owns the color; set on THIN surfaces
-        //(lampshades, leaves) that have no interior to absorb in.
         if (path.type == 3){
-            path.light *=  path.dat.transmitTint;
+            path.light *=  path.dat.surf.transmitTint;
         }
 
     }
@@ -61,11 +53,6 @@ void updateFromSky(inout Path path){
         path.keepGoing = false;
     }
 }
-
-
-
-// (focus visualization retired from the path-trace loop — it now lives as a clean
-// non-destructive debug lens: uDebugMode == 8, focus peaking. See debugPass.glsl.)
 
 
 
@@ -88,6 +75,3 @@ void roulette(inout Path path){
         path.light *= 1. / p;
     }
 }
-
-
-

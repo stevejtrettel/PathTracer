@@ -1,8 +1,10 @@
 //------------------------------------------------
 //The LOCAL DATA Struct
-// everything the tracer needs to know about the surface the path just hit:
-// filled in by the scene's setData functions (see objects/objectAPI.glsl and
-// 3Materials/setImpactData.glsl), consumed by scatter() and updateFromSurface()
+// everything the tracer needs to know about the interface the path just hit:
+// the Surface response there, plus what the two adjacent media contribute
+// (index ratio, absorption/emission on each side, walk parameters beyond).
+// Filled by the wrappers in interaction.glsl, consumed by scatter() and
+// updateFromSurface().
 //-------------------------------------------------
 
 struct LocalData{
@@ -11,59 +13,35 @@ struct LocalData{
     bool isSky;
     bool renderMaterial;
 
-    float side;
-    bool subSurface;
-    float meanFreePath;
-    float isotropicScatter;
-    vec3 surfDiffuse;
-    vec3 surfSpecular;
-    vec3 surfEmit;
-    float surfRoughness;
-    float probDiffuse;
-    float probSpecular;
-    float probRefract;
-    float probCoat;      //computed per event in updateProbabilities (angle-dependent)
-    float coat;          //coat strength from the material (0 = none)
-    float coatRoughness;
-    vec3 transmitTint;   //tint applied when a ray crosses the surface (refract lobe)
-    float IOR;
-    vec3 refractAbsorb;
-    vec3 reflectAbsorb;
-    vec3 refractEmit;
-    vec3 reflectEmit;
+    float side;           //-1 hit from inside, +1 from outside (applyMaterial resampling)
+    Surface surf;         //the surface response at this hit
 
-    Vector normal;//outward pointing (back at you) normal to surface just impacted
+    float IOR;            //front/back index ratio (wavelength-dependent when dispersing)
+    vec3 reflectAbsorb;   //medium on the ray's side: reflections stay in it
+    vec3 reflectEmit;
+    vec3 refractAbsorb;   //medium beyond the surface: transmissions enter it
+    vec3 refractEmit;
+    float mfp;            //scatter mean free path of the medium beyond
+    float blur;           //phase width of the medium beyond
+
+    Vector normal;        //facing the incident ray
 };
 
 
 void initializeData(inout LocalData dat){
-    dat.subSurface=false;
     dat.isSky=false;
     dat.isPhysical=true;
     dat.renderMaterial=true;
-    dat.reflectAbsorb=vec3(0.);
-    dat.refractAbsorb=vec3(0.);
-    dat.surfDiffuse=vec3(1.);
-    dat.surfSpecular=vec3(1.);
-    dat.surfEmit=vec3(0.);
-    dat.surfRoughness=0.;
-    dat.isotropicScatter=0.;
-    dat.meanFreePath=1.;
-    dat.reflectEmit=vec3(0);
-    dat.refractEmit=vec3(0);
+    dat.side=1.;
+    initSurface(dat.surf);
     dat.IOR=1.;
-    dat.probDiffuse=1.;
-    dat.probRefract=0.;
-    dat.probSpecular=0.;
-    dat.probCoat=0.;
-    dat.coat=0.;
-    dat.coatRoughness=0.;
-    dat.transmitTint=vec3(1.);
+    dat.reflectAbsorb=vec3(0.);
+    dat.reflectEmit=vec3(0.);
+    dat.refractAbsorb=vec3(0.);
+    dat.refractEmit=vec3(0.);
+    dat.mfp=maxDist;
+    dat.blur=1.;
 }
-
-
-
-
 
 
 //-------------------------------------------------
@@ -81,7 +59,7 @@ struct Path{
     vec3 pixel;//color collected so far along the path
     vec3 light;//throughput: attenuation applied to any light found from here on
 
-    int type;//type of ray chosen at the last scatter: 1=Diffuse, 2=Specular, 3=Refract
+    int type;//type of ray chosen at the last scatter: 1=Diffuse, 2=Specular, 3=Transmit
     vec3 absorb;//absorption color of the medium currently being traversed
     vec3 emit;//emission color of the medium currently being traversed
     float distance; //distance traveled on a bounce
@@ -90,12 +68,9 @@ struct Path{
     LocalData dat;
 
     bool keepGoing;
-    bool subSurface;
+    bool subSurface;//a transmit event entered a scattering interior: run the walk
 
 };
-
-
-
 
 
 Path initializePath(Vector tv){
@@ -119,11 +94,3 @@ Path initializePath(Vector tv){
     return path;
 
 }
-
-
-
-
-
-
-
-

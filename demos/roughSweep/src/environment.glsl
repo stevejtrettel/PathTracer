@@ -16,14 +16,13 @@ void buildEnvironment(){
     room.front = -18.;   room.back  = 18.;
 
     vec3 wall = vec3(0.10);
-    float rough = 0.3;
 
-    room.floorMat = makeDielectric(vec3(0.35), 0.0, 0.25);
+    room.floorMat = makeMatte(vec3(0.35));
     room.ceilMat  = makeLight(vec3(1.), roomLight);
-    room.leftMat  = makeDielectric(wall, 0.0, rough);
-    room.rightMat = makeDielectric(wall, 0.0, rough);
-    room.frontMat = makeDielectric(wall, 0.0, rough);
-    room.backMat  = makeDielectric(wall, 0.0, rough);
+    room.leftMat  = makeMatte(wall);
+    room.rightMat = makeMatte(wall);
+    room.frontMat = makeMatte(wall);
+    room.backMat  = makeMatte(wall);
 
     //----------- THE KEY LIGHT --------------------
     keyLight.frame  = makeFrame(vec3(8, 11, 9));

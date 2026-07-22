@@ -19,58 +19,15 @@ void stepForward(inout Path path){
     }
     else{
         //straight transport: raytrace gives the nearest analytic surface as a stop
-        //distance, then raymarch the sdf up to it; move to the intersection point.
+        //distance, then raymarch the sdf up to it; the ambient medium (a no-op
+        //vacuum unless the scene hooks it — see ambient.glsl) may scatter the ray
+        //along the way; move to the intersection point.
         float distance = raytrace( path.tv, maxDist );
         distance       = raymarch( path.tv, distance );
-
-#ifdef SCENE_AMBIENT_MEDIUM
-        //AMBIENT MEDIUM (docs/material-system.md §5): open air scatters. The
-        //scene defines `#define SCENE_AMBIENT_MEDIUM` plus four hook functions
-        //(they may read scene knobs):
-        //    float ambientMFP();      scatter mean free path of open air
-        //    float ambientBlur();     phase width: 0 = forward, 1 = isotropic
-        //    vec3  ambientAbsorb();   Beer extinction of open air (1/length)
-        //    vec3  ambientEmit();     volume emission of open air (1/length)
-        //Each leg competes an exponential free flight against the distance to
-        //the next surface; a shorter flight ends the leg in a SCATTER event
-        //(absorb/emit over the leg, phase-blended new direction, roulette) and
-        //we march again. Object interiors keep their own media: legs starting
-        //inside an object are left alone.
-        float legTotal = 0.;
-        for(int amb = 0; amb < 64; amb++){
-            if(inside_Object(path.tv)){ break; }
-            float flight = randomExponential(ambientMFP());
-            if(flight >= distance){ break; }        //the surface wins this leg
-
-            //scatter event: move there, picking up absorption + emission
-            flow(path.tv, flight);
-            legTotal   += flight;
-            path.pixel += path.light * ambientEmit() * flight;
-            path.light *= exp(-ambientAbsorb() * flight);
-
-            float blur = ambientBlur()*ambientBlur();
-            path.tv = vNormalize(mix(path.tv, randomVector(path.tv.pos), blur));
-
-            roulette(path);
-            if(!path.keepGoing){ return; }
-
-            //march the new direction to the next surface
-            distance = raytrace( path.tv, maxDist );
-            distance = raymarch( path.tv, distance );
-        }
-        //absorption + emission over the final leg (open air only)
-        if(!inside_Object(path.tv)){
-            float leg   = min(distance, maxDist);
-            path.pixel += path.light * ambientEmit() * leg;
-            path.light *= exp(-ambientAbsorb() * leg);
-        }
-#endif
-
+        distance       = ambientTransport( path, distance );
+        if(!path.keepGoing){ return; }
         flow(path.tv, distance);
         path.distance  = distance;
-#ifdef SCENE_AMBIENT_MEDIUM
-        path.distance += legTotal;   //Beer via path.absorb sees the full path (air absorb rides above)
-#endif
         path.dat.isSky = (distance > maxDist - 0.1);
     }
 
@@ -79,4 +36,3 @@ void stepForward(inout Path path){
     path.totalDistance += path.distance;
     if(!path.dat.isSky){ setData_Scene(path); }
 }
-

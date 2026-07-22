@@ -6,7 +6,6 @@
 //   BACK row: gold, roughness 0.35 — the LACQUERED-METAL test: brushed gold
 //     picking up a polished white coat over its soft colored highlights.
 // coatRough blurs only the coat (satin finishes); the base roughness is fixed.
-// Works in both roughness models (this page uses the engine default).
 //-------------------------------------------------
 
 const int NUM = 7;
@@ -24,15 +23,11 @@ void buildObjects(){
 
         matteRow[i].frame  = makeFrame(vec3(x, 1.05, 2.));
         matteRow[i].radius = 1.05;
-        matteRow[i].mat    = makeDielectric(cherry, 0.0, 0.0);
-        matteRow[i].mat.coat = coatAmt;
-        matteRow[i].mat.coatRoughness = coatRough;
+        matteRow[i].mat    = withCoat(makeMatte(cherry), coatAmt, coatRough);
 
         goldRow[i].frame  = makeFrame(vec3(x, 1.05, -2.5));
         goldRow[i].radius = 1.05;
-        goldRow[i].mat    = makeGold(0.35);
-        goldRow[i].mat.coat = coatAmt;
-        goldRow[i].mat.coatRoughness = coatRough;
+        goldRow[i].mat    = withCoat(makeGold(0.35), coatAmt, coatRough);
     }
 
 }

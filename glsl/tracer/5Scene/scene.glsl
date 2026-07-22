@@ -3,8 +3,8 @@
 // this takes in the following functions, defined for each individual scene;
 // buildEnvironment() sdf_Environment() trace_Environment() setData_Environment()
 // buildObjects() sdf_Objects() trace_Objects() setData_Objects()
-// inside_Object() — objects only, called directly by subsurface scattering
-//   (6Trace/subSurfScatter.glsl); not aggregated here since there is no
+// inside_Object() — objects only, called directly by the medium walk
+//   (6Trace/mediumWalk.glsl); not aggregated here since there is no
 //   environment analogue (subsurface happens inside objects, not walls).
 //-------------------------------------------------
 

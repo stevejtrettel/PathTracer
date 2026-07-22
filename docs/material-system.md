@@ -333,40 +333,58 @@ Microfacet roughness (§4, judged via A/B demo), multi-bounce microfacets
 interface-as-(Surface, MedA, MedB), ambient medium hook: **yes to all.**
 Fluorescence: skipped. Polarization: shelf.
 
-## 9. Implementation plan (approved sequence)
+## 9. Implementation — CLEAN REWRITE (executed July 22 2026)
 
-**Principle: new behavior is OPT-IN until migration.** Every
-behavior-changing mechanism lands behind a gate (scene-injected `#define`
-or additive field whose default is a no-op), so all existing art scenes
-stay byte-identical while the new model is evaluated. Defaults flip only
-in the migration phase, after the looks are approved by eye.
+The first attempt layered the new mechanisms behind opt-in `#define` gates
+so old scenes stayed byte-identical; that smeared branches across the
+tracer and was rejected. The executed approach: **one model, clean files,
+demos run, art scenes broken until migration.** Checkpoint commit
+`3587709` precedes the rewrite.
 
-**Phase 1 — mechanism + reference demos (now):**
-1. A new top-level **`demos/`** folder: scenes that exist as *references*
-   — material configuration tests, parameter charts, A/B comparisons —
-   not art. (Later also camera/lens tests.) Same page machinery as
-   `scenes/`, separate gallery section.
-2. Engine, staged, each verified against the untouched corpus:
-   - **Coat tier**: `coat`/`coatRoughness` Material fields + the Tier-1
-     lobe; additive, `coat = 0` is a no-op. `transmitTint` likewise.
-   - **Microfacet + multi-bounce roughness**: gated
-     (`MICROFACET_ROUGHNESS`); demos compare mix-blur vs single-bounce
-     (horizon-flip) vs multi-bounce, on glass and gold, roughness swept.
-   - **Walk exit Fresnel/TIR**: gated (`SSS_EXIT_FRESNEL`); implemented in
-     the pathTrace walk-resume loop (the normal comes free from
-     `setData_Scene` after the walk returns — no sdf-gradient needed, and
-     it works for trace-analytic objects too).
-   - **Ambient medium hook** (`SCENE_AMBIENT_MEDIUM`): scatter/emit loop
-     inside `stepForward`'s straight branch, `!inside_Object` guarded;
-     opt-in, compiled out otherwise.
-3. Demo scenes for each: roughness A/B pair, coat sweep, SSS exit A/B,
-   fog/god-rays.
+**The file map (as built):**
 
-**Phase 2 — idiomatic shortcuts** (once looks are approved): the
-constructor family — metal/glass/subsurface/fog/matte etc. — designed
-around the winning mechanisms (§7 has the census-driven candidates).
+`3Materials/`
+- `material.glsl` — `Surface` + `Medium` + `Material{render, surf,
+  interior}`; constructors `makeMatte / makeGloss / makeMetal(+named) /
+  makePlastic / makeGlass / makeSubsurface / makeLight`, helper
+  `absorbFor(tint, depth)`, modifier `withCoat(mat, coat, rough)`.
+- `interaction.glsl` — `setInteraction(dat, Surface, Medium front, Medium
+  back, normal, side)` owns all interface bookkeeping (IOR ratio from the
+  two media, per-side `iorAt` dispersion — air is just the default
+  Medium); thin wrappers `setObjectInAir` / `setSurfaceInMat` /
+  `setMaterialInterface` keep the object library's call sites unchanged;
+  `applyMaterial` (material fields) unchanged.
+- `scatter.glsl` — the event tree: coat → specular → transmit → diffuse,
+  one microfacet per event (shared by Fresnel and directions),
+  multi-bounce specular, facet refraction. Transmit into a medium with
+  `mfp < maxDist` raises `path.subSurface`.
+- `path.glsl` — `LocalData{surf, IOR, reflect/refract absorb+emit, mfp,
+  blur, normal, …}`; `Path` unchanged apart from comments.
 
-**Phase 3 — migration**: flip gated defaults, port the 56 scenes to the
-shortcuts, literal Surface/Medium struct split + IOR-onto-Medium
-restructure of `setImpactData` (behavior-frozen plumbing, done last when
-scenes are being touched anyway), SSS re-tune + baseline re-bake.
+`6Trace/`
+- `mediumWalk.glsl` — the interior walk (per-step Beer + roulette,
+  16-halving exit bisection) with Fresnel/TIR at the boundary from inside;
+  the ballistic limit is the glass path.
+- `ambient.glsl` — `ambientTransport()`: fog/god-rays behind the
+  `SCENE_AMBIENT_MEDIUM` scene hook (engine default vacuum, compiles
+  away). Hook contract: `ambientMFP/ambientBlur/ambientAbsorb/ambientEmit`.
+- `pathTrace.glsl`, `stepForward.glsl` — restored to their original
+  one-screen shapes; one call each into the two files above.
+
+Deleted: `scatterPath.glsl`, `setImpactData.glsl`, `subSurfScatter.glsl`,
+the `MICROFACET_ROUGHNESS`/`SSS_EXIT_FRESNEL` gates, the legacy mix-blur
+roughness, the `subSurface` bool on Material, back colors, `air()`,
+`setDielectric`-family in-place constructors.
+
+**Demos (`demos/`, run these):** `roughSweep` (glass + gold roughness
+sweep), `coat` (matte + gold, coat 0→1), `sssExit` (mfp sweep with
+exit-Fresnel walk), `fog` (ambient hook). Twin A/B pages are gone — there
+is one model; judgment is against memory/checkpoint renders.
+
+**Migration (next, after the looks are approved):** sweep `scenes/` onto
+the constructors (the census in git history maps old→new: makeDielectric
+spec-0 walls → makeMatte, artistic gloss → makeGloss, the 15-scene SSS
+recipe → makeSubsurface, absorb magic constants → absorbFor), rewire the
+variety/multiMaterial libraries (`setSurfaceInMat` back-colors and the
+dominant-roughness quirk were dropped), then the SSS re-tune + baseline
+re-bake.

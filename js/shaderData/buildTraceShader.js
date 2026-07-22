@@ -41,9 +41,12 @@ function buildSky(sky){
 
 let buildTraceShader= function(sceneData, settings){
 
-    let sceneShaderChunk = '';
+    //newline separators are load-bearing: the glsl plugin can drop a chunk's
+    //trailing newline, and a preprocessor directive glued to the previous
+    //chunk's last line ("}#define SCENE_…") is a compile error.
+    let sceneShaderChunk = '\n';
     for(let key in sceneData){
-        sceneShaderChunk = sceneShaderChunk.concat(sceneData[key]);
+        sceneShaderChunk = sceneShaderChunk.concat(sceneData[key], '\n');
     }
 
     let location = settings.location;
