@@ -7,25 +7,29 @@
 
 
 void stepForward(inout Path path){
-    float distance=maxDist;
 
-    //do the raytracing: now distance is set to closest object
-    distance=raytrace( path.tv, distance );
-
-    //do the raymarching, with distance threshold from above
-    distance=raymarch( path.tv, distance );
-
-    //distance now stores the shorter of the traced and marched results
-    //move to this point of intersection
-    path.distance=distance;
-    path.totalDistance+=distance;
-    flow(path.tv,distance);
-
-    //check if we hit the sky: if not, set the data from our intersection point.
-    path.dat.isSky=(path.distance>maxDist-0.1);
-    if(!path.dat.isSky){
-        setData_Scene(path);
+    if(inMedium(path.tv.pos)){
+        //curved transport: inside a medium (n(x) != 1) the segment to the next
+        //surface is a geodesic — the ODE marcher advances path.tv along it. Like the
+        //straight branch it sets path.distance + isSky (or keepGoing=false on capture)
+        //and leaves the shared segment-end tail below to us. inMedium() is always
+        //false for scenes whose indexField()==1, so those are byte-identical.
+        odeMarch(path);
+        if(!path.keepGoing){ return; }   //captured/absorbed: no surface and no sky
+    }
+    else{
+        //straight transport: raytrace gives the nearest analytic surface as a stop
+        //distance, then raymarch the sdf up to it; move to the intersection point.
+        float distance = raytrace( path.tv, maxDist );
+        distance       = raymarch( path.tv, distance );
+        flow(path.tv, distance);
+        path.distance  = distance;
+        path.dat.isSky = (distance > maxDist - 0.1);
     }
 
+    //shared segment-end tail (both transports): accumulate the path length, and set
+    //the impact data from the intersection unless we reached the sky.
+    path.totalDistance += path.distance;
+    if(!path.dat.isSky){ setData_Scene(path); }
 }
 

@@ -70,7 +70,16 @@ float raymarch(Vector tv, float stopDist){
         //where this sample is the overshot, invalid point)
         float eps = EPSILON * (1. + MARCH_CONE * t);
         if(!sorFail && radius < eps){
-            return t + radius;
+            //Land a hair on the STARTING SIDE, not exactly on the surface. The
+            //surface-exact landing (t + signedRadius) leaves sdf ~= 0 at the hit,
+            //so inside() = (sdf < 0) becomes a float-noise coin flip -> the normal
+            //randomly negates (setImpactData) -> ring-structured normal speckle
+            //centred on head-on incidence. Subtracting EPSILON along the ray backs
+            //the hit off to the starting side (sdf ~= +/-EPSILON, sign = sgn) in
+            //all four approach/overshoot x outside/inside cases, so inside() is
+            //stable. (signedRadius already retreats an over-relaxed overshoot; this
+            //adds the safety margin on top.)
+            return t + signedRadius - EPSILON;
         }
 
         t += stepLength;

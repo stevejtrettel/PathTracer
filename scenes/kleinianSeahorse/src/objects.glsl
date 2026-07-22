@@ -76,3 +76,7 @@ void setData_Objects(inout Path path){
         path.dat.surfDiffuse = base;                 // warm muted albedo, no self-glow — lit by the scene light
     }
 }
+
+//no curved-light medium in this scene (n === 1 everywhere: straight transport).
+//A medium scene overrides this with its effective refractive index field.
+float indexField(vec3 p){ return 1.; }
