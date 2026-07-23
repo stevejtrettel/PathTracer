@@ -1,7 +1,7 @@
 // Generate the per-scene index.html pages + the root gallery.
-// Each scenes/<name>/ (art) and demos/<name>/ (reference/test scenes — material
-// configuration charts, A/B comparisons; not art) becomes a Vite page (its
-// index.html loads ./main.js); the root index.html links to them all.
+// Each scenes/<name>/ (art) and demos/<kind>/<name>/ (reference/test pages —
+// material charts, parameter sweeps, object references; not art) becomes a Vite
+// page (its index.html loads ./main.js); the root index.html links to them all.
 // Re-run after adding/removing a scene:
 //   node scripts/gen-pages.mjs
 import { existsSync, readdirSync, writeFileSync } from 'node:fs';
@@ -20,10 +20,19 @@ const scan = (dirName) => {
 };
 
 const scenes = scan('scenes');
-const demos = scan('demos');
+// demos/ is split by subject; each subfolder is its own gallery section.
+// (demos/_studio holds shared environments and has no main.js, so scan skips it.)
+const DEMO_KINDS = [
+  ['demos/materials', 'material demos', 'the material system — catalogs, parameter sweeps, playground'],
+  ['demos/objects',   'object demos',   'the object/SDF library — one shape per page'],
+];
+const demoGroups = DEMO_KINDS
+  .map(([dir, title, blurb]) => [dir, title, blurb, scan(dir)])
+  .filter(([, , , names]) => names.length);
+const demoCount = demoGroups.reduce((n, g) => n + g[3].length, 0);
 
 // per-scene page (CSS is imported from JS, so the page itself is minimal)
-for (const [dirName, names] of [['scenes', scenes], ['demos', demos]]) {
+for (const [dirName, names] of [['scenes', scenes], ...demoGroups.map((g) => [g[0], g[3]])]) {
   for (const name of names) {
     writeFileSync(path.join(root, dirName, name, 'index.html'),
 `<!doctype html>
@@ -40,16 +49,17 @@ for (const [dirName, names] of [['scenes', scenes], ['demos', demos]]) {
   }
 }
 
-// root gallery: scenes, then a demos section (reference/test pages)
+// root gallery: scenes, then one section per demo kind (reference/test pages)
 const linkList = (dirName, names) =>
   names.map((n) => `      <li><a href="./${dirName}/${n}/">${n}</a></li>`).join('\n');
-const demosSection = demos.length
-  ? `  <h2>demos <span class="sub">(reference &amp; parameter tests — not art)</span></h2>
+const demosSection = demoGroups
+  .map(([dir, title, blurb, names]) =>
+`  <h2>${title} <span class="sub">(${blurb})</span></h2>
   <ul class="scenes">
-${linkList('demos', demos)}
+${linkList(dir, names)}
   </ul>
-`
-  : '';
+`)
+  .join('');
 writeFileSync(path.join(root, 'index.html'),
 `<!doctype html>
 <html lang="en">
@@ -76,4 +86,4 @@ ${demosSection}</body>
 </html>
 `);
 
-console.log(`generated ${scenes.length} scene + ${demos.length} demo pages + root gallery`);
+console.log(`generated ${scenes.length} scene + ${demoCount} demo pages + root gallery`);

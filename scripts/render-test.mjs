@@ -23,7 +23,7 @@ for (let i = 0; i < args.length; i++) {
   else scenes.push(args[i]);
 }
 
-const SCENE_ROOTS = ['scenes', 'demos'];
+const SCENE_ROOTS = ['scenes', 'demos/materials', 'demos/objects'];
 const sceneRoot = (name) =>
   SCENE_ROOTS.find((r) => existsSync(path.join(root, r, name, 'main.js')));
 
@@ -32,7 +32,7 @@ const scenesList = () =>
     existsSync(path.join(root, r))
       ? readdirSync(path.join(root, r), { withFileTypes: true })
           .filter((d) => d.isDirectory() && existsSync(path.join(root, r, d.name, 'main.js')))
-          .map((d) => `  ${d.name}${r === 'demos' ? '  (demo)' : ''}`)
+          .map((d) => `  ${d.name}${r.startsWith('demos') ? `  (${r.split('/')[1]} demo)` : ''}`)
       : []
   ).join('\n');
 

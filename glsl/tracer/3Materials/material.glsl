@@ -128,6 +128,9 @@ Material makeGloss(vec3 color, float gloss, float roughness){
 //(artistic "dirty metal"), energy-conserving either way.
 Material makeMetal(vec3 color, float specularity, float roughness){
     Material mat; initMat(mat);
+    //diffuse is inert at specularity 1 (gloss floor forces F=1, so the diffuse
+    //lobe is never selected); it only fires when specularity < 1 leaves a
+    //colored diffuse remainder — the "dirty metal" case above.
     mat.surf.diffuse=color;
     mat.surf.specular=color;
     mat.surf.gloss=specularity;

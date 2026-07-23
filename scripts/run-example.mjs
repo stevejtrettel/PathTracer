@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 // Thin vite wrapper — no more rewriting index.html. Each scene is its own Vite
-// page (scenes/<name>/index.html or demos/<name>/index.html — demos/ holds
-// reference/test scenes, not art; see docs/material-system.md §9).
+// page (scenes/<name>/index.html, or demos/<kind>/<name>/index.html — demos/
+// holds reference/test pages, not art; see demos/README.md).
 //   npm run dev            serve the whole array (/ is the gallery)
 //   npm run dev <name>     serve the array and open that scene's page
 //   npm run build <name>   build just that scene into dist/<name>/  (SCENE env -> vite.config)
@@ -13,9 +13,11 @@ import path from 'node:path';
 const [, , mode, scene] = process.argv;
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const SCENE_ROOTS = ['scenes', 'demos'];
+// demos/ is split by subject (materials/, objects/); scene names stay unique
+// across every root, so `npm run dev <name>` never needs the folder.
+const SCENE_ROOTS = ['scenes', 'demos/materials', 'demos/objects'];
 
-// which top-level folder holds this scene (scene names are unique across roots)
+// which folder holds this scene (scene names are unique across roots)
 const sceneRoot = (name) =>
   SCENE_ROOTS.find((r) => existsSync(path.join(root, r, name, 'main.js')));
 
@@ -24,7 +26,7 @@ const scenesList = () =>
     existsSync(path.join(root, r))
       ? readdirSync(path.join(root, r), { withFileTypes: true })
           .filter((d) => d.isDirectory() && existsSync(path.join(root, r, d.name, 'main.js')))
-          .map((d) => `  ${d.name}${r === 'demos' ? '  (demo)' : ''}`)
+          .map((d) => `  ${d.name}${r.startsWith('demos') ? `  (${r.split('/')[1]} demo)` : ''}`)
       : []
   ).join('\n');
 

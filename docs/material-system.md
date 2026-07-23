@@ -6,7 +6,10 @@ range of physically-correct-looking effects while staying categorical.
 Naming, constructors, and presets are consequences and come later (§7).
 Companions: [material-fields.md](material-fields.md),
 [curved-light-blackhole.md](curved-light-blackhole.md).
-Status: **proposal, nothing implemented.**
+Status: **implemented** (July 2026, checkpoint 3587709) — Surface/Medium
+structs, the event tree, the medium walk, constructors, presets, and the
+fields layer are all live in `glsl/tracer/3Materials/`. This doc is the
+design record; the code is the source of truth.
 
 > TL;DR — four ideas, in dependency order:
 > **(1) One microfacet per event**: roughness = jitter the normal once,
@@ -84,7 +87,7 @@ struct Medium {                   // consumed ALONG a segment
     vec3  absorb;                 // Beer extinction, 1/length
     vec3  emit;                   // volume emission,  1/length
     float mfp;                    // scatter mean free path (maxDist = ballistic)
-    float scatterBlur;            // phase width: 0 = forward, 1 = isotropic
+    float blur;                   // phase width: 0 = forward, 1 = isotropic
 };
 
 struct Material { bool render; Surface surf; Medium interior; };
