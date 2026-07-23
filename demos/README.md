@@ -5,9 +5,11 @@ lives in [`scenes/`](../scenes/).
 
 ```
 demos/
-  _studio/      shared environments (no main.js — not a page)
-  materials/    the material system  (3Materials/) — this file
-  objects/      the object/SDF library (glsl/objects/)
+  _studio/          shared environments (no main.js — not a page)
+  materials/        the material system     (glsl/tracer/3Materials/)
+  objects/          the object/SDF library  (glsl/objects/)
+  multi-material/   composites with internal boundaries
+                                            (glsl/objects/multiMaterial/)
 ```
 
 Run any page by name, from either subfolder — names are unique across the
@@ -90,6 +92,34 @@ that grouping is a materials/ concern).
 
 Object pages use the `empty.glsl` studio: a bare ceiling-lit box, so the only
 thing in frame is the shape.
+
+---
+
+# multi-material/
+
+Composites that own **more than one medium**, so some of their surfaces are
+boundaries between two real materials rather than between a material and air.
+This is the province of `setMaterialInterface` and of the library in
+[`glsl/objects/multiMaterial/`](../glsl/objects/multiMaterial/).
+
+Read them in this order — each page adds one idea:
+
+| page | adds |
+|---|---|
+| `nested-spheres` | **the mechanism.** A core inside a glass shell, core index swept through the shell's. The whole composite is ~20 lines at the bottom of its `objects.glsl` — copy it as the template for your own. Shows a bubble (inverted ratio → TIR) at one end and a dense inclusion at the other, with the core **vanishing** in the middle where the indices match. |
+| `dominant-material` | **the authoring choice.** Two optically identical objects side by side, differing only in which material is named `dominant` at the shared boundary — so only one of them frosts. Physics is decided by the two media; the *surface* still has to be assigned. |
+| `liquid-in-glass` | **the payoff.** Three media (air, glass, liquid) in the library's `BottleLiquid`. Where the waterline crosses the wall, the submerged glass nearly disappears — glass against water is a tenth the index step of glass against air. Drag `liquidIOR` up to `glassIOR` and it vanishes outright. |
+
+**The dispatcher pattern.** A multi-material object is a shape plus two-or-more
+`Material`s plus a hand-written `setData` that, for each hit, decides *which*
+sub-surface was struck and *from which side*, then calls either
+`setObjectInAir` (one side is air) or `setMaterialInterface(current, neighbor,
+dominant)` (both sides are real media). Two contracts to remember: branch on
+the **sign of the sdf**, not on `inside()`, so two cases cannot both fire at a
+grazing hit; and `setMaterialInterface` requires you to set `dat.normal`
+(facing the incoming ray) and `dat.side` *yourself* before calling it.
+
+These pages want a high `maxBounces` (32) — a path can cross many interfaces.
 
 ---
 

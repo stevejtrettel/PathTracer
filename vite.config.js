@@ -12,7 +12,7 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 // dist/<name>/. With no SCENE (dev), root is the project and vite serves the
 // whole array — scenes/ (art) and demos/<kind>/ (reference tests); open
 // /scenes/<name>/ or /demos/<kind>/<name>/ for a specific one; / is the gallery.
-const SCENE_ROOTS = ['scenes', 'demos/materials', 'demos/objects'];
+const SCENE_ROOTS = ['scenes', 'demos/materials', 'demos/objects', 'demos/multi-material'];
 
 const scene = process.env.SCENE;
 const sceneRoot = process.env.SCENE_ROOT
