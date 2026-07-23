@@ -25,7 +25,7 @@ float ambientTransport(inout Path path, float distance){
 #else
 
     for(int leg = 0; leg < 64; leg++){
-        if(inside_Object(path.tv)){ return distance; }
+        if(regionAt(path.tv.pos) != ID_NONE){ return distance; }
 
         float flight = randomExponential(ambientMFP());
         if(flight >= distance){ break; }        //the surface wins this leg

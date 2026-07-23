@@ -14,7 +14,7 @@
 //16 halvings, not 10: the precision is dt/2^N and dt is a full exponential
 //step, so at mean free paths near 1 a 10-halving exit could land farther from
 //the surface than AT_THRESH — the follow-up setData then found no surface.
-float bisect_Scatter(Vector tv, float dt){
+float bisect_Scatter(Vector tv, float dt, int region){
     float dist=0.;
     float testDist=dt;
     Vector temp;
@@ -25,7 +25,7 @@ float bisect_Scatter(Vector tv, float dt){
         temp=tv;
         flow(temp, dist+testDist);
         //still inside: keep the half-step; else halve again
-        if(inside_Object(temp)){
+        if(regionAt(temp.pos) == region){
             dist+=testDist;
         }
     }
@@ -37,8 +37,8 @@ float bisect_Scatter(Vector tv, float dt){
 //walk. Guarded by volumeActive at the call sites, so a pure-scattering medium
 //skips it entirely.
 void absorbEmit(inout Path path, float dl){
-    path.pixel += path.light * path.emit * dl;
-    path.light  *= exp(-path.absorb * dl);
+    path.pixel += path.light * path.medium.emit * dl;
+    path.light  *= exp(-path.medium.absorb * dl);
 }
 
 
@@ -60,7 +60,7 @@ void walkInterior(inout Path path, float mfp, float blur){
 
     //absorption/emission are constant through the walk: decide ONCE whether
     //this medium has any volume interaction
-    bool volumeActive = length(path.absorb) > 1e-4 || length(path.emit) > 1e-4;
+    bool volumeActive = length(path.medium.absorb) > 1e-4 || length(path.medium.emit) > 1e-4;
 
     for (int i = 0; i < scatterSteps; i++){
 
@@ -72,9 +72,12 @@ void walkInterior(inout Path path, float mfp, float blur){
         flowDist=randomExponential(mfp);
         flow(temp,flowDist);
 
-        //crossed the boundary: bisect to it and stop this leg just inside
-        if(!inside_Object(temp)){
-            flowDist=bisect_Scatter(tv,flowDist);
+        //crossed the boundary: bisect to it and stop this leg just inside.
+        //"the boundary" is THIS region's — not "any object's". A region nested
+        //inside another (a variety in a glass ball) has to be able to tell its
+        //own wall from the one enclosing it.
+        if(regionAt(temp.pos) != path.region){
+            flowDist=bisect_Scatter(tv,flowDist,path.region);
             if(volumeActive){ absorbEmit(path, flowDist); }
             flow(tv,flowDist-EPSILON/2.);
             path.tv=tv;
@@ -102,10 +105,12 @@ void walkInterior(inout Path path, float mfp, float blur){
 
 void mediumWalk(inout Path path){
 
-    //the walk parameters, captured at entry: setData_Scene at the boundary
-    //refills dat from the exit interface, whose "beyond" is the outside world
-    float mfp =path.dat.mfp;
-    float blur=path.dat.blur;
+    //the walk parameters come from the medium the path is IN — scatter set
+    //path.medium = dat.back on the transmit event that got us here. Captured at
+    //entry because setData_Scene at the boundary refills dat from the EXIT
+    //interface, whose "beyond" is the outside world.
+    float mfp =path.medium.mfp;
+    float blur=path.medium.blur;
 
     for(int walkTry = 0; walkTry < 8; walkTry++){
 
@@ -114,7 +119,7 @@ void mediumWalk(inout Path path){
 
         //interface data at the exit point: the leg ends just inside the
         //surface, so this is the inside view — dat.normal faces the arriving
-        //ray, dat.IOR = n_inside/n_outside (TIR-capable)
+        //ray, and iorRatio = n_inside/n_outside (TIR-capable)
         setData_Scene(path);
 
         //the boundary has the surface's FINISH: strike a facet of it, shared
@@ -124,7 +129,7 @@ void mediumWalk(inout Path path){
         float exitRough2 = path.dat.surf.roughness*path.dat.surf.roughness;
         Vector facet = sampleFacet(path.tv, path.dat.normal, exitRough2);
 
-        float F = FresnelReflectAmount(path.dat.IOR, path.tv, facet, 0., 1.);
+        float F = FresnelReflectAmount(iorRatio(path.dat), path.tv, facet, 0., 1.);
         if(randomFloat() < F){
             //trapped on the very last try: terminate (rare) rather than force
             //an exit through a possibly-TIR interface
@@ -133,16 +138,16 @@ void mediumWalk(inout Path path){
             //side IS the interior (aboveHorizon keeps the bounce inward)
             path.tv = aboveHorizon(vReflect(path.tv, facet), path.dat.normal);
             nudge(path.tv, path.dat.normal, 5.*EPSILON);
-            path.absorb = path.dat.reflectAbsorb;
-            path.emit   = path.dat.reflectEmit;
+            path.medium = path.dat.front;
+            path.region = path.dat.frontID;
         }
         else{
             //leave: refract at the exit (the physical bend, blurred by the
             //facet), enter the outside medium, and push off the surface
-            path.tv = vRefract(path.tv, facet, path.dat.IOR);
+            path.tv = vRefract(path.tv, facet, iorRatio(path.dat));
             if(vDot(path.tv, path.dat.normal) > 0.){ path.tv = vReflect(path.tv, path.dat.normal); }
-            path.absorb = path.dat.refractAbsorb;
-            path.emit   = path.dat.refractEmit;
+            path.medium = path.dat.back;
+            path.region = path.dat.backID;
             nudge(path.tv, path.dat.normal, -5.*EPSILON);
             path.subSurface = false;
             return;

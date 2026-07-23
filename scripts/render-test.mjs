@@ -23,7 +23,7 @@ for (let i = 0; i < args.length; i++) {
   else scenes.push(args[i]);
 }
 
-const SCENE_ROOTS = ['scenes', 'demos/materials', 'demos/objects', 'demos/multi-material'];
+const SCENE_ROOTS = ['scenes'];   // legacy/ is deliberately excluded: not built, not crawled
 const sceneRoot = (name) =>
   SCENE_ROOTS.find((r) => existsSync(path.join(root, r, name, 'main.js')));
 

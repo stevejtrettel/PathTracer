@@ -10,7 +10,7 @@
 //   setData(path, obj);
 //   if( at(path.tv, obj) ){
 //       vec3 p = toLocal(obj.frame, path.tv.pos);
-//       applyMaterial(path, rustField(p, makeIron(0.3), weathering));
+//       (superseded: material fields are now the object's material_ function)
 //   }
 //-------------------------------------------------
 

@@ -130,6 +130,11 @@ vec3 debugPass(int mode, Path path){
         if(path.dat.isSky){
             return (mode == 7 || mode == 8) ? getSky(cam.dir) : vec3(0.02);   // lit/focus show sky
         }
+        // the marcher landed somewhere no object's sdf vanishes, so the classifier
+        // could not name the interface. That is a bug (a bound culling its own
+        // surface, a feature thinner than AT_THRESH), never a scene feature —
+        // paint it rather than letting it pass silently through.
+        if(path.dat.hit == ID_NONE){ return vec3(1., 0., 1.); }
         vec3 n = path.dat.normal.dir;                                   // real per-object normal
         if(mode == 1){ return 0.5 + 0.5*n; }                           // normals: xyz -> rgb
         if(mode == 4){ return vec3(exp(-0.15 * path.totalDistance)); } // depth: near = bright

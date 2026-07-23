@@ -22,18 +22,17 @@ import buildTraceShader from "./shaderData/buildTraceShader.js";
 // (environment/objects are the scene's GLSL strings; settings is its default
 // export: { uiParams, location, params?, aspect? }.)
 
-function createScene({environment, objects, settings}){
+function createScene({scene, environment, objects, settings}){
 
     //stats readout (fps): a minimal always-on overlay pinned to the upper-right
     //corner (see .fps-meter in gui.css). Updated once per frame by stats.end().
     let stats = new FpsMeter();
     document.body.append(stats.dom);
 
-    //build the tracer shader for this scene
-    let sceneData = {
-        environment: environment,
-        objects: objects,
-    };
+    //build the tracer shader for this scene. One `scene` chunk is the current
+    //form (see scenes/proto): an object is six functions plus the dispatchers,
+    //and the old environment/objects split is gone — walls are regions too.
+    let sceneData = scene ? {scene: scene} : {environment: environment, objects: objects};
     let shaders = {
         tracer: buildTraceShader(sceneData, settings),
         accumulate: accShaderData,

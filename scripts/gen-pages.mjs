@@ -22,11 +22,9 @@ const scan = (dirName) => {
 const scenes = scan('scenes');
 // demos/ is split by subject; each subfolder is its own gallery section.
 // (demos/_studio holds shared environments and has no main.js, so scan skips it.)
-const DEMO_KINDS = [
-  ['demos/materials',      'material demos',       'the material system — catalogs, parameter sweeps, playground'],
-  ['demos/objects',        'object demos',         'the object/SDF library — one shape per page'],
-  ['demos/multi-material', 'multi-material demos', 'composites with internal boundaries — nested media, liquids, inclusions'],
-];
+// (empty during the region-system rewrite: the old demos live in legacy/ until
+// they are ported. legacy/ is intentionally not scanned — it does not compile.)
+const DEMO_KINDS = [];
 const demoGroups = DEMO_KINDS
   .map(([dir, title, blurb]) => [dir, title, blurb, scan(dir)])
   .filter(([, , , names]) => names.length);

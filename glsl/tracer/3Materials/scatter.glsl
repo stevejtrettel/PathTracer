@@ -74,10 +74,10 @@ float thinFilmReflect(float cosI, float nf, float d){
 void scatter( inout Path path ){
 
     //unrendered materials: pass straight through into the medium beyond
-    if(!path.dat.renderMaterial){
+    if(!path.dat.render){
         path.type=3;
-        path.absorb=path.dat.refractAbsorb;
-        path.emit=path.dat.refractEmit;
+        path.medium=path.dat.back;
+        path.region=path.dat.backID;
         path.subSurface=false;
         flow(path.tv, 10.*EPSILON);
         return;
@@ -101,9 +101,10 @@ void scatter( inout Path path ){
     //index-MATCHED interface (IOR == 1, e.g. the Luneburg rim or a thin surface)
     //is physically reflectionless, and Schlick's x^5 grazing term does not
     //vanish at n == 1 — running it there would paint phantom reflections.
+    float ratio=iorRatio(path.dat);
     float F=0.;
-    if(surf.gloss!=0. || path.dat.IOR!=1.){
-        F=FresnelReflectAmount(path.dat.IOR, path.tv, facet, surf.gloss, 1.);
+    if(surf.gloss!=0. || ratio!=1.){
+        F=FresnelReflectAmount(ratio, path.tv, facet, surf.gloss, 1.);
     }
     //a thin film REPLACES the base Fresnel: interference decides the specular
     //share. On a thin surface (IOR ratio 1) it is the only reflectance; over
@@ -126,8 +127,8 @@ void scatter( inout Path path ){
         //COAT: a white reflection off the lacquer's own facet. Reuses type=2,
         //so make the specular tint white — the coat has no color of its own.
         path.type=2;
-        path.absorb=path.dat.reflectAbsorb;
-        path.emit=path.dat.reflectEmit;
+        path.medium=path.dat.front;
+        path.region=path.dat.frontID;
         path.subSurface=false;
 
         path.dat.surf.specular=vec3(1.);
@@ -146,8 +147,8 @@ void scatter( inout Path path ){
         //per-channel Schlick against the struck facet. A no-op for
         //white-specular materials; this is what makes gold gold.
         path.type=2;
-        path.absorb=path.dat.reflectAbsorb;
-        path.emit=path.dat.reflectEmit;
+        path.medium=path.dat.front;
+        path.region=path.dat.frontID;
         path.subSurface=false;
 
         float cosI=clamp(-vDot(path.tv, facet), 0., 1.);
@@ -180,11 +181,11 @@ void scatter( inout Path path ){
         //facet fed F, which returns 1 under TIR and forces the specular tier).
         //If that medium scatters, the walk runs next (pathTrace/mediumWalk).
         path.type=3;
-        path.absorb=path.dat.refractAbsorb;
-        path.emit=path.dat.refractEmit;
-        path.subSurface=(path.dat.mfp < 0.99*maxDist);
+        path.medium=path.dat.back;
+        path.region=path.dat.backID;
+        path.subSurface=(path.dat.back.mfp < 0.99*maxDist);
 
-        newDir=vRefract(path.tv, facet, path.dat.IOR);
+        newDir=vRefract(path.tv, facet, ratio);
         //an extreme facet tilt can refract back above the geometric horizon:
         //mirror it below
         if(vDot(newDir, normal) > 0.){ newDir=vReflect(newDir, normal); }
@@ -197,8 +198,8 @@ void scatter( inout Path path ){
 
         //DIFFUSE: the analytic shortcut for an interior too dense to walk
         path.type=1;
-        path.absorb=path.dat.reflectAbsorb;
-        path.emit=path.dat.reflectEmit;
+        path.medium=path.dat.front;
+        path.region=path.dat.frontID;
         path.subSurface=false;
 
         newDir=diffuseDir;

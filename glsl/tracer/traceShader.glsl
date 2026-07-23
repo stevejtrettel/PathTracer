@@ -44,6 +44,11 @@ vec3 newFrame(vec2 fragCoord ){
     //build the scene
     buildScene();
 
+    //which medium the camera is standing in. Not always air: a camera inside a
+    //glass object should have its first segment billed to that glass.
+    path.region = regionAt(path.tv.pos);
+    path.medium = mediumOf(path.region, path.tv.pos);
+
     //debug fork: a non-zero mode replaces path tracing with a cheap one-shot debug
     //pass (preview shading / diagnostics). This is the ONLY debug branch in the
     //tracer — per pixel, once, coherent — so with debug off (mode 0) the path-trace

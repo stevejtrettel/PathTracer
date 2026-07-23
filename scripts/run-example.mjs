@@ -15,7 +15,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // demos/ is split by subject (materials/, objects/); scene names stay unique
 // across every root, so `npm run dev <name>` never needs the folder.
-const SCENE_ROOTS = ['scenes', 'demos/materials', 'demos/objects', 'demos/multi-material'];
+const SCENE_ROOTS = ['scenes'];   // legacy/ is deliberately excluded: not built, not crawled
 
 // which folder holds this scene (scene names are unique across roots)
 const sceneRoot = (name) =>

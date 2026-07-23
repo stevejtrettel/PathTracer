@@ -8,7 +8,7 @@
 
 void updateFromVolume(inout Path path){
 
-    vec3 beersLaw = path.absorb*path.distance;
+    vec3 beersLaw = path.medium.absorb*path.distance;
 
     if(length(beersLaw)>0.0001){
         path.light *= exp( -beersLaw );
@@ -19,7 +19,7 @@ void updateFromVolume(inout Path path){
 void updateFromSurface(inout Path path){
 
     //only do this if we are actually rendering the material
-    if(path.dat.renderMaterial){
+    if(path.dat.render){
 
         //add in emissive lighting
         if (length(path.dat.surf.emit)>0.001){
