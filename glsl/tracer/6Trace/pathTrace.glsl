@@ -23,6 +23,7 @@ vec3 pathTrace(Path path){
         //scatter the path off in a new direction
         scatter(path);
 
+#ifdef SCENE_SUBSURFACE
         if(path.subSurface){
             //the transmit event entered a scattering interior: walk it.
             //mediumWalk owns everything — the interior legs, the boundary
@@ -33,6 +34,10 @@ vec3 pathTrace(Path path){
             //pick up any color from the reflection off surface
             updateFromSurface(path);
         }
+#else
+        //no region in this scene scatters, so the walk is compiled out entirely
+        updateFromSurface(path);
+#endif
 
         //probabilistically kill rays
         roulette(path);

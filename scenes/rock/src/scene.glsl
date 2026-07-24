@@ -20,6 +20,10 @@
 //=====================================================================
 
 
+#include ../../../glsl/shapes/sphere.glsl
+#include ../../../glsl/shapes/room.glsl
+
+
 const int ID_ROCK = 0;
 const int ID_LAMP = 1;
 const int ID_ROOM = 2;
@@ -42,20 +46,22 @@ const float LAMP_R = 1.0;
 // THE HEIGHT FIELD — the whole scene turns on this one function
 //---------------------------------------------------------------------
 // roughly [-0.5, 0.5]. Positive is a peak, negative is a valley.
+//
+// fbm2 (2 octaves) rather than fbm (4): displacement is evaluated at every march
+// step, and the extra octaves cost twice — more hashes AND more gradient, which
+// lengthens the Lipschitz divisor below and so shortens every step.
 float rockHeight(vec3 q){
-    return fbm(rockFreq*q) - 0.5;
+    return fbm2(rockFreq*q) - 0.5;
 }
 
 //1 + the Lipschitz bound of the displacement, so the sum stays 1-Lipschitz and
 //the over-relaxed marcher (MARCH_RELAX = 1.2) cannot step through the surface.
-//fbm sums four octaves whose amplitude halves while frequency doubles, so every
-//octave contributes the SAME gradient — that is what makes it a 1/f fractal.
-//With valueNoise's smoothstep derivative capped at 1.5: |grad fbm(f*q)| <= 3.06*f.
+//For the 2-octave fbm2, |grad fbm2(f*q)| <= 2.01*f (see fields.glsl).
 //
-//Note this divisor slows the march EVERYWHERE it is applied, which is exactly
-//why bound_rock below matters: outside the bound the ray pays none of it.
+//This divisor slows the march EVERYWHERE it is applied, which is why bound_rock
+//below matters: outside the bound the ray pays none of it.
 float rockLip(){
-    return 1.0 + 3.06*rockAmp*rockFreq;
+    return 1.0 + 2.01*rockAmp*rockFreq;
 }
 
 
@@ -68,14 +74,14 @@ float rockLip(){
 //geometry, not a bump map.
 float sdf_rock(vec3 p){
     vec3  q = p - ROCK_C;
-    float d = length(q) - ROCK_R;
+    float d = sphereDistance(q, ROCK_R);
     d += rockAmp*rockHeight(q);
     return d/rockLip();
 }
 
-float sdf_lamp(vec3 p){ return length(p - LAMP_C) - LAMP_R; }
+float sdf_lamp(vec3 p){ return sphereDistance(p - LAMP_C, LAMP_R); }
 
-float sdf_room(vec3 p){ return -bBox(p - ROOM_C, ROOM_H); }
+float sdf_room(vec3 p){ return roomDistance(p - ROOM_C, ROOM_H); }
 
 
 //---------------------------------------------------------------------
@@ -92,7 +98,7 @@ float sdf_room(vec3 p){ return -bBox(p - ROOM_C, ROOM_H); }
 // Inflated by the displacement: rockHeight is in [-0.5, 0.5], so the surface
 // reaches ROCK_R + 0.5*rockAmp. Without that the bound shaves the peaks off.
 float bound_rock(vec3 p){
-    return length(p - ROCK_C) - (ROCK_R + 0.5*rockAmp);
+    return sphereDistance(p - ROCK_C, ROCK_R + 0.5*rockAmp);
 }
 
 
@@ -149,18 +155,16 @@ Material material_lamp(vec3 p, inout Vector n){
 Medium medium_lamp(vec3 p){ return defaultMedium(); }
 
 //six wall materials from one region: pick by which face p is nearest
+//the six walls are a material FIELD over one region: roomFace() says which one.
+//Set warmColor / coolColor equal to wallColor to make the room uniform.
 Material material_room(vec3 p, inout Vector n){
-    vec3 q = p - ROOM_C;
-    vec3 d = abs(q) - ROOM_H;
-    if(d.y >= d.x && d.y >= d.z){
-        if(q.y > 0.){ return makeLight(vec3(1.0, 0.97, 0.92), roomLight); }   //ceiling
-        return makeGloss(vec3(0.58), 0.0, 0.4);                               //floor
-    }
-    if(d.x >= d.z){
-        if(q.x > 0.){ return makeGloss(vec3(0.28, 0.34, 0.52), 0.0, 0.45); }  //right, cool
-        return makeGloss(vec3(0.52, 0.34, 0.28), 0.0, 0.45);                  //left, warm
-    }
-    return makeGloss(vec3(0.44), 0.0, 0.45);                                  //front + back
+    int face = roomFace(p - ROOM_C, ROOM_H);
+
+    if(face == ROOM_CEILING){ return makeLight(vec3(1.), roomLight); }
+    if(face == ROOM_FLOOR)  { return makeGloss(floorColor, 0., wallRough); }
+    if(face == ROOM_LEFT)   { return makeGloss(warmColor,  0., wallRough); }
+    if(face == ROOM_RIGHT)  { return makeGloss(coolColor,  0., wallRough); }
+    return makeGloss(wallColor, 0., wallRough);
 }
 Medium medium_room(vec3 p){ return defaultMedium(); }
 
@@ -170,26 +174,8 @@ Medium medium_room(vec3 p){ return defaultMedium(); }
 //---------------------------------------------------------------------
 
 float trace_room(Vector tv){
-    vec3 o  = tv.pos - ROOM_C;
-    vec3 tm = max((-ROOM_H - o)/tv.dir, (ROOM_H - o)/tv.dir);
-    float t = min(tm.x, min(tm.y, tm.z));
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
+    return roomTrace(tv, ROOM_C, ROOM_H);
 }
-
-float trace_lamp(Vector tv){
-    vec3 oc = tv.pos - LAMP_C;
-    float b = dot(oc, tv.dir);
-    float c = dot(oc, oc) - LAMP_R*LAMP_R;
-    float disc = b*b - c;
-    if(disc < 0.){ return maxDist; }
-    float s = sqrt(disc);
-    float t = -b - s;
-    if(t < 0.){ t = -b + s; }
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
-}
-
 
 //---------------------------------------------------------------------
 // dispatchers
@@ -207,7 +193,10 @@ Vector normalOf(int id, vec3 p){
     return normal_room(p);
 }
 
-Material materialOf(int id, vec3 p, inout Vector n){
+//no sheets in this scene: every object is a region with an interior
+bool isSheet(int id){ return false; }
+
+Material materialOf(int id, vec3 p, inout Vector n, bool front){
     if(id == ID_ROCK){ return material_rock(p, n); }
     if(id == ID_LAMP){ return material_lamp(p, n); }
     return material_room(p, n);
@@ -234,5 +223,5 @@ float sdf_Scene(Vector tv){
 }
 
 float trace_Scene(Vector tv){
-    return min(trace_room(tv), trace_lamp(tv));
+    return min(trace_room(tv), sphereTrace(tv, LAMP_C, LAMP_R));
 }

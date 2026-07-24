@@ -8,12 +8,22 @@
 //     float gSDF[N_OBJ];                                  scratch, filled below
 //     void  sdfAll( vec3 p );                             every object's sdf at p
 //     Vector   normalOf  ( int id, vec3 p );              4-tap of that object's sdf
-//     Material materialOf( int id, vec3 p, inout Vector n );   full material
+//     Material materialOf( int id, vec3 p, inout Vector n, bool front );
 //     Medium   mediumOf  ( int id, vec3 p );              medium only (ID_NONE = air)
+//     bool     isSheet   ( int id );                      no interior (see below)
 //
 //     void  buildScene();
 //     float sdf_Scene  ( Vector tv );     the marched union (bound-accelerated)
 //     float trace_Scene( Vector tv );     analytic surfaces only
+//
+// and, ONLY if some region scatters (mfp < maxDist), the scene declares
+// `defines: ['SCENE_SUBSURFACE']` and additionally supplies
+//
+//     bool insideOf( int id, vec3 p );    is p inside region `id`?
+//
+// The generator knows which regions can scatter, refract or carry a varying
+// index, so a scene with no scattering media compiles the whole medium walk
+// away — see 6Trace/mediumWalk.glsl.
 //
 // sdf_Scene is emitted separately from sdfAll on purpose: the marcher wants
 // early-outs on bounding volumes and runs hundreds of times per bounce, while
@@ -80,14 +90,19 @@ void setData_Scene(inout Path path){
     }
 
     //---- (b) what is on the other side? ---------------------------------
-    //a coincident second boundary (a shared wall) beats mere containment
+    //Sheets are skipped throughout: a sheet has no interior, so it can never be
+    //what contains a point, and standing on the negative side of a leaf must not
+    //make the leaf your medium.
     int other = ID_NONE;
-    for(int i = hit+1; i < N_OBJ; i++){
-        if(abs(gSDF[i]) < AT_THRESH){ other = i; break; }
+    if(!isSheet(hit)){
+        //a coincident second boundary (a shared wall) beats mere containment
+        for(int i = hit+1; i < N_OBJ; i++){
+            if(!isSheet(i) && abs(gSDF[i]) < AT_THRESH){ other = i; break; }
+        }
     }
     if(other == ID_NONE){
         for(int i = 0; i < N_OBJ; i++){
-            if(i != hit && gSDF[i] < -AT_THRESH){ other = i; break; }
+            if(i != hit && !isSheet(i) && gSDF[i] < -AT_THRESH){ other = i; break; }
         }
     }
 
@@ -98,28 +113,40 @@ void setData_Scene(inout Path path){
     Vector n = normalOf(hit, p);
 
     //the GEOMETRIC normal decides the side; a bump modifier may tilt n afterwards
-    //for shading only.
+    //for shading only. The sdf's gradient points from its negative side to its
+    //positive one, so a ray travelling WITH the gradient is on the negative side.
     bool leaving = vDot(path.tv, n) > 0.;
+    bool front   = !leaving;
 
     //---- (d) refill -----------------------------------------------------
-    //the object we are on always supplies the Surface AND one of the two media,
-    //so it needs its full Material. The far object is only ever a Medium — which
-    //also keeps a stochastic mixMaterial from being sampled and thrown away.
-    Material m = materialOf(hit, p, n);
-    Medium   o = mediumOf(other, p);
+    //the object we are on always supplies the Surface, and (unless it is a sheet)
+    //one of the two media, so it needs its full Material. The far object is only
+    //ever a Medium — which also keeps a stochastic mixMaterial from being sampled
+    //and thrown away.
+    Material m = materialOf(hit, p, n, front);
 
     path.dat.hit    = hit;
     path.dat.surf   = m.surf;
     path.dat.render = m.render;
 
-    if(leaving){                        //we are inside `hit`, heading out
+    if(leaving){ path.dat.normal = negate(n); }
+    else       { path.dat.normal = n;         }
+
+    if(isSheet(hit)){
+        //A SHEET has no interior. Both of its sides open onto whatever region
+        //contains it, so the interface is index-matched: no refraction, and the
+        //ray's medium is unchanged by crossing. All the sheet contributes is its
+        //Surface — and which of its two Surfaces, front or back, it just chose.
+        Medium around = mediumOf(other, p);
+        path.dat.frontID = other;  path.dat.front = around;
+        path.dat.backID  = other;  path.dat.back  = around;
+    }
+    else if(leaving){                   //we are inside `hit`, heading out
         path.dat.frontID = hit;    path.dat.front = m.interior;
-        path.dat.backID  = other;  path.dat.back  = o;
-        path.dat.normal  = negate(n);
+        path.dat.backID  = other;  path.dat.back  = mediumOf(other, p);
     }
     else{                               //we are outside `hit`, heading in
-        path.dat.frontID = other;  path.dat.front = o;
+        path.dat.frontID = other;  path.dat.front = mediumOf(other, p);
         path.dat.backID  = hit;    path.dat.back  = m.interior;
-        path.dat.normal  = n;
     }
 }

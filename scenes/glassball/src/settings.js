@@ -13,7 +13,7 @@ let uiParams = {
 export {uiParams};
 
 
-//camera copied verbatim from legacy/cocktail so the two scenes are comparable
+//camera copied from scenes/cocktail so the two are directly comparable
 let position = [-3.0126253110828656, 2.818905621714715, 5.780456240995506];
 
 let facing = [

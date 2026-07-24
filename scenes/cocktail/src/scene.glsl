@@ -18,6 +18,10 @@
 #include ../../../glsl/shapes/cocktailGlass.glsl
 
 
+#include ../../../glsl/shapes/sphere.glsl
+#include ../../../glsl/shapes/room.glsl
+
+
 //--- the objects, in declaration order (= containment priority, inner to outer)
 const int ID_CUP   = 0;
 const int ID_DRINK = 1;
@@ -48,29 +52,34 @@ const vec3 ROOM_H = vec3(14.25, 7.5, 15.0);
 // the region sdfs
 //---------------------------------------------------------------------
 
-float sdf_cup(vec3 p){
-    float cavity;
-    return cocktailGlassDistance(p - GLASS_P, G_RADIUS, G_HEIGHT, G_THICKNESS, G_BASE, cavity);
-}
-
-//the cavity, intersected with everything below the waterline. Above the line
-//max() picks the plane, so the drink is simply not there — which is why the
-//inner wall classifies as cup/air up there with no branch anywhere.
-float sdf_drink(vec3 p){
+// The cup and the drink are TWO REGIONS OF ONE SHAPE, so they come out of one
+// evaluation: cocktailGlassDistance returns the glass wall and hands back the
+// enclosed cavity, and the drink is that cavity cut off at the waterline.
+//
+// This is what a multi-material object is. Splitting them into two independent
+// sdfs would evaluate the glass twice for no reason.
+//
+// Above the waterline max() picks the plane, so the drink is simply not there —
+// which is why the inner wall classifies as cup/air up there with no branch.
+void sdf_cocktail(vec3 p, out float cup, out float drink){
     vec3  q = p - GLASS_P;
     float cavity;
-    cocktailGlassDistance(q, G_RADIUS, G_HEIGHT, G_THICKNESS, G_BASE, cavity);
-    return max(cavity, q.y - WATERLINE);
+    cup   = cocktailGlassDistance(q, G_RADIUS, G_HEIGHT, G_THICKNESS, G_BASE, cavity);
+    drink = max(cavity, q.y - WATERLINE);
 }
 
+//single-region entry points, for the 4-tap normals below
+float sdf_cup(vec3 p){   float cup, drink; sdf_cocktail(p, cup, drink); return cup;   }
+float sdf_drink(vec3 p){ float cup, drink; sdf_cocktail(p, cup, drink); return drink; }
+
 float sdf_light(vec3 p){
-    return length(p - LIGHT_P) - LIGHT_R;
+    return sphereDistance(p - LIGHT_P, LIGHT_R);
 }
 
 //the room SOLID is everything outside the box, so its interior is open air and
 //regionAt() returns ID_NONE there
 float sdf_room(vec3 p){
-    return -bBox(p - ROOM_C, ROOM_H);
+    return roomDistance(p - ROOM_C, ROOM_H);
 }
 
 
@@ -154,15 +163,16 @@ Medium   medium_light  (vec3 p){ return defaultMedium(); }
 
 //six wall materials out of one region: pick by which face the point is nearest.
 //d is negative inside the room, and its largest component names the face.
+//the six walls are a material FIELD over one region: roomFace() says which one.
+//Set warmColor / coolColor equal to wallColor to make the room uniform.
 Material material_room(vec3 p, inout Vector n){
-    vec3 color = 0.15*vec3(171., 203., 240.)/255.;   //dim sky blue
-    vec3 q = p - ROOM_C;
-    vec3 d = abs(q) - ROOM_H;
+    int face = roomFace(p - ROOM_C, ROOM_H);
 
-    if(d.y >= d.x && d.y >= d.z && q.y > 0.){
-        return makeLight(vec3(1.), roomLight);       //ceiling
-    }
-    return makeGloss(color, 0., 0.1);                //the other five walls
+    if(face == ROOM_CEILING){ return makeLight(vec3(1.), roomLight); }
+    if(face == ROOM_FLOOR)  { return makeGloss(floorColor, 0., wallRough); }
+    if(face == ROOM_LEFT)   { return makeGloss(warmColor,  0., wallRough); }
+    if(face == ROOM_RIGHT)  { return makeGloss(coolColor,  0., wallRough); }
+    return makeGloss(wallColor, 0., wallRough);
 }
 Medium medium_room(vec3 p){ return defaultMedium(); }
 
@@ -174,36 +184,17 @@ Medium medium_room(vec3 p){ return defaultMedium(); }
 
 //the ray is inside the box, so this is the distance at which it exits
 float trace_room(Vector tv){
-    vec3 o  = tv.pos - ROOM_C;
-    vec3 tm = max((-ROOM_H - o)/tv.dir, (ROOM_H - o)/tv.dir);
-    float t = min(tm.x, min(tm.y, tm.z));
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
+    return roomTrace(tv, ROOM_C, ROOM_H);
 }
-
-float trace_light(Vector tv){
-    vec3  oc = tv.pos - LIGHT_P;
-    float b  = dot(oc, tv.dir);
-    float c  = dot(oc, oc) - LIGHT_R*LIGHT_R;
-    float disc = b*b - c;
-    if(disc < 0.){ return maxDist; }
-
-    float s = sqrt(disc);
-    float t = -b - s;
-    if(t < 0.){ t = -b + s; }
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
-}
-
 
 //---------------------------------------------------------------------
 // the dispatchers
 //---------------------------------------------------------------------
 
-//every region's sdf at one point, exact
+//every region's sdf at one point, exact. Organised by SHAPE, not by region:
+//one shape can fill several slots, which is the point of a multi-material object.
 void sdfAll(vec3 p){
-    gSDF[ID_CUP]   = sdf_cup(p);
-    gSDF[ID_DRINK] = sdf_drink(p);
+    sdf_cocktail(p, gSDF[ID_CUP], gSDF[ID_DRINK]);
     gSDF[ID_LIGHT] = sdf_light(p);
     gSDF[ID_ROOM]  = sdf_room(p);
 }
@@ -215,7 +206,10 @@ Vector normalOf(int id, vec3 p){
     return normal_room(p);
 }
 
-Material materialOf(int id, vec3 p, inout Vector n){
+//no sheets in this scene: every object is a region with an interior
+bool isSheet(int id){ return false; }
+
+Material materialOf(int id, vec3 p, inout Vector n, bool front){
     if(id == ID_CUP)  { return material_cup(p, n);   }
     if(id == ID_DRINK){ return material_drink(p, n); }
     if(id == ID_LIGHT){ return material_light(p, n); }
@@ -244,9 +238,11 @@ float sdf_Scene(Vector tv){
     float b = bound_glass(p);
     if(b > BOUND_MARGIN){ return b; }
 
-    return min(sdf_cup(p), sdf_drink(p));
+    float cup, drink;
+    sdf_cocktail(p, cup, drink);
+    return min(cup, drink);
 }
 
 float trace_Scene(Vector tv){
-    return min(trace_room(tv), trace_light(tv));
+    return min(trace_room(tv), sphereTrace(tv, LIGHT_P, LIGHT_R));
 }

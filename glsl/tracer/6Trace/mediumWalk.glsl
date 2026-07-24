@@ -1,5 +1,21 @@
 //-------------------------------------------------
 // MEDIUM WALK  (docs/material-system.md §5)
+//
+// COMPILED ONLY WHEN THE SCENE SAYS SO. A scene whose regions are all ballistic
+// (every mfp == maxDist) can never enter this file, so it declares nothing and
+// the whole walk — plus the insideOf() dispatcher it needs — vanishes from the
+// shader. Scenes that do scatter set `defines: ['SCENE_SUBSURFACE']` in their
+// settings and supply:
+//
+//     bool insideOf(int id, vec3 p);   is p inside region `id`?
+//
+// which the generator emits per region with only the nested-region exclusions
+// that region actually has (usually none). That is much cheaper than a general
+// regionAt() scan, and this is its hottest caller: once per scatter step, and
+// sixteen times per boundary crossing in bisect_Scatter.
+//-------------------------------------------------
+#ifdef SCENE_SUBSURFACE
+//-------------------------------------------------
 // transport through a scattering interior: a random walk with exponential
 // free paths, per-step Beer absorption + volume emission, and Fresnel/TIR at
 // the boundary FROM INSIDE — with the Fresnel probability an exiting ray
@@ -25,7 +41,7 @@ float bisect_Scatter(Vector tv, float dt, int region){
         temp=tv;
         flow(temp, dist+testDist);
         //still inside: keep the half-step; else halve again
-        if(regionAt(temp.pos) == region){
+        if(insideOf(region, temp.pos)){
             dist+=testDist;
         }
     }
@@ -74,9 +90,9 @@ void walkInterior(inout Path path, float mfp, float blur){
 
         //crossed the boundary: bisect to it and stop this leg just inside.
         //"the boundary" is THIS region's — not "any object's". A region nested
-        //inside another (a variety in a glass ball) has to be able to tell its
-        //own wall from the one enclosing it.
-        if(regionAt(temp.pos) != path.region){
+        //inside another (a core in a glass ball) has to tell its own wall from
+        //the one enclosing it, which is what insideOf() encodes per region.
+        if(!insideOf(path.region, temp.pos)){
             flowDist=bisect_Scatter(tv,flowDist,path.region);
             if(volumeActive){ absorbEmit(path, flowDist); }
             flow(tv,flowDist-EPSILON/2.);
@@ -154,3 +170,5 @@ void mediumWalk(inout Path path){
         }
     }
 }
+
+#endif   //SCENE_SUBSURFACE

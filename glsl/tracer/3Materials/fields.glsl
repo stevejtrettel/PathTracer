@@ -44,6 +44,20 @@ float fbm(vec3 p){
     return v;
 }
 
+//2-octave fractal noise, normalised to roughly [0,1] so it drops in for fbm().
+//
+//Half the hashes, and — because each octave of an fbm contributes the SAME
+//gradient (amplitude halves as frequency doubles) — about 1.6x less gradient:
+//|grad fbm(f*p)| <= 3.26*f, |grad fbm2(f*p)| <= 2.01*f.
+//
+//That second number matters twice over for DISPLACEMENT, where the gradient sets
+//the Lipschitz divisor and the divisor sets the march step length. Prefer this
+//for geometry; fbm() is fine for colour, which is paid once per hit rather than
+//once per march step.
+float fbm2(vec3 p){
+    return (0.5*valueNoise(p) + 0.25*valueNoise(2.03*p))/0.75;
+}
+
 //domain warp: displace p by a noise vector before sampling another pattern
 vec3 fieldWarp(vec3 p, float amount){
     return p + amount*vec3( fbm(p),

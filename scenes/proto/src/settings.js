@@ -36,6 +36,13 @@ export const params = [
     { name: 'roomLight', label: 'Room Light', min: 0, max: 3,  step: 0.01, value: 0.35 },
     { name: 'lampPower', label: 'Lamp Power', min: 0, max: 80, step: 0.5,  value: 30.  },
     { name: 'polish',    label: 'Marble Polish', min: 0, max: 1, step: 0.01, value: 0.25 },
+
+    //--- the room: six walls, one region, all live ---
+    { name: 'floorColor', type: 'color', label: 'Floor',      value: [0.62, 0.62, 0.62] },
+    { name: 'warmColor',  type: 'color', label: 'Left Wall',  value: [0.58, 0.32, 0.3] },
+    { name: 'coolColor',  type: 'color', label: 'Right Wall', value: [0.3, 0.36, 0.58] },
+    { name: 'wallColor',  type: 'color', label: 'Walls',      value: [0.43, 0.43, 0.43] },
+    { name: 'wallRough',  label: 'Wall Roughness', min: 0, max: 1, step: 0.01, value: 0.4 },
 ];
 
 export default {uiParams: uiParams, location: location, params: params};

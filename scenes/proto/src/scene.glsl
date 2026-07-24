@@ -31,6 +31,10 @@
 
 //---------------------------------------------------------------------
 // object ids — declaration order IS containment priority
+#include ../../../glsl/shapes/sphere.glsl
+#include ../../../glsl/shapes/room.glsl
+
+
 //---------------------------------------------------------------------
 const int ID_CUP    = 0;
 const int ID_DRINK  = 1;
@@ -64,14 +68,12 @@ const vec3  ROCK_C = vec3(2.9, 1.35, 0.);
 const float ROCK_R = 1.05;
 const float ROCK_AMP  = 0.18;            //displacement amplitude
 const float ROCK_FREQ = 2.5;
-//1 + the Lipschitz bound of the displacement. fbm sums four octaves whose
-//amplitude halves while frequency doubles, so every octave contributes the SAME
-//gradient (that is what makes it a 1/f fractal): with valueNoise's smoothstep
-//derivative capped at 1.5, |grad fbm(f*q)| <= 3.06*f. Hence amp*3.06*freq.
-//Under-estimating this is not "a bit slow", it lets the over-relaxed marcher
-//step through the surface — but note the divisor slows the march EVERYWHERE,
-//which is why the bound below matters so much.
-const float ROCK_LIP  = 1. + ROCK_AMP*3.06*ROCK_FREQ;
+//1 + the Lipschitz bound of the displacement, so the sum stays 1-Lipschitz and
+//the over-relaxed marcher cannot step through the surface. fbm2 is 2 octaves:
+//|grad fbm2(f*q)| <= 2.01*f (see fields.glsl). Under-estimating this is not
+//"a bit slow" — it lets the marcher miss the surface — but note the divisor
+//slows the march EVERYWHERE, which is why the bound below matters so much.
+const float ROCK_LIP  = 1. + ROCK_AMP*2.01*ROCK_FREQ;
 
 const vec3  LAMP_C = vec3(-1.5, 8.2, 3.5);
 const float LAMP_R = 0.9;
@@ -81,46 +83,47 @@ const float LAMP_R = 0.9;
 // sdfs
 //---------------------------------------------------------------------
 
-//the glass shell: outer cylinder with the cavity carved out of it.
-//cup and drink share the cavity wall EXACTLY — that shared zero is what lets
-//the marcher stop on an interface interior to the union (see scene.glsl).
-float sdf_cup(vec3 p){
+// The cup and the drink are TWO REGIONS OF ONE SHAPE, so they come out of one
+// evaluation: the glass is the outer cylinder with the cavity carved out, and
+// the drink is that same cavity cut off at the waterline. Splitting them into
+// two independent sdfs would evaluate the cavity twice for no reason.
+//
+// They share the cavity wall EXACTLY — that shared zero is what lets the
+// marcher stop on an interface interior to the union (see 5Scene/scene.glsl).
+// Above the waterline max() picks the plane, so the drink is simply not there.
+void sdf_tumbler(vec3 p, out float cup, out float drink){
     vec3  q      = p - CUP_C;
     float outer  = cylinderDist(q, CUP_R, CUP_H, 0.08);
     float cavity = cylinderDist(q - vec3(0., CAV_Y, 0.), CAV_R, CAV_H, 0.05);
-    return max(outer, -cavity);
+    cup   = max(outer, -cavity);
+    drink = max(cavity, q.y - WATER_Y);
 }
 
-//the liquid: the cavity, intersected with everything below the waterline.
-//Above the line max() picks the plane, so the drink is simply NOT THERE — the
-//"did we hit the cup near the drink?" branch of the old code is this max().
-float sdf_drink(vec3 p){
-    vec3  q      = p - CUP_C;
-    float cavity = cylinderDist(q - vec3(0., CAV_Y, 0.), CAV_R, CAV_H, 0.05);
-    return max(cavity, q.y - WATER_Y);
-}
+//single-region entry points, for the 4-tap normals below
+float sdf_cup(vec3 p){   float cup, drink; sdf_tumbler(p, cup, drink); return cup;   }
+float sdf_drink(vec3 p){ float cup, drink; sdf_tumbler(p, cup, drink); return drink; }
 
 float sdf_marble(vec3 p){
-    return length(p - MARBLE_C) - MARBLE_R;
+    return sphereDistance(p - MARBLE_C, MARBLE_R);
 }
 
 //sphere + lumps. The displacement is INSIDE the sdf, so the 4-tap normal picks
 //it up with no extra machinery, and at() / inside() stay consistent with it.
 float sdf_rock(vec3 p){
     vec3  q = p - ROCK_C;
-    float d = length(q) - ROCK_R;
-    d += ROCK_AMP*(fbm(ROCK_FREQ*q) - 0.5);
+    float d = sphereDistance(q, ROCK_R);
+    d += ROCK_AMP*(fbm2(ROCK_FREQ*q) - 0.5);
     return d/ROCK_LIP;
 }
 
 float sdf_lamp(vec3 p){
-    return length(p - LAMP_C) - LAMP_R;
+    return sphereDistance(p - LAMP_C, LAMP_R);
 }
 
 //the room SOLID is everything OUTSIDE the box, so the interior is open air and
 //regionAt() returns ID_NONE there.
 float sdf_room(vec3 p){
-    return -bBox(p - ROOM_C, ROOM_H);
+    return roomDistance(p - ROOM_C, ROOM_H);
 }
 
 
@@ -147,7 +150,7 @@ float bound_glass(vec3 p){
 
 //inflated by the displacement, or the bound would shave the lumps off the rock
 float bound_rock(vec3 p){
-    return length(p - ROCK_C) - (ROCK_R + 0.5*ROCK_AMP);
+    return sphereDistance(p - ROCK_C, ROCK_R + 0.5*ROCK_AMP);
 }
 
 
@@ -230,20 +233,16 @@ Medium medium_lamp(vec3 p){ return defaultMedium(); }
 
 //SIX WALL MATERIALS from one region: pick by which face the point is on.
 //d is negative inside; the LARGEST component is the nearest face.
+//the six walls are a material FIELD over one region: roomFace() says which one.
+//Set warmColor / coolColor equal to wallColor to make the room uniform.
 Material material_room(vec3 p, inout Vector n){
-    vec3 q = p - ROOM_C;
-    vec3 d = abs(q) - ROOM_H;
+    int face = roomFace(p - ROOM_C, ROOM_H);
 
-    if(d.y >= d.x && d.y >= d.z){
-        if(q.y > 0.){ return makeLight(vec3(1.0, 0.97, 0.92), roomLight); }   //ceiling
-        return makeGloss(vec3(0.62), 0.0, 0.35);                              //floor
-    }
-    if(d.x >= d.z){
-        if(q.x > 0.){ return makeGloss(vec3(0.30, 0.36, 0.58), 0.0, 0.4); }   //right, cool
-        return makeGloss(vec3(0.58, 0.32, 0.30), 0.0, 0.4);                   //left, warm
-    }
-    if(q.z > 0.){ return makeGloss(vec3(0.46, 0.45, 0.43), 0.0, 0.4); }       //back
-    return makeGloss(vec3(0.40), 0.0, 0.4);                                   //front
+    if(face == ROOM_CEILING){ return makeLight(vec3(1.), roomLight); }
+    if(face == ROOM_FLOOR)  { return makeGloss(floorColor, 0., wallRough); }
+    if(face == ROOM_LEFT)   { return makeGloss(warmColor,  0., wallRough); }
+    if(face == ROOM_RIGHT)  { return makeGloss(coolColor,  0., wallRough); }
+    return makeGloss(wallColor, 0., wallRough);
 }
 Medium medium_room(vec3 p){ return defaultMedium(); }
 
@@ -254,36 +253,17 @@ Medium medium_room(vec3 p){ return defaultMedium(); }
 
 //the ray is inside the box: distance to the wall it exits through
 float trace_room(Vector tv){
-    vec3 o = tv.pos - ROOM_C;
-    vec3 t1 = (-ROOM_H - o)/tv.dir;
-    vec3 t2 = ( ROOM_H - o)/tv.dir;
-    vec3 tm = max(t1, t2);
-    float t = min(tm.x, min(tm.y, tm.z));
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
+    return roomTrace(tv, ROOM_C, ROOM_H);
 }
-
-float trace_lamp(Vector tv){
-    vec3 oc = tv.pos - LAMP_C;
-    float b = dot(oc, tv.dir);
-    float c = dot(oc, oc) - LAMP_R*LAMP_R;
-    float disc = b*b - c;
-    if(disc < 0.){ return maxDist; }
-    float s = sqrt(disc);
-    float t = -b - s;
-    if(t < 0.){ t = -b + s; }
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
-}
-
 
 //---------------------------------------------------------------------
 // the dispatchers
 //---------------------------------------------------------------------
 
+//organised by SHAPE, not by region: one shape can fill several slots, which is
+//the point of a multi-material object
 void sdfAll(vec3 p){
-    gSDF[ID_CUP]    = sdf_cup(p);
-    gSDF[ID_DRINK]  = sdf_drink(p);
+    sdf_tumbler(p, gSDF[ID_CUP], gSDF[ID_DRINK]);
     gSDF[ID_MARBLE] = sdf_marble(p);
     gSDF[ID_ROCK]   = sdf_rock(p);
     gSDF[ID_LAMP]   = sdf_lamp(p);
@@ -299,7 +279,10 @@ Vector normalOf(int id, vec3 p){
     return normal_room(p);
 }
 
-Material materialOf(int id, vec3 p, inout Vector n){
+//no sheets in this scene: every object is a region with an interior
+bool isSheet(int id){ return false; }
+
+Material materialOf(int id, vec3 p, inout Vector n, bool front){
     if(id == ID_CUP)   { return material_cup(p, n);    }
     if(id == ID_DRINK) { return material_drink(p, n);  }
     if(id == ID_MARBLE){ return material_marble(p, n); }
@@ -336,8 +319,9 @@ float sdf_Scene(Vector tv){
     float bg = bound_glass(p);
     if(bg > BOUND_MARGIN){ d = min(d, bg); }
     else{
-        d = min(d, sdf_cup(p));
-        d = min(d, sdf_drink(p));
+        float cup, drink;
+        sdf_tumbler(p, cup, drink);
+        d = min(d, min(cup, drink));
     }
 
     //--- marble: already an exact sphere, no bound worth adding
@@ -353,6 +337,6 @@ float sdf_Scene(Vector tv){
 float trace_Scene(Vector tv){
     float d = maxDist;
     d = min(d, trace_room(tv));
-    d = min(d, trace_lamp(tv));
+    d = min(d, sphereTrace(tv, LAMP_C, LAMP_R));
     return d;
 }

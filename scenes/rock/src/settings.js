@@ -31,6 +31,13 @@ export const params = [
     { name: 'tintDepth', label: 'Colour follows Height', min: 0, max: 1, step: 0.01, value: 1.0 },
     { name: 'roomLight', label: 'Room Light', min: 0, max: 3,  step: 0.01, value: 1.1 },
     { name: 'lampPower', label: 'Lamp Power', min: 0, max: 90, step: 0.5,  value: 25.  },
+
+    //--- the room: six walls, one region, all live ---
+    { name: 'floorColor', type: 'color', label: 'Floor',      value: [0.58, 0.58, 0.58] },
+    { name: 'warmColor',  type: 'color', label: 'Left Wall',  value: [0.52, 0.34, 0.28] },
+    { name: 'coolColor',  type: 'color', label: 'Right Wall', value: [0.28, 0.34, 0.52] },
+    { name: 'wallColor',  type: 'color', label: 'Walls',      value: [0.44, 0.44, 0.44] },
+    { name: 'wallRough',  label: 'Wall Roughness', min: 0, max: 1, step: 0.01, value: 0.45 },
 ];
 
 export default {uiParams: uiParams, location: location, params: params};
