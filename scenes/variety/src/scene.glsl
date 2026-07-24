@@ -46,12 +46,12 @@ const vec3  SOLID_P = vec3( 2.4, 1.6, -1.2);
 const float CLIP_R      = 1.9;     //both are cut down to a ball of this radius
 const float CLIP_SMOOTH = 0.06;    //smax blend, so the cut edge is not razor sharp
 
-const vec3  LIGHT_P = vec3(-7.0, 4.0, 2.0);
-const float LIGHT_R = 1.5;
+const vec3  LIGHT_P      = vec3(-7.0, 4.0, 2.0);
+const float LIGHT_RADIUS = 1.5;
 
 //room interior: x in [-20, 8.5], y in [-1, 14], z in [-20, 10]
-const vec3 ROOM_C = vec3(-5.75, 6.5, -5.0);
-const vec3 ROOM_H = vec3(14.25, 7.5, 15.0);
+const vec3 ROOM_P        = vec3(-5.75, 6.5, -5.0);
+const vec3 ROOM_HALFSIZE = vec3(14.25, 7.5, 15.0);
 
 
 //---------------------------------------------------------------------
@@ -67,16 +67,16 @@ const vec3 ROOM_H = vec3(14.25, 7.5, 15.0);
 //---------------------------------------------------------------------
 
 vec4 data_enneper(vec3 p){
-    T vx = enneper(T(p.x, 1.), T(p.y, 0.), T(p.z, 0.));
-    T vy = enneper(T(p.x, 0.), T(p.y, 1.), T(p.z, 0.));
-    T vz = enneper(T(p.x, 0.), T(p.y, 0.), T(p.z, 1.));
+    T vx = enneper(T(p.x, 1.0), T(p.y, 0.0), T(p.z, 0.0));
+    T vy = enneper(T(p.x, 0.0), T(p.y, 1.0), T(p.z, 0.0));
+    T vz = enneper(T(p.x, 0.0), T(p.y, 0.0), T(p.z, 1.0));
     return vec4(vx.y, vy.y, vz.y, vx.x);
 }
 
 vec4 data_gyroid(vec3 p){
-    T vx = gyroid(T(p.x, 1.), T(p.y, 0.), T(p.z, 0.));
-    T vy = gyroid(T(p.x, 0.), T(p.y, 1.), T(p.z, 0.));
-    T vz = gyroid(T(p.x, 0.), T(p.y, 0.), T(p.z, 1.));
+    T vx = gyroid(T(p.x, 1.0), T(p.y, 0.0), T(p.z, 0.0));
+    T vy = gyroid(T(p.x, 0.0), T(p.y, 1.0), T(p.z, 0.0));
+    T vz = gyroid(T(p.x, 0.0), T(p.y, 0.0), T(p.z, 1.0));
     return vec4(vx.y, vy.y, vz.y, vx.x);
 }
 
@@ -106,19 +106,12 @@ float sdf_sheet(vec3 p){
 float sdf_solid(vec3 p){
     vec3  q = p - SOLID_P;
     float d = varietyDistance(data_gyroid(varScale*q), varScale);
-    d = varietyShell(d, shellThickness, 0.);
+    d = varietyShell(d, shellThickness, 0.0);
     return smax(d, sphereDistance(q, CLIP_R), CLIP_SMOOTH);
 }
 
-float sdf_light(vec3 p){ return sphereDistance(p - LIGHT_P, LIGHT_R); }
-float sdf_room (vec3 p){ return roomDistance(p - ROOM_C, ROOM_H);     }
-
-
-//---------------------------------------------------------------------
-// which objects are sheets
-//---------------------------------------------------------------------
-
-bool isSheet(int id){ return id == ID_SHEET; }
+float sdf_light(vec3 p){ return sphereDistance(p - LIGHT_P, LIGHT_RADIUS); }
+float sdf_room (vec3 p){ return roomDistance(p - ROOM_P, ROOM_HALFSIZE);   }
 
 
 //---------------------------------------------------------------------
@@ -139,22 +132,22 @@ float bound_solid(vec3 p){ return sphereDistance(p - SOLID_P, CLIP_R + CLIP_SMOO
 const float NRM_E = 0.0002;
 
 Vector normal_sheet(vec3 p){
-    vec2 k = vec2(1.,-1.)*0.5773;
+    vec2 k = vec2(1.0,-1.0)*0.5773;
     return Vector(p, normalize( k.xyy*sdf_sheet(p + k.xyy*NRM_E) + k.yyx*sdf_sheet(p + k.yyx*NRM_E)
                               + k.yxy*sdf_sheet(p + k.yxy*NRM_E) + k.xxx*sdf_sheet(p + k.xxx*NRM_E) ));
 }
 Vector normal_solid(vec3 p){
-    vec2 k = vec2(1.,-1.)*0.5773;
+    vec2 k = vec2(1.0,-1.0)*0.5773;
     return Vector(p, normalize( k.xyy*sdf_solid(p + k.xyy*NRM_E) + k.yyx*sdf_solid(p + k.yyx*NRM_E)
                               + k.yxy*sdf_solid(p + k.yxy*NRM_E) + k.xxx*sdf_solid(p + k.xxx*NRM_E) ));
 }
 Vector normal_light(vec3 p){
-    vec2 k = vec2(1.,-1.)*0.5773;
+    vec2 k = vec2(1.0,-1.0)*0.5773;
     return Vector(p, normalize( k.xyy*sdf_light(p + k.xyy*NRM_E) + k.yyx*sdf_light(p + k.yyx*NRM_E)
                               + k.yxy*sdf_light(p + k.yxy*NRM_E) + k.xxx*sdf_light(p + k.xxx*NRM_E) ));
 }
 Vector normal_room(vec3 p){
-    vec2 k = vec2(1.,-1.)*0.5773;
+    vec2 k = vec2(1.0,-1.0)*0.5773;
     return Vector(p, normalize( k.xyy*sdf_room(p + k.xyy*NRM_E) + k.yyx*sdf_room(p + k.yyx*NRM_E)
                               + k.yxy*sdf_room(p + k.yxy*NRM_E) + k.xxx*sdf_room(p + k.xxx*NRM_E) ));
 }
@@ -184,25 +177,24 @@ Material material_sheet(vec3 p, inout Vector n, bool front){
 Medium medium_sheet(vec3 p){ return defaultMedium(); }   //no interior: never used
 
 //the control: the same surface as a real region, with glass inside it
-Material solidMaterial(){
-    return makeGlass(absorbFor(vec3(0.72, 0.86, 0.80), 0.6), 1.5, 1.);
-}
-Material material_solid(vec3 p, inout Vector n){ return solidMaterial(); }
-Medium   medium_solid  (vec3 p){ return solidMaterial().interior; }
+Material material_solid(vec3 p, inout Vector n){ return makeGlass(absorbFor(vec3(0.72, 0.86, 0.80), 0.6), 1.5, 1.0); }
+Medium   medium_solid  (vec3 p){ return makeGlass(absorbFor(vec3(0.72, 0.86, 0.80), 0.6), 1.5, 1.0).interior; }
 
-Material material_light(vec3 p, inout Vector n){ return makeLight(vec3(0.9), 100.); }
+Material material_light(vec3 p, inout Vector n){ return makeLight(vec3(0.9), 100.0); }
 Medium   medium_light  (vec3 p){ return defaultMedium(); }
 
+//six wall materials out of one region: pick by which face the point is nearest.
 //the six walls are a material FIELD over one region: roomFace() says which one.
 //Set warmColor / coolColor equal to wallColor to make the room uniform.
 Material material_room(vec3 p, inout Vector n){
-    int face = roomFace(p - ROOM_C, ROOM_H);
+    vec3 q = p - ROOM_P;
+    int face = roomFace(q, ROOM_HALFSIZE);
 
-    if(face == ROOM_CEILING){ return makeLight(vec3(1.), roomLight); }
-    if(face == ROOM_FLOOR)  { return makeGloss(floorColor, 0., wallRough); }
-    if(face == ROOM_LEFT)   { return makeGloss(warmColor,  0., wallRough); }
-    if(face == ROOM_RIGHT)  { return makeGloss(coolColor,  0., wallRough); }
-    return makeGloss(wallColor, 0., wallRough);
+    if(face == ROOM_CEILING){ return makeLight(vec3(1.0), roomLight); }
+    if(face == ROOM_FLOOR)  { return makeGloss(floorColor, 0.0, wallRough); }
+    if(face == ROOM_LEFT)   { return makeGloss(warmColor,  0.0, wallRough); }
+    if(face == ROOM_RIGHT)  { return makeGloss(coolColor,  0.0, wallRough); }
+    return makeGloss(wallColor, 0.0, wallRough);
 }
 Medium medium_room(vec3 p){ return defaultMedium(); }
 
@@ -211,8 +203,13 @@ Medium medium_room(vec3 p){ return defaultMedium(); }
 // the analytic intersections
 //---------------------------------------------------------------------
 
+float trace_light(Vector tv){
+    return sphereTrace(tv, LIGHT_P, LIGHT_RADIUS);
+}
+
+//the ray is inside the box, so this is the distance at which it exits
 float trace_room(Vector tv){
-    return roomTrace(tv, ROOM_C, ROOM_H);
+    return roomTrace(tv, ROOM_P, ROOM_HALFSIZE);
 }
 
 
@@ -233,6 +230,9 @@ Vector normalOf(int id, vec3 p){
     if(id == ID_LIGHT){ return normal_light(p); }
     return normal_room(p);
 }
+
+//the enneper surface is a sheet: a two-sided surface with no interior
+bool isSheet(int id){ return id == ID_SHEET; }
 
 Material materialOf(int id, vec3 p, inout Vector n, bool front){
     if(id == ID_SHEET){ return material_sheet(p, n, front); }
@@ -265,17 +265,20 @@ float sdf_Scene(Vector tv){
     //on {s=0} and pass through {s<0} rather than treating it as solid — while
     //sdf_sheet stays signed so the surface keeps its two sides. The clip is a
     //hard max OUTSIDE the abs, so the ball cap over {s<0} is not drawn.
-    float bs = bound_sheet(p);
-    float sheetMarch = max(abs(enneperDist(p)), sphereDistance(p - SHEET_P, CLIP_R));
-    d = min(d, (bs > BOUND_MARGIN) ? bs : sheetMarch);
+    float b_sheet = bound_sheet(p);
+    d = min(d, (b_sheet > BOUND_MARGIN) ? b_sheet
+                                        : max(abs(enneperDist(p)), sphereDistance(p - SHEET_P, CLIP_R)));
 
     //VOLUME trace: sdf_solid is a thickened shell, marched directly
-    float bo = bound_solid(p);
-    d = min(d, (bo > BOUND_MARGIN) ? bo : sdf_solid(p));
+    float b_solid = bound_solid(p);
+    d = min(d, (b_solid > BOUND_MARGIN) ? b_solid : sdf_solid(p));
 
     return d;
 }
 
 float trace_Scene(Vector tv){
-    return min(trace_room(tv), sphereTrace(tv, LIGHT_P, LIGHT_R));
+    float d = maxDist;
+    d = min(d, trace_light(tv));
+    d = min(d, trace_room(tv));
+    return d;
 }

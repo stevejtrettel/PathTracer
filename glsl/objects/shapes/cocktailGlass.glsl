@@ -24,12 +24,12 @@ float cocktailGlassDistance(vec3 p, CocktailGlass glass, out float insideGlass){
 
     vec3 pos=p;
 
-    float outside=cylinderDist(pos,glass.radius,glass.height,0.1);
+    float outside=cylinderDistance(pos,glass.radius,glass.height,0.1);
 
     //the height is the "half height" of the glass....
     vec3 q=pos-vec3(0,2.*glass.base,0);
 
-    float inside=cylinderDist(q,glass.radius-glass.thickness,glass.height,0.05);
+    float inside=cylinderDistance(q,glass.radius-glass.thickness,glass.height,0.05);
 
     //the glass
     float dist= max(outside,-inside);

@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "node scripts/run-example.mjs dev",
     "build": "node scripts/run-example.mjs build",
-    "preview": "node scripts/run-example.mjs preview"
+    "preview": "node scripts/run-example.mjs preview",
+    "gen": "node scripts/gen.mjs"
   },
   "devDependencies": {
     "vite": "^6.3.2",

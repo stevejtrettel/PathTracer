@@ -1,6 +1,7 @@
 import createScene from "../../js/createScene.js";
+import {emit} from "../../js/scenegen/index.js";
 
-import scene from "./src/scene.glsl";
+import description from "./src/scene.js";
 import settings from "./src/settings.js";
 
-createScene({scene, settings});
+createScene(emit(description, settings));

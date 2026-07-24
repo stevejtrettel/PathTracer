@@ -1,6 +1,6 @@
 //-------------------------------------------------
 // COMPUTATIONS FOR CREATING OBJECTS
-// shared helpers (op* combinators, bounding shapes, cylinderDist)
+// shared helpers (op* combinators, bounding shapes, cylinderDistance)
 // used by the object files; included in every scene (see tracer/setupShader.glsl)
 //-------------------------------------------------
 
@@ -201,7 +201,7 @@ vec3 sdgBox( in vec2 p, in vec2 b )
 
 
 
-float cylinderDist(vec3 pos, float radius, float height, float rounded){
+float cylinderDistance(vec3 pos, float radius, float height, float rounded){
 
     vec2 p=vec2( length(pos.xz) , pos.y);
     //the box we rotate about its central axis has width 2rad and height = 2height.

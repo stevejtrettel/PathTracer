@@ -15,13 +15,14 @@
 // build the liquid from the SAME evaluation — one shape, two outputs.
 //
 // p is in the glass's own coordinates (origin at the bowl centre).
+//@shape cocktailGlass -> wall, cavity
 float cocktailGlassDistance(vec3 p, float radius, float height,
                             float thickness, float base, out float cavity){
 
-    float outside = cylinderDist(p, radius, height, 0.1);
+    float outside = cylinderDistance(p, radius, height, 0.1);
 
     vec3  q      = p - vec3(0., 2.*base, 0.);
-    float inside = cylinderDist(q, radius - thickness, height, 0.05);
+    float inside = cylinderDistance(q, radius - thickness, height, 0.05);
 
     float dist = max(outside, -inside);
 

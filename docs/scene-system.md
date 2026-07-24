@@ -8,10 +8,12 @@ For emission detail see [generator.md](generator.md); for materials see
 
 ## The goal
 
-Scenes are authored in JS and a **generator** emits the GLSL. The generator emits
-only glue and structure; all math lives in hand-written libraries. Nothing about
-the generator is built yet — but the GLSL it must produce is fully worked out, as
-eight hand-written scenes in `scenes/` that are its exact target.
+Scenes are authored in JS (`src/scene.js`) and the **generator**
+(`js/scenegen/`, built July 2026) emits the GLSL at page load. The generator
+emits only glue and structure; all math lives in hand-written libraries. Every
+non-variety scene in `scenes/` runs this way. Authoring guide:
+[scene-authoring.md](scene-authoring.md); emitter contract and schema:
+[generator.md](generator.md).
 
 Two standing rules:
 
@@ -79,7 +81,8 @@ Every object supplies, all taking a **world** point (placement baked in):
 ```glsl
 float    sdf_<name>     (vec3 p);                        // SIGNED. always
 Vector   normal_<name>  (vec3 p);                        // 4-tap of sdf. always
-Material material_<name>(vec3 p, inout Vector n, bool front);
+Material material_<name>(vec3 p, inout Vector n);        // regions
+Material material_<name>(vec3 p, inout Vector n, bool front);  // sheets: two faces
 Medium   medium_<name>  (vec3 p);                        // when it is the far side
 float    bound_<name>   (vec3 p);                        // optional, hand-written
 float    trace_<name>   (Vector tv);                     // optional, analytic
@@ -124,9 +127,10 @@ into a distance, `varietyShell` thickens a surface into a volume.
 
 ---
 
-## The spec: eight hand-written scenes
+## The spec: eight scenes
 
-The generator's job is to reproduce these. Each pins down one thing.
+Each pins down one thing. All except `variety` are generated from
+`src/scene.js` (variety keeps hand-written GLSL until the variety pass).
 
 | scene | pins down |
 |---|---|
@@ -146,15 +150,16 @@ its legacy twin once lighting is equalised (wall albedo drives path length).
 
 ## Where we are / next
 
-1. **Done:** engine rewrite, the eight scenes, `glsl/shapes/` started, `legacy/`
-   holding 52 old scenes + demos (excluded from the build).
-2. **Next: the JS schema and the generator.** The schema is unstarted — the early
-   `region().shape().medium()` sketch predates regions-vs-sheets, trace modes,
-   group bounds and capability flags. Recommended first step: write the JS for
-   `cocktail` by hand and check it emits exactly `scenes/cocktail/src/scene.glsl`,
-   then the other seven, then build the emitter against all eight.
-3. **Then: port `legacy/` scene by scene.** The eight cover most patterns, but
-   these are unproven and will extend the schema:
+1. **Done:** engine rewrite; the eight scenes; `glsl/shapes/` started; `legacy/`
+   holding 52 old scenes + demos (excluded from the build); the **generator**
+   (`js/scenegen/`) with all seven non-variety scenes converted to
+   `src/scene.js` descriptions and their hand-written references retired to
+   git history. Design rules settled: explicit descriptions / formulaic
+   generator, knowledge in presets, authored GLSL references nothing magical
+   (generator.md §5).
+2. **Next: port `legacy/` scene by scene**, non-variety first — each port
+   grows the shapes catalogue and the preset shelf, never core machinery. The
+   eight cover most patterns, but these are unproven and will extend the system:
    - **varieties at scale** (14 legacy scenes) — mostly covered by `variety`
    - **tracer hooks** — `indexField` (blackhole ×3, luneburg), ambient fog; clean
      `#define` contracts, probably easy

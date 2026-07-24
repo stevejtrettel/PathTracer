@@ -1,3 +1,5 @@
+//@noshape — helpers, not a catalogue shape: the variety builder is its own
+//           (carefully designed) piece of the generator, still to come
 //----------------------------------------------------------------------------
 // ALGEBRAIC VARIETIES
 //

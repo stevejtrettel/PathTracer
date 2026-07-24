@@ -29,13 +29,13 @@ float bottleDistance(vec3 p, Bottle bottle,out float insideBottle ){
     vec3 pos=p;
 
     //the base of the bottle
-    float base=cylinderDist(pos,bottle.baseRadius, bottle.baseHeight,bottle.rounded);
+    float base=cylinderDistance(pos,bottle.baseRadius, bottle.baseHeight,bottle.rounded);
 
     //the neck of the bottle
     //first: adjust the height
     vec3 q=pos-vec3(0,bottle.baseHeight+bottle.neckHeight,0);
 
-    float neck=cylinderDist(q,bottle.neckRadius,bottle.neckHeight,bottle.rounded);
+    float neck=cylinderDistance(q,bottle.neckRadius,bottle.neckHeight,bottle.rounded);
 
     //give the smooth union of these:
     float theBottle=opMinDist(base, neck,bottle.smoothJoin);
