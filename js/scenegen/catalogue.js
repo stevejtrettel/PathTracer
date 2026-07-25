@@ -8,7 +8,10 @@
 //   <stem>Trace(Vector tv, vec3 centre, ...)     optional   world
 //   <stem>Bound(vec3 p, ...params)               optional
 //   //@shape <stem> -> <returnName>, <outName>,...   names multi-outputs
-//   //@noshape                                   file opts out (helpers only)
+//   //@noshape                                   helpers-only file: not a
+//                                                shape builder, but still a
+//                                                library reference — legal in
+//                                                uses:, an error to CALL
 //
 // File name == stem. Anything unparseable is a LOUD load error — the parser
 // is load-bearing, so it must never silently skip a file.
@@ -22,9 +25,16 @@ const RAW = import.meta.glob('../../glsl/shapes/*.glsl', {query: '?raw', import:
 
 //---------------------------------------------------------------- parsing
 
+//signatures are scanned with comments removed — a signature QUOTED in a
+//comment ("call sphereDistance(p, r) like so") must never win over the real
+//definition below it. Annotations (//@shape, //@noshape) read the raw source.
+function stripComments(src){
+    return src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+}
+
 //find `float <name>(...)` and return its raw comma-split argument strings
-function findArgs(src, name){
-    const m = src.match(new RegExp(`float\\s+${name}\\s*\\(([\\s\\S]*?)\\)`));
+function findArgs(code, name){
+    const m = code.match(new RegExp(`float\\s+${name}\\s*\\(([\\s\\S]*?)\\)`));
     if(!m) return null;
     return m[1].replace(/\s+/g, ' ').split(',').map(s => s.trim()).filter(s => s !== '');
 }
@@ -40,9 +50,10 @@ function parseArgs(raws, file, fnName){
 
 function parseShapeFile(stem, src){
     const file = `glsl/shapes/${stem}.glsl`;
+    const code = stripComments(src);
 
     //---- <stem>Distance: required ---------------------------------------
-    const distRaw = findArgs(src, `${stem}Distance`);
+    const distRaw = findArgs(code, `${stem}Distance`);
     if(!distRaw){
         throw new Error(`scenegen catalogue: ${file} has no ${stem}Distance() and no //@noshape opt-out — `
             + `every shapes/ file must declare one or the other`);
@@ -74,7 +85,7 @@ function parseShapeFile(stem, src){
 
     //---- <stem>Trace: optional, world, (Vector tv, vec3 centre, ...) -----
     let trace = null;
-    const traceRaw = findArgs(src, `${stem}Trace`);
+    const traceRaw = findArgs(code, `${stem}Trace`);
     if(traceRaw){
         if(traceRaw[0] !== 'Vector tv' || traceRaw[1] !== 'vec3 centre'){
             throw new Error(`scenegen catalogue: ${file}: ${stem}Trace must take (Vector tv, vec3 centre, ...), `
@@ -91,7 +102,7 @@ function parseShapeFile(stem, src){
 
     //---- <stem>Bound: optional, (vec3 p, ...) ----------------------------
     let bound = null;
-    const boundRaw = findArgs(src, `${stem}Bound`);
+    const boundRaw = findArgs(code, `${stem}Bound`);
     if(boundRaw){
         if(boundRaw[0] !== 'vec3 p'){
             throw new Error(`scenegen catalogue: ${file}: ${stem}Bound must take (vec3 p, ...), got (${boundRaw.join(', ')})`);
@@ -115,7 +126,11 @@ function build(){
     const shapes = new Map();
     for(const [path, src] of Object.entries(RAW)){
         const stem = path.split('/').pop().replace(/\.glsl$/, '');
-        if(/^\s*\/\/@noshape/m.test(src)) continue;
+        if(/^\s*\/\/@noshape/m.test(src)){
+            //include-only: no signatures to parse, just the source to inline
+            shapes.set(stem, {stem, src, file: `glsl/shapes/${stem}.glsl`, noshape: true});
+            continue;
+        }
         shapes.set(stem, parseShapeFile(stem, src));
     }
     return shapes;
@@ -126,6 +141,10 @@ export const catalogue = build();
 
 function makeBuilder(entry){
     const builder = function(values = {}){
+        if(entry.noshape){
+            throw new Error(`scenegen: lib.${entry.stem} is a helpers-only file (//@noshape) — `
+                + `reference it in uses: [lib.${entry.stem}], call its functions from authored GLSL`);
+        }
         const names = entry.params.map(p => p.name);
         for(const key of Object.keys(values)){
             if(!names.includes(key)){
@@ -163,6 +182,7 @@ export const lib = new Proxy({}, {
 //human-readable dump, for `npm run gen -- --catalogue`
 export function catalogueInfo(){
     return [...catalogue.values()].map(e => {
+        if(e.noshape) return `${e.stem} [helpers only — uses:]`;
         const parts = [`${e.stem}(${e.params.map(p => p.name).join(', ')})`];
         if(e.outputs) parts.push(`-> ${e.outputs.join(', ')}`);
         if(e.trace)   parts.push('[trace]');

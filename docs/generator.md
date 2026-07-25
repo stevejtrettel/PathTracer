@@ -149,7 +149,9 @@ During the migration, hand-written scene files normalized to these conventions
 were the emitter's verification targets, gated by comment-stripped code
 equality (`npm run gen <scene> -- --check`). With every scene converted the
 references were deleted (git history keeps them); the gate for emitter changes
-is now `npm run gen` diffs plus a render look.
+is now the committed goldens (`npm run gen -- --goldens` byte-compares every
+scene's chunk against `render-tests/goldens/`; an intended output change is
+re-baked with `--write` so its full blast radius is a git diff).
 
 **Two namespaces, told apart by word order.**
 
@@ -159,9 +161,13 @@ is now `npm run gen` diffs plus a render look.
   `<stem>Bound(vec3 p, ...)` optional. File name == stem. Anything else in the
   file (`roomFace`) is a free-form helper, included verbatim. Multi-output
   shapes name their outputs with one annotation:
-  `//@shape cocktailGlass -> wall, cavity`. The scenegen catalogue is PARSED
-  from these files (vite raw glob + signature parse) — there are no companion
-  JS registry files, and an unparseable `shapes/` file is a loud load error.
+  `//@shape cocktailGlass -> wall, cavity`; a helpers-only file opts out with
+  `//@noshape` and becomes an INCLUDE-ONLY entry (legal in `uses:`, an error
+  to call). The scenegen catalogue is PARSED from these files (vite raw glob
+  + signature parse) — there are no companion JS registry files, and an
+  unparseable `shapes/` file is a loud load error. **Materials are NOT parsed**
+  — they are JS value bundles over the one material model (§5); the model's
+  GLSL (`3Materials/material.glsl`) is engine-global, not a scenegen catalogue.
 - **Kind-first = emitted glue**: `sdf_<name>`, `normal_<name>`,
   `material_<name>`, `medium_<name>`, `bound_<name>`, `trace_<name>`,
   `inside_<name>`, `toLocal_<name>`, `data_<eqn>`, `sdf_Scene`, `trace_Scene`.
@@ -178,14 +184,29 @@ is now `npm run gen` diffs plus a render look.
   a scene with nothing marched returns `maxDist` directly.
 - Every traced object gets a `trace_<name>(Vector tv)` wrapper; `trace_Scene`
   mins the wrappers in declaration order.
-- Constant materials emit their constructor twice — `material_<name>` returns
-  it, `medium_<name>` returns `...interior` — with no shared helper function.
+- Materials are value bundles (§5), emitted so each value appears ONCE:
+  `medium_<name>` is `defaultMedium()` + the interior assignments;
+  `material_<name>` is `defaultMaterial()`, then `m.interior = medium_<name>(p)`
+  for a volume/subsurface (or the interior fields inline for a plain surface),
+  then the surface assignments. (This replaced the old constructor-emitted-twice
+  form.)
 - `material_<name>` takes `bool front` ONLY on sheets.
 - Numbers: integer-valued floats are written `X.0`; everything else plain
   (`0.25`, `14.25`).
 - Slot contracts for authored GLSL bodies: sdf/bound bodies see `q` (local);
   material bodies see `p` (world), `q` (local) and `inout Vector n`; field
-  functions take `vec3 q`.
+  functions take `vec3 q`. **`q`'s frame depends on the slot**, because the two
+  slots want different things on a transformed node (settled July 2026):
+  - **bounds** get PLACEMENT-local `q` = `p - <NAME>_P`. A bound is a cheap
+    world-space enclosing volume; the transform scene's `sphereDistance(q, ...)`
+    is a world-oriented sphere around the centre, and rotate/scale must NOT be
+    applied or it would enclose the wrong region.
+  - **material bodies** get the object's FULLY-local `q`: `p - <NAME>_P` for a
+    plain/displaced object (no transform, so placement-local == fully-local),
+    but `toLocal_<name>(p)` on a transformed one — so a texture rides the
+    rotation/scale, in the same frame the sdf sees. (A displaced object keeps
+    `p - <NAME>_P`, matching its sdf's own `q`, so a height field colours the
+    peak it raised.)
 
 ---
 
@@ -218,9 +239,9 @@ these at the top of the shader.
 
 | flag | condition | effect |
 |---|---|---|
-| `SCENE_SUBSURFACE` | any region has `mfp < maxDist` | **done** — `mediumWalk.glsl` and the `pathTrace` branch vanish; `insideOf` is not needed at all |
+| `SCENE_SUBSURFACE` | any region's material SETS `mfp` (kind = subsurface, §5 — structural, not a value test) | **done** — `mediumWalk.glsl` and the `pathTrace` branch vanish; `insideOf` is not needed at all |
 | `SCENE_INDEX_FIELD` | any region has a varying index | existing engine hook (`odeMarch`) |
-| `SCENE_AMBIENT_MEDIUM` | the scene declares fog | existing engine hook |
+| `SCENE_AMBIENT_MEDIUM` | the scene sets `ambient:` (open-air medium) | derived by the emitter |
 | *transmit* | no region transmits | **not built** — the transmit tier of `scatter()` could compile out |
 
 ### 3.3 Derived numbers
@@ -281,8 +302,14 @@ Settled in the scene-builder design discussion:
   the shared bound) / `sheet` (front/back material slots). Placement (`at`,
   `rotate`, `scale` — knob-driven allowed) lives on the node; the emitter
   derives `toLocal_`, the min-singular-value Lipschitz factor, and the bound.
+  Names are validated loudly: unique scene-wide (units and regions share one
+  namespace, case-insensitively — the `ID_`/const names fold case), and never
+  an emitter local (`d`, `p`, `q`, ...) or a GLSL keyword — a region named `d`
+  would otherwise SILENTLY shadow the `sdf_Scene` accumulator.
 - **Knobs.** `knob('name', {...})` returns a JS binding; self-registers at
-  module eval; name collisions are a loud emit error. Declarations (label,
+  module eval and is drained by `scene()` onto the description (so the
+  description is self-contained and `emit()` is pure); conflicting
+  re-declarations are a loud error. Declarations (label,
   range, default) live in scene.js; current VALUES live in settings.js
   (`export const values = {...}`), merged by the loader; Save-to-Scene writes
   only settings.js (camera pose, uiParams, values). Sky moves INTO scene.js;
@@ -309,7 +336,7 @@ Settled in the scene-builder design discussion:
   declared metadata, the transform's min-singular-value factor. Fields are
   one kind: an authored GLSL function + declared `{gradBound, range}`; the
   noise gradient constants live in PRESETS (`fbm2Height`, `fbmHeight` in
-  presets.js), not in the core. Groups are always AUTHORED bodies assigning
+  `js/presets/fields.js`), not in the core. Groups are always AUTHORED bodies assigning
   their regions (the old lib-group `from:`/cutAbove output-plumbing was
   removed — proto's tumbler form won). Bounds are derived only where
   principled (`<stem>Bound` from the catalogue, displace's inflation);
@@ -318,18 +345,70 @@ Settled in the scene-builder design discussion:
   mechanism, and their design may be refined further.
 - **Nesting is declared** (`nestedIn: 'shell'`), never inferred: it yields the
   `insideOf` exclusion terms and an order check. Capability flags derive from
-  material constructor KINDS (`makeSubsurface` → `SCENE_SUBSURFACE`), not
-  values — mfp can be a live knob.
-- **Engine hooks reserved.** Scene-level `indexField:` and `ambient:` keys will
-  emit the hook function plus its define (`SCENE_INDEX_FIELD`,
-  `SCENE_AMBIENT_MEDIUM`); their exact shape is designed when the blackhole and
-  fog scenes are ported. `scene()` rejects unknown top-level keys so the names
-  are reserved now.
+  material KIND (a bundle that SETS `mfp` → `SCENE_SUBSURFACE`), not values —
+  mfp can be a live knob.
+- **Materials are VALUE BUNDLES built in JS** (decided July 24 2026 after a
+  one-day detour through a parsed constructor catalogue — implemented, then
+  superseded by this design; git history has it). The governing rule is
+  *many sdfs, one material model*: sdfs are genuinely different CODE (many
+  hand-written GLSL files), but a material is a point in the parameter space
+  of ONE fixed model — values, not code. So GLSL keeps only the MODEL
+  (`Surface`/`Medium`/`Material` structs + defaults, `absorbFor` — real math,
+  `mixMaterial` — needs `randomFloat`), and every named material is a JS
+  function returning a bundle of field values. It is ONE FLAT SPACE of presets
+  over a single primitive `material({surf, interior})` (the escape hatch, in
+  `js/scenegen/`, the analogue of authored `glsl\`\`` for sdfs): the archetypes
+  (`matte`…`glow` — the canonical parameterizations) and their specializations
+  (`terracotta`, `honey`, `gold` with its measured F0) differ only in how many
+  fields they bind. All live in `js/presets/materials.js`. **No renames** —
+  archetype arguments are the model's REAL field names (`transmit`, not
+  "clarity"; `specular`, not "specularity"), so a scene and its emitted chunk
+  speak one vocabulary. The emitter builds each object's material function
+  individually from the bundle.
+  - **Each value is emitted exactly ONCE**, factored on the model's own seam:
+    Medium fields in `medium_<name>` (`defaultMedium()` + assignments), Surface
+    fields in `material_<name>`, which starts `Material m = defaultMaterial();`
+    then COMPOSES `m.interior = medium_<name>(p);` (a plain surface skips that
+    line and keeps `defaultMedium()`). This replaced the constructor-emitted-
+    twice convention and eliminates the author-side material/medium duplication
+    for volume interiors.
+  - **Kind derives structurally from which fields a bundle sets** (never from
+    values, so knobs stay live): sets `mfp` → subsurface; sets `transmit`
+    plus any interior field → volume; otherwise surface. The `//@material`
+    annotations, the materials parser, and the kind cross-checker all
+    dissolve.
+  - Composition is data: everything named is a preset, and specialization is
+    just calling one (`honey` → `liquid` → `glass` → `material`); modifiers are
+    merges (`withCoat(gold({roughness: 0.3}))`). A bundle reused across objects
+    is one JS binding emitted per object, stamped `/*name*/` — derived
+    repetition, not a sync hazard.
+  - Authored material BODIES may write the struct directly
+    (`m.surf.roughness = mix(...)`) OR call the `make*` constructors, which are
+    RETAINED (legacy) in `material.glsl` — rock's material field and the room
+    preset still call `makeGloss`/`makeLight` today. **The constructors can't
+    leave GLSL yet**: `material.glsl` and `presets.glsl` are engine-global
+    (`#include`d into every shader), `presets.glsl` calls `make*`, and the
+    hand-written variety scene plus a dozen legacy object files
+    (`objects/varieties/*`, `polytopes/`, `environments/roomBox`,
+    `3Materials/fields.glsl`) call them too. So the constructors delete only as
+    part of the legacy port (variety pass + object-library migration), not as
+    a quick edit — the GLSL model reaches "structs + `absorbFor` + `mixMaterial`
+    only" when its last non-JS caller ports.
+- **Curved-light media.** A medium is an OBJECT whose interior `ior` is a
+  position-varying `glsl\`\`` field (not a scene key). The emitter derives the
+  per-region hooks (`isMedium`, `indexFieldOf`, `SCENE_HAS_MEDIA`) and force-marches
+  the boundary; the engine's `odeMarch` reads the field off `path.region`. Built
+  against the blackhole/luneburg port — see
+  [curved-light-scenegen.md](curved-light-scenegen.md). `ambient:` (fog,
+  `SCENE_AMBIENT_MEDIUM`, derived). `indexField:` stays a reserved-only name;
+  `scene()` rejects unknown top-level keys so it stays held.
 
-Still open, deliberately: the variety builder (§6 — design it against the 14
-legacy variety scenes, carefully), the presets API (`room()`, `sphereLight()` —
-plain JS functions over the schema, no engine involvement), and `//@`
-annotation grammar beyond `//@shape`.
+Built since: the presets API (`js/presets/` — `room()`, `sphereLight()`, the
+field presets, and every named material as a flat space of bundle-presets over
+`material()`). Still open, deliberately: the variety builder (§6 — design it
+against the 14 legacy variety scenes, carefully), which is also when the GLSL
+`make*` constructors finally delete. Annotation grammar is now just `//@shape`
+and `//@noshape`.
 
 ---
 

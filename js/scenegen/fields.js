@@ -12,26 +12,27 @@
 // from code; presets that KNOW their math (fbm2Height in presets.js) fill
 // the declarations in for you.
 //
-// Fields self-register (like knobs) and are emitted in declaration order, in
-// their own section before the sdfs. Reference a field inside authored GLSL
-// by interpolation — `${rockHeight}(q)` — which is also how the emitter
-// learns the dependency.
+// Fields self-register (like knobs, drained by scene() onto the description)
+// and are emitted in declaration order, in their own section before the sdfs.
+// Reference a field inside authored GLSL by interpolation — `${rockHeight}(q)`
+// — which is also how the emitter learns the dependency.
 //-------------------------------------------------
 
-import {dedent} from './fmt.js';
-import {isGlsl, resolveGlsl} from './glslTag.js';
+import {bodyText} from './glslTag.js';
+import {checkReserved} from './fmt.js';
 
 const registry = [];
 
 
 export function field(src, {name, gradBound, range} = {}){
-    const body = isGlsl(src) ? dedent(resolveGlsl(src)) : dedent(String(src));
+    const body = bodyText(src);
     const parsed = body.match(/float\s+(\w+)\s*\(\s*vec3\s+q\s*\)/);
     const fname = name ?? parsed?.[1];
     if(!fname){
         throw new Error(`scenegen: field(): cannot find 'float <name>(vec3 q)' in the source — `
             + `name it explicitly with {name}`);
     }
+    checkReserved('field', fname);
     const f = {
         __field: true,
         name: fname, body,
@@ -46,16 +47,13 @@ export function isField(x){
     return !!(x && x.__field === true);
 }
 
-export function fieldDef(f){
-    return f.body;
-}
-
 export function drainFields(){
     const byName = new Map();
     for(const f of registry){
         const prev = byName.get(f.name);
         if(prev && JSON.stringify(prev) !== JSON.stringify(f)){
-            throw new Error(`scenegen: field '${f.name}' declared twice with different settings`);
+            const differs = Object.keys(f).filter(k => JSON.stringify(f[k]) !== JSON.stringify(prev[k]));
+            throw new Error(`scenegen: field '${f.name}' declared twice with different ${differs.join('/')}`);
         }
         byName.set(f.name, f);
     }

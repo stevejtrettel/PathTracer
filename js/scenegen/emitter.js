@@ -2,94 +2,41 @@
 // THE EMITTER — a scene description -> the GLSL scene chunk
 //
 // Emits glue and structure only, never math (docs/generator.md). The output
-// follows the settled conventions of §2.7 exactly: the normalized hand-written
-// scenes in scenes/ are what this reproduces, checked by comment-stripped code
-// equality (scripts/gen.mjs --check).
+// follows the settled conventions of §2.7 exactly; the regression gate is the
+// committed goldens (`npm run gen -- --goldens`).
 //
-// Planning happens at two levels, mirroring §2.2:
-//
-//   UNIT    one shape evaluation — an object()/sheet(), or a group() feeding
-//           several region slots. Owns the consts, the sdf function(s), the
-//           bound, the trace, and its sdfAll / sdf_Scene contributions.
-//   REGION  one entry in the id space. Owns the normal, the material pair,
-//           and its dispatcher rows. An object is a unit with one region.
-//
-// A plan unit is a plain record:
-//
-//   { name, NAME, entry,                    catalogue entry (null: custom group)
-//     consts, constsExtra,                  const rows + optional authored block
-//     regions,                              [{name, NAME, frameNAME, sheet,
-//                                             material, medium, front/back,
-//                                             nestedIn, scatters}]
-//     analytic,                             true -> traced; false -> marched
-//     sdfDefs, boundDef, traceDef,          emitted function text
-//     sdfAllLine(idW), marchedBlock }       dispatcher / sdf_Scene pieces
+// The work splits in two: plan.js turns each node into a plain UNIT record,
+// and this file validates the plan, prints the sections in the fixed order of
+// the hand files, and merges settings.
 //
 // emit(description, settings) returns {scene, settings} — exactly the input
-// createScene() wants. Knob DECLARATIONS come from the description; current
+// createScene() wants. The description is SELF-CONTAINED (scene() drained the
+// knob/field registries onto it), so emit is pure: same inputs, same chunk,
+// any number of times. Knob DECLARATIONS come from the description; current
 // VALUES come from settings (the file Save-to-Scene writes).
 //-------------------------------------------------
 
-import {fnum, fvec2, fvec3, dedent, indent} from './fmt.js';
-import {isGlsl, resolveGlsl} from './glslTag.js';
-import {isMat} from './materials.js';
-import {drainKnobs} from './knobs.js';
-import {drainFields, fieldDef} from './fields.js';
+import {pad, commentLines, indent} from './fmt.js';
+import {isGlsl, resolveGlsl, bodyText, qLine, valueText} from './glslTag.js';
+import {isMat, matKind, matIsMedium, SURF_FIELDS, MEDIUM_FIELDS} from './materials.js';
+import {planNode} from './plan.js';
 
 
 //-------------------------------------------------
 // text helpers
 //-------------------------------------------------
 
-const pad = (s, w) => s + ' '.repeat(Math.max(0, w - s.length));
-
-function constText(type, v){
-    if(v && v.__knob) throw new Error('scenegen: knobs are uniforms — they never become consts');
-    if(isGlsl(v))        return resolveGlsl(v);
-    if(type === 'vec3')  return fvec3(v);
-    if(type === 'vec2')  return fvec2(v);
-    if(type === 'float') return fnum(v);
-    if(type === 'int'){
-        if(!Number.isInteger(v)) throw new Error(`scenegen: expected an int, got ${v}`);
-        return String(v);
-    }
-    throw new Error(`scenegen: no const formatting for type ${type}`);
-}
-
-//an authored glsl`` body (or a raw string from a ?raw import), dedented
-function bodyText(x){
-    if(isGlsl(x)) return dedent(resolveGlsl(x));
-    if(typeof x === 'string') return dedent(x);
-    throw new Error(`scenegen: expected a glsl\`\` fragment or raw source string`);
-}
-
-//a material slot as one EXPRESSION (a constructor mirror, or authored glsl)
-function matExprText(x){
-    if(isMat(x))  return x.text;
+//a sheet face given as an authored glsl`` expression returning a Material
+//(a bundle face is emitted by bundleBody instead, never routed here)
+function matExprText(x, where){
     if(isGlsl(x)) return resolveGlsl(x);
-    throw new Error('scenegen: expected a material constructor or a glsl`` expression');
-}
-
-//a knob or a plain number, as text
-function refText(v){
-    if(v && v.__knob) return v.name;
-    if(typeof v === 'number') return fnum(v);
-    throw new Error(`scenegen: expected a knob or a number, got ${JSON.stringify(v)}`);
-}
-
-function commentLines(text){
-    return text.split('\n').map(l => `//${l}`).join('\n');
+    throw new Error(`scenegen: ${where}: expected a material bundle or a glsl\`\` expression`);
 }
 
 function sectionHeader(title){
     const lines = title.split('\n').map(l => `// ${l}`.trimEnd()).join('\n');
     return `//---------------------------------------------------------------------\n${lines}\n//---------------------------------------------------------------------`;
 }
-
-
-//-------------------------------------------------
-// shared emission pieces
-//-------------------------------------------------
 
 //the 4-tap: always the numerical gradient of the region's own SIGNED sdf, in
 //world coordinates — transforms baked in the sdf are handled by the chain rule
@@ -99,257 +46,6 @@ const norm4tap = (name) =>
     return Vector(p, normalize( k.xyy*sdf_${name}(p + k.xyy*NRM_E) + k.yyx*sdf_${name}(p + k.yyx*NRM_E)
                               + k.yxy*sdf_${name}(p + k.yxy*NRM_E) + k.xxx*sdf_${name}(p + k.xxx*NRM_E) ));
 }`;
-
-//consts + per-parameter argument text for one shape reference. Description-
-//supplied values become named consts `<NAME>_<PARAM>`; knobs stay bare (they
-//are uniforms already); glsl`` fragments are inlined.
-function shapeArgs(NAME, shape, consts){
-    const argFor = {};
-    for(const p of shape.entry.params){
-        const v = shape.values[p.name];
-        if(v && v.__knob){ argFor[p.name] = v.name; }
-        else if(isGlsl(v)){ argFor[p.name] = resolveGlsl(v); }
-        else{
-            const cname = `${NAME}_${p.name.toUpperCase()}`;
-            consts.push({type: p.type, name: cname, text: constText(p.type, v)});
-            argFor[p.name] = cname;
-        }
-    }
-    return argFor;
-}
-
-//an authored bound: a single expression, with q provided if the body reads it
-function authoredBound(name, NAME, src){
-    const bexpr = bodyText(src);
-    const qLine = /\bq\b/.test(bexpr) ? `    vec3 q = p - ${NAME}_P;\n` : '';
-    return `float bound_${name}(vec3 p){\n${qLine}    return ${bexpr};\n}`;
-}
-
-//the Lipschitz divisor of amp*field(q): 1 + amp*gradBound(field), with the
-//field's DECLARED gradBound expression kept intact, parenthesized
-function divisorText(f, ampT){
-    return `1.0 + ${ampT}*(${resolveGlsl(f.gradBound)})`;
-}
-
-
-//-------------------------------------------------
-// planning — objects and sheets (units with one region)
-//-------------------------------------------------
-
-function makeRegion(name, spec, frameNAME){
-    return {
-        name, NAME: name.toUpperCase(), frameNAME, sheet: false,
-        material: spec.material,
-        medium:   spec.medium ?? null,
-        comment:  spec.comment ?? null,
-        nestedIn: spec.nestedIn ?? null,
-        scatters: isMat(spec.material) && spec.material.kind === 'subsurface',
-    };
-}
-
-//the four sdf forms of a simple shape. Each returns {sdfDef, boundDef};
-//boundDef is null when nothing useful can be derived (an authored `bound:`
-//on the node overrides either way). ctx: {name, NAME, entry, args, argFor,
-//comment} — the resolved naming of one shape reference.
-
-function sdfPlain(node, c){
-    return {
-        sdfDef: `${c.comment}float sdf_${c.name}(vec3 p){\n    return ${c.entry.stem}Distance(p - ${c.NAME}_P, ${c.args.join(', ')});\n}`,
-        boundDef: c.entry.bound
-            ? `float bound_${c.name}(vec3 p){\n    return ${c.entry.stem}Bound(p - ${c.NAME}_P, ${c.entry.bound.map(n => c.argFor[n]).join(', ')});\n}`
-            : null,
-    };
-}
-
-function sdfDisplaced(node, c){
-    const f    = node.shape.by;
-    const ampT = refText(node.shape.amp);
-    //the bound is the undisplaced shape pushed out by the largest possible
-    //displacement — without the inflation it would shave off the peaks
-    const maxAbs = Math.max(Math.abs(f.range[0]), Math.abs(f.range[1]));
-    return {
-        sdfDef: `${c.comment}float sdf_${c.name}(vec3 p){\n`
-            + `    vec3  q = p - ${c.NAME}_P;\n`
-            + `    float d = ${c.entry.stem}Distance(q, ${c.args.join(', ')});\n`
-            + `    d += ${ampT}*${f.name}(q);\n`
-            + `    return d/(${divisorText(f, ampT)});\n}`,
-        boundDef: `float bound_${c.name}(vec3 p){\n`
-            + `    return ${c.entry.stem}Distance(p - ${c.NAME}_P, ${c.args.join(', ')}) - ${fnum(maxAbs)}*${ampT};\n}`,
-    };
-}
-
-function sdfRepLim(node, c){
-    //one region, many copies: fold the grid onto a single cell. No derived
-    //bound — a lattice bound (one box over the whole grid) is authored.
-    return {
-        sdfDef: `${c.comment}float sdf_${c.name}(vec3 p){\n`
-            + `    vec3 q = opRepLim(p - ${c.NAME}_P, ${c.NAME}_SPACING, ${c.NAME}_LIMIT);\n`
-            + `    return ${c.entry.stem}Distance(q, ${c.args.join(', ')});\n}`,
-        boundDef: null,
-    };
-}
-
-function sdfTransformed(node, c){
-    //world -> local: undo the placement, then the rotation (GLSL's v*M is the
-    //rotation's inverse), then the scale
-    const rotLn = node.rotate
-        ? `    mat3 rot = rot3AxisAngle(normalize(${c.NAME}_AXIS), ${refText(node.rotate.angle)});\n`
-        : '';
-    let back;
-    if(node.rotate && node.scale) back = `((p - ${c.NAME}_P) * rot) / ${c.NAME}_SCALE`;
-    else if(node.rotate)          back = `(p - ${c.NAME}_P) * rot`;
-    else                          back = `(p - ${c.NAME}_P) / ${c.NAME}_SCALE`;
-    const toLocal = `vec3 toLocal_${c.name}(vec3 p){\n${rotLn}    return ${back};\n}`;
-
-    //a non-uniform scale makes the local sdf overestimate world distance by
-    //the largest singular value; multiplying by the smallest component
-    //restores a conservative underestimate. The 4-tap normal needs NO fixup —
-    //it differentiates the world function (chain rule).
-    const S   = `${c.NAME}_SCALE`;
-    const lip = node.scale ? ` * min(${S}.x, min(${S}.y, ${S}.z))` : '';
-    return {
-        sdfDef: toLocal + '\n\n'
-            + `${c.comment}float sdf_${c.name}(vec3 p){\n`
-            + `    float d = ${c.entry.stem}Distance(toLocal_${c.name}(p), ${c.args.join(', ')});\n`
-            + `    return d${lip};\n}`,
-        boundDef: null,       //no derived bound: a transformed body's bound is authored
-    };
-}
-
-
-function planObject(node){
-    const name = node.name;
-    const NAME = name.toUpperCase();
-    if(!node.shape || !node.shape.__shape){
-        throw new Error(`scenegen: ${node.__node}('${name}'): shape must come from lib.<stem>({...})`);
-    }
-    const entry = node.shape.entry;
-    if(entry.outputs){
-        throw new Error(`scenegen: object('${name}'): ${entry.stem} yields several outputs (${entry.outputs.join(', ')}) — `
-            + `call it from a group's authored sdf body (with uses: [lib.${entry.stem}])`);
-    }
-
-    const kind        = node.shape.kind ?? 'plain';
-    const transformed = !!(node.scale || node.rotate);
-    if(transformed && kind !== 'plain'){
-        throw new Error(`scenegen: object('${name}'): rotate/scale cannot combine with ${kind} yet`);
-    }
-    if(node.rotate && (!node.rotate.axis || node.rotate.angle === undefined)){
-        throw new Error(`scenegen: object('${name}'): rotate needs {axis: [x,y,z], angle}`);
-    }
-
-    //consts: placement, then transform data, then wrapper params, then the
-    //shape's own parameters — matching the hand files' block order
-    const consts = [{type: 'vec3', name: `${NAME}_P`, text: fvec3(node.at)}];
-    if(node.scale)  consts.push({type: 'vec3', name: `${NAME}_SCALE`, text: fvec3(node.scale)});
-    if(node.rotate) consts.push({type: 'vec3', name: `${NAME}_AXIS`,  text: fvec3(node.rotate.axis)});
-    if(kind === 'repLim'){
-        consts.push({type: 'float', name: `${NAME}_SPACING`, text: constText('float', node.shape.spacing)});
-        consts.push({type: 'vec3',  name: `${NAME}_LIMIT`,   text: fvec3(node.shape.limit)});
-    }
-    const argFor = shapeArgs(NAME, node.shape, consts);
-    const args   = entry.params.map(p => argFor[p.name]);
-
-    //trace routing: a displaced, repeated, or transformed shape has no closed
-    //form any more, so it loses its trace and marches
-    const analytic = !!entry.trace && kind === 'plain' && !transformed;
-    const comment  = node.comment ? commentLines(node.comment) + '\n' : '';
-
-    const ctx = {name, NAME, entry, args, argFor, comment};
-    const build = kind === 'displaced' ? sdfDisplaced
-                : kind === 'repLim'    ? sdfRepLim
-                : transformed          ? sdfTransformed
-                :                        sdfPlain;
-    let {sdfDef, boundDef} = build(node, ctx);
-
-    //an authored bound is authored knowledge: it beats anything derived
-    if(node.bound) boundDef = authoredBound(name, NAME, node.bound);
-
-    //a sheet is the same unit with a two-faced region instead of a material.
-    //(node.comment belongs to the sdf; region comments come from group specs)
-    const region = (node.__node === 'sheet')
-        ? {name, NAME, frameNAME: NAME, sheet: true, front: node.front, back: node.back,
-           medium: null, comment: null, nestedIn: null, scatters: false}
-        : makeRegion(name, {material: node.material, medium: node.medium, nestedIn: node.nestedIn}, NAME);
-
-    return {
-        name, NAME, entry, usesEntries: (node.uses ?? []).map(u => u.entry), consts, constsExtra: null, analytic,
-        regions: [region],
-        sdfDefs: sdfDef,
-        boundDef,
-        sdfAllLine: (idW) => `    gSDF[${pad(`ID_${NAME}`, idW)}] = sdf_${name}(p);`,
-        marchedBlock: analytic ? null : (boundDef
-            ? `    float b_${name} = bound_${name}(p);\n    d = min(d, (b_${name} > BOUND_MARGIN) ? b_${name} : sdf_${name}(p));`
-            : `    d = min(d, sdf_${name}(p));`),
-        traceDef: analytic
-            ? `float trace_${name}(Vector tv){\n    return ${entry.stem}Trace(tv, ${NAME}_P, ${entry.trace.map(n => argFor[n]).join(', ')});\n}`
-            : null,
-    };
-}
-
-
-//-------------------------------------------------
-// planning — groups (one shape evaluation, several region slots)
-//-------------------------------------------------
-
-const WRAPPER_NOTE = '//single-region entry points, for the 4-tap normals';
-
-//per-region sdf wrappers: a 4-tap normal has to differentiate one region at a
-//time, so each region gets a single-output entry point over the group call
-function regionWrappers(name, regionNames){
-    const paramList = regionNames.join(', ');
-    return regionNames.map(r =>
-        `float sdf_${r}(vec3 p){ float ${paramList}; sdf_${name}(p, ${paramList}); return ${r}; }`
-    ).join('\n');
-}
-
-function groupSdfAllLine(name, regionNames){
-    return () => `    sdf_${name}(p, ${regionNames.map(r => `gSDF[ID_${r.toUpperCase()}]`).join(', ')});`;
-}
-
-//sdf_Scene form: the group bound guards ONE evaluation of the shape,
-//min-ing every region it produced
-function groupMarchedBlock(name, regionNames, hasBound){
-    const paramList = regionNames.join(', ');
-    const evalAll = `        float ${paramList};\n        sdf_${name}(p, ${paramList});\n`
-                  + `        d = min(d, ${regionNames.reduce((a, b) => `min(${a}, ${b})`)});`;
-    return hasBound
-        ? `    float b_${name} = bound_${name}(p);\n`
-          + `    if(b_${name} > BOUND_MARGIN){ d = min(d, b_${name}); }\n`
-          + `    else{\n${evalAll}\n    }`
-        : `    {\n${evalAll}\n    }`;
-}
-
-
-//a group: one AUTHORED sdf evaluation feeding several region slots. In
-//scope: p (world), q (local, provided), and the region names as out params
-//the body assigns. The optional consts block sits with the placement const;
-//library calls inside the body declare their file via `uses:`.
-function planGroup(node){
-    const name  = node.name;
-    const NAME  = name.toUpperCase();
-    const regionNames = Object.keys(node.regions);
-    const regions = regionNames.map(r => makeRegion(r, node.regions[r], NAME));
-
-    const consts  = [{type: 'vec3', name: `${NAME}_P`, text: fvec3(node.at)}];
-    const comment = node.comment ? commentLines(node.comment) + '\n' : '';
-    const sig     = regionNames.map(r => `out float ${r}`).join(', ');
-    const groupFn = `${comment}void sdf_${name}(vec3 p, ${sig}){\n`
-        + `    vec3  q = p - ${NAME}_P;\n${indent(bodyText(node.sdf), 4)}\n}`;
-
-    const boundDef = node.bound ? authoredBound(name, NAME, node.bound) : null;
-
-    return {
-        name, NAME, entry: null, usesEntries: (node.uses ?? []).map(u => u.entry), consts,
-        constsExtra: node.consts ? bodyText(node.consts) : null,
-        analytic: false, regions,
-        sdfDefs: groupFn + `\n\n${WRAPPER_NOTE}\n` + regionWrappers(name, regionNames),
-        boundDef,
-        sdfAllLine: groupSdfAllLine(name, regionNames),
-        marchedBlock: groupMarchedBlock(name, regionNames, !!boundDef),
-        traceDef: null,
-    };
-}
 
 
 //-------------------------------------------------
@@ -379,11 +75,37 @@ function constsSection(units){
 function fieldsSection(fields){
     return sectionHeader('the fields — shared functions of a local point,\n'
         + ' usable by sdfs (displacement) and materials (colour) alike')
-        + '\n\n' + fields.map(fieldDef).join('\n\n');
+        + '\n\n' + fields.map(f => f.body).join('\n\n');
 }
 
 function sdfsSection(units){
     return sectionHeader('the region sdfs') + '\n\n' + units.map(u => u.sdfDefs).join('\n\n');
+}
+
+//the curved-light media (docs/curved-light-scenegen.md). A medium is an object
+//whose interior IOR is a position-varying field; each such region contributes
+//    float indexField_<name>(vec3 q)      the index n, in the object's own frame
+// and the two id-keyed dispatchers the ODE marcher reads off path.region:
+//    bool  isMedium(int id)               is this region a curved medium?
+//    float indexFieldOf(int id, vec3 p)   -> indexField_<name>(p - <NAME>_P)
+// The field function is the SINGLE source: indexFieldOf calls it (odeMarch), and
+// the region's own medium_ IOR is emitted as the same call (the dynamic wall, so
+// Snell at the surface matches the interior eikonal — one field, no duplication).
+// Emitted BEFORE the sdfs/materials so both dispatchers and the wall can call it.
+function mediumSection(media){
+    //q is the object's own local frame — the field is authored in it, same as a
+    //material body. A single-expression field: `return <expr>;`
+    const fieldFns = media.map(r =>
+        `float indexField_${r.name}(vec3 q){\n    return ${r.fieldBody};\n}`);
+
+    const isMedium = `bool isMedium(int id){ return ${media.map(r => `id == ID_${r.NAME}`).join(' || ')}; }`;
+
+    const rows = media.map(r =>
+        `    if(id == ID_${r.NAME}){ return indexField_${r.name}(p - ${r.NAME}_P); }`).join('\n');
+    const indexFieldOf = `float indexFieldOf(int id, vec3 p){\n${rows}\n    return 1.0;   //not a medium: vacuum\n}`;
+
+    return sectionHeader('the media — a per-region varying index the ODE marcher bends light through')
+        + '\n\n' + fieldFns.join('\n\n') + '\n\n' + isMedium + '\n\n' + indexFieldOf;
 }
 
 //"is p inside region k" — NOT sdf < 0 when regions nest: the shell's solid
@@ -416,6 +138,32 @@ function normalsSection(regions){
         + regions.map(r => norm4tap(r.name)).join('\n\n');
 }
 
+//aligned `<lhs>.<field> = <value>;` rows for the fields a bundle sets, in
+//the struct's own declaration order
+function assignLines(lhs, order, fields){
+    const keys = order.filter(k => fields[k] !== undefined);
+    const w = Math.max(...keys.map(k => `${lhs}.${k}`.length));
+    return keys.map(k => `    ${pad(`${lhs}.${k}`, w)} = ${valueText(fields[k])};`).join('\n');
+}
+
+//a bundle emitted as one material function body: defaultMaterial() + the
+//assignments. `interiorFrom` is the medium_ call for a real interior, null
+//for a surface material (whose stray interior fields — plastic's ior — are
+//assigned inline: they shape the Fresnel, but the far side stays open air).
+//localPoint gives `q` its value, but only when a field expression reads it — a
+//bundle field may be a glsl`` expression of the local point (the foam gradient),
+//exactly as an interior IOR may be (the curved-media field).
+function bundleBody(m, interiorFrom, localPoint){
+    const stamp = m.name ? `      //${m.name}` : '';
+    const lines = [`    Material m = defaultMaterial();${stamp}`];
+    if(interiorFrom) lines.push(`    m.interior = ${interiorFrom};`);
+    if(Object.keys(m.surf).length) lines.push(assignLines('m.surf', SURF_FIELDS, m.surf));
+    if(!interiorFrom && Object.keys(m.interior).length) lines.push(assignLines('m.interior', MEDIUM_FIELDS, m.interior));
+    lines.push('    return m;');
+    const body = lines.join('\n');
+    return qLine(body, localPoint) + body;
+}
+
 function materialFns(r){
     const matName = `material_${r.name}`;
     const medName = `medium_${r.name}`;
@@ -424,31 +172,52 @@ function materialFns(r){
     //a sheet: two faces, one infinitely thin surface. No interior, so medium_
     //is never consulted — the classifier uses the CONTAINING region's medium.
     if(r.sheet){
+        const checkFace = (side, which) => {
+            if(isMat(side) && matKind(side) !== 'surface'){
+                throw new Error(`scenegen: sheet '${r.name}' ${which}: a sheet face has no interior — `
+                    + `use a surface material`);
+            }
+        };
+        checkFace(r.front, 'front');
+        checkFace(r.back, 'back');
+        const frontTxt = isMat(r.front)
+            ? `    if(front){\n${indent(bundleBody(r.front, null, r.localPoint), 4)}\n    }`
+            : `    if(front){ return ${matExprText(r.front, `sheet '${r.name}' front`)}; }`;
+        const backTxt = isMat(r.back)
+            ? bundleBody(r.back, null, r.localPoint)
+            : `    return ${matExprText(r.back, `sheet '${r.name}' back`)};`;
         return comment
-             + `Material ${matName}(vec3 p, inout Vector n, bool front){\n`
-             + `    if(front){ return ${matExprText(r.front)}; }\n`
-             + `    return ${matExprText(r.back)};\n}\n`
+             + `Material ${matName}(vec3 p, inout Vector n, bool front){\n${frontTxt}\n${backTxt}\n}\n`
              + `Medium ${medName}(vec3 p){ return defaultMedium(); }`;
     }
 
-    //a constant material: the constructor emitted twice — the Surface side and
-    //the Medium side — with no shared helper (docs/generator.md §2.7)
+    //a BUNDLE: each value emitted exactly once, factored on the model's seam —
+    //Medium fields in medium_, Surface fields in material_, which composes
+    //m.interior = medium_<name>(p). (docs/generator.md §5)
     const m = r.material;
     if(isMat(m)){
-        const interior = (m.kind === 'volume' || m.kind === 'subsurface')
-            ? `${m.text}.interior`
-            : 'defaultMedium()';
-        //pad medium_'s name so its ( aligns under material_'s
-        return comment
-             + `Material ${matName}(vec3 p, inout Vector n){ return ${m.text}; }\n`
-             + `Medium   ${pad(medName, matName.length)}(vec3 p){ return ${interior}; }`;
+        const kind = matKind(m);
+        if(kind === 'surface'){
+            return comment
+                 + `Material ${matName}(vec3 p, inout Vector n){\n${bundleBody(m, null, r.localPoint)}\n}\n`
+                 + `Medium   ${pad(medName, matName.length)}(vec3 p){ return defaultMedium(); }`;
+        }
+        //real interior: medium_ first (material_ calls it). Its fields may vary
+        //with position (foam), so q is provided when an assignment reads it.
+        const medAssign = assignLines('m', MEDIUM_FIELDS, m.interior);
+        const medFn = `Medium ${medName}(vec3 p){\n`
+            + `    Medium m = defaultMedium();\n`
+            + qLine(medAssign, r.localPoint)
+            + medAssign + '\n'
+            + `    return m;\n}`;
+        return comment + medFn + '\n'
+             + `Material ${matName}(vec3 p, inout Vector n){\n${bundleBody(m, `${medName}(p)`, r.localPoint)}\n}`;
     }
 
     //a FIELD: an authored body. In scope: p (world), q (local), n. The q line
     //is emitted only when the body actually reads it.
     const body  = bodyText(m);
-    const qLine = /\bq\b/.test(body) ? `    vec3 q = p - ${r.frameNAME}_P;\n` : '';
-    const matFn = `${comment}Material ${matName}(vec3 p, inout Vector n){\n${qLine}${indent(body, 4)}\n}`;
+    const matFn = `${comment}Material ${matName}(vec3 p, inout Vector n){\n${qLine(body, r.localPoint)}${indent(body, 4)}\n}`;
 
     if(!r.medium){
         return matFn + `\nMedium ${medName}(vec3 p){ return defaultMedium(); }`;
@@ -463,6 +232,18 @@ function materialsSection(regions){
         + '\n\n' + regions.map(materialFns).join('\n\n');
 }
 
+//the ambient medium: open air (region ID_NONE) as a scattering medium. Emitted
+//as one argless Medium that mediumOf returns for ID_NONE, so a ray in open air
+//carries it as path.medium and ambientTransport (engine) reads it — no separate
+//ambient vocabulary (docs/curved-light-scenegen.md sibling: the ID_NONE medium).
+function ambientSection(ambient){
+    return sectionHeader('the ambient medium — open air (ID_NONE) as a scattering medium')
+        + '\n\n'
+        + `Medium ambientMedium(){\n    Medium m = defaultMedium();\n`
+        + assignLines('m', MEDIUM_FIELDS, ambient) + '\n'
+        + `    return m;\n}`;
+}
+
 function tracesSection(units){
     const traced = units.filter(u => u.traceDef);
     if(!traced.length) return null;
@@ -470,7 +251,7 @@ function tracesSection(units){
         + traced.map(u => u.traceDef).join('\n\n');
 }
 
-function dispatchersSection(units, regions, scatters){
+function dispatchersSection(units, regions, scatters, airMedium){
     const idW  = Math.max(...regions.map(r => `ID_${r.NAME}`.length));
     const last = regions[regions.length - 1];
     const row  = (r, body) => `    if(id == ${pad(`ID_${r.NAME}`, idW)}){ return ${body}; }`;
@@ -499,7 +280,7 @@ function dispatchersSection(units, regions, scatters){
         + `Vector normalOf(int id, vec3 p){\n${chain(r => `normal_${r.name}(p)`)}\n}\n\n`
         + isSheetTxt + '\n\n'
         + `Material materialOf(int id, vec3 p, inout Vector n, bool front){\n${chain(r => r.sheet ? `material_${r.name}(p, n, front)` : `material_${r.name}(p, n)`)}\n}\n\n`
-        + `Medium mediumOf(int id, vec3 p){\n${regions.map(r => row(r, `medium_${r.name}(p)`)).join('\n')}\n    return defaultMedium();      //ID_NONE: open air\n}`;
+        + `Medium mediumOf(int id, vec3 p){\n${regions.map(r => row(r, `medium_${r.name}(p)`)).join('\n')}\n    return ${airMedium};      //ID_NONE: open air\n}`;
 }
 
 function entrySection(units){
@@ -524,13 +305,69 @@ function entrySection(units){
 
 
 //-------------------------------------------------
-// emit
+// validation — every check over the assembled plan
 //-------------------------------------------------
 
-function planNode(node){
-    if(node.__node === 'object' || node.__node === 'sheet') return planObject(node);
-    if(node.__node === 'group') return planGroup(node);
-    throw new Error(`scenegen: node kind '${node.__node}' is not emittable yet`);
+//every unit and region name is one entry in a single scene-wide namespace
+//(an object IS its own region, so the shared name counts once). A collision
+//would otherwise surface as a confusing duplicate-symbol shader error.
+function validateNames(units, knobs, fields){
+    const seen = new Map();     //UPPERCASE -> original, so case-collisions in ID_/const names are caught too
+    for(const u of units){
+        const names = [u.name, ...u.regions.map(r => r.name).filter(n => n !== u.name)];
+        for(const n of names){
+            const prev = seen.get(n.toUpperCase());
+            if(prev !== undefined){
+                throw new Error(`scenegen: the name '${n}' is used twice (as '${prev}' and '${n}') — `
+                    + `every object, group, and region name must be unique in the scene`);
+            }
+            seen.set(n.toUpperCase(), n);
+        }
+    }
+
+    //knobs and fields are the two BARE symbol families (uniforms, functions):
+    //a shared name is one GLSL symbol declared twice
+    const knobNames = new Set(knobs.map(k => k.name));
+    for(const f of fields){
+        if(knobNames.has(f.name)){
+            throw new Error(`scenegen: '${f.name}' is both a knob and a field — one symbol, `
+                + `two GLSL declarations; rename one`);
+        }
+    }
+}
+
+//a declared `uses:` must be USED: at least one name the file defines has to
+//appear in the emitted body (authored code lands there resolved) or in some
+//other included library file. Catches a stale uses: before it silently ships
+//a dead include in every chunk. (A name mentioned only in a comment passes —
+//the check is deliberately permissive, erring toward never blocking a scene.)
+function validateUses(units, includes, bodyPool){
+    for(const u of units){
+        for(const entry of u.usesEntries){
+            const names = [
+                ...[...entry.src.matchAll(/(?:float|int|bool|void|vec[234]|mat[234])\s+(\w+)\s*\(/g)].map(m => m[1]),
+                ...[...entry.src.matchAll(/\bconst\s+\w+\s+(\w+)\s*=/g)].map(m => m[1]),
+            ];
+            const pool = bodyPool + includes.filter(e => e.stem !== entry.stem).map(e => e.src).join('\n');
+            if(!names.some(n => new RegExp(`\\b${n}\\b`).test(pool))){
+                throw new Error(`scenegen: '${u.name}' declares uses: [lib.${entry.stem}], but nothing references `
+                    + `that file (looked for: ${names.join(', ')}) — remove the stale uses:`);
+            }
+        }
+    }
+}
+
+//the names of every region that is a medium (interior IOR is a varying field),
+//read off the description nodes before planning — object regions and group slots
+function mediumNames(objects){
+    const names = new Set();
+    for(const node of objects){
+        if(node.material && matIsMedium(node.material)) names.add(node.name);
+        for(const [rn, spec] of Object.entries(node.regions ?? {})){
+            if(spec.material && matIsMedium(spec.material)) names.add(rn);
+        }
+    }
+    return names;
 }
 
 //nesting is declared, and declaration order is containment priority: a nested
@@ -550,54 +387,100 @@ function validateNesting(regions){
 }
 
 
+//-------------------------------------------------
+// emit
+//-------------------------------------------------
+
 export function emit(description, settings = {}){
     if(!description || !description.__scene){
         throw new Error('scenegen: emit() takes the default export of scene.js (a scene({...}))');
     }
 
-    const knobs    = drainKnobs();
-    const fields   = drainFields();
-    const units    = description.objects.map(planNode);
+    const knobs    = description.knobs  ?? [];
+    const fields   = description.fields ?? [];
+
+    //open air (region ID_NONE) may be given a scattering medium — that is all
+    //"ambient fog" is. Validate its fields against the Medium model, exactly like
+    //a material's interior.
+    const ambient  = description.ambient ?? null;
+    if(ambient){
+        if(typeof ambient !== 'object' || Array.isArray(ambient) || !Object.keys(ambient).length){
+            throw new Error('scenegen: ambient: must be a set of Medium fields (e.g. fog({mfp: 12}))');
+        }
+        for(const k of Object.keys(ambient)){
+            if(!MEDIUM_FIELDS.includes(k)){
+                throw new Error(`scenegen: ambient: no field '${k}' in the Medium model (have: ${MEDIUM_FIELDS.join(', ')})`);
+            }
+        }
+    }
+
+    //a MEDIUM is any region whose interior IOR is a position-varying field (a
+    //bundle with a glsl`` ior). Its boundary is forced to march — odeMarch finds
+    //the wall by an sdf_Scene sign change, never a trace — decided up front, before
+    //planning, from the materials on the description nodes.
+    const forceMarch = mediumNames(description.objects);
+    const units    = description.objects.map(node => planNode(node, forceMarch));
     const regions  = units.flatMap(u => u.regions);
     const scatters = regions.some(r => r.scatters);
+    validateNames(units, knobs, fields);
     validateNesting(regions);
 
-    //---- the chunk ------------------------------------------------------
-    const parts = [];
-    parts.push(`//=====================================================================\n`
-             + `// generated by scenegen from src/scene.js — do not edit by hand\n`
-             + `//=====================================================================`);
+    //resolve each medium region's field ONCE into indexField_<name>(q), and point
+    //its own interior IOR at that same function (the dynamic wall) — one source for
+    //odeMarch and Snell. Mutates the fresh region record, not the description.
+    const media = regions.filter(r => matIsMedium(r.material));
+    for(const r of media){
+        if(r.sheet) throw new Error(`scenegen: '${r.name}' is a sheet with a varying IOR — a sheet has no interior; a medium needs a solid region`);
+        r.fieldBody = resolveGlsl(r.material.interior.ior);
+        r.material  = {...r.material, interior: {...r.material.interior,
+            ior: {__expr: true, text: `indexField_${r.name}(p - ${r.NAME}_P)`}}};
+    }
 
     //library includes, inlined (the chunk is a runtime string, so no #include):
     //a unit needs its shape's file, plus anything its authored code `uses:`
+    const includes = [];
     const seen = new Set();
     for(const u of units){
         for(const entry of [...u.usesEntries, ...(u.entry ? [u.entry] : [])]){
             if(seen.has(entry.stem)) continue;
             seen.add(entry.stem);
-            parts.push(`//--- library: ${entry.file} ---\n` + entry.src.trimEnd());
+            includes.push(entry);
         }
     }
 
+    //---- the chunk ------------------------------------------------------
+    const sections = [];
+
     //scene-level authored GLSL blocks, verbatim
     for(const block of description.glsl ?? []){
-        parts.push(bodyText(block));
+        sections.push(bodyText(block));
     }
 
-    parts.push(idsSection(regions));
-    parts.push(constsSection(units));
-    if(fields.length) parts.push(fieldsSection(fields));
-    parts.push(sdfsSection(units));
-    if(scatters) parts.push(insideSection(regions));
+    sections.push(idsSection(regions));
+    sections.push(constsSection(units));
+    if(fields.length) sections.push(fieldsSection(fields));
+    if(media.length)  sections.push(mediumSection(media));
+    sections.push(sdfsSection(units));
+    if(scatters) sections.push(insideSection(regions));
     const bounds = boundsSection(units);
-    if(bounds) parts.push(bounds);
-    parts.push(normalsSection(regions));
-    parts.push(materialsSection(regions));
+    if(bounds) sections.push(bounds);
+    sections.push(normalsSection(regions));
+    sections.push(materialsSection(regions));
+    if(ambient) sections.push(ambientSection(ambient));
     const traces = tracesSection(units);
-    if(traces) parts.push(traces);
-    parts.push(dispatchersSection(units, regions, scatters));
-    parts.push(entrySection(units));
+    if(traces) sections.push(traces);
+    sections.push(dispatchersSection(units, regions, scatters, ambient ? 'ambientMedium()' : 'defaultMedium()'));
+    sections.push(entrySection(units));
 
+    validateUses(units, includes, sections.join('\n'));
+
+    const parts = [
+        `//=====================================================================\n`
+      + `// generated by scenegen from src/scene.js — do not edit by hand\n`
+      + `//=====================================================================`,
+        ...includes.map(e => `//--- library: ${e.file} ---\n` + e.src.trimEnd()),
+        ...sections,
+    ];
     const chunk = parts.join('\n\n\n') + '\n';
 
     //---- settings merge -------------------------------------------------
@@ -610,6 +493,8 @@ export function emit(description, settings = {}){
     const defines = [...new Set([
         ...(settings.defines ?? []),
         ...(scatters ? ['SCENE_SUBSURFACE'] : []),
+        ...(media.length ? ['SCENE_HAS_MEDIA'] : []),      //stands the engine isMedium/indexFieldOf defaults down
+        ...(ambient ? ['SCENE_AMBIENT_MEDIUM'] : []),      //compiles ambientTransport in (derived, not hand-#defined)
     ])];
 
     const outSettings = {...settings, params};

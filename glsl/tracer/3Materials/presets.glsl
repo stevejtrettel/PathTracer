@@ -3,6 +3,11 @@
 // material.glsl. Every preset takes a color; overloads expose the extra
 // parameter worth touching (and a no-arg classic where one exists). Tuning
 // reference: demos/presets renders one sphere of each.
+//
+// LEGACY for generated scenes: the live named-material source is
+// js/presets/materials.js (JS value bundles, docs/generator.md §5). This
+// file remains for hand-written GLSL callers (variety scene, demo branch)
+// and deletes when those migrate — keep the two in sync until then.
 //-------------------------------------------------
 
 
@@ -143,21 +148,6 @@ Material makeMarble(vec3 color){
     return makeMarble(color, 0.06);
 }
 
-
-//------ ambient-medium presets --------------------------------------------
-// a scene opts into fog with:
-//     #define SCENE_AMBIENT_MEDIUM
-//     AMBIENT_FOG(12., 0.7)
-// (see ambient.glsl for the hook contract these expand into)
-
-#define AMBIENT_FOG(mfpV, blurV)                       \
-    float ambientMFP(){    return mfpV; }              \
-    float ambientBlur(){   return blurV; }             \
-    vec3  ambientAbsorb(){ return vec3(0.); }          \
-    vec3  ambientEmit(){   return vec3(0.); }
-
-#define AMBIENT_MEDIUM(mfpV, blurV, absorbV, emitV)    \
-    float ambientMFP(){    return mfpV; }              \
-    float ambientBlur(){   return blurV; }             \
-    vec3  ambientAbsorb(){ return absorbV; }           \
-    vec3  ambientEmit(){   return emitV; }
+//ambient fog is no longer a bolt-on hook: open air is region ID_NONE, so a scene
+//sets its medium with `ambient:` and the generator emits it into mediumOf(ID_NONE)
+//(the ambientMFP/AMBIENT_FOG accessors + macros are gone). See ambient.glsl.

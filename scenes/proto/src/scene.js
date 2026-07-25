@@ -8,7 +8,8 @@
 //=====================================================================
 
 import {scene, object, group, lib, glsl, knob, displace,
-        absorbFor, makeGlass, room, sphereLight, fbm2Height} from '../../../js/scenegen/index.js';
+        absorbFor} from '../../../js/scenegen/index.js';
+import {room, sphereLight, fbm2Height, glass} from '../../../js/presets/index.js';
 
 
 const polish = knob('polish', {label: 'Marble Polish', min: 0, max: 1, step: 0.01, value: 0.25});
@@ -41,8 +42,8 @@ export default scene({
             `,
             bound: glsl`bCyl(q, vec2(CUP_R + 0.15, CUP_H + 0.15))`,
             regions: {
-                cup:   {material: makeGlass(absorbFor([0.86, 0.9, 0.88], 1.2), 1.5, 1.0)},
-                drink: {material: makeGlass(absorbFor([0.75, 0.22, 0.12], 0.8), 1.34, 1.0)},
+                cup:   {material: glass({absorb: absorbFor([0.86, 0.9, 0.88], 1.2), ior: 1.5})},
+                drink: {material: glass({absorb: absorbFor([0.75, 0.22, 0.12], 0.8), ior: 1.34})},
             },
         }),
 

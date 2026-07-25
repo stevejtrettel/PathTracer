@@ -9,8 +9,8 @@
 // the trace routing (displaced -> marched).
 //=====================================================================
 
-import {scene, object, lib, glsl, knob, displace,
-        room, sphereLight, fbm2Height} from '../../../js/scenegen/index.js';
+import {scene, object, lib, glsl, knob, displace} from '../../../js/scenegen/index.js';
+import {room, sphereLight, fbm2Height} from '../../../js/presets/index.js';
 
 
 //--- knobs: declared once, shared by geometry and colour --------------

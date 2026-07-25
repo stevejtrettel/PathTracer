@@ -8,12 +8,13 @@
 
 void stepForward(inout Path path){
 
-    if(inMedium(path.tv.pos)){
-        //curved transport: inside a medium (n(x) != 1) the segment to the next
-        //surface is a geodesic — the ODE marcher advances path.tv along it. Like the
-        //straight branch it sets path.distance + isSky (or keepGoing=false on capture)
-        //and leaves the shared segment-end tail below to us. inMedium() is always
-        //false for scenes whose indexField()==1, so those are byte-identical.
+    if(isMedium(path.region)){
+        //curved transport: the ray is inside a MEDIUM REGION (an object whose
+        //interior index varies with position), so the segment to the next surface is
+        //a geodesic — the ODE marcher advances path.tv along path.region's field. Like
+        //the straight branch it sets path.distance + isSky (or keepGoing=false on
+        //capture) and leaves the shared segment-end tail below to us. isMedium() is
+        //always false for scenes with no media, so those are byte-identical.
         odeMarch(path);
         if(!path.keepGoing){ return; }   //captured/absorbed: no surface and no sky
     }

@@ -1,39 +1,42 @@
 //-------------------------------------------------
 // ODE MARCH — curved-light transport (the curved sibling of raymarch)
 //
-// When the ray is inside a medium with a variable effective index n(x), the
-// segment to the next surface is a GEODESIC, not a line. stepForward() branches
-// here (see inMedium below) instead of the straight raytrace+raymarch. Everything
-// downstream is unchanged: this reports the hit + the ARC LENGTH in path.distance,
-// so updateFromVolume colours the curved segment and scatter refracts at the
-// boundary exactly as for a straight segment.
+// When the ray is inside a MEDIUM REGION with a variable effective index n(x),
+// the segment to the next surface is a GEODESIC, not a line. stepForward()
+// branches here when isMedium(path.region) instead of the straight
+// raytrace+raymarch. Everything downstream is unchanged: this reports the hit +
+// the ARC LENGTH in path.distance, so updateFromVolume colours the curved segment
+// and scatter refracts at the boundary exactly as for a straight segment.
 //
 // Integrator: SYMPLECTIC leapfrog (Störmer-Verlet). The optical ray ODE is
 // Hamiltonian, H = ½(|T|² − n²(r)), state (r, T = n·tangent), dr/dt = T,
 // dT/dt = n·∇n (Sharma-Kumar-Ghatak). Separable ⇒ kick-drift-kick conserves the
 // invariant |T| = n over long paths (black-hole orbits) at ONE gradient eval/step.
 //
-// A medium scene supplies the field `float indexField(vec3 p)` (1.0 = vacuum),
-// announced with `#define SCENE_INDEX_FIELD` above the definition (a scene hook —
-// see docs/material-fields.md; the default below stands down). Static metric null
-// geodesics are n = √(g_space/g_time), so this bends light for graded-index optics
-// AND black holes (Majumdar-Papapetrou = U²). Scenes with no medium say nothing:
-// the default indexField()==1 ⇒ inMedium() is always false ⇒ this file is never
-// entered ⇒ byte-identical to the straight tracer.
+// THE FIELD IS PER-REGION. A medium is an object whose interior index varies with
+// position; the scene supplies, keyed by region id,
+//     bool  isMedium(int id);              is this region a curved medium?
+//     float indexFieldOf(int id, vec3 p);  its index n(p), 1.0 = vacuum
+// odeMarch reads the region the ray is currently traversing off path.region — the
+// state already carried for the subsurface walk ("am I still inside THIS region?")
+// — and integrates that region's field. No global field, no #define gate: WHICH
+// region confines the curving is the region's own sdf, and the field is chosen
+// ONCE per traversal (path.region only changes at a surface crossing, which is
+// exactly where odeMarch exits), so ∇n stays smooth across the wall for free.
+// Static metric null geodesics are n = √(g_space/g_time), so this bends light for
+// graded-index optics AND black holes (Majumdar-Papapetrou = U²).
 //
-// BOUNDED-MEDIUM CONTRACT (one unified pattern — see IN_MEDIUM_REGION below):
-// A medium confined to a shape (a lens, a block of graded glass) provides
-//   (1) a SMOOTH indexField(p): the IOR function, real-valued a little PAST the
-//       boundary — do NOT clamp it to 1 outside. Clamping makes a value-cliff (or,
-//       if the field already hits 1 at the wall, a slope-kink); either way the
-//       central-difference ∇n in odeForce reads garbage right at the wall and bands.
-//   (2) `#define IN_MEDIUM_REGION(p) <inside my shape>`: the geometric gate that
-//       actually confines the curving. indexField extends past the shape; the gate,
-//       not a discontinuity, is what stops the ray curving outside it.
-//   (3) a surface object whose setData refracts with n_wall = indexField(hit) (the
-//       dynamic-IOR wall), so Snell at the surface matches the interior field.
-// Luneburg (self-tapering, n→1 at the rim) and the black-hole cube (n≠1 at the wall)
-// are the SAME case under this contract; the only prior difference was clamp severity.
+// THE FIELD MUST BE SMOOTH past the region's own boundary — real a little OUTSIDE
+// the wall; do NOT clamp it to 1 there. odeForce central-differences ∇n, and a
+// value-cliff at the wall reads garbage and bands. The region's sdf, not a jump in
+// n, is what stops the ray curving outside it. The confining surface refracts with
+// n_wall = indexFieldOf(id, hit) (the SAME field), so Snell at the wall matches the
+// interior eikonal: Luneburg (n→1 at the rim, seamless) and the black-hole cube
+// (n≠1 at the wall) are ONE case.
+//
+// Scenes with no medium define neither symbol; the #ifndef defaults below make
+// isMedium()==false everywhere ⇒ this file is never entered ⇒ byte-identical to
+// the straight tracer.
 //-------------------------------------------------
 
 #ifndef ODE_STEP
@@ -53,38 +56,25 @@
 #endif
 
 
-// scene hook: the engine default (no medium anywhere). This file compiles after
-// the scene chunk, so a scene's `#define SCENE_INDEX_FIELD` + its own indexField
-// replace it — same pattern as IN_MEDIUM_REGION below.
-#ifndef SCENE_INDEX_FIELD
-float indexField(vec3 p){ return 1.; }
+// scene hooks: the engine defaults (no medium anywhere). This file compiles after
+// the scene chunk, so a scene WITH media `#define SCENE_HAS_MEDIA` and supplies its
+// own isMedium/indexFieldOf (keyed by region id), standing these defaults down.
+#ifndef SCENE_HAS_MEDIA
+bool  isMedium(int id){ return false; }
+float indexFieldOf(int id, vec3 p){ return 1.; }
 #endif
 
-float odeIndex(vec3 p){ return max(indexField(p), 1e-3); }   // physical n ≥ 0; fp floor
+float odeIndex(int reg, vec3 p){ return max(indexFieldOf(reg, p), 1e-3); }   // physical n ≥ 0; fp floor
 
-// Geometric confinement gate. A BOUNDED medium (a real dielectric with a surface)
-// has a DISCONTINUOUS index at its wall — and central-differencing ∇n across that
-// cliff gives odeForce a spurious huge kick (concentric banding). The cure is to
-// let indexField stay SMOOTH (the medium field continued past the wall) and decide
-// straight-vs-curved GEOMETRICALLY instead. A scene with a bounded medium #defines
-// IN_MEDIUM_REGION(p) as "inside my medium object"; unbounded/tapered media (global
-// black hole, Luneburg) leave it at the default and are unchanged.
-#ifndef IN_MEDIUM_REGION
-#define IN_MEDIUM_REGION(p) true
-#endif
-
-// cheap gate for stepForward: is p inside a medium region AND is n actually != 1?
-bool inMedium(vec3 p){ return IN_MEDIUM_REGION(p) && (abs(indexField(p) - 1.) > 0.001); }
-
-// force F(r) = n·∇n = ½∇(n²), central differences of the index field
-vec3 odeForce(vec3 p){
+// force F(r) = n·∇n = ½∇(n²), central differences of region `reg`'s index field
+vec3 odeForce(int reg, vec3 p){
     vec2 e = vec2(ODE_GRAD_EPS, 0.);
     vec3 g = vec3(
-        odeIndex(p+e.xyy) - odeIndex(p-e.xyy),
-        odeIndex(p+e.yxy) - odeIndex(p-e.yxy),
-        odeIndex(p+e.yyx) - odeIndex(p-e.yyx)
+        odeIndex(reg, p+e.xyy) - odeIndex(reg, p-e.xyy),
+        odeIndex(reg, p+e.yxy) - odeIndex(reg, p-e.yxy),
+        odeIndex(reg, p+e.yyx) - odeIndex(reg, p-e.yyx)
     ) / (2.*ODE_GRAD_EPS);
-    return odeIndex(p) * g;
+    return odeIndex(reg, p) * g;
 }
 
 // advance path.tv along the geodesic to the next surface. Reports the outcome the
@@ -98,15 +88,16 @@ void odeMarch(inout Path path){
     // Hamiltonian H = ½(|mom|² − n²(r)): mom = n·(unit tangent) (Sharma's ray
     // vector T), so |mom| = n — the invariant the symplectic step conserves.
     // (Named `mom`, not `T`: `T` is #defined to vec2 for dual numbers; `p` is position.)
+    int  reg = path.region;                       // the medium we are traversing (isMedium(reg) is true)
     vec3 r   = path.tv.pos;
-    vec3 mom = odeIndex(r) * path.tv.dir;
+    vec3 mom = odeIndex(reg, r) * path.tv.dir;
     float arc = 0.;
     float startSgn = sign(sdf_Scene(path.tv));   // side we start on (inside the medium: < 0)
-    vec3 force = odeForce(r);                     // reused across leapfrog steps
+    vec3 force = odeForce(reg, r);                // reused across leapfrog steps
 
     for(int i = 0; i < maxMarchSteps; i++){
 
-        float n = odeIndex(r);
+        float n = odeIndex(reg, r);
 
         // capture: the index blows up at the singular POINT (the event horizon is
         // a point in these coords). Any ray this deep is heading in — stop it; it
@@ -132,7 +123,7 @@ void odeMarch(inout Path path){
         vec3 rBefore = r;            // step start (on the startSgn side)
         mom += 0.5*h*force;          // half kick   (force at r)
         r  += h*mom;                 // drift
-        force = odeForce(r);         // force at the new r (this step's 2nd kick + next step's 1st)
+        force = odeForce(reg, r);    // force at the new r (this step's 2nd kick + next step's 1st)
         mom += 0.5*h*force;          // half kick
         arc += length(mom)*h;        // ds ≈ n·h
 

@@ -11,8 +11,8 @@
 // scene identity, not a setting).
 //=====================================================================
 
-import {scene, object, sheet, lib, glsl, knob, absorbFor, makeGlass,
-        } from '../../../js/scenegen/index.js';
+import {scene, object, sheet, lib, glsl, knob, absorbFor} from '../../../js/scenegen/index.js';
+import {glass} from '../../../js/presets/index.js';
 
 
 const frontTint  = knob('frontTint',  {type: 'color', label: 'Sheet Front', value: [1.0, 0.72, 0.42]});
@@ -52,7 +52,7 @@ export default scene({
         object('ball', {
             at:    [-1.6, 1.3, -1.2],
             shape: lib.sphere({radius: 1.3}),
-            material: makeGlass(absorbFor([0.8, 0.88, 0.92], 2.0), ballIOR, 1.0),
+            material: glass({absorb: absorbFor([0.8, 0.88, 0.92], 2.0), ior: ballIOR}),
         }),
     ],
 

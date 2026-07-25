@@ -368,9 +368,11 @@ demos run, art scenes broken until migration.** Checkpoint commit
 - `mediumWalk.glsl` — the interior walk (per-step Beer + roulette,
   16-halving exit bisection) with Fresnel/TIR at the boundary from inside;
   the ballistic limit is the glass path.
-- `ambient.glsl` — `ambientTransport()`: fog/god-rays behind the
-  `SCENE_AMBIENT_MEDIUM` scene hook (engine default vacuum, compiles
-  away). Hook contract: `ambientMFP/ambientBlur/ambientAbsorb/ambientEmit`.
+- `ambient.glsl` — `ambientTransport()`: fog/god-rays. Open air is region
+  ID_NONE, so its medium is just `mediumOf(ID_NONE)` — the transport reads
+  `path.medium` (no separate `ambientMFP/...` accessors). A scene sets it with
+  the `ambient:` key; the emitter emits `ambientMedium()` and derives
+  `SCENE_AMBIENT_MEDIUM` (engine default vacuum, compiles away).
 - `pathTrace.glsl`, `stepForward.glsl` — restored to their original
   one-screen shapes; one call each into the two files above.
 

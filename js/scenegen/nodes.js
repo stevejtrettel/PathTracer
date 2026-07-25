@@ -9,7 +9,22 @@
 // carry `uses: [lib.x, ...]` — uncalled catalogue references declaring that
 // its authored GLSL calls into those library files (the emitter inlines the
 // includes).
+//
+// scene() also drains the knob/field registries onto the description, so the
+// returned value is SELF-CONTAINED: emit(description) depends on nothing
+// module-global, and can run any number of times.
 //-------------------------------------------------
+
+import {drainKnobs} from './knobs.js';
+import {drainFields} from './fields.js';
+import {checkReserved} from './fmt.js';
+
+function checkName(kind, name){
+    if(typeof name !== 'string' || !/^[a-z]\w*$/i.test(name)){
+        throw new Error(`scenegen: ${kind} name must be an identifier, got ${JSON.stringify(name)}`);
+    }
+    checkReserved(kind, name);
+}
 
 function checkUses(name, uses){
     if(uses === undefined) return;
@@ -22,9 +37,7 @@ function checkUses(name, uses){
 const OBJECT_KEYS = new Set(['at', 'scale', 'rotate', 'shape', 'material', 'medium', 'bound', 'uses', 'comment', 'nestedIn']);
 
 export function object(name, spec){
-    if(typeof name !== 'string' || !/^[a-z]\w*$/i.test(name)){
-        throw new Error(`scenegen: object name must be an identifier, got ${JSON.stringify(name)}`);
-    }
+    checkName('object', name);
     for(const key of Object.keys(spec)){
         if(!OBJECT_KEYS.has(key)){
             throw new Error(`scenegen: object('${name}'): unknown key '${key}' (have: ${[...OBJECT_KEYS].join(', ')})`);
@@ -49,9 +62,7 @@ const REGION_KEYS = new Set(['material', 'medium', 'comment', 'nestedIn']);
 //This is the one deliberately rich mechanism in the schema — the design of
 //multi-material/component objects may still be refined.
 export function group(name, spec){
-    if(typeof name !== 'string' || !/^[a-z]\w*$/i.test(name)){
-        throw new Error(`scenegen: group name must be an identifier, got ${JSON.stringify(name)}`);
-    }
+    checkName('group', name);
     for(const key of Object.keys(spec)){
         if(!GROUP_KEYS.has(key)){
             throw new Error(`scenegen: group('${name}'): unknown key '${key}' (have: ${[...GROUP_KEYS].join(', ')})`);
@@ -64,6 +75,7 @@ export function group(name, spec){
         throw new Error(`scenegen: group('${name}') needs at least two regions — one region is just an object()`);
     }
     for(const [rname, region] of Object.entries(spec.regions)){
+        checkName(`group('${name}') region`, rname);
         for(const key of Object.keys(region)){
             if(!REGION_KEYS.has(key)){
                 throw new Error(`scenegen: group('${name}').${rname}: unknown key '${key}' (have: ${[...REGION_KEYS].join(', ')})`);
@@ -83,9 +95,7 @@ const SHEET_KEYS = new Set(['at', 'scale', 'rotate', 'shape', 'front', 'back', '
 //two of them, front and back. Its sdf stays SIGNED like everyone else's; what
 //makes it a sheet is isSheet(), not the shape of its sdf.
 export function sheet(name, spec){
-    if(typeof name !== 'string' || !/^[a-z]\w*$/i.test(name)){
-        throw new Error(`scenegen: sheet name must be an identifier, got ${JSON.stringify(name)}`);
-    }
+    checkName('sheet', name);
     for(const key of Object.keys(spec)){
         if(!SHEET_KEYS.has(key)){
             throw new Error(`scenegen: sheet('${name}'): unknown key '${key}' (have: ${[...SHEET_KEYS].join(', ')})`);
@@ -102,15 +112,22 @@ export function sheet(name, spec){
 }
 
 
-const SCENE_KEYS = new Set(['objects', 'sky', 'glsl']);
+//`ambient:` is the medium of open air (region ID_NONE) — fog/god rays; its
+//fields are validated in emit() against the Medium model. (A curved-light medium,
+//by contrast, is an OBJECT with a position-varying interior IOR, not a scene key.)
+const SCENE_KEYS = new Set(['objects', 'sky', 'glsl', 'ambient']);
 
 export function scene(spec){
+    //drain FIRST: if validation throws, the registries are still clean for the
+    //next (HMR) evaluation of the module
+    const knobs  = drainKnobs();
+    const fields = drainFields();
     for(const key of Object.keys(spec)){
         if(!SCENE_KEYS.has(key)){
-            //indexField / ambient are reserved for the engine hooks; everything
-            //else is a typo. Reject both loudly so the names stay held.
+            //indexField is a reserved name (a curved medium is an object, not a
+            //scene key); everything else is a typo.
             throw new Error(`scenegen: scene(): unknown key '${key}' `
-                + `(have: ${[...SCENE_KEYS].join(', ')}; reserved for later: indexField, ambient)`);
+                + `(have: ${[...SCENE_KEYS].join(', ')}; reserved: indexField)`);
         }
     }
     if(!Array.isArray(spec.objects) || spec.objects.length === 0){
@@ -122,5 +139,5 @@ export function scene(spec){
                 + '(a preset that forgot to return one?)');
         }
     }
-    return {__scene: true, ...spec};
+    return {__scene: true, knobs, fields, ...spec};
 }

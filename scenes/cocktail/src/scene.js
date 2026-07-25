@@ -7,13 +7,14 @@
 // share; the whole above/below-waterline system is the one max() below —
 // the classifier works out every interface from the sdfs at the hit.
 //
-// The drink's material keeps its hand-written mixing math as authored GLSL
-// (and so appears twice, for the Surface and the Medium): folding it to a
-// literal is a by-eye decision deferred to a render-gated pass.
+// The drink's absorb keeps its hand-written mixing math as authored GLSL (a
+// by-eye decision deferred to a render-gated pass) — but ONE bundle now feeds
+// both the Surface and the Medium side, so the old material/medium copy is
+// gone.
 //=====================================================================
 
-import {scene, group, lib, glsl, makeGlass,
-        room, sphereLight} from '../../../js/scenegen/index.js';
+import {scene, group, lib, glsl} from '../../../js/scenegen/index.js';
+import {room, sphereLight, glass} from '../../../js/presets/index.js';
 
 
 export default scene({
@@ -40,20 +41,14 @@ export default scene({
             regions: {
 
                 cup: {
-                    material: makeGlass(glsl`0.1*vec3(0.3, 0.05, 0.2)`, 1.5),
+                    material: glass({absorb: glsl`0.1*vec3(0.3, 0.05, 0.2)`, ior: 1.5}),
                 },
 
                 drink: {
-                    material: glsl`
-                        vec3 brownAbsorb = vec3(1.0) - vec3(204.0, 142.0, 105.0)/255.0;
-                        vec3 redAbsorb   = vec3(0.2, 1.0, 0.6);
-                        return makeGlass(3.0*(brownAbsorb + 0.25*redAbsorb), 1.2, 1.0);
-                    `,
-                    medium: glsl`
-                        vec3 brownAbsorb = vec3(1.0) - vec3(204.0, 142.0, 105.0)/255.0;
-                        vec3 redAbsorb   = vec3(0.2, 1.0, 0.6);
-                        return makeGlass(3.0*(brownAbsorb + 0.25*redAbsorb), 1.2, 1.0).interior;
-                    `,
+                    material: glass({
+                        absorb: glsl`3.0*(vec3(1.0) - vec3(204.0, 142.0, 105.0)/255.0 + 0.25*vec3(0.2, 1.0, 0.6))`,
+                        ior: 1.2,
+                    }),
                 },
             },
         }),

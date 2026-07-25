@@ -3,7 +3,7 @@
 //
 // A scene is authored as src/scene.js:
 //
-//     import {scene, object, lib, knob, glsl, makeGlass, ...} from '../../../js/scenegen/index.js';
+//     import {scene, object, lib, mat, knob, glsl, ...} from '../../../js/scenegen/index.js';
 //     export default scene({ objects: [...] });
 //
 // and its main.js hands the description straight to the engine:
@@ -16,12 +16,15 @@
 export {scene, object, group, sheet} from './nodes.js';
 export {lib, catalogue, catalogueInfo} from './catalogue.js';
 export {knob} from './knobs.js';
-export {glsl} from './glslTag.js';
+export {glsl, valueText} from './glslTag.js';
 export {displace, repLim} from './combinators.js';
 export {field} from './fields.js';
 export {emit} from './emitter.js';
 
-export {absorbFor, makeMatte, makeGloss, makeMetal, makePlastic,
-        makeGlass, makeSubsurface, makeLight, withCoat} from './materials.js';
+//the material PRIMITIVES only — every named material is a preset over these
+//in js/presets/materials.js (material() is the escape hatch for raw fields)
+export {material, withSurface, withMedium, named,
+        absorbFor, matKind, matIsMedium, checkArgs, materialInfo} from './materials.js';
 
-export {room, sphereLight, fbmHeight, fbm2Height} from './presets.js';
+//content (room, sphereLight, the field presets) lives in js/presets/ —
+//presets import FROM this surface, never the reverse

@@ -79,6 +79,13 @@ Medium defaultMedium(){
 void initSurface(inout Surface s){ s = defaultSurface(); }
 void initMedium(inout Medium m){ m = defaultMedium(); }
 
+//the neutral material every generated material function starts from: scene
+//materials are emitted as defaultMaterial() + field assignments (the JS
+//value-bundle system, docs/generator.md §5)
+Material defaultMaterial(){
+    return Material(true, defaultSurface(), defaultMedium());
+}
+
 //the default material: pure white matte
 void initMat(inout Material mat){
     mat.render=true;
@@ -101,6 +108,11 @@ vec3 absorbFor(vec3 tint, float depth){
 
 //-------------------------------------------------
 // CONSTRUCTORS — matte / gloss / metal / plastic / glass / subsurface / light
+//
+// LEGACY for generated scenes: scene materials are now JS value bundles
+// emitted as defaultMaterial() + assignments (docs/generator.md §5). These
+// constructors remain for hand-written GLSL — authored material bodies, the
+// variety scene, and the demo branch — and delete when those migrate.
 //-------------------------------------------------
 
 //pure diffuse: what walls actually are

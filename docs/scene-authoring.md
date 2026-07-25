@@ -39,14 +39,15 @@ createScene(emit(description, settings));
 The smallest real scene:
 
 ```js
-import {scene, object, lib, makeGlass, room, sphereLight} from '../../../js/scenegen/index.js';
+import {scene, object, lib} from '../../../js/scenegen/index.js';
+import {room, sphereLight, glass} from '../../../js/presets/index.js';
 
 export default scene({
     objects: [
         object('ball', {
             at:       [-1.0, 1.1, -1.2],
             shape:    lib.sphere({radius: 1.2}),
-            material: makeGlass([0.03, 0.005, 0.02], 1.5),
+            material: glass({absorb: [0.03, 0.005, 0.02], ior: 1.5}),
         }),
         sphereLight({at: [-7.0, 4.0, 2.0], radius: 1.5, power: 100}),
         room({center: [-5.75, 6.5, -5.0], half: [14.25, 7.5, 15.0]}),
@@ -60,6 +61,8 @@ points — is emitted. Inspect the result any time:
 ```
 npm run gen <scene>              print the emitted GLSL chunk
 npm run gen -- --catalogue       what the shape parser found in glsl/shapes/
+npm run gen -- --materials       what the material parser found in 3Materials/
+npm run gen -- --goldens         byte-compare every scene vs its committed golden
 ```
 
 ---
@@ -73,6 +76,10 @@ the Surface. Three node kinds:
 - `object(name, {...})` — one region of space (a signed sdf; negative inside)
 - `group(name, {...})` — one authored sdf evaluation feeding several regions (§4)
 - `sheet(name, {...})` — a two-sided surface with no interior (§9)
+
+Names (nodes and regions alike) share one scene-wide namespace and are
+checked loudly: unique (case-insensitively), never a GLSL keyword or one of
+the emitter's own locals (`d`, `p`, `q`, ...).
 
 Placement lives on the node: `at: [x,y,z]` always; optionally
 `scale: [sx,sy,sz]` and `rotate: {axis, angle}` (angle may be a knob). The
@@ -92,8 +99,9 @@ shape: lib.sphere({radius: 1.2})        //params by name; typos throw with the r
 A shapes file follows the naming convention (`<stem>Distance(vec3 p, ...)`
 required; `<stem>Trace(Vector tv, vec3 centre, ...)` and
 `<stem>Bound(vec3 p, ...)` optional; file name == stem; `//@shape stem -> a, b`
-names multi-outputs; `//@noshape` opts a helpers-only file out). Adding a
-library shape = writing one `.glsl` file.
+names multi-outputs; `//@noshape` marks a helpers-only file — include-only,
+referenced via `uses: [lib.<stem>]`, an error to call). Adding a library
+shape = writing one `.glsl` file.
 
 **Routing is derived**: a plain library shape with a `Trace` is analytic (it
 never marches); displacing, repeating, or transforming it removes the closed
@@ -164,6 +172,13 @@ sees:
 | `medium:` | `p` | statements returning a `Medium` |
 | field function | takes `vec3 q` | a complete function |
 
+`q`'s frame depends on the slot (it matters only on a transformed node):
+a **material** body reads the object's own local frame (`toLocal_<name>(p)`
+when transformed, so a texture rides the rotation/scale), while a **bound**
+reads the placement frame (`p - <at>`, a world-space enclosing volume — author
+it rotation-invariant, as the transform scene does). On a plain or displaced
+node the two coincide.
+
 Interpolation `${...}` accepts knobs, fields, numbers, `[x,y,z]` vectors,
 material constructors, and nested fragments. It is **required for fields**
 (that's how the emitter learns the dependency) and optional for knobs (they
@@ -181,19 +196,41 @@ authored code just because the emitter happens to generate that const.
 
 ## 6 · Materials and knobs
 
-Constant materials are the JS mirrors of the GLSL constructors — same names,
-same arguments (`docs/material-system.md`):
+A material is not code — it is a point in the parameter space of the ONE
+model (the `Surface`/`Medium` structs in `3Materials/material.glsl`). So a
+material is a **value bundle**, and *everything named is a preset*: one flat
+space imported from `js/presets/`, from the archetypes (the model's canonical
+menu) down through their specializations. Named arguments are the model's REAL
+field names — no renames — so a scene and its emitted chunk speak one
+vocabulary:
 
 ```js
-material: makeGlass(absorbFor([0.85, 0.92, 0.9], 2.0), 1.5, 1.0)
-material: makeSubsurface(absorbFor(waxTint, waxDepth), 1.45, waxDensity, waxBlur)
+material: glass({absorb: absorbFor([0.85, 0.92, 0.9], 2.0), ior: 1.5})   //transmit defaults to 1 (clear)
+material: subsurface({absorb: absorbFor(waxTint, waxDepth), ior: 1.45, mfp: waxDensity, blur: waxBlur})
+material: metal({specular: [0.92, 0.8, 0.52], roughness: bodyRough})     //specular is the F0
+material: gold({roughness: 0.3})                                          //a look: a preset over metal
+material: withCoat(gold({roughness: 0.3}))                               //modifiers merge fields into a base
 ```
 
-The constructor's kind does two jobs silently: `medium_` returns `.interior`
-for volume/subsurface materials and `defaultMedium()` otherwise, and any
-`makeSubsurface` in the scene derives `SCENE_SUBSURFACE` (compiling the medium
-walk in). A **material field** is an authored body instead — sampled fresh at
-every hit:
+The one primitive is `material({surf: {...}, interior: {...}})` — the escape
+hatch for raw struct fields, the way authored `glsl\`\`` is the escape hatch for
+sdfs. It lives in `js/scenegen/`; every named material is a preset over it.
+
+The emitter builds each object's material function from the bundle —
+`defaultMaterial()` plus assignments — and **each value is emitted exactly
+once**: Medium fields land in `medium_<name>`, and `material_<name>` composes
+it (`m.interior = medium_<name>(p)`). No duplication to keep in sync.
+
+KIND is derived structurally from *which fields the bundle sets* (never from
+values, so a knob stays live): setting `mfp` → subsurface; `transmit` plus any
+interior field → volume; otherwise surface. Kind does two jobs silently —
+`medium_` carries a real interior only for volume/subsurface, and any
+subsurface material derives `SCENE_SUBSURFACE` (compiling the medium walk in).
+
+A **material field** is an authored body instead — sampled fresh at every hit.
+It writes the struct directly, or calls the legacy `make*` constructors still
+compiled into every shader (retained for authored GLSL and the not-yet-ported
+legacy scenes):
 
 ```js
 material: glsl`
@@ -290,5 +327,27 @@ sky: {type: 'image', src: '/assets/office.jpg'}     //or {type:'solid'|'gradient
 A preset is plain JS returning nodes or fields — ordinary schema use, written
 once, imported everywhere. `room()` (the six-wall box with its knobs;
 per-scene overrides via `knobs: {roomLight: {max: 3}}`), `sphereLight()`, and
-the field presets live in `js/scenegen/presets.js`. When a pattern repeats
-across ports, make it a preset — never new core machinery.
+the field presets live in `js/presets/` (one file per domain, own index) —
+**content, outside the generator**: presets import from scenegen's public
+surface, never the reverse. When a pattern repeats across ports, make it a
+preset — never new core machinery. Named *materials* are ordinary presets
+too — the archetypes (`matte`…`glow`) and their specializations alike, one
+flat space in `js/presets/materials.js` over the `material()` primitive (see
+§6, §11).
+
+## 11 · When you write new GLSL
+
+The extension contract — what each kind of addition requires:
+
+| you add | write | and that's it? |
+|---|---|---|
+| a shape | `glsl/shapes/<stem>.glsl` per the §3 convention | yes — `lib.<stem>` appears |
+| a shared helper file | a `glsl/shapes/` file topped with `//@noshape` | yes — reference it with `uses: [lib.<stem>]`; calling it as a shape is an error |
+| a named material (terracotta, honey, …) or a new archetype | nothing in GLSL — it's *values* | a function returning a bundle in `js/presets/materials.js` — over an archetype (`gloss`, `glass`, …), or over `material()` for a new archetype |
+| a new material *capability* (a field the model lacks) | the field on the `Surface`/`Medium` struct in `material.glsl` + its handling in the tracer | nothing in scenegen — `SURF_FIELDS`/`MEDIUM_FIELDS` are parsed from the struct, so `material({...})` accepts the new field automatically; add an archetype preset if it deserves a name. Genuine model surgery, rare by design |
+| a noise / field function | the function in `3Materials/fields.glsl` (derive its gradient bound in a comment there) | a field preset in `js/presets/fields.js` declaring `{gradBound, range}` — the bound is human math, it cannot be parsed |
+| an operator (`op...`) | `glsl/objects/computations.glsl` (engine-global) | yes — authored bodies see it; promoting one to a first-class wrapper is deliberate core surgery, rare by design |
+| a repeated scene pattern | a preset in `js/presets/` | yes — plain JS over the public schema |
+
+If an addition seems to need new machinery in `js/scenegen/`, stop and treat
+it as a schema-design question first.

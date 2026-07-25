@@ -10,8 +10,16 @@
 //                                             (includes expanded, comments
 //                                             stripped, whitespace normalized)
 //   node scripts/gen.mjs --catalogue          print the parsed shape catalogue
+//   node scripts/gen.mjs --materials          print the parsed material catalogue
+//   node scripts/gen.mjs --goldens            BYTE-compare every scene's chunk
+//                                             against render-tests/goldens/
+//   node scripts/gen.mjs --goldens --write    (re)bake the goldens
+//
+// The goldens are the emitter's regression gate: they pin the exact output of
+// every generated scene, so an emitter change shows its full blast radius as
+// a git diff of render-tests/goldens/. Bake deliberately, after eyeballing.
 import { createServer } from 'vite';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -31,12 +39,15 @@ const opt = (f) => {
 };
 
 const wantCatalogue = flag('--catalogue');
+const wantMaterials = flag('--materials');
 const wantCheck     = flag('--check');
+const wantGoldens   = flag('--goldens');
+const wantWrite     = flag('--write');
 const outFile       = opt('--out');
 const sceneName     = args[0];
 
-if(!wantCatalogue && !sceneName){
-    console.error('usage: node scripts/gen.mjs <scene> [--check | --out <file>]  |  --catalogue');
+if(!wantCatalogue && !wantMaterials && !wantGoldens && !sceneName){
+    console.error('usage: node scripts/gen.mjs <scene> [--check | --out <file>]  |  --catalogue  |  --materials  |  --goldens [--write]');
     process.exit(1);
 }
 
@@ -87,10 +98,51 @@ const server = await createServer({
     optimizeDeps: {noDiscovery: true},
 });
 
+//every scene that has a description (variety etc. stay hand-written)
+function generatedScenes(){
+    return readdirSync(path.join(root, 'scenes'))
+        .filter(s => existsSync(path.join(root, 'scenes', s, 'src', 'scene.js')))
+        .sort();
+}
+
+async function emitScene(name){
+    const description = (await server.ssrLoadModule(`/scenes/${name}/src/scene.js`)).default;
+    const settings    = (await server.ssrLoadModule(`/scenes/${name}/src/settings.js`)).default;
+    const {emit}      = await server.ssrLoadModule('/js/scenegen/index.js');
+    return emit(description, settings).scene;
+}
+
 try{
     if(wantCatalogue){
         const {catalogueInfo} = await server.ssrLoadModule('/js/scenegen/catalogue.js');
         console.log(catalogueInfo());
+    }
+    else if(wantMaterials){
+        const {materialInfo} = await server.ssrLoadModule('/js/scenegen/materials.js');
+        console.log(materialInfo());
+    }
+    else if(wantGoldens){
+        const goldenDir = path.join(root, 'render-tests', 'goldens');
+        mkdirSync(goldenDir, {recursive: true});
+        let failed = 0;
+        for(const name of generatedScenes()){
+            const chunk  = await emitScene(name);
+            const golden = path.join(goldenDir, `${name}.glsl`);
+            if(wantWrite){
+                writeFileSync(golden, chunk, 'utf8');
+                console.log(`${name}: baked render-tests/goldens/${name}.glsl`);
+            }
+            else if(!existsSync(golden)){
+                console.error(`${name}: NO GOLDEN — bake with \`npm run gen -- --goldens --write\``);
+                failed++;
+            }
+            else{
+                const ref = readFileSync(golden, 'utf8');
+                if(chunk === ref){ console.log(`${name}: OK`); }
+                else{ console.error(`${name}: DIFFERS from its golden`); reportDiff(chunk, ref); failed++; }
+            }
+        }
+        if(failed) process.exitCode = 1;
     }
     else{
         const sceneDir = path.join(root, 'scenes', sceneName);
@@ -99,11 +151,7 @@ try{
             process.exit(1);
         }
 
-        const description = (await server.ssrLoadModule(`/scenes/${sceneName}/src/scene.js`)).default;
-        const settings    = (await server.ssrLoadModule(`/scenes/${sceneName}/src/settings.js`)).default;
-        const {emit}      = await server.ssrLoadModule('/js/scenegen/index.js');
-
-        const {scene} = emit(description, settings);
+        const scene = await emitScene(sceneName);
 
         if(wantCheck){
             const refPath = path.join(sceneDir, 'src', 'scene.glsl');

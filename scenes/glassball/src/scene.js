@@ -6,8 +6,8 @@
 // `npm run gen glassball -- --check` proves code equality).
 //=====================================================================
 
-import {scene, object, lib, glsl, makeGlass,
-        room, sphereLight} from '../../../js/scenegen/index.js';
+import {scene, object, lib, glsl} from '../../../js/scenegen/index.js';
+import {room, sphereLight, glass} from '../../../js/presets/index.js';
 
 
 export default scene({
@@ -16,7 +16,7 @@ export default scene({
         object('ball', {
             at:       [-1.0, 1.1, -1.2],
             shape:    lib.sphere({radius: 1.2}),
-            material: makeGlass(glsl`0.1*vec3(0.3, 0.05, 0.2)`, 1.5),
+            material: glass({absorb: glsl`0.1*vec3(0.3, 0.05, 0.2)`, ior: 1.5}),
         }),
 
         sphereLight({at: [-7.0, 4.0, 2.0], radius: 1.5, color: [0.9, 0.9, 0.9], power: 100}),
