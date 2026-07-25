@@ -55,13 +55,13 @@ export function room({center, half, knobs = {}} = {}){
         shape: lib.room({halfSize: half}),
         comment: 'the room SOLID is everything outside the box, so its interior is open air and\n'
                + 'regionAt() returns ID_NONE there',
+        //faceData is a shape DATA output (room.glsl): the emitter injects it,
+        //baking in the room's own halfSize — no re-passing (docs/shape-data.md)
         material: glsl`
-            int face = roomFace(q, ${{half}});
-
-            if(face == ROOM_CEILING){ return makeLight(vec3(1.0), roomLight); }
-            if(face == ROOM_FLOOR)  { return makeGloss(floorColor, 0.0, wallRough); }
-            if(face == ROOM_LEFT)   { return makeGloss(warmColor,  0.0, wallRough); }
-            if(face == ROOM_RIGHT)  { return makeGloss(coolColor,  0.0, wallRough); }
+            if(faceData == ROOM_CEILING){ return makeLight(vec3(1.0), roomLight); }
+            if(faceData == ROOM_FLOOR)  { return makeGloss(floorColor, 0.0, wallRough); }
+            if(faceData == ROOM_LEFT)   { return makeGloss(warmColor,  0.0, wallRough); }
+            if(faceData == ROOM_RIGHT)  { return makeGloss(coolColor,  0.0, wallRough); }
             return makeGloss(wallColor, 0.0, wallRough);
         `,
     });

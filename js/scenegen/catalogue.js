@@ -32,11 +32,19 @@ function stripComments(src){
     return src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
 }
 
-//find `float <name>(...)` and return its raw comma-split argument strings
+//find `<type> <name>(...)` and return its raw comma-split argument strings.
+//type-agnostic: Distance/Trace/Bound all return float, but a data output may
+//return vec4/int/etc.
 function findArgs(code, name){
-    const m = code.match(new RegExp(`float\\s+${name}\\s*\\(([\\s\\S]*?)\\)`));
+    const m = code.match(new RegExp(`(?:float|vec[234]|int|bool)\\s+${name}\\s*\\(([\\s\\S]*?)\\)`));
     if(!m) return null;
     return m[1].replace(/\s+/g, ' ').split(',').map(s => s.trim()).filter(s => s !== '');
+}
+
+//the return type of `<type> <name>(`
+function returnType(code, name){
+    const m = code.match(new RegExp(`(float|vec[234]|int|bool)\\s+${name}\\s*\\(`));
+    return m ? m[1] : null;
 }
 
 //parse `[out] <type> <name>` argument strings
@@ -116,7 +124,34 @@ function parseShapeFile(stem, src){
         }
     }
 
-    return {stem, src, file, params, outs, outputs, trace, bound};
+    //---- data outputs: <stem><Name>Data(vec3 q, ...params ⊆ Distance) ----
+    //auto-detected by the `Data` suffix (self-identifying, no annotation). A
+    //material that reads the injected name <name>Data gets it emitted with the
+    //object's consts baked in — the shape-data channel (docs/shape-data.md).
+    const dataOutputs = [];
+    const seenData = new Set();
+    for(const m of code.matchAll(new RegExp(`\\b(?:float|vec[234]|int|bool)\\s+(${stem}\\w*Data)\\s*\\(`, 'g'))){
+        const fn = m[1];
+        if(seenData.has(fn)) continue;
+        seenData.add(fn);
+        const raw = findArgs(code, fn);
+        if(raw[0] !== 'vec3 p' && raw[0] !== 'vec3 q'){
+            throw new Error(`scenegen catalogue: ${file}: ${fn} must take (vec3 q, ...), got (${raw.join(', ')})`);
+        }
+        const dparams = parseArgs(raw.slice(1), file, fn).map(a => a.name);
+        for(const name of dparams){
+            if(!isParam(name)){
+                throw new Error(`scenegen catalogue: ${file}: ${fn} parameter '${name}' `
+                    + `does not match any ${stem}Distance parameter`);
+            }
+        }
+        //injected name: the suffix after the stem, first letter lowered
+        const suffix = fn.slice(stem.length);
+        const inject = suffix[0].toLowerCase() + suffix.slice(1);
+        dataOutputs.push({fn, type: returnType(code, fn), params: dparams, inject});
+    }
+
+    return {stem, src, file, params, outs, outputs, trace, bound, dataOutputs};
 }
 
 

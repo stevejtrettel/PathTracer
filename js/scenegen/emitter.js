@@ -214,10 +214,15 @@ function materialFns(r){
              + `Material ${matName}(vec3 p, inout Vector n){\n${bundleBody(m, `${medName}(p)`, r.localPoint)}\n}`;
     }
 
-    //a FIELD: an authored body. In scope: p (world), q (local), n. The q line
-    //is emitted only when the body actually reads it.
+    //a FIELD: an authored body. In scope: p (world), q (local), n, plus any
+    //shape-data output the body reads (<name>Data), injected with the object's
+    //consts baked in (docs/shape-data.md). q is emitted whenever the body reads q
+    //OR a data output is injected (the data call reads q).
     const body  = bodyText(m);
-    const matFn = `${comment}Material ${matName}(vec3 p, inout Vector n){\n${qLine(body, r.localPoint)}${indent(body, 4)}\n}`;
+    const data  = (r.dataOutputs ?? []).filter(d => new RegExp(`\\b${d.inject}\\b`).test(body));
+    const qL    = (/\bq\b/.test(body) || data.length) ? `    vec3 q = ${r.localPoint};\n` : '';
+    const dataL = data.map(d => `    ${d.type} ${d.inject} = ${d.call};\n`).join('');
+    const matFn = `${comment}Material ${matName}(vec3 p, inout Vector n){\n${qL}${dataL}${indent(body, 4)}\n}`;
 
     if(!r.medium){
         return matFn + `\nMedium ${medName}(vec3 p){ return defaultMedium(); }`;

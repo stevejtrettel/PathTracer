@@ -39,10 +39,11 @@ float roomTrace(Vector tv, vec3 centre, vec3 halfSize){
 }
 
 
-// Which wall p is on (or nearest to). d is negative inside the room, so its
-// LARGEST component names the axis the point is closest to leaving through,
-// and the sign of p picks which of that axis's two faces.
-int roomFace(vec3 p, vec3 halfSize){
+// Which wall p is on (or nearest to) — a shape DATA output (docs/shape-data.md):
+// a material that reads `faceData` gets it injected. d is negative inside the
+// room, so its LARGEST component names the axis the point is closest to leaving
+// through, and the sign of p picks which of that axis's two faces.
+int roomFaceData(vec3 p, vec3 halfSize){
     vec3 d = abs(p) - halfSize;
 
     if(d.y >= d.x && d.y >= d.z){

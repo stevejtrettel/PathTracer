@@ -118,11 +118,15 @@ function makeRegion(name, spec, localPoint){
 //on the node overrides either way). ctx: {name, NAME, entry, args, argFor,
 //comment} — the resolved naming of one shape reference.
 
+//"<local>" or "<local>, a, b" — no trailing comma when a shape (or its bound)
+//takes no parameters beyond the point (e.g. apollonianBound(vec3 p))
+function withArgs(local, extra){ return extra.length ? `${local}, ${extra.join(', ')}` : local; }
+
 function sdfPlain(node, c){
     return {
-        sdfDef: `${c.comment}float sdf_${c.name}(vec3 p){\n    return ${c.entry.stem}Distance(p - ${c.NAME}_P, ${c.args.join(', ')});\n}`,
+        sdfDef: `${c.comment}float sdf_${c.name}(vec3 p){\n    return ${c.entry.stem}Distance(${withArgs(`p - ${c.NAME}_P`, c.args)});\n}`,
         boundDef: c.entry.bound
-            ? `float bound_${c.name}(vec3 p){\n    return ${c.entry.stem}Bound(p - ${c.NAME}_P, ${c.entry.bound.map(n => c.argFor[n]).join(', ')});\n}`
+            ? `float bound_${c.name}(vec3 p){\n    return ${c.entry.stem}Bound(${withArgs(`p - ${c.NAME}_P`, c.entry.bound.map(n => c.argFor[n]))});\n}`
             : null,
     };
 }
@@ -254,6 +258,15 @@ function planObject(node, forceMarch){
         ? {name, NAME, localPoint, sheet: true, front: node.front, back: node.back,
            medium: null, comment: null, nestedIn: null, scatters: false}
         : makeRegion(name, {material: node.material, medium: node.medium, nestedIn: node.nestedIn}, localPoint);
+
+    //shape-data outputs available to this region's material: <name>Data injected
+    //with the object's own consts baked in (docs/shape-data.md). The call reads q
+    //(the material's local point), so the emitter emits it after the q line.
+    region.dataOutputs = (entry.dataOutputs ?? []).map(d => ({
+        inject: d.inject,
+        type:   d.type,
+        call:   `${d.fn}(q${d.params.length ? ', ' + d.params.map(p => argFor[p]).join(', ') : ''})`,
+    }));
 
     return {
         name, NAME, entry, usesEntries: (node.uses ?? []).map(u => u.entry), consts, constsExtra: null, analytic,

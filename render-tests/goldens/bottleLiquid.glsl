@@ -138,10 +138,11 @@ float roomTrace(Vector tv, vec3 centre, vec3 halfSize){
 }
 
 
-// Which wall p is on (or nearest to). d is negative inside the room, so its
-// LARGEST component names the axis the point is closest to leaving through,
-// and the sign of p picks which of that axis's two faces.
-int roomFace(vec3 p, vec3 halfSize){
+// Which wall p is on (or nearest to) — a shape DATA output (docs/shape-data.md):
+// a material that reads `faceData` gets it injected. d is negative inside the
+// room, so its LARGEST component names the axis the point is closest to leaving
+// through, and the sign of p picks which of that axis's two faces.
+int roomFaceData(vec3 p, vec3 halfSize){
     vec3 d = abs(p) - halfSize;
 
     if(d.y >= d.x && d.y >= d.z){
@@ -290,12 +291,11 @@ Medium   medium_light  (vec3 p){ return defaultMedium(); }
 
 Material material_room(vec3 p, inout Vector n){
     vec3 q = p - ROOM_P;
-    int face = roomFace(q, /*half*/vec3(14.25, 7.5, 15.0));
-
-    if(face == ROOM_CEILING){ return makeLight(vec3(1.0), roomLight); }
-    if(face == ROOM_FLOOR)  { return makeGloss(floorColor, 0.0, wallRough); }
-    if(face == ROOM_LEFT)   { return makeGloss(warmColor,  0.0, wallRough); }
-    if(face == ROOM_RIGHT)  { return makeGloss(coolColor,  0.0, wallRough); }
+    int faceData = roomFaceData(q, ROOM_HALFSIZE);
+    if(faceData == ROOM_CEILING){ return makeLight(vec3(1.0), roomLight); }
+    if(faceData == ROOM_FLOOR)  { return makeGloss(floorColor, 0.0, wallRough); }
+    if(faceData == ROOM_LEFT)   { return makeGloss(warmColor,  0.0, wallRough); }
+    if(faceData == ROOM_RIGHT)  { return makeGloss(coolColor,  0.0, wallRough); }
     return makeGloss(wallColor, 0.0, wallRough);
 }
 Medium medium_room(vec3 p){ return defaultMedium(); }
