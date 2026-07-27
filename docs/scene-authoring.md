@@ -107,18 +107,56 @@ shape = writing one `.glsl` file.
 never marches); displacing, repeating, or transforming it removes the closed
 form, so it marches.
 
-**Two shape wrappers** exist, and only these:
+**Shape modifiers** take one shape and return one shape, so they **stack** —
+nesting order is application order, innermost first
+([shape-modifiers.md](shape-modifiers.md); `scenes/chain/` is the demo):
 
 ```js
 shape: displace(lib.sphere({radius: 2.0}), {by: rockHeight, amp: rockAmp})   //§7
 shape: repLim(lib.sphere({radius: 0.32}), {spacing: 1.0, limit: [2, 0, 1]})
+shape: carve(lib.sphere({radius: 1.9}), {octaves: 6, erosion, gain, blend, seed: 0})
+shape: mirror(lib.gem({size: 1.0}), {axes: 'xz'})            //fold across coordinate planes
+shape: radial(lib.box({halfSize: [...]}), {n: 7, axis: 'y'}) //n-fold symmetry about an axis
+shape: round(lib.box({halfSize: [...]}), {r: 0.1})           //offset the surface outward
+shape: shell(lib.gem({size: 1.4}), {thickness: 0.06})        //keep a skin (>= 0.006)
+shape: clip(base, {to: lib.plane({normal: [0,1,0]}), at, blend})     //intersect with a volume
+shape: subtract(base, {what: lib.sphere({radius: 1.25}), at, blend}) //carve a volume away
+
+//stacks: an eroded lattice disc; a grid of holes (the cutter is a chain too)
+shape: clip(repLim(lib.sphere({radius: 0.32}), {spacing: 1, limit: [3,0,3]}), {to: lib.sphere({radius: 2.4})})
+shape: subtract(lib.box({halfSize: [1,1,1]}), {what: repLim(lib.sphere({radius: 0.2}), {spacing: 0.5, limit: [1,1,1]})})
 ```
+
+Two rules order a stack, both checked loudly. A **domain** modifier
+(`repLim`, `mirror`, `radial` — they fold the query point) must sit inside
+any **field** modifier (everything else — they act on the distance). And
+`carve`/`round`/`shell` must sit inside any `displace` — displacement breaks
+the true-distance property they rely on.
+
+Frames: `carve` and `displace` act on the **folded** point, so every
+lattice/wedge copy gets identical detail. `clip`/`subtract` cutters are
+**placed volumes** — they act in the object's own (pre-fold) frame and cut
+the whole assembly. A material's `q` is always the unfolded point.
+`rotate`/`scale` on the node compose with all of it.
 
 `repLim` folds the query point into one lattice cell — one sdf evaluation no
 matter how many copies, all of them one region with one material. Keep the
 base shape centered and inside its cell (a sphere is always safe); an
 off-center shape can make the fold overestimate distance at cell walls, which
 the marcher punishes as tunneling.
+
+`carve` is displacement's structural opposite, and the difference is worth
+knowing before choosing between them. Displacement ADDS a height field, which is
+not a distance field: it costs a Lipschitz divisor at every march step and an
+inflated bound, so it stays affordable only for gentle bumps. Carving SUBTRACTS
+a distance field — an fbm of sphere lattices, smooth-maxed out of the solid
+(`opCarveFbm`, IQ's fbmSDF) — and a smooth max of distance fields is still one.
+So the detail is free to march, and because carving only ever ERODES, the
+**uncarved base is already a valid bound** and is emitted as one unchanged.
+`gain` is the dial: at `gain <= 1/lacunarity` (0.5) every octave is 1-Lipschitz
+and nothing is paid; above it the operator divides by the steepest octave, which
+the marcher feels. The carving field is built in, the way `repLim`'s fold is —
+letting a caller pass their own distance field is a later addition.
 
 Anything fancier than these is an **authored sdf body** (see §5), not a new
 wrapper.
@@ -283,10 +321,16 @@ Bounds are the marcher's acceleration structure (they exist only in
 `sdf_Scene`; `sdfAll` stays exact so the classifier can recognise surfaces).
 Derived where principled, authored otherwise:
 
-- a library shape's `<stem>Bound` is used automatically
-- a displaced shape's bound is the base pushed out by `maxAbs(range)*amp`
-- everything else (`repLim` lattices, transformed bodies, custom groups) takes
-  an authored `bound:` expression — which also *overrides* any derivation
+- a library shape's `<stem>Bound` is used automatically — and a domain fold
+  (`repLim`/`mirror`/`radial`) folds it along: `<stem>Bound(opRepLim(...))`
+- a displaced shape's bound is the base pushed out by `maxAbs(range)*amp`;
+  a carved/subtracted one keeps the uncarved base; a shelled or rounded one
+  inflates it; a **clipped** one is *replaced by the cutter* — which is how a
+  lattice or a limit set gains a bound it could not otherwise have
+  (full table: [shape-modifiers.md](shape-modifiers.md) §5)
+- everything else (a bare `repLim` of a `Bound`-less shape, transformed
+  bodies, custom groups) takes an authored `bound:` expression — which also
+  *overrides* any derivation
 
 Cheap exact shapes (a plain sphere) need no bound: their sdf already is one.
 
@@ -326,8 +370,10 @@ sky: {type: 'image', src: '/assets/office.jpg'}     //or {type:'solid'|'gradient
 
 A preset is plain JS returning nodes or fields — ordinary schema use, written
 once, imported everywhere. `room()` (the six-wall box with its knobs;
-per-scene overrides via `knobs: {roomLight: {max: 3}}`), `sphereLight()`, and
-the field presets live in `js/presets/` (one file per domain, own index) —
+per-scene overrides via `knobs: {roomLight: {max: 3}}`), `sphereLight()`, the
+field presets, and the named Kleinian boxes (`kleinianStandardBox`,
+`kleinianSeahorse` — a shape's classic parameter bundles, `fractals.js`) live
+in `js/presets/` (one file per domain, own index) —
 **content, outside the generator**: presets import from scenegen's public
 surface, never the reverse. When a pattern repeats across ports, make it a
 preset — never new core machinery. Named *materials* are ordinary presets

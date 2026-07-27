@@ -120,7 +120,10 @@ float opRound(float dist, float r){ return dist - r; }
 vec3 opSymX(vec3 p){ p.x = abs(p.x); return p; }
 vec3 opSymY(vec3 p){ p.y = abs(p.y); return p; }
 vec3 opSymZ(vec3 p){ p.z = abs(p.z); return p; }
+vec3 opSymXY(vec3 p){ p.xy = abs(p.xy); return p; }
 vec3 opSymXZ(vec3 p){ p.xz = abs(p.xz); return p; }
+vec3 opSymYZ(vec3 p){ p.yz = abs(p.yz); return p; }
+vec3 opSymXYZ(vec3 p){ return abs(p); }
 
 //INFINITE repetition on a grid of spacing s (one copy of the shape per cell)
 vec3 opRep(vec3 p, vec3 s){ return p - s*round(p/s); }
@@ -130,6 +133,106 @@ vec3 opRepLim(vec3 p, float s, vec3 lim){ return p - s*clamp(round(p/s), -lim, l
 
 //ELONGATE: pull a shape apart by h along each axis (cheap; exact for convex shapes)
 vec3 opElongate(vec3 p, vec3 h){ return p - clamp(p, -h, h); }
+
+//RADIAL: fold space into one of n wedges around the axis — an n-fold rotational
+//symmetry. A rotation is an isometry, so this is exact; but like opRepLim, the
+//base must stay INSIDE its wedge or the fold overestimates distance across the
+//seam, which the marcher punishes as tunneling.
+vec3 opRadialY(vec3 p, float n){
+    float r = length(p.xz);
+    if(r < 1.0e-6){ return p; }              //on the axis atan is undefined
+    float seg = 6.2831853/n;
+    float a   = mod(atan(p.z, p.x) + 0.5*seg, seg) - 0.5*seg;
+    return vec3(r*cos(a), p.y, r*sin(a));
+}
+vec3 opRadialX(vec3 p, float n){
+    float r = length(p.yz);
+    if(r < 1.0e-6){ return p; }
+    float seg = 6.2831853/n;
+    float a   = mod(atan(p.z, p.y) + 0.5*seg, seg) - 0.5*seg;
+    return vec3(p.x, r*cos(a), r*sin(a));
+}
+vec3 opRadialZ(vec3 p, float n){
+    float r = length(p.xy);
+    if(r < 1.0e-6){ return p; }
+    float seg = 6.2831853/n;
+    float a   = mod(atan(p.y, p.x) + 0.5*seg, seg) - 0.5*seg;
+    return vec3(r*cos(a), r*sin(a), p.z);
+}
+
+
+//--- CARVE: erode a solid with an fbm of sphere lattices ---------------
+//
+// IQ's fbmSDF (https://iquilezles.org/articles/fbmsdf). The point is what it is
+// NOT: displacement. `d + amp*noise(p)` is not a distance field, which is why
+// displace() pays a Lipschitz divisor at every march step and has to inflate its
+// bound. This SUBTRACTS a distance field instead — a lattice of spheres, smooth-
+// maxed out of the solid octave by octave — and a smooth max of two distance
+// fields is still one. So the detail is free to march, and because carving only
+// ever ERODES, the uncarved base remains a valid bound.
+//
+// FUTURE US: the carving field is hard-wired to the sphere lattice, the way
+// repLim hard-wires its fold. The natural generalization is to let carve() take
+// a caller-supplied DISTANCE field (`by:`), whose metadata would be a declared
+// Lipschitz constant rather than displace's {gradBound, range}. Call sites would
+// not change; opCarveFbm would take the field's function instead of calling
+// opCarveCell. Deferred until a second carving field actually exists.
+
+const float CARVE_LACUNARITY = 2.0;
+
+//the rotation between octaves, so the lattices never line up (IQ's matrix)
+const mat3 CARVE_ROT = mat3( 0.00,  0.80,  0.60,
+                            -0.80,  0.36, -0.48,
+                            -0.60, -0.48,  0.64);
+
+//one sphere per corner of the unit cell, radius from the corner's own hash.
+//`erosion` scales every radius: 0 bites nothing, 1 is the full 0.7 of a cell.
+//
+//A min over the 8 CORNERS is IQ's approximation — a lattice point one cell over
+//sits as close as 1.0 while a corner can be 1.73 away, so a big enough neighbour
+//sphere can in principle be nearer than all eight. Used subtractively, as here,
+//the error is small and bounded; do not lift this out as a general-purpose sdf.
+float opCarveCell(vec3 p, float erosion){
+    vec3  i = floor(p);
+    vec3  f = p - i;
+    float d = 1.0e9;
+    for(int x = 0; x <= 1; x++){
+        for(int y = 0; y <= 1; y++){
+            for(int z = 0; z <= 1; z++){
+                vec3  c = vec3(float(x), float(y), float(z));
+                float r = fieldHash(i + c);
+                d = min(d, length(f - c) - erosion*r*r*0.7);
+            }
+        }
+    }
+    return d;
+}
+
+//carve `d` with `octaves` of that lattice, each half the size and `gain` of the
+//amplitude of the last. Returns a CONSERVATIVE distance.
+//
+//THE DIVISOR. Octave i carries amplitude gain^i at frequency LACUNARITY^i, so its
+//gradient is (gain*LACUNARITY)^i, and a smooth max is bounded by the steepest of
+//its operands. With gain <= 1/LACUNARITY every octave is 1-Lipschitz and the
+//field is a true distance function — divisor 1, nothing paid. Above that the
+//divisor is real and the marcher needs it, so it is tracked in the loop rather
+//than assumed away. This is why gain is worth exposing: it is the dial between
+//"free to march" and "richer, and paying for it".
+float opCarveFbm(vec3 p, float d, int octaves, float erosion, float gain, float blend, float seed){
+    vec3  q   = p + vec3(seed);
+    float s   = 1.0;      //this octave's amplitude
+    float g   = 1.0;      //this octave's gradient bound
+    float lip = 1.0;      //the steepest octave so far
+
+    for(int i = 0; i < octaves; i++){
+        lip = max(lip, g);
+        d   = opMaxDist(d, -s*opCarveCell(q, erosion), blend*s);
+        q   = CARVE_LACUNARITY*(CARVE_ROT*q);
+        s  *= gain;
+        g  *= gain*CARVE_LACUNARITY;
+    }
+    return d/lip;
+}
 
 
 

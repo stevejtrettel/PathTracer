@@ -22,6 +22,14 @@
 //
 // The emitter (emitter.js) never looks inside a node — everything it prints
 // comes off these records.
+//
+// A shape is a base plus an ordered MODIFIER CHAIN (combinators.js), folded
+// here into one sdf: the transform gives the local point, the domain mods
+// fold it, the base is evaluated, the field mods act on the distance, and
+// the divisor/scale factors close the return. The bound is folded alongside
+// by the same chain (docs/shape-modifiers.md). chainBody renders a chain as
+// statements, chainBoundExpr as its bound; a clip/subtract CUTTER is the
+// same fold again, planned by planCutter.
 //-------------------------------------------------
 
 import {fnum, fvec2, fvec3, indent, pad, commentLines} from './fmt.js';
@@ -56,8 +64,9 @@ function refText(v, where){
 
 //consts + per-parameter argument text for one shape reference. Description-
 //supplied values become named consts `<NAME>_<PARAM>`; knobs stay bare (they
-//are uniforms already); glsl`` fragments are inlined.
-function shapeArgs(NAME, shape, consts){
+//are uniforms already); glsl`` fragments are inlined. NAME is the const-name
+//prefix (a cutter passes its own `<NAME>_<tok>`); `where` labels errors.
+function shapeArgs(NAME, shape, consts, where = `lib.${shape.entry.stem}`){
     const argFor = {};
     for(const p of shape.entry.params){
         const v = shape.values[p.name];
@@ -65,7 +74,7 @@ function shapeArgs(NAME, shape, consts){
         else if(isGlsl(v)){ argFor[p.name] = resolveGlsl(v); }
         else{
             const cname = `${NAME}_${p.name.toUpperCase()}`;
-            consts.push({type: p.type, name: cname, text: constText(p.type, v, `lib.${shape.entry.stem} parameter '${p.name}'`)});
+            consts.push({type: p.type, name: cname, text: constText(p.type, v, `${where} parameter '${p.name}'`)});
             argFor[p.name] = cname;
         }
     }
@@ -81,10 +90,235 @@ function authoredBound(name, NAME, src){
     return `float bound_${name}(vec3 p){\n${qLine(bexpr, `p - ${NAME}_P`)}    return ${bexpr};\n}`;
 }
 
-//the Lipschitz divisor of amp*field(q): 1 + amp*gradBound(field), with the
-//field's DECLARED gradBound expression kept intact, parenthesized
-function divisorText(f, ampT){
-    return `1.0 + ${ampT}*(${resolveGlsl(f.gradBound)})`;
+//"<local>" or "<local>, a, b" — no trailing comma when a shape (or its bound)
+//takes no parameters beyond the point (e.g. apollonianBound(vec3 p))
+function withArgs(local, extra){ return extra.length ? `${local}, ${extra.join(', ')}` : local; }
+
+//a shape's own bound as text: its Bound if the catalogue has one, else its
+//Distance — the starting point of every derived-bound fold
+const boundBaseOf = (entry, argFor, args) => (pt) => entry.bound
+    ? `${entry.stem}Bound(${withArgs(pt, entry.bound.map(n => argFor[n]))})`
+    : `${entry.stem}Distance(${withArgs(pt, args)})`;
+
+
+//-------------------------------------------------
+// the fold — one shape chain -> sdf text + derived bound
+//-------------------------------------------------
+
+//the fold context handed to each modifier's plan(): how a modifier turns its
+//description values into emitted text. The one rule (shared with carve's
+//original cv): a knob stays a bare uniform (an int knob in a float slot is
+//cast at the call); anything else becomes a const, named <NAME>_<SUFFIX> —
+//with a numeric suffix if a repeated modifier already claimed the name
+//(<NAME>_SPACING, <NAME>_SPACING2, ...; tokens CLIP, CLIP2, ... likewise).
+//
+//`local` is the node's PRE-FOLD local point — what clip/subtract evaluate
+//their cutter at (a cutter is a placed volume, so it lives in the placement
+//frame, not the folded one; docs/shape-modifiers.md). `child(prefix)` is the
+//same context with every const it allocates prefixed — a cutter's values
+//land as <NAME>_<tok>_* beside the unit's own rows.
+function makeFoldCtx(name, NAME, consts, local){
+    const used   = new Set();
+    const tokens = new Set();
+    const claim = (set, base) => {
+        let t = base, i = 2;
+        while(set.has(t)) t = base + i++;
+        set.add(t);
+        return t;
+    };
+
+    function value(type, suffix, v, where){
+        if(v && v.__knob){
+            return (type === 'float' && v.type === 'int') ? `float(${v.name})` : v.name;
+        }
+        const cname = `${NAME}_${claim(used, suffix)}`;
+        consts.push({type, name: cname, text: constText(type, v, where)});
+        return cname;
+    }
+
+    const child = (parent, prefix) => {
+        const c = {...parent, cpfx: `${parent.cpfx}_${prefix}`,
+                   value: (t, s, v, w) => parent.value(t, `${prefix}_${s}`, v, w)};
+        c.child  = (p) => child(c, p);
+        c.cutter = (shape, tok, at, where) => planCutter(shape, c, tok, at, where);
+        return c;
+    };
+
+    const fx = {
+        name, NAME, cpfx: NAME, consts, local, value,
+        num:    (v, where) => refText(v, where),
+        glsl:   (frag) => resolveGlsl(frag),
+        token:  (base) => claim(tokens, base),
+        child:  (prefix) => child(fx, prefix),
+        cutter: (shape, tok, at, where) => planCutter(shape, fx, tok, at, where),
+    };
+    return fx;
+}
+
+//fold a planned chain's BOUND: the base's bound at the domain-folded point
+//(a fold is 1-Lipschitz, so the folded bound stays conservative), then each
+//field mod KEEPS it (carve/subtract erode into the base), INFLATES it
+//(displace/round/shell push the surface out), or REPLACES it (clip).
+//Inflations accumulate as subtractions; a replacement resets them.
+function chainBoundExpr(planned, boundBase, pt){
+    const domain = planned.filter(m => m.fold);
+    const fields = planned.filter(m => m.line || m.expr);
+    let running  = boundBase(domain.reduce((acc, m) => m.fold(acc), pt));
+    let inflates = [];
+    for(const f of fields){
+        const e = f.boundEffect;
+        if(!e || e === 'keep') continue;
+        if(e.inflate) inflates.push(e.inflate);
+        else if(e.replace){ running = e.replace(pt); inflates = []; }
+    }
+    return running + inflates.map(t => ` - ${t}`).join('');
+}
+
+//render a planned chain as the statement body of a float-returning function
+//of one point. The collapse rules keep simple chains reading like the hand
+//files: no q/d locals unless something needs them, the first domain fold
+//inlines the local point, a trailing field mod's expression form folds into
+//the return, a divisor closes it as d/(1 + Σ terms).
+//
+//opts: local      the pre-fold local point ('p - <NAME>_P',
+//                 'toLocal_<name>(p)', or a cutter helper's own 'p')
+//      bindLocal  bind `local` to a variable when placed-volume mods reuse
+//                 it — a transformed node's cutter must not run toLocal_
+//                 twice per evaluation
+//      forceD     introduce `float d` even with no field mods (the
+//                 transformed form the goldens pin)
+//      lip        factor appended to the final distance (non-uniform scale)
+function chainBody(planned, entry, args, {local, bindLocal = false, forceD = false, lip = ''}){
+    const domain    = planned.filter(m => m.fold);
+    const fields    = planned.filter(m => m.line || m.expr);
+    const localMods = fields.filter(f => f.frame === 'local');
+
+    const needQ = domain.length > 0 || fields.some(f => f.readsQ);
+    const needD = fields.length > 0 || forceD;
+
+    //where the placed-volume mods read the local point: bound to a variable
+    //when it is expensive and reused — q itself IS the binding when nothing
+    //folds it, q0 (the pre-fold point) when a domain mod does
+    let localRef = local, qInit = local, bindQ0 = false;
+    if(bindLocal && localMods.length){
+        if(domain.length === 0){ localRef = 'q'; }
+        else{ bindQ0 = true; localRef = 'q0'; qInit = 'q0'; }
+    }
+
+    const lines = [];
+    const vec   = needD ? pad('vec3', 5) : 'vec3';
+    if(bindQ0) lines.push(`    ${vec} q0 = ${local};`);
+    const useQ = needQ || localRef === 'q';
+    if(useQ){
+        lines.push(`    ${vec} q = ${domain.length ? domain[0].fold(qInit) : qInit};`);
+        lines.push(...domain.slice(1).map(m => `    q = ${m.fold('q')};`));
+    }
+    const basePt   = useQ ? 'q' : local;
+    const baseCall = `${entry.stem}Distance(${withArgs(basePt, args)})`;
+    if(needD) lines.push(`    float d = ${baseCall};`);
+
+    const ptFor = (f) => f.frame === 'local' ? localRef : basePt;
+    const divisorTerms = fields.map(f => f.divisor).filter(Boolean);
+    let stmts = fields.map(f => `    ${f.expr ? `d = ${f.expr('d', ptFor(f))};` : f.line}`);
+    let ret;
+    if(!needD){
+        ret = `    return ${baseCall};`;
+    }
+    else if(divisorTerms.length){
+        //the Lipschitz divisor of every displacement in the chain, summed;
+        //dividing a conservative distance by >= 1 stays conservative
+        ret = `    return d/(1.0 + ${divisorTerms.join(' + ')})${lip};`;
+    }
+    else{
+        const last = fields[fields.length - 1];
+        if(last && last.expr){ stmts = stmts.slice(0, -1); ret = `    return ${last.expr('d', ptFor(last))}${lip};`; }
+        else                 { ret = `    return d${lip};`; }
+    }
+    return [...lines, ...stmts, ret].join('\n');
+}
+
+//plan the OPERAND of clip/subtract: a called lib shape, or a modifier chain
+//over one, used purely as a cutting volume. Its consts land on the unit as
+//<NAME>_<tok>_*. A plain cutter stays one inline Distance call; a MODIFIED
+//cutter becomes its own small function (`clip_<name>`, `cut_<name>`, ...) so
+//its folds and field mods evaluate once per call. The bound side folds the
+//cutter's chain through the same keep/inflate/replace rules as the unit's —
+//a carved cutter donates its UNCARVED base, never the full erosion.
+function planCutter(shape, fx, tok, at, where){
+    const zero = Array.isArray(at) && at.every(x => x === 0);
+    let P = null;
+    if(!zero){
+        P = `${fx.cpfx}_${tok}_P`;
+        fx.consts.push({type: 'vec3', name: P, text: fvec3(at)});
+    }
+    const off = (pt) => P ? `${pt} - ${P}` : pt;
+
+    const planned = (shape.mods ?? []).map(m => m.plan(fx.child(tok)));
+    const bad = planned.find(f => f.divisor);
+    if(bad) throw new Error(`scenegen: ${where}: a cutter cannot carry a displacement divisor`);
+
+    const argFor = shapeArgs(`${fx.cpfx}_${tok}`, shape, fx.consts, where);
+    const args   = shape.entry.params.map(p => argFor[p.name]);
+
+    const boundExpr  = (pt) => chainBoundExpr(planned, boundBaseOf(shape.entry, argFor, args), off(pt));
+    const helperDefs = planned.flatMap(m => m.helperDefs ?? []);
+
+    if(!planned.length){
+        return {call: (pt) => `${shape.entry.stem}Distance(${withArgs(off(pt), args)})`, boundExpr, helperDefs};
+    }
+    const fnName = `${tok.toLowerCase()}_${fx.name}`;
+    helperDefs.push(`float ${fnName}(vec3 p){\n${chainBody(planned, shape.entry, args, {local: 'p'})}\n}`);
+    return {call: (pt) => `${fnName}(${off(pt)})`, boundExpr, helperDefs};
+}
+
+//fold one planned chain into {sdfDef, boundDef}.
+//ctx: {name, NAME, entry, args, argFor, comment, transformed, planned, local}
+//plus the node for rotate/scale.
+function buildChain(node, c){
+    //world -> local: undo the placement, then the rotation (GLSL's v*M is
+    //the rotation's inverse), then the scale
+    let toLocal = '';
+    if(c.transformed){
+        const rotLn = node.rotate
+            ? `    mat3 rot = rot3AxisAngle(normalize(${c.NAME}_AXIS), ${refText(node.rotate.angle, `rotate angle of '${c.name}'`)});\n`
+            : '';
+        let back;
+        if(node.rotate && node.scale) back = `((p - ${c.NAME}_P) * rot) / ${c.NAME}_SCALE`;
+        else if(node.rotate)          back = `(p - ${c.NAME}_P) * rot`;
+        else                          back = `(p - ${c.NAME}_P) / ${c.NAME}_SCALE`;
+        toLocal = `vec3 toLocal_${c.name}(vec3 p){\n${rotLn}    return ${back};\n}\n\n`;
+    }
+
+    //a non-uniform scale makes the local sdf overestimate world distance by
+    //the largest singular value; multiplying by the smallest component
+    //restores a conservative underestimate — applied to the FINAL distance,
+    //after every field mod. The 4-tap normal needs NO fixup: it
+    //differentiates the world function (chain rule).
+    const S   = `${c.NAME}_SCALE`;
+    const lip = node.scale ? ` * min(${S}.x, min(${S}.y, ${S}.z))` : '';
+
+    const body = chainBody(c.planned, c.entry, c.args,
+        {local: c.local, bindLocal: c.transformed, forceD: c.transformed, lip});
+    const helpers = c.planned.flatMap(m => m.helperDefs ?? []);
+    const sdfDef = toLocal
+        + (helpers.length ? helpers.join('\n\n') + '\n\n' : '')
+        + `${c.comment}float sdf_${c.name}(vec3 p){\n${body}\n}`;
+
+    //the derived bound, folded alongside the sdf by chainBoundExpr. Emitted
+    //only when it differs from the sdf itself: a bound textually equal to
+    //the sdf accelerates nothing. A transformed node derives no bound (a
+    //placement-frame expression cannot enclose a rotated body) — its bound
+    //is authored, as today. An authored bound: overrides either way.
+    let boundDef = null;
+    if(!c.transformed){
+        const fields = c.planned.filter(m => m.line || m.expr);
+        if(fields.length > 0 || c.entry.bound){
+            const expr = chainBoundExpr(c.planned, boundBaseOf(c.entry, c.argFor, c.args), `p - ${c.NAME}_P`);
+            boundDef = `float bound_${c.name}(vec3 p){\n    return ${expr};\n}`;
+        }
+    }
+
+    return {sdfDef, boundDef};
 }
 
 
@@ -93,9 +327,10 @@ function divisorText(f, ampT){
 //-------------------------------------------------
 
 //localPoint: the GLSL expression a material body reads as `q` — the object's
-//OWN local frame, so a texture rides the transform. `p - NAME_P` for a plain
-//or displaced object (placement-local == fully-local when there is no
-//rotate/scale), `toLocal_<name>(p)` for a transformed one.
+//OWN local frame, so a texture rides the transform. `p - NAME_P` for an
+//untransformed object (placement-local == fully-local when there is no
+//rotate/scale), `toLocal_<name>(p)` for a transformed one. A domain fold
+//does NOT change it: materials read the UNFOLDED point (docs/shape-modifiers.md).
 function makeRegion(name, spec, localPoint){
     //a bundle DERIVES its medium — an explicit medium: goes with an authored
     //material body, never with a bundle (one source of truth per material)
@@ -113,79 +348,6 @@ function makeRegion(name, spec, localPoint){
     };
 }
 
-//the four sdf forms of a simple shape. Each returns {sdfDef, boundDef};
-//boundDef is null when nothing useful can be derived (an authored `bound:`
-//on the node overrides either way). ctx: {name, NAME, entry, args, argFor,
-//comment} — the resolved naming of one shape reference.
-
-//"<local>" or "<local>, a, b" — no trailing comma when a shape (or its bound)
-//takes no parameters beyond the point (e.g. apollonianBound(vec3 p))
-function withArgs(local, extra){ return extra.length ? `${local}, ${extra.join(', ')}` : local; }
-
-function sdfPlain(node, c){
-    return {
-        sdfDef: `${c.comment}float sdf_${c.name}(vec3 p){\n    return ${c.entry.stem}Distance(${withArgs(`p - ${c.NAME}_P`, c.args)});\n}`,
-        boundDef: c.entry.bound
-            ? `float bound_${c.name}(vec3 p){\n    return ${c.entry.stem}Bound(${withArgs(`p - ${c.NAME}_P`, c.entry.bound.map(n => c.argFor[n]))});\n}`
-            : null,
-    };
-}
-
-function sdfDisplaced(node, c){
-    const f    = node.shape.by;
-    const ampT = refText(node.shape.amp, `displace amp of '${c.name}'`);
-    //the bound is the undisplaced shape pushed out by the largest possible
-    //displacement — without the inflation it would shave off the peaks
-    const maxAbs = Math.max(Math.abs(f.range[0]), Math.abs(f.range[1]));
-    return {
-        sdfDef: `${c.comment}float sdf_${c.name}(vec3 p){\n`
-            + `    vec3  q = p - ${c.NAME}_P;\n`
-            + `    float d = ${c.entry.stem}Distance(q, ${c.args.join(', ')});\n`
-            + `    d += ${ampT}*${f.name}(q);\n`
-            + `    return d/(${divisorText(f, ampT)});\n}`,
-        boundDef: `float bound_${c.name}(vec3 p){\n`
-            + `    return ${c.entry.stem}Distance(p - ${c.NAME}_P, ${c.args.join(', ')}) - ${fnum(maxAbs)}*${ampT};\n}`,
-    };
-}
-
-function sdfRepLim(node, c){
-    //one region, many copies: fold the grid onto a single cell. No derived
-    //bound — a lattice bound (one box over the whole grid) is authored.
-    return {
-        sdfDef: `${c.comment}float sdf_${c.name}(vec3 p){\n`
-            + `    vec3 q = opRepLim(p - ${c.NAME}_P, ${c.NAME}_SPACING, ${c.NAME}_LIMIT);\n`
-            + `    return ${c.entry.stem}Distance(q, ${c.args.join(', ')});\n}`,
-        boundDef: null,
-    };
-}
-
-function sdfTransformed(node, c){
-    //world -> local: undo the placement, then the rotation (GLSL's v*M is the
-    //rotation's inverse), then the scale
-    const rotLn = node.rotate
-        ? `    mat3 rot = rot3AxisAngle(normalize(${c.NAME}_AXIS), ${refText(node.rotate.angle, `rotate angle of '${c.name}'`)});\n`
-        : '';
-    let back;
-    if(node.rotate && node.scale) back = `((p - ${c.NAME}_P) * rot) / ${c.NAME}_SCALE`;
-    else if(node.rotate)          back = `(p - ${c.NAME}_P) * rot`;
-    else                          back = `(p - ${c.NAME}_P) / ${c.NAME}_SCALE`;
-    const toLocal = `vec3 toLocal_${c.name}(vec3 p){\n${rotLn}    return ${back};\n}`;
-
-    //a non-uniform scale makes the local sdf overestimate world distance by
-    //the largest singular value; multiplying by the smallest component
-    //restores a conservative underestimate. The 4-tap normal needs NO fixup —
-    //it differentiates the world function (chain rule).
-    const S   = `${c.NAME}_SCALE`;
-    const lip = node.scale ? ` * min(${S}.x, min(${S}.y, ${S}.z))` : '';
-    return {
-        sdfDef: toLocal + '\n\n'
-            + `${c.comment}float sdf_${c.name}(vec3 p){\n`
-            + `    float d = ${c.entry.stem}Distance(toLocal_${c.name}(p), ${c.args.join(', ')});\n`
-            + `    return d${lip};\n}`,
-        boundDef: null,       //no derived bound: a transformed body's bound is authored
-    };
-}
-
 
 function planObject(node, forceMarch){
     const name = node.name;
@@ -199,41 +361,39 @@ function planObject(node, forceMarch){
             + `call it from a group's authored sdf body (with uses: [lib.${entry.stem}])`);
     }
 
-    const kind        = node.shape.kind ?? 'plain';
+    const mods        = node.shape.mods ?? [];
     const transformed = !!(node.scale || node.rotate);
-    if(transformed && kind !== 'plain'){
-        throw new Error(`scenegen: object('${name}'): rotate/scale cannot combine with ${kind} yet`);
-    }
     if(node.rotate && (!node.rotate.axis || node.rotate.angle === undefined)){
         throw new Error(`scenegen: object('${name}'): rotate needs {axis: [x,y,z], angle}`);
     }
 
-    //consts: placement, then transform data, then wrapper params, then the
-    //shape's own parameters — matching the hand files' block order
+    //the node's local frame, computed ONCE: the fold (cutters), the sdf
+    //renderer, and the material slot all read this same expression
+    const local = transformed ? `toLocal_${name}(p)` : `p - ${NAME}_P`;
+
+    //consts: placement, then transform data, then each modifier's rows in
+    //chain order, then the shape's own parameters — matching the hand files'
+    //block order
     const consts = [{type: 'vec3', name: `${NAME}_P`, text: fvec3(node.at)}];
     if(node.scale)  consts.push({type: 'vec3', name: `${NAME}_SCALE`, text: fvec3(node.scale)});
     if(node.rotate) consts.push({type: 'vec3', name: `${NAME}_AXIS`,  text: fvec3(node.rotate.axis)});
-    if(kind === 'repLim'){
-        consts.push({type: 'float', name: `${NAME}_SPACING`, text: constText('float', node.shape.spacing, `repLim spacing of '${name}'`)});
-        consts.push({type: 'vec3',  name: `${NAME}_LIMIT`,   text: fvec3(node.shape.limit)});
-    }
+
+    const fx      = makeFoldCtx(name, NAME, consts, local);
+    const planned = mods.map(m => m.plan(fx));
+
     const argFor = shapeArgs(NAME, node.shape, consts);
     const args   = entry.params.map(p => argFor[p.name]);
 
-    //trace routing: a displaced, repeated, or transformed shape has no closed
-    //form any more, so it loses its trace and marches. A medium boundary is
-    //FORCED to march even when it has a trace: odeMarch finds the confining wall
-    //only by an sdf_Scene sign change, never trace_Scene (docs/curved-light-scenegen.md)
+    //trace routing: a modified or transformed shape has no closed form any
+    //more, so it loses its trace and marches. A medium boundary is FORCED to
+    //march even when it has a trace: odeMarch finds the confining wall only
+    //by an sdf_Scene sign change, never trace_Scene (docs/curved-light-scenegen.md)
     const forced   = !!(forceMarch && forceMarch.has(name));
-    const analytic = !!entry.trace && kind === 'plain' && !transformed && !forced;
+    const analytic = !!entry.trace && mods.length === 0 && !transformed && !forced;
     const comment  = node.comment ? commentLines(node.comment) + '\n' : '';
 
-    const ctx = {name, NAME, entry, args, argFor, comment};
-    const build = kind === 'displaced' ? sdfDisplaced
-                : kind === 'repLim'    ? sdfRepLim
-                : transformed          ? sdfTransformed
-                :                        sdfPlain;
-    let {sdfDef, boundDef} = build(node, ctx);
+    const ctx = {name, NAME, entry, args, argFor, comment, transformed, planned, local};
+    let {sdfDef, boundDef} = buildChain(node, ctx);
 
     //an authored bound is authored knowledge: it beats anything derived
     if(node.bound) boundDef = authoredBound(name, NAME, node.bound);
@@ -248,16 +408,12 @@ function planObject(node, forceMarch){
         boundDef = null;
     }
 
-    //a transformed object's material reads q in its OWN frame (toLocal_); a
-    //plain/displaced one has no rotate/scale, so placement-local IS fully-local
-    const localPoint = transformed ? `toLocal_${name}(p)` : `p - ${NAME}_P`;
-
     //a sheet is the same unit with a two-faced region instead of a material.
     //(node.comment belongs to the sdf; region comments come from group specs)
     const region = (node.__node === 'sheet')
-        ? {name, NAME, localPoint, sheet: true, front: node.front, back: node.back,
+        ? {name, NAME, localPoint: local, sheet: true, front: node.front, back: node.back,
            medium: null, comment: null, nestedIn: null, scatters: false}
-        : makeRegion(name, {material: node.material, medium: node.medium, nestedIn: node.nestedIn}, localPoint);
+        : makeRegion(name, {material: node.material, medium: node.medium, nestedIn: node.nestedIn}, local);
 
     //shape-data outputs available to this region's material: <name>Data injected
     //with the object's own consts baked in (docs/shape-data.md). The call reads q
@@ -269,7 +425,12 @@ function planObject(node, forceMarch){
     }));
 
     return {
-        name, NAME, entry, usesEntries: (node.uses ?? []).map(u => u.entry), consts, constsExtra: null, analytic,
+        name, NAME, entry,
+        //a modifier that calls into a library file (a cutter's shape) rides
+        //the include list like a declared uses: — except these can never be
+        //stale, the emitted sdf calls them
+        usesEntries: [...(node.uses ?? []).map(u => u.entry), ...mods.flatMap(m => m.uses ?? [])],
+        consts, constsExtra: null, analytic,
         regions: [region],
         sdfDefs: sdfDef,
         boundDef,

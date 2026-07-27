@@ -17,7 +17,8 @@ export {scene, object, group, sheet} from './nodes.js';
 export {lib, catalogue, catalogueInfo} from './catalogue.js';
 export {knob} from './knobs.js';
 export {glsl, valueText} from './glslTag.js';
-export {displace, repLim} from './combinators.js';
+export {displace, repLim, carve,
+        mirror, radial, round, shell, clip, subtract} from './combinators.js';
 export {field} from './fields.js';
 export {emit} from './emitter.js';
 

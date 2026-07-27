@@ -329,11 +329,21 @@ Settled in the scene-builder design discussion:
   meaning in the generated code.
 - **Explicit descriptions, formulaic generator** (July 2026 simplification).
   The core has a SMALL set of first-class mechanisms and no built-in
-  knowledge: the two shape wrappers `displace(by, amp)` and
-  `repLim(spacing, limit)`, plus `rotate`/`scale` placement. Everything the
-  emitter derives is a fixed formula over DECLARED data — displace's divisor
-  `1 + amp*gradBound` and inflation `maxAbs(range)*amp` from the field's
-  declared metadata, the transform's min-singular-value factor. Fields are
+  knowledge: the shape MODIFIERS — an ordered chain over one library shape
+  ([shape-modifiers.md](shape-modifiers.md)): `displace`, `repLim`, `carve`,
+  `mirror`, `radial`, `round`, `shell`, `clip`, `subtract` —
+  plus `rotate`/`scale` placement, which composes with all of them. Everything
+  the emitter derives is a fixed formula over DECLARED data — displace's
+  divisor `1 + amp*gradBound` and inflation `maxAbs(range)*amp` from the
+  field's declared metadata (several displaces in one chain SUM both), the
+  transform's min-singular-value factor applied to the final distance, the
+  bound folded alongside the sdf (kept, inflated, or replaced per modifier —
+  clip DONATES its cutter as the bound, which is how an unboundable lattice
+  gains one). Carve is
+  displace's mirror image and derives the two things that FOLLOW from erosion:
+  the base's own bound, uninflated (the carved solid is strictly inside it),
+  and no divisor at all — the Lipschitz arithmetic stays inside `opCarveFbm`,
+  which owns the lacunarity the divisor is computed from. Fields are
   one kind: an authored GLSL function + declared `{gradBound, range}`; the
   noise gradient constants live in PRESETS (`fbm2Height`, `fbmHeight` in
   `js/presets/fields.js`), not in the core. Groups are always AUTHORED bodies assigning
