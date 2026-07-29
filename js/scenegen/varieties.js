@@ -82,6 +82,25 @@ function buildVarieties(){
 
 export const varieties = buildVarieties();
 
+//the --catalogue dump: what variety(varieties.<name>, {...}) can name,
+//grouped by file, with the capability the SIGNATURE grants (§4)
+export function varietiesInfo(){
+    const byFile = new Map();
+    for(const f of Object.values(varieties)){
+        const list = byFile.get(f.entry.file) ?? [];
+        list.push(f);
+        byFile.set(f.entry.file, list);
+    }
+    const lines = [`variety formulas — variety(varieties.<name>, {scale, view}):`];
+    for(const [file, list] of [...byFile.entries()].sort()){
+        lines.push(`  ${file}`);
+        for(const f of list.sort((a, b) => a.name.localeCompare(b.name))){
+            lines.push(`    ${f.name}${f.arity === 4 ? '   (projective: stereo | affine patch)' : ''}`);
+        }
+    }
+    return lines.join('\n');
+}
+
 
 //---------------------------------------------------------------- the base
 

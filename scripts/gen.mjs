@@ -119,7 +119,10 @@ async function emitScene(name){
 try{
     if(wantCatalogue){
         const {catalogueInfo} = await server.ssrLoadModule('/js/scenegen/catalogue.js');
+        const {varietiesInfo} = await server.ssrLoadModule('/js/scenegen/varieties.js');
         console.log(catalogueInfo());
+        console.log('');
+        console.log(varietiesInfo());
     }
     else if(wantMaterials){
         const {materialInfo} = await server.ssrLoadModule('/js/scenegen/materials.js');
