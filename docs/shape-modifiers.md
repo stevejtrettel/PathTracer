@@ -55,21 +55,45 @@ the base, **a domain mod may not wrap a field mod** — see §6 for the error.
 
 ## 3 · The modifier descriptor
 
-Replace `kind` with `mods: [...]`, each entry a plain record the planner folds:
+*(As built — §10.5.4 records how this evolved from the plan's separate
+`consts/line/bound` closures.)* A `shape:` is a base plus `mods: [...]`, each
+a plain record its combinator appends (`appendMod`, `combinators.js` — which
+also enforces the phase-order and true-DF rules of §6):
 
 ```js
 {
-  kind:   'clip',                  // for errors and validation
-  phase:  'domain' | 'field',
-  consts: (NAME) => [{type, name, text}, ...],   // its own <NAME>_* rows
-  line:   (ctx) => 'q = …;' | 'd = …;',          // exactly one statement
-  bound:  (prev, ctx) => boundExpr | null,       // see §5
+  kind:  'accrete',            // for errors and validation
+  phase: 'domain' | 'field',   // rewrites the point | rewrites the distance
+  requiresTrueDF: true,        // refuse if anything below broke true distance
+  breaksTrueDF:   true,        // displace: the result is not a true distance
+  uses:  [entry, ...],         // library files a cutter operand calls into
+  plan(fx){ ... },             // description values -> one planned instance
 }
 ```
 
-`ctx` carries `{name, NAME, entry, args, argFor, localPoint}` — the same data the
-current builders receive. **A knob stays a bare uniform; anything else becomes a
-const** (`cv()` in the current `sdfCarve` planning is the pattern to reuse).
+`plan(fx)` runs once per emission and returns the planned instance the fold
+renders — the sdf AND the bound come from this one call, so consts allocate
+exactly once:
+
+| field | meaning |
+|---|---|
+| `fold: (pt) => text` | domain mods: the point rewrite (`opRepLim(pt, S, L)`) |
+| `expr: (d, pt) => text` | field mods: the distance rewrite (`opCarveFbm(pt, d, …)`) |
+| `line: 'd += …;'` | statement form — displace only, whose divisor closes the return |
+| `readsQ: true` | the mod evaluates the folded point, so the body binds the `q` local |
+| `frame: 'local'` | placed-volume mods (clip/subtract): `pt` is the PRE-fold local point |
+| `divisor: text` | Lipschitz term, summed into the closing `d/(1.0 + Σ terms)` |
+| `boundEffect` | `'keep'` \| `{inflate: text}` \| `{replace: (pt) => text}` — see §5 |
+| `helperDefs: [text]` | extra emitted functions (a modified cutter's `clip_<name>`) |
+
+`fx` is the fold context (`makeFoldCtx`, `plan.js`). `fx.value(type, suffix,
+v, where)` applies the one naming rule — **a knob stays a bare uniform (an
+int knob in a float slot is cast at the call); anything else becomes a const
+`<NAME>_<SUFFIX>`**, numbered when a repeated modifier already claimed the
+name (`SPACING`, `SPACING2`). `fx.num`/`fx.glsl` resolve plain numbers and
+glsl`` fragments, `fx.token` claims a repeat-numbered prefix (`CLIP`,
+`CLIP2`), and `fx.cutter` plans a placed operand, whose consts land as
+`<NAME>_<tok>_*`.
 
 
 ## 4 · The modifiers to build
@@ -163,6 +187,7 @@ The bound is folded alongside the sdf. Start from the base's derived bound
 | modifier | effect on the running bound |
 |---|---|
 | `carve`, `subtract` | unchanged — the result is contained in the base |
+| `accrete` | inflate by `(ACCRETE_REACH + blend/4)/(1 - gain)` — the octaves' reach, summed |
 | `round` | inflate by `r` |
 | `shell` | inflate by the thickness (the outer face lies outside the base) |
 | `displace` | inflate by `maxAbs(range)*amp` (several displaces SUM their inflations) |
@@ -246,6 +271,7 @@ beads:  clip(repLim(lib.sphere({radius: 0.32}), {spacing: 1, limit: [3,0,3]}), {
 pillar: carve(radial(lib.box({halfSize: [0.35, 1.2, 0.35]}), {n: segments}), {...})
 husk:   shell(clip(lib.gem({size: 1.4}), {to: lib.box({halfSize: [2,2,1]}), at: [0,0,1.2]}), {thickness})
 dice:   subtract(lib.box({halfSize: [1,1,1]}), {what: lib.sphere({radius: 1.25}), at: [0.7,0.7,0.7], blend: 0.08})
+reef:   accrete(lib.box({halfSize: [0.85,0.85,0.85]}), {...})   //carve's mirror, same erosion knobs as mesa
 ```
 
 `beads` is the bound story in one object: the lattice (unboundable alone —
@@ -266,9 +292,15 @@ non-black (`node scripts/render-test.mjs --budget 20000 chain`), then hand it ov
 - `twist` / `bend` / `taper` — domain mods that *distort*; each needs a divisor
   derived from the base's extent (twist: `√(1 + (k·r)²)`). Own design conversation.
 - `elongate` — exact only for convex bases.
-- `accrete` — `carve` with `opMinDist` instead of `opMaxDist` (blobs grow instead
-  of being eaten). A near one-liner; deliberately not bundled, so it can land any
-  time without shaping the mechanism.
+- ~~`accrete`~~ — **built** (July 2026, after the chain landed, exactly as
+  hoped: no mechanism change). `accrete(base, {octaves, erosion, gain, blend,
+  seed})` — carve's mirror: the same lattice octaves GROW on the surface
+  (`opAccreteFbm`: each octave's spheres clamp to `ACCRETE_REACH` of the
+  running surface, then smooth-union on). The one flipped derivation: the
+  bound INFLATES by the geometric series `(ACCRETE_REACH + blend/4)/(1 - gain)`
+  — emitted with the const's NAME, so retuning it in GLSL cannot strand the
+  derived bounds — which is why accrete alone validates `gain` in `[0, 1)`
+  (a literal, or a knob's whole range): the growth itself diverges at 1.
 - `carve`'s deferred `by:` (a caller-supplied distance field, metadata = a declared
   Lipschitz constant). See the note in `combinators.js`.
 - Union as description structure. Two solids that don't contain each other are
@@ -339,3 +371,41 @@ amended to match, this list is the record of what changed and why.
    replaced by a half-space), intersecting instead (`max(prev, cutter - blend)`)
    would be strictly tighter. Left as-is for now; revisit if a clipped
    scene marches slow.
+
+
+## 11 · Adding a modifier — the recipe
+
+Accrete (July 2026) is the reference: the first modifier added AFTER the
+chain landed, and it needed no mechanism change. (Step 0, optional: prototype
+it in one scene first with the `modifier()` escape hatch —
+[`authored-modifiers.md`](authored-modifiers.md) — and promote it here once
+it earns a name.) What one costs:
+
+1. **The math** — an `op…` in `glsl/objects/computations.glsl`, beside the
+   others. Derive the human math IN ITS COMMENT: the bound effect (where the
+   new surface can lie relative to the base's) and, for a distorting mod,
+   the Lipschitz divisor. These derivations cannot be parsed from code —
+   the combinator *declares* them, and the comment is where the next reader
+   checks the declaration. If the formula owns a tuning const
+   (`ACCRETE_REACH`), the combinator must emit it by NAME, never restate
+   the number.
+2. **The combinator** — ~30 lines in `js/scenegen/combinators.js`: validate
+   the arguments, then `appendMod(base, {kind, phase, flags, plan(fx)},
+   signature)` per §3. Validation rules of thumb: a constraint on a value
+   must hold for a LITERAL and for a knob's whole `[min, max]` range
+   (accrete's gain); loop and fold counts go through `requireInt`;
+   constraints inherited from the ENGINE cite their source (shell's
+   `2*AT_THRESH` cites `docs/marching.md`). Every error names the modifier
+   and says what to write instead (§6).
+3. **The export** — one name added in `js/scenegen/index.js`.
+4. **The docs** — a line in `scene-authoring.md` §3's modifier list, a row
+   in §5's bound table here.
+5. **The proof** — use it in a scene (`scenes/chain` is the sampler), check
+   `npm run gen -- --goldens` leaves every pre-existing golden untouched,
+   bake the new one deliberately (`--write`, after eyeballing the diff),
+   and render non-black (`node scripts/render-test.mjs --budget 20000
+   <scene>`). Looks are the owner's by-eye pass, not part of the landing.
+
+If the modifier does not fit the §3 descriptor — it needs new machinery in
+`plan.js`'s fold — stop and treat it as a schema-design question first
+(twist/bend/taper sit in §9 for exactly this reason).

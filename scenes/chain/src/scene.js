@@ -12,13 +12,16 @@
 //   pillar  carve(radial(box))           a 7-fold fluted column, eroded
 //   husk    shell(clip(gem))             a clipped gem, hollowed to a skin
 //   dice    subtract(box, sphere)        a corner scooped away
+//   reef    accrete(box)                 carve's mirror: the same lattice
+//                                        GROWN on the block (same knobs as
+//                                        mesa's erosion — one dial, two duals)
 //
 // Cutters (clip's `to:`, subtract's `what:`) are placed volumes: they act in
 // the object's own frame, cutting the WHOLE assembly. Carving acts on the
 // folded point, so every lattice/wedge copy erodes identically.
 //=====================================================================
 
-import {scene, object, lib, knob, carve, repLim, clip, subtract, shell, radial} from '../../../js/scenegen/index.js';
+import {scene, object, lib, knob, carve, accrete, repLim, clip, subtract, shell, radial} from '../../../js/scenegen/index.js';
 import {room, sphereLight, gloss, metal, matte, glass} from '../../../js/presets/index.js';
 
 
@@ -76,6 +79,15 @@ export default scene({
             shape: subtract(lib.box({halfSize: [1.0, 1.0, 1.0]}),
                             {what: lib.sphere({radius: 1.25}), at: [0.7, 0.7, 0.7], blend: 0.08}),
             material: glass({absorb: [0.03, 0.005, 0.02], ior: 1.5}),
+        }),
+
+        //carve's mirror on a box: blobs grow ON the surface instead of being
+        //eaten from it — and the bound inflates by the octaves' total reach,
+        //where mesa's stays the uncarved base
+        object('reef', {
+            at:    [0.9, 0.85, 3.6],
+            shape: accrete(lib.box({halfSize: [0.85, 0.85, 0.85]}), eaten(41.0)),
+            material: gloss({diffuse: [0.3, 0.5, 0.46], gloss: 0.04, roughness: 0.4}),
         }),
 
         sphereLight({

@@ -115,6 +115,7 @@ nesting order is application order, innermost first
 shape: displace(lib.sphere({radius: 2.0}), {by: rockHeight, amp: rockAmp})   //§7
 shape: repLim(lib.sphere({radius: 0.32}), {spacing: 1.0, limit: [2, 0, 1]})
 shape: carve(lib.sphere({radius: 1.9}), {octaves: 6, erosion, gain, blend, seed: 0})
+shape: accrete(lib.sphere({radius: 1.4}), {erosion, gain})   //carve's mirror: blobs GROW on the surface (gain < 1)
 shape: mirror(lib.gem({size: 1.0}), {axes: 'xz'})            //fold across coordinate planes
 shape: radial(lib.box({halfSize: [...]}), {n: 7, axis: 'y'}) //n-fold symmetry about an axis
 shape: round(lib.box({halfSize: [...]}), {r: 0.1})           //offset the surface outward
@@ -125,6 +126,11 @@ shape: subtract(base, {what: lib.sphere({radius: 1.25}), at, blend}) //carve a v
 //stacks: an eroded lattice disc; a grid of holes (the cutter is a chain too)
 shape: clip(repLim(lib.sphere({radius: 0.32}), {spacing: 1, limit: [3,0,3]}), {to: lib.sphere({radius: 2.4})})
 shape: subtract(lib.box({halfSize: [1,1,1]}), {what: repLim(lib.sphere({radius: 0.2}), {spacing: 0.5, limit: [1,1,1]})})
+
+//the ESCAPE HATCH: an authored field mod — expr reads d and the folded q,
+//and you DECLARE the bound ('keep' | {inflate: v}). authored-modifiers.md;
+//scenes/modifier/ is the demo
+shape: modifier(lib.sphere({radius: 1.0}), {expr: glsl`smax(d, 0.45 - length(q.xz), ${bite})`, bound: 'keep'})
 ```
 
 Two rules order a stack, both checked loudly. A **domain** modifier
@@ -392,7 +398,9 @@ The extension contract — what each kind of addition requires:
 | a named material (terracotta, honey, …) or a new archetype | nothing in GLSL — it's *values* | a function returning a bundle in `js/presets/materials.js` — over an archetype (`gloss`, `glass`, …), or over `material()` for a new archetype |
 | a new material *capability* (a field the model lacks) | the field on the `Surface`/`Medium` struct in `material.glsl` + its handling in the tracer | nothing in scenegen — `SURF_FIELDS`/`MEDIUM_FIELDS` are parsed from the struct, so `material({...})` accepts the new field automatically; add an archetype preset if it deserves a name. Genuine model surgery, rare by design |
 | a noise / field function | the function in `3Materials/fields.glsl` (derive its gradient bound in a comment there) | a field preset in `js/presets/fields.js` declaring `{gradBound, range}` — the bound is human math, it cannot be parsed |
-| an operator (`op...`) | `glsl/objects/computations.glsl` (engine-global) | yes — authored bodies see it; promoting one to a first-class wrapper is deliberate core surgery, rare by design |
+| an operator (`op...`) | `glsl/objects/computations.glsl` (engine-global) | yes — authored bodies see it; to make it a first-class `shape:` modifier, see the next row |
+| a shape modifier | the `op...` as above, its bound effect (and divisor, if distorting) derived in its comment | a short combinator in `js/scenegen/combinators.js` + an `index.js` export — the derivations are human math, *declared* there, never parsed. Recipe: `shape-modifiers.md` §11 |
+| a one-off modifier experiment | nothing — `modifier(base, {expr: glsl\`…\`, bound})` right in the scene | yes, but the declared bound is your promise (`authored-modifiers.md`); promote it per the row above when it earns a name |
 | a repeated scene pattern | a preset in `js/presets/` | yes — plain JS over the public schema |
 
 If an addition seems to need new machinery in `js/scenegen/`, stop and treat

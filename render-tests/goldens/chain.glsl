@@ -227,10 +227,11 @@ const int ID_BEADS  = 1;
 const int ID_PILLAR = 2;
 const int ID_HUSK   = 3;
 const int ID_DICE   = 4;
-const int ID_LAMP   = 5;
-const int ID_ROOM   = 6;
+const int ID_REEF   = 5;
+const int ID_LAMP   = 6;
+const int ID_ROOM   = 7;
 
-const int N_OBJ = 7;
+const int N_OBJ = 8;
 float gSDF[N_OBJ];
 
 
@@ -266,6 +267,12 @@ const vec3  DICE_CUT_P      = vec3(0.7);
 const float DICE_CUT_RADIUS = 1.25;
 const float DICE_CUT_BLEND  = 0.08;
 const vec3  DICE_HALFSIZE   = vec3(1.0);
+
+const vec3  REEF_P        = vec3(0.9, 0.85, 3.6);
+const int   REEF_OCTAVES  = 6;
+const float REEF_GAIN     = 0.5;
+const float REEF_SEED     = 41.0;
+const vec3  REEF_HALFSIZE = vec3(0.85);
 
 const vec3  LAMP_P      = vec3(-4.0, 8.5, 5.0);
 const float LAMP_RADIUS = 1.4;
@@ -308,6 +315,12 @@ float sdf_dice(vec3 p){
     return opSubtractDist(d, sphereDistance(p - DICE_P - DICE_CUT_P, DICE_CUT_RADIUS), DICE_CUT_BLEND);
 }
 
+float sdf_reef(vec3 p){
+    vec3  q = p - REEF_P;
+    float d = boxDistance(q, REEF_HALFSIZE);
+    return opAccreteFbm(q, d, REEF_OCTAVES, erosion, REEF_GAIN, bite, REEF_SEED);
+}
+
 float sdf_lamp(vec3 p){
     return sphereDistance(p - LAMP_P, LAMP_RADIUS);
 }
@@ -341,6 +354,10 @@ float bound_husk(vec3 p){
 
 float bound_dice(vec3 p){
     return boxDistance(p - DICE_P, DICE_HALFSIZE);
+}
+
+float bound_reef(vec3 p){
+    return boxDistance(p - REEF_P, REEF_HALFSIZE) - (ACCRETE_REACH + 0.25*bite)/(1.0 - REEF_GAIN);
 }
 
 
@@ -377,6 +394,12 @@ Vector normal_dice(vec3 p){
     vec2 k = vec2(1.0,-1.0)*0.5773;
     return Vector(p, normalize( k.xyy*sdf_dice(p + k.xyy*NRM_E) + k.yyx*sdf_dice(p + k.yyx*NRM_E)
                               + k.yxy*sdf_dice(p + k.yxy*NRM_E) + k.xxx*sdf_dice(p + k.xxx*NRM_E) ));
+}
+
+Vector normal_reef(vec3 p){
+    vec2 k = vec2(1.0,-1.0)*0.5773;
+    return Vector(p, normalize( k.xyy*sdf_reef(p + k.xyy*NRM_E) + k.yyx*sdf_reef(p + k.yyx*NRM_E)
+                              + k.yxy*sdf_reef(p + k.yxy*NRM_E) + k.xxx*sdf_reef(p + k.xxx*NRM_E) ));
 }
 
 Vector normal_lamp(vec3 p){
@@ -446,6 +469,15 @@ Material material_dice(vec3 p, inout Vector n){
     return m;
 }
 
+Material material_reef(vec3 p, inout Vector n){
+    Material m = defaultMaterial();      //gloss
+    m.surf.diffuse   = vec3(0.3, 0.5, 0.46);
+    m.surf.roughness = 0.4;
+    m.surf.gloss     = 0.04;
+    return m;
+}
+Medium   medium_reef  (vec3 p){ return defaultMedium(); }
+
 Material material_lamp(vec3 p, inout Vector n){
     Material m = defaultMaterial();      //light
     m.surf.emit = lampPower*vec3(1.0, 0.95, 0.88);
@@ -488,6 +520,7 @@ void sdfAll(vec3 p){
     gSDF[ID_PILLAR] = sdf_pillar(p);
     gSDF[ID_HUSK  ] = sdf_husk(p);
     gSDF[ID_DICE  ] = sdf_dice(p);
+    gSDF[ID_REEF  ] = sdf_reef(p);
     gSDF[ID_LAMP  ] = sdf_lamp(p);
     gSDF[ID_ROOM  ] = sdf_room(p);
 }
@@ -498,6 +531,7 @@ Vector normalOf(int id, vec3 p){
     if(id == ID_PILLAR){ return normal_pillar(p); }
     if(id == ID_HUSK  ){ return normal_husk(p); }
     if(id == ID_DICE  ){ return normal_dice(p); }
+    if(id == ID_REEF  ){ return normal_reef(p); }
     if(id == ID_LAMP  ){ return normal_lamp(p); }
     return normal_room(p);
 }
@@ -511,6 +545,7 @@ Material materialOf(int id, vec3 p, inout Vector n, bool front){
     if(id == ID_PILLAR){ return material_pillar(p, n); }
     if(id == ID_HUSK  ){ return material_husk(p, n); }
     if(id == ID_DICE  ){ return material_dice(p, n); }
+    if(id == ID_REEF  ){ return material_reef(p, n); }
     if(id == ID_LAMP  ){ return material_lamp(p, n); }
     return material_room(p, n);
 }
@@ -521,6 +556,7 @@ Medium mediumOf(int id, vec3 p){
     if(id == ID_PILLAR){ return medium_pillar(p); }
     if(id == ID_HUSK  ){ return medium_husk(p); }
     if(id == ID_DICE  ){ return medium_dice(p); }
+    if(id == ID_REEF  ){ return medium_reef(p); }
     if(id == ID_LAMP  ){ return medium_lamp(p); }
     if(id == ID_ROOM  ){ return medium_room(p); }
     return defaultMedium();      //ID_NONE: open air
@@ -551,6 +587,9 @@ float sdf_Scene(Vector tv){
 
     float b_dice = bound_dice(p);
     d = min(d, (b_dice > BOUND_MARGIN) ? b_dice : sdf_dice(p));
+
+    float b_reef = bound_reef(p);
+    d = min(d, (b_reef > BOUND_MARGIN) ? b_reef : sdf_reef(p));
 
     return d;
 }

@@ -4,12 +4,14 @@
 //   displace(base, {by, amp})        move the surface by amp*field(q)
 //   repLim(base, {spacing, limit})   one region, a folded grid of copies
 //   carve(base, {...})               erode it with an fbm of sphere lattices
+//   accrete(base, {...})             the same lattice grown ON the surface
 //   mirror(base, {axes})             fold across coordinate planes
 //   radial(base, {n, axis})          n-fold rotational symmetry about an axis
 //   round(base, {r})                 offset the surface outward by r
 //   shell(base, {thickness})         keep a skin around the surface
 //   clip(base, {to, at, blend})      intersect with a placed cutting volume
 //   subtract(base, {what, at, blend})  carve a placed volume away
+//   modifier(base, {expr, bound})    the ESCAPE HATCH: an authored field mod
 //
 // Each modifier takes one shape and returns one shape, so they STACK:
 // nesting order = application order, innermost first (docs/shape-modifiers.md).
@@ -41,6 +43,8 @@
 //             boundEffect: 'keep' | {inflate: text} | {replace: (pt) -> text},
 //             helperDefs, uses (cutter machinery)}
 //-------------------------------------------------
+
+import {isGlsl} from './glslTag.js';
 
 
 //append one modifier to a chain, enforcing the rules every modifier obeys:
@@ -139,6 +143,42 @@ export function carve(base, {octaves = 6, erosion = 1.0, gain = 0.5, blend = 0.1
             };
         },
     }, 'carve(base, {...})');
+}
+
+//ACCRETION, carve's mirror image: the same fbm sphere lattice GROWS on the
+//surface instead of being eaten from it (opAccreteFbm, computations.glsl).
+//The one derivation that flips: accreted material lies OUTSIDE the base, so
+//the bound inflates — each octave attaches at most REACH*s past the surface
+//plus the smooth-union bulge, and the total over octaves is the geometric
+//series (REACH + blend/4)/(1 - gain). That formula is why accrete's gain
+//must stay below 1 where carve's may not: the growth itself would diverge.
+export function accrete(base, {octaves = 6, erosion = 1.0, gain = 0.5, blend = 0.15, seed = 0.0} = {}){
+    requireInt('accrete', 'octaves', octaves, {min: 1, max: 10, why: 'it is a GLSL loop count'});
+    if(gain && gain.__knob){
+        if(gain.min < 0 || gain.max >= 1){
+            throw new Error(`scenegen: accrete(): the gain knob '${gain.name}' must keep its range inside [0, 1) — `
+                + `the bound inflation (and the growth) diverge as gain reaches 1`);
+        }
+    }
+    else if(!(typeof gain === 'number' && gain >= 0 && gain < 1)){
+        throw new Error(`scenegen: accrete(): gain must be a number in [0, 1) — `
+            + `the bound inflation diverges at 1 — got ${JSON.stringify(gain)}`);
+    }
+    return appendMod(base, {
+        kind: 'accrete', phase: 'field', requiresTrueDF: true,
+        plan(fx){
+            const o = fx.value('int',   'OCTAVES', octaves, `accrete octaves of '${fx.name}'`);
+            const e = fx.value('float', 'EROSION', erosion, `accrete erosion of '${fx.name}'`);
+            const g = fx.value('float', 'GAIN',    gain,    `accrete gain of '${fx.name}'`);
+            const b = fx.value('float', 'BLEND',   blend,   `accrete blend of '${fx.name}'`);
+            const s = fx.value('float', 'SEED',    seed,    `accrete seed of '${fx.name}'`);
+            return {
+                expr: (d, pt) => `opAccreteFbm(${pt}, ${d}, ${o}, ${e}, ${g}, ${b}, ${s})`,
+                readsQ: true,
+                boundEffect: {inflate: `(ACCRETE_REACH + 0.25*${b})/(1.0 - ${g})`},
+            };
+        },
+    }, 'accrete(base, {...})');
 }
 
 export function repLim(base, {spacing, limit} = {}){
@@ -304,3 +344,57 @@ function cutMod(base, spec, kind, operandKey){
 
 export function clip(base, spec = {}){ return cutMod(base, spec, 'clip', 'to'); }
 export function subtract(base, spec = {}){ return cutMod(base, spec, 'subtract', 'what'); }
+
+//THE ESCAPE HATCH — an authored field mod, the modifier analogue of the
+//material() ground builder (docs/authored-modifiers.md). The author writes
+//the distance rewrite as a glsl`` EXPRESSION over two documented locals —
+//`d` the running distance, `q` the folded local point (the infinite-field
+//frame, like carve: every folded copy gets identical treatment) — and
+//DECLARES the one thing the generator cannot derive, the bound effect:
+//'keep' promises the surface stays inside the base; {inflate: v} promises
+//it reaches at most v outside (v a number, or a float knob whose WHOLE
+//range keeps the promise). The expression must return a conservative
+//distance — `d + noise(q)` is displacement and belongs to displace(),
+//which pays the Lipschitz divisor for it. Promotion to a named combinator:
+//docs/shape-modifiers.md §11.
+export function modifier(base, {expr, bound} = {}){
+    if(!isGlsl(expr)){
+        throw new Error('scenegen: modifier() needs expr: a glsl`...` expression over d and q — '
+            + 'see docs/authored-modifiers.md');
+    }
+    const authored = expr.strings.join('');
+    if(authored.includes(';') || /(^|[^=!<>+\-*/])=(?!=)/.test(authored)){
+        throw new Error('scenegen: modifier(): expr must be a single EXPRESSION producing the new '
+            + 'distance — no statements, no `;`, no assignment. Real structure belongs in '
+            + 'glsl/objects/computations.glsl as an op the expression calls');
+    }
+    if(bound === undefined){
+        throw new Error("scenegen: modifier() must declare its bound — 'keep' if the surface stays "
+            + 'inside the base, {inflate: v} if it can move outward by at most v. This is your '
+            + 'promise to the marcher (docs/authored-modifiers.md §3)');
+    }
+    let inflate = null;
+    if(bound !== 'keep'){
+        inflate = bound ? bound.inflate : undefined;
+        const ok = (inflate && inflate.__knob)
+            ? (inflate.type === 'float' && inflate.min >= 0)
+            : (typeof inflate === 'number' && inflate >= 0);
+        if(!ok){
+            throw new Error(`scenegen: modifier(): bound must be 'keep' or {inflate: v} — v a number >= 0, `
+                + `or a float knob with min >= 0 (the whole range is the promise) — got ${JSON.stringify(bound)}`);
+        }
+    }
+    return appendMod(base, {
+        kind: 'modifier', phase: 'field', requiresTrueDF: true,
+        plan(fx){
+            const text = fx.glsl(expr);
+            return {
+                //the fragment names d and q itself, so the closure ignores its args
+                expr: () => text,
+                readsQ: true,
+                boundEffect: inflate === null ? 'keep'
+                    : {inflate: fx.num(inflate, `modifier inflate of '${fx.name}'`)},
+            };
+        },
+    }, 'modifier(base, {expr, bound})');
+}

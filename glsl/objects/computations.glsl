@@ -234,6 +234,38 @@ float opCarveFbm(vec3 p, float d, int octaves, float erosion, float gain, float 
     return d/lip;
 }
 
+//ACCRETE: carve's mirror image — the same lattice octaves GROW on the surface
+//instead of being eaten from it (the union form of IQ's fbmSDF). One extra move
+//vs carve: each octave's spheres are first CLAMPED to a thin neighborhood of the
+//running surface (smax against d dilated by REACH of that octave's scale) —
+//without it the infinite lattice would sprout blobs everywhere in space — and
+//then smooth-unioned on. Divisor bookkeeping is opCarveFbm's, unchanged.
+//
+//Growth is bounded: an octave attaches at most REACH*s past the surface, and the
+//smooth union bulges at most blend*s/4 more, so the total over all octaves is the
+//geometric series (REACH + blend/4)*(1 + gain + gain^2 + ...). That closed form,
+//(REACH + 0.25*blend)/(1 - gain), is the bound inflation the generator derives —
+//and why accrete's gain must stay below 1 (the series, and the growth, diverge).
+const float ACCRETE_REACH = 0.1;
+
+float opAccreteFbm(vec3 p, float d, int octaves, float erosion, float gain, float blend, float seed){
+    vec3  q   = p + vec3(seed);
+    float s   = 1.0;      //this octave's amplitude
+    float g   = 1.0;      //this octave's gradient bound
+    float lip = 1.0;      //the steepest octave so far
+
+    for(int i = 0; i < octaves; i++){
+        lip     = max(lip, g);
+        float n = s*opCarveCell(q, erosion);
+        n = opMaxDist(n, d - ACCRETE_REACH*s, blend*s);   //only near the current surface
+        d = opMinDist(d, n, blend*s);                     //grow it on
+        q = CARVE_LACUNARITY*(CARVE_ROT*q);
+        s *= gain;
+        g *= gain*CARVE_LACUNARITY;
+    }
+    return d/lip;
+}
+
 
 
 
