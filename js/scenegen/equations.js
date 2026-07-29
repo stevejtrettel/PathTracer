@@ -810,7 +810,7 @@ function verifyField({arity, F, D}, {points = 2000, seed = 12345} = {}){
             : null;
         const analytic = (i) => (i < 3) ? d[i + 1] : dw[1];
         for(let i = 0; i < names.length; i++){
-            const h  = 1e-5*Math.max(1, Math.abs(pt[names[i]]));
+            const h  = 1e-6*Math.max(1, Math.abs(pt[names[i]]));
             const fa = F({...pt, [names[i]]: pt[names[i]] + h});
             const fb = F({...pt, [names[i]]: pt[names[i]] - h});
             if(!usable(fa) || !usable(fb)) continue;             //kissed a pole: skip the partial
@@ -886,7 +886,7 @@ function verifyField({arity, F, D}, {points = 2000, seed = 12345} = {}){
                     continue;
                 }
                 for(const [i, n] of ['x', 'y', 'z'].entries()){
-                    const h  = 1e-5*Math.max(1, Math.abs(pt[n]));
+                    const h  = 1e-6*Math.max(1, Math.abs(pt[n]));
                     const fa = F3({...pt, [n]: pt[n] + h});
                     const fb = F3({...pt, [n]: pt[n] - h});
                     if(!usable(fa) || !usable(fb)) continue;
