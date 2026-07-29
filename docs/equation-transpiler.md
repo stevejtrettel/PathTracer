@@ -1,10 +1,26 @@
 # The equation transpiler and the vec4 dual-number system
 
-**Status: PLANNED (July 2026).** The precise build plan for the dual-number
-subsystem of the variety builder ([`variety-builder.md`](variety-builder.md)
-§5 — decisions settled there; this doc is the engineering spec). Everything
-here is buildable and testable BEFORE any scene machinery changes: pure JS +
-one additive GLSL section, zero goldens touched.
+**Status: BUILT (July 2026).** All six build-order steps landed the same day
+the spec was written, one commit per stage, every scene golden untouched
+throughout. Files: `js/scenegen/equations.js` (parse/evaluate/verify/emit,
+~1100 lines), the vec4 section in `dualNumbers.glsl`, the gate in `gen.mjs
+--equations`, suite + byte-exact emission fixtures in
+`render-tests/equations/`. As-built deltas from the plan below:
+- the GATE landed at stage 1 and grew with every stage (the only sane way to
+  run vite-loaded modules), rather than arriving at step 6;
+- function sources are CLOSED (no free identifiers) — trailing formula
+  parameters play the scene-string `params` role, and are read-only;
+- `else if` chains and ternaries are in (a ternary's condition is a
+  comparison, parsed `expr CMP expr ? … : …`); int/float mixing is refused
+  (GLSL ES has no implicit conversion), int expressions are int-only;
+- helper twins overload the float ORIGINALS by name — a scalar-kind helper
+  call emits the plain name and relies on the float original in the
+  catalogue file;
+- `x*x` emits `tmul(x, x)`, not `tsqr` — squares are recognized from `^2`
+  only (no-simplification rule);
+- the parent design is [`variety-builder.md`](variety-builder.md) §5.
+Integration into the `variety()` base is the NEXT phase (variety-builder
+§7–§10).
 
 
 ## 1 · The representation and the contract

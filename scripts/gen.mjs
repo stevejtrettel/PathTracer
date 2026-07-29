@@ -130,16 +130,21 @@ try{
         //value vs float, dual gradient vs central differences, numeric
         //homogeneity for 4-ary sources — plus the suite's pinned REFUSALS
         //(`expect`), asserted to fail for their stated reason
-        const {verifyEquation, emitEquation} = await server.ssrLoadModule('/js/scenegen/equations.js');
+        const {verifyEquation, emitEquation, verifyFunctions, emitFunctions}
+            = await server.ssrLoadModule('/js/scenegen/equations.js');
         const suite = (await server.ssrLoadModule('/render-tests/equations/suite.mjs')).default;
         const emitDir = path.join(root, 'render-tests', 'equations', 'emitted');
         mkdirSync(emitDir, {recursive: true});
         let failed = 0;
         for(const spec of suite){
+            //fns: entries are statement-body function sources (stage 5)
+            const arg    = {name: spec.name, src: spec.fns ?? spec.src, params: spec.params};
+            const verify = spec.fns ? verifyFunctions : verifyEquation;
+            const emit   = spec.fns ? emitFunctions   : emitEquation;
             if(spec.expect){
                 let outcome = null;
                 try{
-                    const r = verifyEquation(spec);
+                    const r = verify(arg);
                     if(!r.ok) outcome = {kind: r.failures[0].kind, message: r.failures[0].note ?? ''};
                 }
                 catch(e){ outcome = {kind: 'throw', message: e.message}; }
@@ -154,7 +159,7 @@ try{
                 }
                 continue;
             }
-            const r = verifyEquation(spec);
+            const r = verify(arg);
             if(!r.ok || (spec.degree !== undefined && spec.degree !== r.degree)){
                 console.error(`${spec.name}: FAILED`);
                 for(const f of r.failures) console.error('  ' + JSON.stringify(f));
@@ -172,7 +177,7 @@ try{
                    {view: 'affine', file: `${spec.name}.affine.glsl`}];
             let fixture = '', bad = false;
             for(const f of forms){
-                const glsl    = emitEquation({name: spec.name, src: spec.src, view: f.view});
+                const glsl    = emit({...arg, view: f.view});
                 const fixPath = path.join(emitDir, f.file);
                 if(wantWrite){
                     writeFileSync(fixPath, glsl, 'utf8');

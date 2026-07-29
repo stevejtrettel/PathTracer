@@ -1,50 +1,57 @@
 //-------------------------------------------------
-// EQUATIONS — the variety equation transpiler, stage 1
+// EQUATIONS — the variety equation transpiler
 // (docs/equation-transpiler.md; the parent design is docs/variety-builder.md)
 //
 // An equation is authored as the GLSL expression subset — a string that is
 // simultaneously valid float GLSL and valid input here (`^` integer powers
-// are the one piece of sugar). This module owns:
+// are the one piece of sugar) — or, catalogue-style, as STANDARD FLOAT GLSL
+// FUNCTIONS whose bodies carry the statement whitelist (counted `for`,
+// `if`/`else`, reassignment, helper functions). This module owns:
 //
-//   parse      the expression grammar -> AST (coords x y z w, free params,
-//              the function vocabulary). `w` appearing = a 4-ary/projective
-//              source; capability is the SIGNATURE, never the body (§4).
-//   evaluate   the AST two ways in JS float64: FLOAT (plain arithmetic) and
-//              DUAL — the exact vec4 forward-mode semantics the emitted GLSL
-//              will compute: (value, dx, dy, dz), one pass, three tangents.
+//   parse      expression strings (parseEquation) and function sources
+//              (parseFunctions). `w` in a string / a 4-ary signature = a
+//              projective source; capability is the SIGNATURE, never the
+//              body (variety-builder §4).
+//   evaluate   everything two ways in JS float64: FLOAT (plain arithmetic)
+//              and DUAL — the exact vec4 forward-mode semantics the emitted
+//              GLSL computes: (value, dx, dy, dz), one pass, three tangents.
+//              Statement bodies run through a small interpreter.
 //   verify     the self-check gate (§5): dual value vs float value, dual
-//              gradient vs central differences, and for 4-ary sources the
-//              NUMERIC homogeneity check — the sole homogeneity authority.
-//   emit       (stage 2) the same AST as GLSL vec4 forward-mode arithmetic:
-//              the scalar/dual kind rule, hand-catalogue power locals, and
-//              the affine data_ wrapper. Pinned by byte-exact fixtures in
+//              gradient vs central differences, numeric homogeneity for
+//              4-ary sources (the sole homogeneity authority), and the two
+//              composed R³ views (stereo lift, w = 1 patch).
+//   emit       the same AST as GLSL: the scalar/dual kind rule,
+//              hand-catalogue power locals, dual TWINS of statement
+//              functions (vec4 overloads of the float originals), and the
+//              data_ wrapper matrix. Pinned by byte-exact fixtures in
 //              render-tests/equations/emitted/ (--equations --write bakes).
 //
-// Statement bodies arrive at stage 5; the stereo/patch wrappers at stage 4.
-// The dual arithmetic here is the REFERENCE for what dualNumbers.glsl's vec4
-// overloads must compute — keep the two in lockstep, formula for formula.
+// The dual arithmetic here is the REFERENCE for what dualNumbers.glsl's
+// vec4 overloads must compute — keep the two in lockstep, formula for
+// formula.
 //-------------------------------------------------
 
 import {fnum} from './fmt.js';
 
 
 //the function vocabulary (docs/equation-transpiler.md §3) — name -> arity.
-//Adding one = a row here, a dual rule in D_FNS below, and (stage 3) the vec4
-//overload in dualNumbers.glsl.
+//Adding one = a row here, a dual rule in D_FNS below, and the vec4 overload
+//in dualNumbers.glsl.
 const FNS = {sin: 1, cos: 1, tan: 1, exp: 1, sqrt: 1};
 
 const COORDS = new Set(['x', 'y', 'z', 'w']);
 
 
 //-------------------------------------------------
-// parsing — tokenizer + a small Pratt parser
-// precedence: ^ (integer literal only) > unary - > * / > + -
+// tokens — shared by the string and function parsers
 //-------------------------------------------------
 
 function eqError(msg, src, pos){
     const ctx = src.slice(Math.max(0, pos - 20), pos) + '‸' + src.slice(pos, pos + 20);
     return new Error(`scenegen: equations: ${msg} at position ${pos}: ...${ctx}...`);
 }
+
+const TWO_CHAR = ['<=', '>=', '==', '!=', '++'];
 
 function tokenize(src){
     const toks = [];
@@ -55,7 +62,7 @@ function tokenize(src){
         if(/[0-9.]/.test(c)){
             const m = src.slice(i).match(/^(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/);
             if(!m) throw eqError(`cannot read number`, src, i);
-            toks.push({t: 'num', v: parseFloat(m[0]), pos: i});
+            toks.push({t: 'num', v: parseFloat(m[0]), int: /^\d+$/.test(m[0]), pos: i});
             i += m[0].length;
             continue;
         }
@@ -65,7 +72,13 @@ function tokenize(src){
             i += m[0].length;
             continue;
         }
-        if('+-*/^(),'.includes(c)){
+        const two = src.slice(i, i + 2);
+        if(TWO_CHAR.includes(two)){
+            toks.push({t: two, pos: i});
+            i += 2;
+            continue;
+        }
+        if('+-*/^(),{};=<>?:'.includes(c)){
             toks.push({t: c, pos: i});
             i++;
             continue;
@@ -78,6 +91,12 @@ function tokenize(src){
 
 const BINARY_BP = {'+': 10, '-': 10, '*': 20, '/': 20};
 const UNARY_BP  = 25;      //^ (30) binds tighter: -x^2 = -(x^2)
+
+
+//-------------------------------------------------
+// parsing an equation STRING (scene-level customs)
+// precedence: ^ (integer literal only) > unary - > * / > + -
+//-------------------------------------------------
 
 export function parseEquation(src){
     if(typeof src !== 'string' || !src.trim()){
@@ -175,6 +194,364 @@ export function parseEquation(src){
 
 
 //-------------------------------------------------
+// parsing FUNCTION SOURCES (catalogue-style standard float GLSL)
+//
+// The statement whitelist (§3): float/int declarations, reassignment,
+// counted `for` over int bounds, `if`/`else`, ternaries, `return`. A
+// FORMULA is a function whose leading parameters are 3–4 floats named
+// x, y, z(, w), plus trailing float parameters; anything else is a HELPER,
+// transpiled too, with a generated vec4 twin. Identifiers must resolve —
+// function sources are closed (no free identifiers; scene-string params
+// have no analogue here, trailing formula parameters play that role).
+//-------------------------------------------------
+
+const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+
+export function parseFunctions(src){
+    const clean = stripComments(src);
+    const toks  = tokenize(clean);
+    let at = 0;
+    const peek = () => toks[at];
+    const next = () => toks[at++];
+    const expect = (t, what) => {
+        if(peek().t !== t) throw eqError(`expected ${what}`, clean, peek().pos);
+        return next();
+    };
+    const kw = (name) => peek().t === 'ident' && peek().name === name;
+
+    const defs = new Map();      //name -> def, in declaration order
+
+    //--- expressions, body flavour: scope-resolved idents, helper calls,
+    //    ternaries; same precedence and the same ^ rule as the string form
+    function nud(scope){
+        const tok = next();
+        if(tok.t === 'num'){ return {t: 'num', v: tok.v, int: tok.int}; }
+        if(tok.t === '('){
+            const inner = valueExpr(scope);
+            expect(')', `')'`);
+            return inner;
+        }
+        if(tok.t === '-'){ return {t: 'neg', a: expr(UNARY_BP, scope)}; }
+        if(tok.t === '+'){ return expr(UNARY_BP, scope); }
+        if(tok.t === 'ident'){
+            if(peek().t === '('){
+                next();      //'('
+                const args = [valueExpr(scope)];
+                while(peek().t === ','){ next(); args.push(valueExpr(scope)); }
+                expect(')', `')'`);
+                if(tok.name in FNS){
+                    if(args.length !== FNS[tok.name]){
+                        throw eqError(`${tok.name}() takes ${FNS[tok.name]} argument(s), got ${args.length}`, clean, tok.pos);
+                    }
+                    return {t: 'call', fn: tok.name, args};
+                }
+                const def = defs.get(tok.name);
+                if(!def){
+                    throw eqError(`unknown function '${tok.name}' (vocabulary: ${Object.keys(FNS).join(', ')}; `
+                        + `defined: ${[...defs.keys()].join(', ') || 'none'})`, clean, tok.pos);
+                }
+                if(args.length !== def.params.length){
+                    throw eqError(`${tok.name}() takes ${def.params.length} argument(s), got ${args.length}`, clean, tok.pos);
+                }
+                return {t: 'hcall', fn: tok.name, args};
+            }
+            if(!scope.has(tok.name)){
+                throw eqError(`unknown identifier '${tok.name}' — function sources are closed `
+                    + `(parameters and locals only)`, clean, tok.pos);
+            }
+            return {t: 'ident', name: tok.name};
+        }
+        throw eqError(`expected a value`, clean, tok.pos);
+    }
+
+    function expr(minBp, scope){
+        let left = nud(scope);
+        for(;;){
+            const tok = peek();
+            if(tok.t === '^'){
+                if(30 <= minBp) break;
+                next();
+                const e = peek();
+                if(e.t !== 'num' || !Number.isInteger(e.v) || e.v < 0){
+                    throw eqError(`'^' needs a nonnegative integer literal exponent (use / for negative powers)`, clean, e.pos);
+                }
+                next();
+                left = {t: 'pow', a: left, n: e.v};
+                continue;
+            }
+            const bp = BINARY_BP[tok.t];
+            if(bp === undefined || bp <= minBp) break;
+            next();
+            left = {t: tok.t === '+' ? 'add' : tok.t === '-' ? 'sub' : tok.t === '*' ? 'mul' : 'div',
+                    a: left, b: expr(bp, scope)};
+        }
+        return left;
+    }
+
+    const CMP = ['<', '>', '<=', '>=', '==', '!='];
+
+    //a full RHS: arithmetic, optionally `cmp ? value : value`
+    function valueExpr(scope){
+        const a = expr(0, scope);
+        if(CMP.includes(peek().t)){
+            const op = next().t;
+            const b  = expr(0, scope);
+            expect('?', `'?' (a comparison only exists as a condition)`);
+            const then = valueExpr(scope);
+            expect(':', `':'`);
+            const els  = valueExpr(scope);
+            return {t: 'ternary', cond: {t: 'cmp', op, a, b}, a: then, b: els};
+        }
+        return a;
+    }
+
+    function condition(scope){
+        const a  = expr(0, scope);
+        const op = CMP.includes(peek().t)
+            ? next().t
+            : (() => { throw eqError(`expected a comparison (${CMP.join(' ')})`, clean, peek().pos); })();
+        return {t: 'cmp', op, a, b: expr(0, scope)};
+    }
+
+    //--- statements -----------------------------------------------------
+    function block(scope){
+        expect('{', `'{'`);
+        const stmts = [];
+        while(peek().t !== '}'){
+            stmts.push(statement(scope));
+        }
+        next();      //'}'
+        return stmts;
+    }
+
+    function statement(scope){
+        const tok = peek();
+        if(tok.t !== 'ident'){
+            throw eqError(`expected a statement`, clean, tok.pos);
+        }
+        if(tok.name === 'while'){
+            throw eqError(`'while' is outside the statement whitelist (declarations, assignment, counted `
+                + `for, if/else, return) — value-dependent iteration cannot be transpiled; `
+                + `author a data: body instead (docs/variety-builder.md §5)`, clean, tok.pos);
+        }
+        if(tok.name === 'float' || tok.name === 'int'){
+            next();
+            const name = expect('ident', 'a name').name;
+            if(scope.has(name)) throw eqError(`'${name}' is already declared`, clean, tok.pos);
+            expect('=', `'='`);
+            const e = valueExpr(scope);
+            expect(';', `';'`);
+            scope.add(name);
+            return {t: 'decl', kind: tok.name, name, e};
+        }
+        if(tok.name === 'for'){
+            next();
+            expect('(', `'('`);
+            if(!kw('int')) throw eqError(`for wants a counted loop: for(int i = ...; i < ...; i++)`, clean, peek().pos);
+            next();
+            const counter = expect('ident', 'a counter name').name;
+            expect('=', `'='`);
+            const from = expr(0, scope);
+            expect(';', `';'`);
+            const c = expect('ident', 'the counter');
+            if(c.name !== counter) throw eqError(`the loop condition must test '${counter}'`, clean, c.pos);
+            expect('<', `'<' (counted loops only)`);
+            const limit = expr(0, scope);
+            expect(';', `';'`);
+            const c2 = expect('ident', 'the counter');
+            if(c2.name !== counter) throw eqError(`the loop increment must step '${counter}'`, clean, c2.pos);
+            expect('++', `'++'`);
+            expect(')', `')'`);
+            const inner = new Set(scope);
+            inner.add(counter);
+            return {t: 'for', counter, from, limit, body: block(inner)};
+        }
+        if(tok.name === 'if'){
+            next();
+            expect('(', `'('`);
+            const cond = condition(scope);
+            expect(')', `')'`);
+            const then = block(new Set(scope));
+            let els = null;
+            if(kw('else')){
+                next();
+                els = kw('if') ? [statement(scope)] : block(new Set(scope));
+            }
+            return {t: 'if', cond, then, els};
+        }
+        if(tok.name === 'return'){
+            next();
+            const e = valueExpr(scope);
+            expect(';', `';'`);
+            return {t: 'ret', e};
+        }
+        //assignment
+        next();
+        if(!scope.has(tok.name)){
+            throw eqError(`unknown statement or identifier '${tok.name}' — the whitelist is: declarations, `
+                + `assignment, counted for, if/else, return`, clean, tok.pos);
+        }
+        expect('=', `'='`);
+        const e = valueExpr(scope);
+        expect(';', `';'`);
+        return {t: 'assign', name: tok.name, e};
+    }
+
+    //--- function definitions -------------------------------------------
+    while(peek().t !== 'end'){
+        const ret = expect('ident', `'float' (a function definition)`);
+        if(ret.name !== 'float'){
+            throw eqError(`functions return float (got '${ret.name}')`, clean, ret.pos);
+        }
+        const name = expect('ident', 'a function name').name;
+        if(defs.has(name) || name in FNS){
+            throw eqError(`'${name}' is already defined`, clean, ret.pos);
+        }
+        expect('(', `'('`);
+        const params = [];
+        if(peek().t !== ')'){
+            for(;;){
+                const ty = expect('ident', `'float' or 'int'`);
+                if(ty.name !== 'float' && ty.name !== 'int'){
+                    throw eqError(`parameters are float or int (got '${ty.name}')`, clean, ty.pos);
+                }
+                params.push({type: ty.name, name: expect('ident', 'a parameter name').name});
+                if(peek().t !== ','){ break; }
+                next();
+            }
+        }
+        expect(')', `')'`);
+        const scope = new Set(params.map(p => p.name));
+        const body  = block(scope);
+        const def   = {name, params, body};
+        classify(def);
+        analyze(def, defs);
+        defs.set(name, def);
+    }
+    if(!defs.size){
+        throw new Error('scenegen: equations: no function definitions found');
+    }
+    return defs;
+}
+
+//formula vs helper: a formula's leading params are 3–4 floats named
+//x, y, z(, w) in order; anything after must be float (the trailing scalar
+//parameters — the knob hooks). Everything else is a helper.
+function classify(def){
+    const names = def.params.map(p => p.name);
+    const lead  = ['x', 'y', 'z', 'w'];
+    let n = 0;
+    while(n < 4 && n < def.params.length
+          && def.params[n].type === 'float' && names[n] === lead[n]) n++;
+    if(n === 3 || n === 4){
+        const trailing = def.params.slice(n);
+        if(trailing.every(p => p.type === 'float')){
+            def.formula  = true;
+            def.arity    = n;
+            def.trailing = trailing.map(p => p.name);
+            return;
+        }
+    }
+    def.formula = false;
+}
+
+//kinds: ints (never differentiated), duals (promoted to fixpoint — a float
+//assigned a dual anywhere is vec4 throughout). Helper float params are dual
+//by construction: the twin's signature is float->vec4. Float expressions may
+//not read int names (GLSL ES has no implicit conversion) except as helper
+//int arguments and loop machinery.
+function analyze(def, defs){
+    const ints  = new Set(def.params.filter(p => p.type === 'int').map(p => p.name));
+    const duals = new Set(def.formula
+        ? def.params.slice(0, def.arity).map(p => p.name)
+        : def.params.filter(p => p.type === 'float').map(p => p.name));
+
+    const isDual = (node) => isDualNode(node, duals);
+
+    const walkStmts = (stmts) => {
+        let changed = false;
+        for(const s of stmts){
+            if(s.t === 'decl'){
+                if(s.kind === 'int'){ ints.add(s.name); checkInt(s.e, ints, defs); }
+                else if(!duals.has(s.name) && isDual(s.e)){ duals.add(s.name); changed = true; }
+            }
+            if(s.t === 'assign'){
+                if(ints.has(s.name)){ checkInt(s.e, ints, defs); }
+                else if(def.formula && def.trailing.includes(s.name)){
+                    throw new Error(`scenegen: equations: '${def.name}' assigns to its parameter '${s.name}' — `
+                        + `trailing formula parameters are read-only`);
+                }
+                else if(!duals.has(s.name) && isDual(s.e)){ duals.add(s.name); changed = true; }
+            }
+            if(s.t === 'for'){ checkInt(s.from, ints, defs); checkInt(s.limit, ints, defs); changed = walkStmts(s.body) || changed; }
+            if(s.t === 'if'){
+                changed = walkStmts(s.then) || changed;
+                if(s.els) changed = walkStmts(s.els) || changed;
+            }
+        }
+        return changed;
+    };
+    while(walkStmts(def.body));      //to fixpoint
+
+    //float expressions must not read int names
+    const checkFloats = (stmts) => {
+        for(const s of stmts){
+            if(s.t === 'decl' && s.kind === 'float') checkNoInt(s.e, ints, defs, def.name);
+            if(s.t === 'assign' && !ints.has(s.name)) checkNoInt(s.e, ints, defs, def.name);
+            if(s.t === 'ret') checkNoInt(s.e, ints, defs, def.name);
+            if(s.t === 'for') checkFloats(s.body);
+            if(s.t === 'if'){ checkFloats(s.then); if(s.els) checkFloats(s.els); }
+        }
+    };
+    checkFloats(def.body);
+
+    def.ints  = ints;
+    def.duals = duals;
+}
+
+function checkInt(node, ints, defs){
+    const ok = (n) => {
+        switch(n.t){
+            case 'num':   return n.int === true;
+            case 'ident': return ints.has(n.name);
+            case 'neg':   return ok(n.a);
+            case 'add': case 'sub': case 'mul': return ok(n.a) && ok(n.b);
+            default: return false;
+        }
+    };
+    if(!ok(node)){
+        throw new Error(`scenegen: equations: expected an int expression (int literals, int names, + - *)`);
+    }
+}
+
+function checkNoInt(node, ints, defs, where){
+    switch(node.t){
+        case 'ident':
+            if(ints.has(node.name)){
+                throw new Error(`scenegen: equations: '${where}' uses int '${node.name}' in a float `
+                    + `expression — GLSL ES has no implicit conversion`);
+            }
+            return;
+        case 'hcall': {
+            const ps = defs.get(node.fn).params;
+            node.args.forEach((a, i) => { if(ps[i].type !== 'int') checkNoInt(a, ints, defs, where); });
+            return;
+        }
+        case 'call':    checkNoInt(node.args[0], ints, defs, where); return;
+        case 'neg': case 'pow': checkNoInt(node.a, ints, defs, where); return;
+        case 'ternary':
+            checkNoInt(node.a, ints, defs, where);
+            checkNoInt(node.b, ints, defs, where);
+            return;
+        case 'add': case 'sub': case 'mul': case 'div':
+            checkNoInt(node.a, ints, defs, where);
+            checkNoInt(node.b, ints, defs, where);
+            return;
+    }
+}
+
+
+//-------------------------------------------------
 // float evaluation — plain arithmetic, the value the author wrote
 //-------------------------------------------------
 
@@ -185,6 +562,7 @@ export function evalFloat(node, env){
         case 'num':   return node.v;
         case 'var':   return env[node.name];
         case 'param': return env[node.name];
+        case 'ident': return env[node.name];
         case 'neg':   return -evalFloat(node.a, env);
         case 'add':   return evalFloat(node.a, env) + evalFloat(node.b, env);
         case 'sub':   return evalFloat(node.a, env) - evalFloat(node.b, env);
@@ -192,6 +570,9 @@ export function evalFloat(node, env){
         case 'div':   return evalFloat(node.a, env) / evalFloat(node.b, env);
         case 'pow':   return Math.pow(evalFloat(node.a, env), node.n);
         case 'call':  return F_FNS[node.fn](evalFloat(node.args[0], env));
+        case 'hcall': return env.__call(node.fn, node.args, env, 'float');
+        case 'ternary':
+            return evalCmp(node.cond, env, 'float') ? evalFloat(node.a, env) : evalFloat(node.b, env);
     }
     throw new Error(`scenegen: equations: unknown AST node '${node.t}'`);
 }
@@ -201,8 +582,8 @@ export function evalFloat(node, env){
 // dual evaluation — the vec4 forward-mode semantics, in float64
 //
 // A dual is [value, dx, dy, dz]. These formulas ARE the contract for the
-// vec4 overloads in dualNumbers.glsl (stage 3): tmul/tsqr/tdiv/... must
-// compute exactly these, lane for lane.
+// vec4 overloads in dualNumbers.glsl: tmul/tsqr/tdiv/... must compute
+// exactly these, lane for lane.
 //-------------------------------------------------
 
 const dnum = (v) => [v, 0, 0, 0];
@@ -227,7 +608,7 @@ const ddiv = (a, b) => {
 };
 
 //integer power by binary exponentiation over dsqr/dmul — the same op chain
-//the emitter will write (stage 2), so the numerics line up exactly
+//the emitter writes, so the numerics line up exactly
 function dpow(a, n){
     if(n === 0) return dnum(1);
     if(n === 1) return a;
@@ -244,11 +625,30 @@ const D_FNS = {
     sqrt: (a) => { const r = Math.sqrt(a[0]); return chain(r, 0.5/r, a); },
 };
 
+//a value that may be an int (plain number) or a dual — comparisons and
+//helper int arguments read through this
+const valOf = (x) => (Array.isArray(x) ? x[0] : x);
+
+function evalCmp(cmp, env, world){
+    const ev = world === 'dual' ? evalDual : evalFloat;
+    const a = valOf(ev(cmp.a, env));
+    const b = valOf(ev(cmp.b, env));
+    switch(cmp.op){
+        case '<':  return a < b;
+        case '>':  return a > b;
+        case '<=': return a <= b;
+        case '>=': return a >= b;
+        case '==': return a === b;
+        case '!=': return a !== b;
+    }
+}
+
 export function evalDual(node, env){
     switch(node.t){
         case 'num':   return dnum(node.v);
         case 'var':   return env[node.name];
         case 'param': return env[node.name];
+        case 'ident': return env[node.name];
         case 'neg':   return dneg(evalDual(node.a, env));
         case 'add':   return dadd(evalDual(node.a, env), evalDual(node.b, env));
         case 'sub':   return dsub(evalDual(node.a, env), evalDual(node.b, env));
@@ -256,6 +656,9 @@ export function evalDual(node, env){
         case 'div':   return ddiv(evalDual(node.a, env), evalDual(node.b, env));
         case 'pow':   return dpow(evalDual(node.a, env), node.n);
         case 'call':  return D_FNS[node.fn](evalDual(node.args[0], env));
+        case 'hcall': return env.__call(node.fn, node.args, env, 'dual');
+        case 'ternary':
+            return evalCmp(node.cond, env, 'dual') ? evalDual(node.a, env) : evalDual(node.b, env);
     }
     throw new Error(`scenegen: equations: unknown AST node '${node.t}'`);
 }
@@ -279,35 +682,86 @@ function liftStereoDual(pt){
             w: ddiv(wNum, denom)};
 }
 
-//the standard seeding: x/y/z carry the three tangents, w (4-ary) rides as a
-//scalar. `seedW` instead puts THE tangent on w (x/y/z scalar) — how the
-//verify pass reaches the fourth partial with a three-lane dual.
-function dualEnv(eq, pt, params, seedW = false){
-    const env = {};
-    if(seedW){
-        env.x = dnum(pt.x); env.y = dnum(pt.y); env.z = dnum(pt.z);
-        env.w = [pt.w, 1, 0, 0];
-    }
-    else{
-        env.x = [pt.x, 1, 0, 0];
-        env.y = [pt.y, 0, 1, 0];
-        env.z = [pt.z, 0, 0, 1];
-        if(eq.arity === 4) env.w = dnum(pt.w);
-    }
-    for(const p of eq.params) env[p] = dnum(params[p]);
-    return env;
+
+//-------------------------------------------------
+// the statement interpreter — one body, both worlds
+//-------------------------------------------------
+
+const LOOP_CAP = 100000;      //runaway backstop; counted loops only, so far above any real formula
+
+function makeCaller(defs){
+    const finish = (name, def, env, world) => {
+        const ret = execBlock(def.body, env, world, def);
+        if(ret === undefined){
+            throw new Error(`scenegen: equations: '${name}' returned nothing`);
+        }
+        return ret;
+    };
+    const call = (name, argNodes, callerEnv, world) => {
+        const def = defs.get(name);
+        const ev  = world === 'dual' ? evalDual : evalFloat;
+        const env = {__call: call};
+        def.params.forEach((p, i) => {
+            //int arguments are int-only expressions (validated) — evaluate
+            //them as plain floats in EITHER world; int names hold numbers
+            env[p.name] = p.type === 'int'
+                ? evalFloat(argNodes[i], callerEnv)
+                : ev(argNodes[i], callerEnv);
+        });
+        return finish(name, def, env, world);
+    };
+    //entry from OUTSIDE the AST: arguments as already-computed values
+    const callValues = (name, values, world) => {
+        const def = defs.get(name);
+        const env = {__call: call};
+        def.params.forEach((p, i) => { env[p.name] = p.type === 'int' ? valOf(values[i]) : values[i]; });
+        return finish(name, def, env, world);
+    };
+    return {call, callValues};
 }
 
-function floatEnv(eq, pt, params){
-    const env = {x: pt.x, y: pt.y, z: pt.z};
-    if(eq.arity === 4) env.w = pt.w;
-    for(const p of eq.params) env[p] = params[p];
-    return env;
+function execBlock(stmts, env, world, def){
+    const ev = world === 'dual' ? evalDual : evalFloat;
+    for(const s of stmts){
+        switch(s.t){
+            case 'decl':
+            case 'assign':
+                //int slots always evaluate as plain numbers (int-only exprs)
+                env[s.name] = def.ints.has(s.name) ? evalFloat(s.e, env) : ev(s.e, env);
+                break;
+            case 'for': {
+                const from  = evalFloat(s.from, env);
+                const limit = evalFloat(s.limit, env);
+                if(limit - from > LOOP_CAP) throw new Error(`scenegen: equations: loop bound ${limit} is absurd`);
+                for(let i = from; i < limit; i++){
+                    env[s.counter] = i;
+                    const r = execBlock(s.body, env, world, def);
+                    if(r !== undefined) return r;
+                }
+                break;
+            }
+            case 'if': {
+                const r = evalCmp(s.cond, env, world)
+                    ? execBlock(s.then, env, world, def)
+                    : (s.els ? execBlock(s.els, env, world, def) : undefined);
+                if(r !== undefined) return r;
+                break;
+            }
+            case 'ret':
+                return world === 'dual' ? evalDual(s.e, env) : evalFloat(s.e, env);
+        }
+    }
+    return undefined;
 }
 
 
 //-------------------------------------------------
 // the verification gate (docs/equation-transpiler.md §5)
+//
+// One core over two closures: F(vals) evaluates the float form at named
+// coordinate values; D(dualMap) evaluates the dual form with arbitrary dual
+// inputs. Everything — the standard checks, the w-partial, homogeneity, and
+// both composed R³ views — derives from those two.
 //-------------------------------------------------
 
 //deterministic RNG (mulberry32) — Date/Math.random stay out of the gate so a
@@ -325,75 +779,56 @@ function makeRng(seed){
 
 const relClose = (a, b, rtol) => Math.abs(a - b) <= rtol*Math.max(1, Math.abs(a), Math.abs(b));
 
-//`params` must cover the equation's free identifiers exactly — the same
-//loud-cover rule the scene schema will enforce
-export function checkParams(eq, params = {}){
-    const given = Object.keys(params).sort();
-    const need  = eq.params;
-    const missing = need.filter(n => !(n in params));
-    const extra   = given.filter(n => !need.includes(n));
-    if(missing.length || extra.length){
-        throw new Error(`scenegen: equations: params must cover the equation's free identifiers exactly — `
-            + (missing.length ? `missing: ${missing.join(', ')}` : '')
-            + (missing.length && extra.length ? '; ' : '')
-            + (extra.length ? `unused: ${extra.join(', ')}` : ''));
-    }
-}
-
-export function verifyEquation({name = '(unnamed)', src, params = {}},
-                               {points = 2000, seed = 12345} = {}){
-    const eq = parseEquation(src);
-    checkParams(eq, params);
-
-    const rng  = makeRng(seed);
+function verifyField({arity, F, D}, {points = 2000, seed = 12345} = {}){
+    const rng   = makeRng(seed);
     const coord = () => rng()*4 - 2;                //uniform in [-2, 2]
-    const F = (pt) => evalFloat(eq.ast, floatEnv(eq, pt, params));
-
-    const failures = [];
     const usable = (v) => Number.isFinite(v) && Math.abs(v) < 1e12;
+    const failures = [];
+
+    const seeds = (pt) => ({x: [pt.x, 1, 0, 0], y: [pt.y, 0, 1, 0], z: [pt.z, 0, 0, 1],
+                            ...(arity === 4 ? {w: dnum(pt.w)} : {})});
 
     //--- value + gradient, dual vs float --------------------------------
     let checked = 0, attempts = 0;
     while(checked < points && attempts < points*20){
         attempts++;
-        const pt = {x: coord(), y: coord(), z: coord(), w: eq.arity === 4 ? coord() : 0};
+        const pt = {x: coord(), y: coord(), z: coord(), w: arity === 4 ? coord() : 0};
         const f = F(pt);
         if(!usable(f)) continue;                     //poles, overflow: resample
 
-        const d = evalDual(eq.ast, dualEnv(eq, pt, params));
+        const d = D(seeds(pt));
         if(!relClose(d[0], f, 1e-9)){
             failures.push({kind: 'value', pt, float: f, dual: d[0]});
             if(failures.length >= 5) break;
         }
 
-        //central differences per coordinate, scale-aware step
-        const names = eq.arity === 4 ? ['x', 'y', 'z', 'w'] : ['x', 'y', 'z'];
-        const dw = eq.arity === 4 ? evalDual(eq.ast, dualEnv(eq, pt, params, true)) : null;
+        const names = arity === 4 ? ['x', 'y', 'z', 'w'] : ['x', 'y', 'z'];
+        const dw = arity === 4
+            ? D({x: dnum(pt.x), y: dnum(pt.y), z: dnum(pt.z), w: [pt.w, 1, 0, 0]})
+            : null;
         const analytic = (i) => (i < 3) ? d[i + 1] : dw[1];
-        let ok = true;
-        for(let i = 0; i < names.length && ok; i++){
+        for(let i = 0; i < names.length; i++){
             const h  = 1e-5*Math.max(1, Math.abs(pt[names[i]]));
-            const pa = {...pt, [names[i]]: pt[names[i]] + h};
-            const pb = {...pt, [names[i]]: pt[names[i]] - h};
-            const fa = F(pa), fb = F(pb);
-            if(!usable(fa) || !usable(fb)){ ok = false; continue; }     //kissed a pole: drop the point
+            const fa = F({...pt, [names[i]]: pt[names[i]] + h});
+            const fb = F({...pt, [names[i]]: pt[names[i]] - h});
+            if(!usable(fa) || !usable(fb)) continue;             //kissed a pole: skip the partial
             const num = (fa - fb)/(2*h);
             if(!relClose(analytic(i), num, 1e-4)){
                 failures.push({kind: 'gradient', coord: names[i], pt, analytic: analytic(i), numeric: num});
-                if(failures.length >= 5){ ok = false; }
+                break;
             }
         }
         if(failures.length >= 5) break;
         checked++;
     }
     if(checked < points && failures.length === 0){
-        failures.push({kind: 'sampling', note: `only ${checked}/${points} usable sample points in [-2,2]^${eq.arity === 4 ? 4 : 3}`});
+        failures.push({kind: 'sampling', note: `only ${checked}/${points} usable sample points`});
     }
 
     //--- homogeneity, 4-ary only: fit one integer degree numerically ----
     //(the SOLE homogeneity authority — body-agnostic by design, §4/§5)
     let degree = null;
-    if(eq.arity === 4 && failures.length === 0){
+    if(arity === 4 && failures.length === 0){
         const fits = [];
         let tries = 0;
         while(fits.length < 200 && tries < 4000){
@@ -413,7 +848,6 @@ export function verifyEquation({name = '(unnamed)', src, params = {}},
                            a: {pt: fits[0].pt, degree: fits[0].d}, b: {pt: off.pt, degree: off.d}});
         }
         else{
-            //confirm at a second scale, against the fitted integer
             const lam = 2.3;
             const bad = fits.slice(0, 50).find(({pt}) => {
                 const f  = F(pt);
@@ -427,36 +861,32 @@ export function verifyEquation({name = '(unnamed)', src, params = {}},
         }
     }
 
-    //--- the two R³ views, composed — what actually marches (stage 4) ---
-    //stereo: chain rule through the lift; patch: w pinned to 1. Both dual
-    //composites vs central differences of the float composite.
-    if(eq.arity === 4 && failures.length === 0){
-        const pdual = Object.fromEntries(eq.params.map(p => [p, dnum(params[p])]));
+    //--- the two R³ views, composed — what actually marches -------------
+    if(arity === 4 && failures.length === 0){
         const views = [
             {kind: 'stereo-composite',
-             F: (pt) => evalFloat(eq.ast, floatEnv(eq, liftStereo(pt), params)),
-             D: (pt) => evalDual(eq.ast, {...liftStereoDual(pt), ...pdual})},
+             F3: (pt) => F(liftStereo(pt)),
+             D3: (pt) => D(liftStereoDual(pt))},
             {kind: 'patch-composite',
-             F: (pt) => evalFloat(eq.ast, floatEnv(eq, {...pt, w: 1}, params)),
-             D: (pt) => evalDual(eq.ast, {x: [pt.x, 1, 0, 0], y: [pt.y, 0, 1, 0],
-                                          z: [pt.z, 0, 0, 1], w: dnum(1), ...pdual})},
+             F3: (pt) => F({...pt, w: 1}),
+             D3: (pt) => D({x: [pt.x, 1, 0, 0], y: [pt.y, 0, 1, 0], z: [pt.z, 0, 0, 1], w: dnum(1)})},
         ];
-        for(const {kind, F, D} of views){
+        for(const {kind, F3, D3} of views){
             let done = 0, tries = 0;
             while(done < 400 && tries < 8000 && failures.length < 5){
                 tries++;
                 const pt = {x: coord(), y: coord(), z: coord()};
-                const f = F(pt);
+                const f = F3(pt);
                 if(!usable(f)) continue;
-                const d = D(pt);
+                const d = D3(pt);
                 if(!relClose(d[0], f, 1e-9)){
                     failures.push({kind, sub: 'value', pt, float: f, dual: d[0]});
                     continue;
                 }
                 for(const [i, n] of ['x', 'y', 'z'].entries()){
                     const h  = 1e-5*Math.max(1, Math.abs(pt[n]));
-                    const fa = F({...pt, [n]: pt[n] + h});
-                    const fb = F({...pt, [n]: pt[n] - h});
+                    const fa = F3({...pt, [n]: pt[n] + h});
+                    const fb = F3({...pt, [n]: pt[n] - h});
                     if(!usable(fa) || !usable(fb)) continue;
                     const num = (fa - fb)/(2*h);
                     if(!relClose(d[i + 1], num, 1e-4)){
@@ -469,66 +899,173 @@ export function verifyEquation({name = '(unnamed)', src, params = {}},
         }
     }
 
+    return {checked, degree, failures};
+}
+
+//`params` must cover the free identifiers exactly — the same loud-cover
+//rule the scene schema will enforce
+export function checkParams(eq, params = {}){
+    const given = Object.keys(params).sort();
+    const need  = eq.params;
+    const missing = need.filter(n => !(n in params));
+    const extra   = given.filter(n => !need.includes(n));
+    if(missing.length || extra.length){
+        throw new Error(`scenegen: equations: params must cover the equation's free identifiers exactly — `
+            + (missing.length ? `missing: ${missing.join(', ')}` : '')
+            + (missing.length && extra.length ? '; ' : '')
+            + (extra.length ? `unused: ${extra.join(', ')}` : ''));
+    }
+}
+
+export function verifyEquation({name = '(unnamed)', src, params = {}}, opts = {}){
+    const eq = parseEquation(src);
+    checkParams(eq, params);
+
+    const pflt  = Object.fromEntries(eq.params.map(p => [p, params[p]]));
+    const pdual = Object.fromEntries(eq.params.map(p => [p, dnum(params[p])]));
+    const F = (vals) => evalFloat(eq.ast, {...vals, ...pflt});
+    const D = (duals) => evalDual(eq.ast, {...duals, ...pdual});
+
+    const {checked, degree, failures} = verifyField({arity: eq.arity, F, D}, opts);
     return {name, src, arity: eq.arity, params: eq.params, checked, degree,
+            ok: failures.length === 0, failures};
+}
+
+export function verifyFunctions({name = '(unnamed)', src, params = {}}, opts = {}){
+    const defs = parseFunctions(src);
+    const formulas = [...defs.values()].filter(d => d.formula);
+    if(formulas.length !== 1){
+        throw new Error(`scenegen: equations: expected exactly one formula (leading params x, y, z[, w]) — `
+            + `found ${formulas.length ? formulas.map(f => f.name).join(', ') : 'none'}`);
+    }
+    const f = formulas[0];
+    checkParams({params: f.trailing}, params);
+
+    const {callValues} = makeCaller(defs);
+    const F = (vals)  => callValues(f.name,
+        f.params.map(p => (p.name in vals ? vals[p.name] : params[p.name])), 'float');
+    const D = (duals) => callValues(f.name,
+        f.params.map(p => (p.name in duals ? duals[p.name] : dnum(params[p.name]))), 'dual');
+
+    const {checked, degree, failures} = verifyField({arity: f.arity, F, D}, opts);
+    return {name, src, arity: f.arity, params: f.trailing, checked, degree,
             ok: failures.length === 0, failures};
 }
 
 
 //-------------------------------------------------
-// GLSL emission — stage 2 (docs/equation-transpiler.md §3)
+// GLSL emission (docs/equation-transpiler.md §3)
 //
-// The kind rule: a node is SCALAR iff it contains no coordinate — scalars
-// emit as plain float arithmetic (parameter soup stays cheap), duals as
+// The kind rule: a node is SCALAR iff it contains no coordinate (and no
+// dual-promoted local) — scalars emit as plain float arithmetic, duals as
 // vec4 ops. Native vec4 +, -, unary -, scalar* and dual/scalar are correct
 // dual arithmetic and emit as themselves; products of duals emit tmul
 // (n-ary up to 4, the vec2 library's own idiom), powers of a bare
-// coordinate become cached power locals in the hand-catalogue style
-// (x2 = tsqr(x); x3 = tmul(x2, x); x4 = tsqr(x2)), other powers inline
-// their tsqr/tmul chains.
+// coordinate become cached power locals in the hand-catalogue style,
+// other powers inline their tsqr/tmul chains.
 //
 // Sums are FLATTENED with signs and their scalar terms fold into one
 // trailing constant dual — `- vec4(0.1, 0.0, 0.0, 0.0)`, the hand
 // catalogue's `- T(0.1, 0)` idiom one lane wider. (So `a - (b + c)` emits
 // as `a - b - c`: value-exact, one term per sum — the single sanctioned
 // restructuring; there is no other simplification.)
+//
+// Statement functions emit as DUAL TWINS: same name, float params become
+// vec4 (int stays int), statements carried over with each expression
+// emitted by its kind — GLSL overloading does the rest. Scalar-kind calls
+// to helpers emit the plain name and rely on the float ORIGINAL, which the
+// catalogue file itself provides.
 //-------------------------------------------------
 
-function isDualNode(node){
+function isDualNode(node, duals){
     switch(node.t){
         case 'var':   return true;
         case 'num':   return false;
         case 'param': return false;
-        case 'neg':   return isDualNode(node.a);
-        case 'pow':   return isDualNode(node.a);
-        case 'call':  return isDualNode(node.args[0]);
-        default:      return isDualNode(node.a) || isDualNode(node.b);
+        case 'ident': return duals ? duals.has(node.name) : false;
+        case 'neg':   return isDualNode(node.a, duals);
+        case 'pow':   return isDualNode(node.a, duals);
+        case 'call':  return isDualNode(node.args[0], duals);
+        case 'hcall': return node.args.some(a => isDualNode(a, duals));
+        case 'ternary':
+            return isDualNode(node.a, duals) || isDualNode(node.b, duals);
+        default:      return isDualNode(node.a, duals) || isDualNode(node.b, duals);
     }
 }
 
 //precedence levels for parenthesization: sum 10, product 20, unary 25
-function emitScalar(node, refs, prec = 0){
+function emitScalar(node, ctx, prec = 0){
     const wrap = (text, my) => (prec > my ? `(${text})` : text);
     switch(node.t){
-        case 'num':   return fnum(node.v);
-        case 'param': return refs[node.name];
-        case 'neg':   return wrap(`-${emitScalar(node.a, refs, 25)}`, 12);
-        case 'add':   return wrap(`${emitScalar(node.a, refs, 10)} + ${emitScalar(node.b, refs, 10)}`, 10);
-        case 'sub':   return wrap(`${emitScalar(node.a, refs, 10)} - ${emitScalar(node.b, refs, 11)}`, 10);
-        case 'mul':   return wrap(`${emitScalar(node.a, refs, 20)}*${emitScalar(node.b, refs, 20)}`, 20);
-        case 'div':   return wrap(`${emitScalar(node.a, refs, 20)}/${emitScalar(node.b, refs, 21)}`, 20);
-        case 'call':  return `${node.fn}(${emitScalar(node.args[0], refs, 0)})`;
+        case 'num':   return node.int && ctx.intSlot ? String(node.v) : fnum(node.v);
+        case 'param': return ctx.refs[node.name];
+        case 'ident': return ctx.refs[node.name] ?? node.name;
+        case 'neg':   return wrap(`-${emitScalar(node.a, ctx, 25)}`, 12);
+        case 'add':   return wrap(`${emitScalar(node.a, ctx, 10)} + ${emitScalar(node.b, ctx, 10)}`, 10);
+        case 'sub':   return wrap(`${emitScalar(node.a, ctx, 10)} - ${emitScalar(node.b, ctx, 11)}`, 10);
+        case 'mul':   return wrap(`${emitScalar(node.a, ctx, 20)}*${emitScalar(node.b, ctx, 20)}`, 20);
+        case 'div':   return wrap(`${emitScalar(node.a, ctx, 20)}/${emitScalar(node.b, ctx, 21)}`, 20);
+        case 'call':  return `${node.fn}(${emitScalar(node.args[0], ctx, 0)})`;
+        case 'hcall': return `${node.fn}(${node.args.map((a, i) => emitArg(a, i, node.fn, ctx)).join(', ')})`;
+        case 'ternary':
+            return wrap(`${emitCond(node.cond, ctx)} ? ${emitScalar(node.a, ctx, 6)} : ${emitScalar(node.b, ctx, 6)}`, 5);
         case 'pow': {
             if(node.n === 0) return '1.0';
-            if(node.n === 1) return emitScalar(node.a, refs, prec);
-            const simple = node.a.t === 'param' || node.a.t === 'num';
+            if(node.n === 1) return emitScalar(node.a, ctx, prec);
+            const simple = node.a.t === 'param' || node.a.t === 'num' || node.a.t === 'ident';
             if(simple && node.n <= 4){
-                const b = emitScalar(node.a, refs, 20);
+                const b = emitScalar(node.a, ctx, 20);
                 return wrap(Array(node.n).fill(b).join('*'), 20);
             }
-            return `pow(${emitScalar(node.a, refs, 0)}, ${fnum(node.n)})`;
+            return `pow(${emitScalar(node.a, ctx, 0)}, ${fnum(node.n)})`;
         }
     }
     throw new Error(`scenegen: equations: cannot emit scalar '${node.t}'`);
+}
+
+//int expressions (loop machinery, int helper arguments)
+function emitInt(node, ctx, prec = 0){
+    const wrap = (text, my) => (prec > my ? `(${text})` : text);
+    switch(node.t){
+        case 'num':   return String(node.v);
+        case 'ident': return node.name;
+        case 'neg':   return wrap(`-${emitInt(node.a, ctx, 25)}`, 12);
+        case 'add':   return wrap(`${emitInt(node.a, ctx, 10)} + ${emitInt(node.b, ctx, 10)}`, 10);
+        case 'sub':   return wrap(`${emitInt(node.a, ctx, 10)} - ${emitInt(node.b, ctx, 11)}`, 10);
+        case 'mul':   return wrap(`${emitInt(node.a, ctx, 20)}*${emitInt(node.b, ctx, 20)}`, 20);
+    }
+    throw new Error(`scenegen: equations: cannot emit int expression '${node.t}'`);
+}
+
+//a helper-call argument, by the CALLEE's parameter kind
+function emitArg(node, i, fn, ctx){
+    const p = ctx.defs.get(fn).params[i];
+    if(p.type === 'int') return emitInt(node, ctx, 0);
+    return isDualNode(node, ctx.duals)
+        ? emitDual(node, ctx, 0)
+        : constDual(emitScalar(node, ctx, 0));
+}
+
+//a comparison — a dual operand reads its VALUE lane
+function emitCond(cmp, ctx){
+    const side = (n) => {
+        if(ctx.ints && onlyInts(n, ctx.ints)) return emitInt(n, ctx, 8);
+        return isDualNode(n, ctx.duals)
+            ? `${emitDual(n, ctx, 30)}.x`
+            : emitScalar(n, ctx, 8);
+    };
+    return `${side(cmp.a)} ${cmp.op} ${side(cmp.b)}`;
+}
+
+function onlyInts(node, ints){
+    switch(node.t){
+        case 'num':   return node.int === true;
+        case 'ident': return ints.has(node.name);
+        case 'neg':   return onlyInts(node.a, ints);
+        case 'add': case 'sub': case 'mul':
+            return onlyInts(node.a, ints) && onlyInts(node.b, ints);
+        default: return false;
+    }
 }
 
 const constDual = (text) => `vec4(${text}, 0.0, 0.0, 0.0)`;
@@ -549,15 +1086,16 @@ function flattenMul(node, out){
 function emitDual(node, ctx, prec = 0){
     const wrap = (text, my) => (prec > my ? `(${text})` : text);
     switch(node.t){
-        case 'var': return node.name;
-        case 'neg': return wrap(`-${emitDual(node.a, ctx, 25)}`, 12);
+        case 'var':   return node.name;
+        case 'ident': return node.name;
+        case 'neg':   return wrap(`-${emitDual(node.a, ctx, 25)}`, 12);
 
         case 'add':
         case 'sub': {
             const terms = [];
             flattenSum(node, 1, terms);
-            const duals   = terms.filter(t => isDualNode(t.node));
-            const scalars = terms.filter(t => !isDualNode(t.node));
+            const duals   = terms.filter(t => isDualNode(t.node, ctx.duals));
+            const scalars = terms.filter(t => !isDualNode(t.node, ctx.duals));
             let text = '';
             for(const t of duals){
                 const e = emitDual(t.node, ctx, 15);
@@ -578,7 +1116,7 @@ function emitDual(node, ctx, prec = 0){
                     let s = '';
                     for(const t of scalars){
                         const sign = flip ? -t.sign : t.sign;
-                        const e = emitScalar(t.node, ctx.refs, 15);
+                        const e = emitScalar(t.node, ctx, 15);
                         s = s === ''
                             ? (sign > 0 ? e : `-${e}`)
                             : `${s} ${sign > 0 ? '+' : '-'} ${e}`;
@@ -592,9 +1130,9 @@ function emitDual(node, ctx, prec = 0){
         case 'mul': {
             const factors = [];
             flattenMul(node, factors);
-            const duals   = factors.filter(isDualNode);
-            const scalars = factors.filter(f => !isDualNode(f));
-            const sText   = scalars.map(f => emitScalar(f, ctx.refs, 20)).join('*');
+            const duals   = factors.filter(f => isDualNode(f, ctx.duals));
+            const scalars = factors.filter(f => !isDualNode(f, ctx.duals));
+            const sText   = scalars.map(f => emitScalar(f, ctx, 20)).join('*');
             let dText;
             if(duals.length === 1){ dText = emitDual(duals[0], ctx, 20); }
             else{
@@ -606,11 +1144,11 @@ function emitDual(node, ctx, prec = 0){
         }
 
         case 'div': {
-            const aDual = isDualNode(node.a);
-            const bDual = isDualNode(node.b);
+            const aDual = isDualNode(node.a, ctx.duals);
+            const bDual = isDualNode(node.b, ctx.duals);
             if(aDual && bDual) return `tdiv(${emitDual(node.a, ctx, 0)}, ${emitDual(node.b, ctx, 0)})`;
-            if(aDual)          return wrap(`${emitDual(node.a, ctx, 20)}/${emitScalar(node.b, ctx.refs, 21)}`, 20);
-            return `tdiv(${constDual(emitScalar(node.a, ctx.refs, 0))}, ${emitDual(node.b, ctx, 0)})`;
+            if(aDual)          return wrap(`${emitDual(node.a, ctx, 20)}/${emitScalar(node.b, ctx, 21)}`, 20);
+            return `tdiv(${constDual(emitScalar(node.a, ctx, 0))}, ${emitDual(node.b, ctx, 0)})`;
         }
 
         case 'pow': {
@@ -636,59 +1174,82 @@ function emitDual(node, ctx, prec = 0){
             return inline(node.n);
         }
 
-        case 'call': return `t${node.fn}(${emitDual(node.args[0], ctx, 0)})`;
+        case 'call':  return `t${node.fn}(${emitDual(node.args[0], ctx, 0)})`;
+        case 'hcall': return `${node.fn}(${node.args.map((a, i) => emitArg(a, i, node.fn, ctx)).join(', ')})`;
+        case 'ternary':
+            return wrap(`${emitCond(node.cond, ctx)} ? ${emitDualOr(node.a, ctx)} : ${emitDualOr(node.b, ctx)}`, 5);
 
         //a scalar subtree reaching a dual slot (defensive — callers split kinds)
-        default: return constDual(emitScalar(node, ctx.refs, 0));
+        default: return constDual(emitScalar(node, ctx, 0));
     }
 }
 
-//the data_ wrapper matrix (§3/§4): seeds (or the stereo lift, or the w = 1
-//patch), power locals, one expression, and the .yzwx swizzle onto the
-//existing data contract (grad, value). The view rule is variety-builder §4:
-//capability is the SIGNATURE — a 3-ary source is affine, full stop; a 4-ary
-//source defaults to stereo and may opt into the generated patch.
-export function emitEquation({name, src, refs = null, view = null}){
-    if(typeof name !== 'string' || !/^[A-Za-z_]\w*$/.test(name)){
-        throw new Error(`scenegen: equations: emit needs a valid identifier name, got ${JSON.stringify(name)}`);
-    }
-    const eq = parseEquation(src);
-    if(eq.arity === 3){
+//a dual-valued slot whose expression may be scalar-kind (ternary branches,
+//returns): promote through the constant dual
+function emitDualOr(node, ctx){
+    return isDualNode(node, ctx.duals) ? emitDual(node, ctx, 6) : constDual(emitScalar(node, ctx, 0));
+}
+
+//the seed lines shared by every wrapper form
+const SEED_LINES = [
+    `    vec4 x = vec4(p.x, 1.0, 0.0, 0.0);`,
+    `    vec4 y = vec4(p.y, 0.0, 1.0, 0.0);`,
+    `    vec4 z = vec4(p.z, 0.0, 0.0, 1.0);`,
+];
+
+function resolveView(name, arity, view){
+    if(arity === 3){
         if(view === 'stereo'){
             throw new Error(`scenegen: equations: '${name}': the stereo view needs the homogeneous 4-ary `
                 + `form — author it (there is no automatic lift); docs/variety-builder.md §4`);
         }
-        view = 'affine';
+        return 'affine';
     }
-    else{
-        view = view ?? 'stereo';
-        if(view !== 'stereo' && view !== 'affine'){
-            throw new Error(`scenegen: equations: unknown view '${view}' — 'affine' or 'stereo'`);
-        }
+    view = view ?? 'stereo';
+    if(view !== 'stereo' && view !== 'affine'){
+        throw new Error(`scenegen: equations: unknown view '${view}' — 'affine' or 'stereo'`);
     }
+    return view;
+}
 
-    const ctx = {refs: {}, powers: new Map()};
-    for(const p of eq.params) ctx.refs[p] = refs?.[p] ?? p;
-
-    const body = isDualNode(eq.ast)
-        ? emitDual(eq.ast, ctx, 0)
-        : constDual(emitScalar(eq.ast, ctx.refs, 0));      //unreachable: parse requires a coordinate
-
+function wrapperHead(name, arity, view){
     const lines = [`vec4 data_${name}(vec3 p){`];
-    if(eq.arity === 4 && view === 'stereo'){
+    if(arity === 4 && view === 'stereo'){
         lines.push(`    vec4 x, y, z, w;`);
         lines.push(`    invStereo(vec4(p.x, 1.0, 0.0, 0.0),`);
         lines.push(`              vec4(p.y, 0.0, 1.0, 0.0),`);
         lines.push(`              vec4(p.z, 0.0, 0.0, 1.0), x, y, z, w);`);
     }
     else{
-        lines.push(`    vec4 x = vec4(p.x, 1.0, 0.0, 0.0);`);
-        lines.push(`    vec4 y = vec4(p.y, 0.0, 1.0, 0.0);`);
-        lines.push(`    vec4 z = vec4(p.z, 0.0, 0.0, 1.0);`);
-        if(eq.arity === 4){
+        lines.push(...SEED_LINES);
+        if(arity === 4){
             lines.push(`    vec4 w = vec4(1.0, 0.0, 0.0, 0.0);      //the affine patch: w = 1`);
         }
     }
+    return lines;
+}
+
+//the data_ wrapper matrix (§3/§4) over an equation STRING: seeds (or the
+//stereo lift, or the w = 1 patch), power locals, one expression, and the
+//.yzwx swizzle onto the existing data contract (grad, value). The view rule
+//is variety-builder §4: capability is the SIGNATURE — a 3-ary source is
+//affine, full stop; a 4-ary source defaults to stereo and may opt into the
+//generated patch.
+export function emitEquation({name, src, refs = null, view = null}){
+    if(typeof name !== 'string' || !/^[A-Za-z_]\w*$/.test(name)){
+        throw new Error(`scenegen: equations: emit needs a valid identifier name, got ${JSON.stringify(name)}`);
+    }
+    const eq = parseEquation(src);
+    view = resolveView(name, eq.arity, view);
+
+    const ctx = {refs: {}, powers: new Map()};
+    for(const p of eq.params) ctx.refs[p] = refs?.[p] ?? p;
+
+    const body = isDualNode(eq.ast, null)
+        ? emitDual(eq.ast, ctx, 0)
+        : constDual(emitScalar(eq.ast, ctx, 0));      //unreachable: parse requires a coordinate
+
+    const lines = wrapperHead(name, eq.arity, view);
     for(const v of (eq.arity === 4 ? ['x', 'y', 'z', 'w'] : ['x', 'y', 'z'])){
         const set = ctx.powers.get(v);
         if(!set) continue;
@@ -702,4 +1263,85 @@ export function emitEquation({name, src, refs = null, view = null}){
     lines.push(`    return v.yzwx;`);
     lines.push(`}`);
     return lines.join('\n') + '\n';
+}
+
+//statement emission — one function's dual twin, statements carried over
+function emitStmts(stmts, ctx, indent){
+    const pad = '    '.repeat(indent);
+    const lines = [];
+    const rhs = (name, e) => {
+        if(ctx.ints.has(name)) return emitInt(e, ctx, 0);
+        return ctx.duals.has(name)
+            ? emitDualOr(e, ctx)
+            : emitScalar(e, ctx, 0);
+    };
+    for(const s of stmts){
+        switch(s.t){
+            case 'decl': {
+                const ty = s.kind === 'int' ? 'int' : (ctx.duals.has(s.name) ? 'vec4' : 'float');
+                lines.push(`${pad}${ty} ${s.name} = ${rhs(s.name, s.e)};`);
+                break;
+            }
+            case 'assign':
+                lines.push(`${pad}${s.name} = ${rhs(s.name, s.e)};`);
+                break;
+            case 'for':
+                lines.push(`${pad}for(int ${s.counter} = ${emitInt(s.from, ctx, 0)}; `
+                    + `${s.counter} < ${emitInt(s.limit, ctx, 0)}; ${s.counter}++){`);
+                lines.push(...emitStmts(s.body, ctx, indent + 1));
+                lines.push(`${pad}}`);
+                break;
+            case 'if':
+                lines.push(`${pad}if(${emitCond(s.cond, ctx)}){`);
+                lines.push(...emitStmts(s.then, ctx, indent + 1));
+                if(s.els){
+                    lines.push(`${pad}}`);
+                    lines.push(`${pad}else{`);
+                    lines.push(...emitStmts(s.els, ctx, indent + 1));
+                }
+                lines.push(`${pad}}`);
+                break;
+            case 'ret':
+                lines.push(`${pad}return ${emitDualOr(s.e, ctx)};`);
+                break;
+        }
+    }
+    return lines;
+}
+
+//emit a function source set: a dual twin per function (same names — GLSL
+//overloading resolves against the float originals in the catalogue file),
+//and the data_ wrapper for the ONE formula, calling its twin
+export function emitFunctions({name, src, refs = null, view = null}){
+    const defs = parseFunctions(src);
+    const formulas = [...defs.values()].filter(d => d.formula);
+    if(formulas.length !== 1){
+        throw new Error(`scenegen: equations: expected exactly one formula (leading params x, y, z[, w]) — `
+            + `found ${formulas.length ? formulas.map(f => f.name).join(', ') : 'none'}`);
+    }
+    const f = formulas[0];
+    view = resolveView(name ?? f.name, f.arity, view);
+
+    const pieces = [];
+    for(const def of defs.values()){
+        const ctx = {refs: {}, powers: new Map(), duals: def.duals, ints: def.ints, defs};
+        const params = def.params.map(p => {
+            const ty = p.type === 'int' ? 'int' : (def.duals.has(p.name) ? 'vec4' : 'float');
+            return `${ty} ${p.name}`;
+        }).join(', ');
+        const body = emitStmts(def.body, ctx, 1);
+        pieces.push([`vec4 ${def.name}(${params}){`, ...body, `}`].join('\n'));
+    }
+
+    //the wrapper: seeds (per view), then one call into the formula's twin —
+    //trailing parameters ride as constant duals of their GLSL references
+    const trail = f.trailing.map(p => `, ${constDual(refs?.[p] ?? p)}`).join('');
+    const args  = f.params.slice(0, f.arity).map(p => p.name).join(', ');
+    const lines = wrapperHead(f.name, f.arity, view);
+    lines.push(`    vec4 v = ${f.name}(${args}${trail});`);
+    lines.push(`    return v.yzwx;`);
+    lines.push(`}`);
+    pieces.push(lines.join('\n'));
+
+    return pieces.join('\n\n') + '\n';
 }

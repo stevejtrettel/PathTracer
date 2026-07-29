@@ -34,7 +34,31 @@ export default [
     {name: 'quadricCone',  src: 'x^2 + y^2 - z^2 - w^2',  degree: 2},
     {name: 'quarticFermat', src: 'x^4 + y^4 + z^4 - w^4', degree: 4},
 
+    //--- statement bodies (stage 5) — the Chebyshev acceptance --------
+    //the loop the closed form above spells out by hand: a helper with a
+    //counted for + int params, called three ways by the formula
+    {name: 'chmutovFns', fns: `
+        float cheb(float x, int n){
+            for(int i = 0; i < n; i++){ x = 2.0*x*x - 1.0; }
+            return x;
+        }
+        float chmutov(float x, float y, float z){
+            int n = 2;
+            return cheb(x, n) + cheb(y, n) + cheb(z, n) + 1.0;
+        }`},
+
+    //if/else + kind promotion: h starts as a copy of a coordinate (dual),
+    //is folded by a branch whose comparison reads the value lane
+    {name: 'foldCone', fns: `
+        float foldCone(float x, float y, float z){
+            float h = y;
+            if(h < 0.0){ h = -h; }
+            return x*x + z*z - h;
+        }`},
+
     //--- the refusals — these MUST fail, for these reasons ------------
+    {name: 'whileLoop', fns: 'float bad(float x, float y, float z){ while(x < 1.0){ x = x + 1.0; } return x; }',
+     expect: /'while' is outside the statement whitelist/},
     {name: 'inhomogeneous', src: 'x^3 + y*w', expect: 'homogeneity'},
     {name: 'unknownFn',     src: 'sinh(x) + y + z', expect: /unknown function 'sinh'/},
     {name: 'badExponent',   src: 'x^-2 + y + z', expect: /nonnegative integer literal/},
