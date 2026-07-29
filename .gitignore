@@ -4,3 +4,4 @@ dist/
 .DS_Store
 render-tests/*
 !render-tests/goldens/
+!render-tests/equations/

@@ -14,6 +14,9 @@
 //   node scripts/gen.mjs --goldens            BYTE-compare every scene's chunk
 //                                             against render-tests/goldens/
 //   node scripts/gen.mjs --goldens --write    (re)bake the goldens
+//   node scripts/gen.mjs --equations          run the equation-transpiler
+//                                             verify gate over its suite
+//                                             (docs/equation-transpiler.md §5)
 //
 // The goldens are the emitter's regression gate: they pin the exact output of
 // every generated scene, so an emitter change shows its full blast radius as
@@ -42,12 +45,13 @@ const wantCatalogue = flag('--catalogue');
 const wantMaterials = flag('--materials');
 const wantCheck     = flag('--check');
 const wantGoldens   = flag('--goldens');
+const wantEquations = flag('--equations');
 const wantWrite     = flag('--write');
 const outFile       = opt('--out');
 const sceneName     = args[0];
 
-if(!wantCatalogue && !wantMaterials && !wantGoldens && !sceneName){
-    console.error('usage: node scripts/gen.mjs <scene> [--check | --out <file>]  |  --catalogue  |  --materials  |  --goldens [--write]');
+if(!wantCatalogue && !wantMaterials && !wantGoldens && !wantEquations && !sceneName){
+    console.error('usage: node scripts/gen.mjs <scene> [--check | --out <file>]  |  --catalogue  |  --materials  |  --goldens [--write]  |  --equations');
     process.exit(1);
 }
 
@@ -120,6 +124,47 @@ try{
     else if(wantMaterials){
         const {materialInfo} = await server.ssrLoadModule('/js/scenegen/materials.js');
         console.log(materialInfo());
+    }
+    else if(wantEquations){
+        //the transpiler's self-check (docs/equation-transpiler.md §5): dual
+        //value vs float, dual gradient vs central differences, numeric
+        //homogeneity for 4-ary sources — plus the suite's pinned REFUSALS
+        //(`expect`), asserted to fail for their stated reason
+        const {verifyEquation} = await server.ssrLoadModule('/js/scenegen/equations.js');
+        const suite = (await server.ssrLoadModule('/render-tests/equations/suite.mjs')).default;
+        let failed = 0;
+        for(const spec of suite){
+            if(spec.expect){
+                let outcome = null;
+                try{
+                    const r = verifyEquation(spec);
+                    if(!r.ok) outcome = {kind: r.failures[0].kind, message: r.failures[0].note ?? ''};
+                }
+                catch(e){ outcome = {kind: 'throw', message: e.message}; }
+                const want = spec.expect;
+                const hit = outcome && (want instanceof RegExp
+                    ? want.test(outcome.message)
+                    : outcome.kind === want);
+                if(hit){ console.log(`${spec.name}: OK (refused as expected: ${want})`); }
+                else{
+                    console.error(`${spec.name}: FAILED to refuse — expected ${want}, got ${JSON.stringify(outcome)}`);
+                    failed++;
+                }
+                continue;
+            }
+            const r = verifyEquation(spec);
+            if(r.ok && (spec.degree === undefined || spec.degree === r.degree)){
+                const kind = r.arity === 4 ? `projective, degree ${r.degree}` : 'affine';
+                console.log(`${spec.name}: OK (${kind}, ${r.checked} pts)`);
+            }
+            else{
+                console.error(`${spec.name}: FAILED`);
+                for(const f of r.failures) console.error('  ' + JSON.stringify(f));
+                if(r.ok) console.error(`  fitted degree ${r.degree}, suite pinned ${spec.degree}`);
+                failed++;
+            }
+        }
+        if(failed) process.exitCode = 1;
     }
     else if(wantGoldens){
         const goldenDir = path.join(root, 'render-tests', 'goldens');
