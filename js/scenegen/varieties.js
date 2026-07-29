@@ -35,8 +35,16 @@ import {parseEquation, parseFunctions, checkParams, emitEquation, emitFunctions}
 
 //---------------------------------------------------------------- catalogue
 
-const RAW = import.meta.glob('../../glsl/objects/varieties/formulas/*.glsl',
-                             {query: '?raw', import: 'default', eager: true});
+//two roots during the float migration: glsl/shapes/varieties/ is the
+//library's home (converted float files move there, file by file);
+//glsl/objects/varieties/formulas/ holds the remaining hand-T files and
+//dies with the last one (docs/variety-builder.md §6.5)
+const RAW = {
+    ...import.meta.glob('../../glsl/shapes/varieties/*.glsl',
+                        {query: '?raw', import: 'default', eager: true}),
+    ...import.meta.glob('../../glsl/objects/varieties/formulas/*.glsl',
+                        {query: '?raw', import: 'default', eager: true}),
+};
 
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
 
@@ -49,8 +57,7 @@ const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^
 //  //@default <fn>.<param> <value>
 //a scene may then omit the parameter (the default bakes) or override it
 //(a number, or a knob — live moduli).
-function parseFormulaFile(stem, src){
-    const file = `glsl/objects/varieties/formulas/${stem}.glsl`;
+function parseFormulaFile(stem, file, src){
     const entry = {stem, file, src};
     const found = [];
     const code  = stripComments(src);
@@ -84,7 +91,8 @@ function buildVarieties(){
     const byName = {};
     for(const [path, src] of Object.entries(RAW)){
         const stem = path.split('/').pop().replace(/\.glsl$/, '');
-        for(const f of parseFormulaFile(stem, src)){
+        const file = path.replace(/^(\.\.\/)+/, '');
+        for(const f of parseFormulaFile(stem, file, src)){
             const prev = byName[f.name];
             if(prev){
                 //the hand catalogue overloads some names with a 3-ary affine
