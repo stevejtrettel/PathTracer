@@ -79,7 +79,23 @@ function fieldsSection(fields){
 }
 
 function sdfsSection(units){
-    return sectionHeader('the region sdfs') + '\n\n' + units.map(u => u.sdfDefs).join('\n\n');
+    //shared defs (a variety formula's transpiled twins) print ONCE, however
+    //many objects reference the formula — first declaration order, keyed;
+    //the same key must always carry the same text
+    const shared = [];
+    const seen   = new Map();
+    for(const u of units){
+        for(const s of (u.sharedDefs ?? [])){
+            const prev = seen.get(s.key);
+            if(prev === undefined){ seen.set(s.key, s.text); shared.push(s.text); }
+            else if(prev !== s.text){
+                throw new Error(`scenegen: shared def '${s.key}' emitted with two different bodies`);
+            }
+        }
+    }
+    return sectionHeader('the region sdfs') + '\n\n'
+        + (shared.length ? shared.join('\n\n') + '\n\n' : '')
+        + units.map(u => u.sdfDefs).join('\n\n');
 }
 
 //the curved-light media (docs/curved-light-scenegen.md). A medium is an object

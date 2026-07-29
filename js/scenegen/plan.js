@@ -487,6 +487,7 @@ function planObject(node, forceMarch){
         //stale, the emitted sdf calls them
         usesEntries: [...(node.uses ?? []).map(u => u.entry), ...mods.flatMap(m => m.uses ?? []),
                       ...(vplan ? vplan.usesEntries : [])],
+        sharedDefs: vplan ? vplan.shared : [],
         consts, constsExtra: null, analytic,
         regions: [region],
         sdfDefs: sdfDef + (marchDef ? '\n\n' + marchDef : ''),

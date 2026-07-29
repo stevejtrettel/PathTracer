@@ -87,49 +87,6 @@ float varietyShell(float dist, float inner, float outer){
 }
 
 
-//--- library: glsl/objects/varieties/formulas/barthSextic.glsl ---
-//-------------------------------------------------
-// VARIETY FORMULAS — barthSextic
-// dual-number defining equations T eqn(T x,T y,T z[,T w]); the engine (T
-// arithmetic, DE, invStereo) lives in glsl/tracer/1Setup/dualNumbers.glsl.
-// #include this file in a scene's objects.glsl to use: barthSextic, sexticStereo.
-//-------------------------------------------------
-
-T barthSextic(T x, T y, T z){
-
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    float phi1=(1.+sqrt(5.))/2., phi2=phi1*phi1;
-
-    T term1 = 4.*tmul(phi2*x2-y2, phi2*y2-z2, phi2*z2-x2);
-    T term2 = (1.+2.*phi1) * tmul(x2+y2+z2-T(1,0),x2+y2+z2-T(1,0));
-
-    return -(term1-term2);
-}
-
-
-T barthSextic(T x, T y, T z, T w){
-
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T w2 = tsqr(w);
-    float phi1=(1.+sqrt(5.))/2., phi2=phi1*phi1;
-
-    T term1 = 4.*tmul(phi2*x2-y2, phi2*y2-z2, phi2*z2-x2);
-    T term2 = (1.+2.*phi1) * tmul(tsqr(x2+y2+z2-w2),w2);
-
-    return -(term1-term2);
-}
-
-T sexticStereo(T x, T y, T z){
-    T X, Y, Z, W;
-    invStereo(x,y,z,X,Y,Z,W);
-    return barthSextic(X,Y,Z,W);
-}
-
-
 //--- library: glsl/shapes/room.glsl ---
 //----------------------------------------------------------------------------
 // ROOM — a closed box, seen from the inside.
@@ -202,6 +159,7 @@ float gSDF[N_OBJ];
 const vec3  BARTH_P           = vec3(0.0, 1.9, -1.2);
 const float BARTH_CLIP_RADIUS = 1.9;
 const float BARTH_CLIP_BLEND  = 0.06;
+const float BARTH_TAU         = 4.236068;
 
 const vec3  LIGHT_P      = vec3(-7.0, 4.0, 2.0);
 const float LIGHT_RADIUS = 1.5;
@@ -214,15 +172,25 @@ const vec3 ROOM_HALFSIZE = vec3(14.25, 7.5, 15.0);
 // the region sdfs
 //---------------------------------------------------------------------
 
-T eqn_barth(T x, T y, T z){
-    return barthSextic(x, y, z, T(1.0, 0.0));      //the affine patch: w = 1
+vec4 barthSextic(vec4 x, vec4 y, vec4 z, vec4 w, float tau){
+    float phi = 0.5*(1.0 + sqrt(5.0));
+    float phi2 = phi*phi;
+    vec4 x2 = tmul(x, x);
+    vec4 y2 = tmul(y, y);
+    vec4 z2 = tmul(z, z);
+    vec4 w2 = tmul(w, w);
+    vec4 p1 = 4.0*tmul(phi2*x2 - y2, phi2*y2 - z2, phi2*z2 - x2);
+    vec4 r2 = x2 + y2 + z2 - w2;
+    return tau*tmul(r2, r2, w2) - p1;
 }
 
 vec4 data_barth(vec3 p){
-    T vx = eqn_barth(T(p.x, 1.0), T(p.y, 0.0), T(p.z, 0.0));
-    T vy = eqn_barth(T(p.x, 0.0), T(p.y, 1.0), T(p.z, 0.0));
-    T vz = eqn_barth(T(p.x, 0.0), T(p.y, 0.0), T(p.z, 1.0));
-    return vec4(vx.y, vy.y, vz.y, vx.x);
+    vec4 x = vec4(p.x, 1.0, 0.0, 0.0);
+    vec4 y = vec4(p.y, 0.0, 1.0, 0.0);
+    vec4 z = vec4(p.z, 0.0, 0.0, 1.0);
+    vec4 w = vec4(1.0, 0.0, 0.0, 0.0);      //the affine patch: w = 1
+    vec4 v = barthSextic(x, y, z, w, BARTH_TAU);
+    return v.yzwx;
 }
 
 float sdf_barth(vec3 p){

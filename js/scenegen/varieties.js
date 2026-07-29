@@ -213,19 +213,35 @@ function paramRefs(list, values, fx, what){
     return refs;
 }
 
-//plan one variety base: emitted helper text (defs), the base-call closure
-//the chain renders, and the include entries. `fx` is the fold context.
+//the base call: varietyDistance(data(scale*q), scale) — the chain rule
+//puts the scale on the gradient, keeping distances in local units
+function makeCall(v, name, fx){
+    const one = typeof v.scale === 'number' && v.scale === 1;
+    const S   = one ? null : fx.value('float', 'VSCALE', v.scale, `variety scale of '${name}'`);
+    const at  = (pt) => (/^[A-Za-z_]\w*$/.test(pt) ? pt : `(${pt})`);
+    return (pt) => one
+        ? `varietyDistance(data_${name}(${pt}), 1.0)`
+        : `varietyDistance(data_${name}(${S}*${at(pt)}), ${S})`;
+}
+
+//plan one variety base: emitted helper text (defs, per-object), shared defs
+//(twins, deduped chunk-wide by the emitter), the base-call closure the
+//chain renders, and the include entries. `fx` is the fold context.
 export function planVariety(v, name, fx){
     let defs, usesEntries = [lib.variety.entry];
 
     if(v.kind === 'formula' && v.source.float){
         //a FLOAT catalogue formula: transpiler input, nothing included —
         //only generated code ships. Defaults fill omitted trailing params.
+        //The TWINS are shared chunk-wide (two objects naming one formula
+        //emit them once); the data_ wrapper is the per-object piece.
         const f = v.source;
         const merged = {...f.defaults, ...v.params};
         checkParams({params: f.trailing.map(t => t.name)}, merged);
         const refs = paramRefs(f.trailing, merged, fx, `variety '${name}'`);
-        defs = emitFunctions({name, src: f.entry.src, formula: f.name, refs, view: v.view}).trimEnd();
+        const out  = emitFunctions({name, src: f.entry.src, formula: f.name, refs, view: v.view, split: true});
+        return {defs: out.wrapper, call: makeCall(v, name, fx), usesEntries,
+                shared: [{key: `variety twins: ${f.name}`, text: out.twins}]};
     }
     else if(v.kind === 'formula'){
         const f    = v.source;
@@ -271,14 +287,5 @@ export function planVariety(v, name, fx){
              + `vec4 data_${name}(vec3 p){\n${indent(bodyText(v.source.data), 4)}\n}`;
     }
 
-    //the base call: varietyDistance(data(scale*q), scale) — the chain rule
-    //puts the scale on the gradient, keeping distances in local units
-    const one  = typeof v.scale === 'number' && v.scale === 1;
-    const S    = one ? null : fx.value('float', 'VSCALE', v.scale, `variety scale of '${name}'`);
-    const at   = (pt) => (/^[A-Za-z_]\w*$/.test(pt) ? pt : `(${pt})`);
-    const call = (pt) => one
-        ? `varietyDistance(data_${name}(${pt}), 1.0)`
-        : `varietyDistance(data_${name}(${S}*${at(pt)}), ${S})`;
-
-    return {defs, call, usesEntries};
+    return {defs, call: makeCall(v, name, fx), usesEntries, shared: []};
 }

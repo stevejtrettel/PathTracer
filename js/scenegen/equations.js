@@ -1365,7 +1365,7 @@ function callClosure(f, defs){
 //site needs, and the data_ wrapper for the formula, calling its twin.
 //`formula:` selects out of a many-formula source (a catalogue file); the
 //call graph prunes everything the chosen formula does not reach.
-export function emitFunctions({name, src, refs = null, view = null, formula}){
+export function emitFunctions({name, src, refs = null, view = null, formula, split = false}){
     const defs = parseFunctions(src);
     const f = pickFormula(defs, formula);
     name = name ?? f.name;      //the data_ wrapper carries the CALLER's name (the object)
@@ -1401,7 +1401,12 @@ export function emitFunctions({name, src, refs = null, view = null, formula}){
     lines.push(`    vec4 v = ${f.name}(${args}${trail});`);
     lines.push(`    return v.yzwx;`);
     lines.push(`}`);
-    pieces.push(lines.join('\n'));
 
+    //split: the twins are SHARED (identical for every object that names the
+    //formula — the emitter dedupes them chunk-wide); the wrapper is the
+    //per-object piece
+    if(split) return {twins: pieces.join('\n\n'), wrapper: lines.join('\n')};
+
+    pieces.push(lines.join('\n'));
     return pieces.join('\n\n') + '\n';
 }

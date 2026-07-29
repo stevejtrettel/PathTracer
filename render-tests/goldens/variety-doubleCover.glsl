@@ -87,44 +87,6 @@ float varietyShell(float dist, float inner, float outer){
 }
 
 
-//--- library: glsl/objects/varieties/formulas/kummer.glsl ---
-//-------------------------------------------------
-// VARIETY FORMULAS — kummer
-// dual-number defining equations T eqn(T x,T y,T z[,T w]); the engine (T
-// arithmetic, DE, invStereo) lives in glsl/tracer/1Setup/dualNumbers.glsl.
-// #include this file in a scene's objects.glsl to use: kummer, kummerStereo.
-//-------------------------------------------------
-
-T kummer(T x, T y, T z, T w){
-
-    //moduli for the quartic:
-    float muSqr=1.5; //(alternate value: 0.7)
-    float Lambda = (3.* muSqr - 1.)/(3.-muSqr);
-
-    T p = z - w + x * sqrt(2.);
-    T q = z - w - x * sqrt(2.);
-    T r = z + w + y * sqrt(2.);
-    T s = z + w - y * sqrt(2.);
-
-    //put a larger multiple of muSqr as the coefficient to get nice genus 3 surfaces for musqr<1
-    float coef = 1.;
-    T fmu = tsqr(x) + tsqr(y) + tsqr(z) - coef * muSqr * tsqr(w);
-    T prod = tmul(p,q,r,s);
-
-    return tsqr(fmu) - Lambda * prod;
-}
-
-T kummer(T x, T y, T z){
-    return kummer(x,y,z,T(1,0));
-}
-
-T kummerStereo(T x, T y, T z){
-    T X, Y, Z, W;
-    invStereo(x,y,z,X,Y,Z,W);
-    return kummer(X,Y,Z,W);
-}
-
-
 //--- library: glsl/shapes/room.glsl ---
 //----------------------------------------------------------------------------
 // ROOM — a closed box, seen from the inside.
@@ -198,10 +160,12 @@ float gSDF[N_OBJ];
 const vec3  CHART_P           = vec3(-2.2, 1.9, -1.2);
 const float CHART_CLIP_RADIUS = 1.9;
 const float CHART_CLIP_BLEND  = 0.06;
+const float CHART_MUSQR       = 1.5;
 
 const vec3  COVER_P           = vec3(2.2, 1.9, -1.2);
 const float COVER_CLIP_RADIUS = 1.9;
 const float COVER_CLIP_BLEND  = 0.06;
+const float COVER_MUSQR       = 1.5;
 
 const vec3  LAMP_P      = vec3(-4.0, 8.5, 5.0);
 const float LAMP_RADIUS = 1.4;
@@ -214,15 +178,24 @@ const vec3 ROOM_HALFSIZE = vec3(10.0, 6.0, 10.0);
 // the region sdfs
 //---------------------------------------------------------------------
 
-T eqn_chart(T x, T y, T z){
-    return kummer(x, y, z, T(1.0, 0.0));      //the affine patch: w = 1
+vec4 kummer(vec4 x, vec4 y, vec4 z, vec4 w, float muSqr){
+    float lambda = (3.0*muSqr - 1.0)/(3.0 - muSqr);
+    float s2 = sqrt(2.0);
+    vec4 p = z - w + s2*x;
+    vec4 q = z - w - s2*x;
+    vec4 r = z + w + s2*y;
+    vec4 s = z + w - s2*y;
+    vec4 fmu = tmul(x, x) + tmul(y, y) + tmul(z, z) - muSqr*tmul(w, w);
+    return tmul(fmu, fmu) - lambda*tmul(p, q, r, s);
 }
 
 vec4 data_chart(vec3 p){
-    T vx = eqn_chart(T(p.x, 1.0), T(p.y, 0.0), T(p.z, 0.0));
-    T vy = eqn_chart(T(p.x, 0.0), T(p.y, 1.0), T(p.z, 0.0));
-    T vz = eqn_chart(T(p.x, 0.0), T(p.y, 0.0), T(p.z, 1.0));
-    return vec4(vx.y, vy.y, vz.y, vx.x);
+    vec4 x = vec4(p.x, 1.0, 0.0, 0.0);
+    vec4 y = vec4(p.y, 0.0, 1.0, 0.0);
+    vec4 z = vec4(p.z, 0.0, 0.0, 1.0);
+    vec4 w = vec4(1.0, 0.0, 0.0, 0.0);      //the affine patch: w = 1
+    vec4 v = kummer(x, y, z, w, CHART_MUSQR);
+    return v.yzwx;
 }
 
 float sdf_chart(vec3 p){
@@ -231,17 +204,13 @@ float sdf_chart(vec3 p){
     return smax(d, sphereDistance(p - CHART_P, CHART_CLIP_RADIUS), CHART_CLIP_BLEND);
 }
 
-T eqn_cover(T x, T y, T z){
-    T X; T Y; T Z; T W;
-    invStereo(x, y, z, X, Y, Z, W);
-    return kummer(X, Y, Z, W);
-}
-
 vec4 data_cover(vec3 p){
-    T vx = eqn_cover(T(p.x, 1.0), T(p.y, 0.0), T(p.z, 0.0));
-    T vy = eqn_cover(T(p.x, 0.0), T(p.y, 1.0), T(p.z, 0.0));
-    T vz = eqn_cover(T(p.x, 0.0), T(p.y, 0.0), T(p.z, 1.0));
-    return vec4(vx.y, vy.y, vz.y, vx.x);
+    vec4 x, y, z, w;
+    invStereo(vec4(p.x, 1.0, 0.0, 0.0),
+              vec4(p.y, 0.0, 1.0, 0.0),
+              vec4(p.z, 0.0, 0.0, 1.0), x, y, z, w);
+    vec4 v = kummer(x, y, z, w, COVER_MUSQR);
+    return v.yzwx;
 }
 
 float sdf_cover(vec3 p){
