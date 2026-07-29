@@ -35,54 +35,31 @@ import {parseEquation, parseFunctions, checkParams, emitEquation, emitFunctions}
 
 //---------------------------------------------------------------- catalogue
 
-//two roots during the float migration: glsl/shapes/varieties/ is the
-//library's home (converted float files move there, file by file);
-//glsl/objects/varieties/formulas/ holds the remaining hand-T files and
-//dies with the last one (docs/variety-builder.md §6.5)
-const RAW = {
-    ...import.meta.glob('../../glsl/shapes/varieties/*.glsl',
-                        {query: '?raw', import: 'default', eager: true}),
-    ...import.meta.glob('../../glsl/objects/varieties/formulas/*.glsl',
-                        {query: '?raw', import: 'default', eager: true}),
-};
+const RAW = import.meta.glob('../../glsl/shapes/varieties/*.glsl',
+                             {query: '?raw', import: 'default', eager: true});
 
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
 
-//a formula file is either all-FLOAT (transpiler input: standard float GLSL
-//formulas, migration end state) or all-T (the hand dual rung: three-seed
-//include path). Detection: a `float <name>(float x, ...)` formula present
-//means float. Migration is file-atomic, so mixed files never exist.
-//
-//Float files may annotate trailing-parameter defaults:
+//a formula file is standard float GLSL (transpiler input, never included —
+//only generated code ships). Trailing-parameter defaults are annotated:
 //  //@default <fn>.<param> <value>
 //a scene may then omit the parameter (the default bakes) or override it
 //(a number, or a knob — live moduli).
 function parseFormulaFile(stem, file, src){
     const entry = {stem, file, src};
     const found = [];
-    const code  = stripComments(src);
-
-    if(/\bfloat\s+\w+\s*\(\s*float\s+x\b/.test(code)){
-        const defaults = {};
-        for(const m of src.matchAll(/^\s*\/\/@default\s+(\w+)\.(\w+)\s+(-?[\d.eE+]+)\s*$/gm)){
-            (defaults[m[1]] ??= {})[m[2]] = parseFloat(m[3]);
-        }
-        for(const d of parseFunctions(src).values()){
-            if(!d.formula) continue;
-            found.push({name: d.name, arity: d.arity, trailing: d.trailing,
-                        defaults: defaults[d.name] ?? {}, float: true, entry});
-        }
-        return found;
+    const defaults = {};
+    for(const m of src.matchAll(/^\s*\/\/@default\s+(\w+)\.(\w+)\s+(-?[\d.eE+]+)\s*$/gm)){
+        (defaults[m[1]] ??= {})[m[2]] = parseFloat(m[3]);
     }
-
-    //the hand-T rung: every `T <name>(T a, T b, T c[, T d])` is a formula
-    //(parameter NAMES are positional here — the hand catalogue predates the
-    //x,y,z convention being load-bearing)
-    for(const m of code.matchAll(/\bT\s+(\w+)\s*\(([^)]*)\)\s*\{/g)){
-        const params = m[2].split(',').map(s => s.trim()).filter(Boolean);
-        if(params.length < 3 || params.length > 4) continue;
-        if(!params.every(p => /^(?:in\s+)?T\s+\w+$/.test(p))) continue;
-        found.push({name: m[1], arity: params.length, entry});
+    for(const d of parseFunctions(src).values()){
+        if(!d.formula) continue;
+        found.push({name: d.name, arity: d.arity, trailing: d.trailing,
+                    defaults: defaults[d.name] ?? {}, float: true, entry});
+    }
+    if(!found.length){
+        throw new Error(`scenegen varieties: ${file} defines no formula `
+            + `(a formula's leading params are float x, y, z[, w])`);
     }
     return found;
 }
@@ -95,13 +72,6 @@ function buildVarieties(){
         for(const f of parseFormulaFile(stem, file, src)){
             const prev = byName[f.name];
             if(prev){
-                //the hand catalogue overloads some names with a 3-ary affine
-                //patch beside the homogeneous 4-ary (barthDecic) — the 4-ary
-                //is the truth (the generated patch replaces the hand one)
-                if(prev.entry === f.entry && prev.arity !== f.arity){
-                    if(f.arity === 4) byName[f.name] = {__varietyFormula: true, ...f};
-                    continue;
-                }
                 throw new Error(`scenegen varieties: formula '${f.name}' is defined in both `
                     + `${prev.entry.file} and ${f.entry.file}`);
             }
@@ -129,8 +99,7 @@ export function varietiesInfo(){
             const ps = (f.trailing ?? []).map(t =>
                 `${t.name}${t.name in (f.defaults ?? {}) ? ` = ${f.defaults[t.name]}` : ''}`).join(', ');
             lines.push(`    ${f.name}${ps ? `(${ps})` : ''}`
-                + `${f.arity === 4 ? '   (projective: stereo | affine patch)' : ''}`
-                + `${f.float ? '' : '   [hand-T]'}`);
+                + `${f.arity === 4 ? '   (projective: stereo | affine patch)' : ''}`);
         }
     }
     return lines.join('\n');
@@ -188,17 +157,6 @@ export function variety(source, {scale = 1.0, view = null, params = {}} = {}){
 
 //---------------------------------------------------------------- planning
 
-//the hand scene's three-seed vec2 wrapper, verbatim (scenes/variety was the
-//reference): one dual evaluation per partial, value from the first
-function tSeedData(name, target){
-    return `vec4 data_${name}(vec3 p){\n`
-        + `    T vx = ${target}(T(p.x, 1.0), T(p.y, 0.0), T(p.z, 0.0));\n`
-        + `    T vy = ${target}(T(p.x, 0.0), T(p.y, 1.0), T(p.z, 0.0));\n`
-        + `    T vz = ${target}(T(p.x, 0.0), T(p.y, 0.0), T(p.z, 1.0));\n`
-        + `    return vec4(vx.y, vy.y, vz.y, vx.x);\n`
-        + `}`;
-}
-
 //resolve a params map into GLSL reference texts: knobs stay bare, numbers
 //become named consts — the same rule as everywhere else. `list` entries are
 //names (the eqn rung) or {name, type} (function trailing params, where int
@@ -242,28 +200,6 @@ export function planVariety(v, name, fx){
         const out  = emitFunctions({name, src: f.entry.src, formula: f.name, refs, view: v.view, split: true});
         return {defs: out.wrapper, call: makeCall(v, name, fx), usesEntries,
                 shared: [{key: `variety twins: ${f.name}`, text: out.twins}]};
-    }
-    else if(v.kind === 'formula'){
-        const f    = v.source;
-        const view = resolveView(f.name, f.arity, v.view);
-        let target = f.name;
-        if(f.arity === 4){
-            target = `eqn_${name}`;
-            defs = (view === 'stereo'
-                ? `T ${target}(T x, T y, T z){\n`
-                  + `    T X; T Y; T Z; T W;\n`
-                  + `    invStereo(x, y, z, X, Y, Z, W);\n`
-                  + `    return ${f.name}(X, Y, Z, W);\n`
-                  + `}`
-                : `T ${target}(T x, T y, T z){\n`
-                  + `    return ${f.name}(x, y, z, T(1.0, 0.0));      //the affine patch: w = 1\n`
-                  + `}`)
-                + '\n\n' + tSeedData(name, target);
-        }
-        else{
-            defs = tSeedData(name, target);
-        }
-        usesEntries.push(f.entry);
     }
     else if(v.kind === 'eqn'){
         const eq = parseEquation(v.source.eqn);
