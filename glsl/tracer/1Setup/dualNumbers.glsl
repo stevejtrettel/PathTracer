@@ -195,3 +195,56 @@ void invStereo( in T x, in T y, out T X, out T Y, out T Z){
 
 }
 
+
+//----------------------------------------------------------------------------
+// vec4 duals — one-pass forward mode, for GENERATED equation code only
+// (docs/equation-transpiler.md §2; js/scenegen/equations.js holds the
+// reference semantics — keep the two in lockstep, lane for lane).
+//
+// A vec4 dual is (value, ∂x, ∂y, ∂z): one evaluation of a transpiled
+// equation returns the value AND the whole gradient, replacing the vec2
+// path's three seeded runs. Native vec4 +, -, unary -, scalar* and /scalar
+// are already correct dual arithmetic and need no functions; everything
+// else is an overload of the T names below, resolved by parameter type.
+// Authored formulas keep the vec2 path until the float-source migration
+// retires it (docs/variety-builder.md §6).
+//----------------------------------------------------------------------------
+
+vec4 tmul(vec4 a, vec4 b){
+    return vec4(a.x*b.x, a.x*b.yzw + b.x*a.yzw);
+}
+vec4 tmul(vec4 a, vec4 b, vec4 c){ return tmul(a, tmul(b, c)); }
+vec4 tmul(vec4 a, vec4 b, vec4 c, vec4 d){ return tmul(tmul(a, b), tmul(c, d)); }
+
+vec4 tsqr(vec4 a){ return vec4(a.x*a.x, 2.0*a.x*a.yzw); }
+
+vec4 tinv(vec4 a){ return vec4(1.0/a.x, -a.yzw/(a.x*a.x)); }
+
+vec4 tdiv(vec4 a, vec4 b){
+    return vec4(a.x/b.x, (b.x*a.yzw - a.x*b.yzw)/(b.x*b.x));
+}
+
+vec4 tsqrt(vec4 a){
+    float r = sqrt(a.x);
+    return vec4(r, 0.5*a.yzw/r);
+}
+
+vec4 texp(vec4 a){ return exp(a.x)*vec4(1.0, a.yzw); }
+vec4 tsin(vec4 a){ return vec4(sin(a.x), cos(a.x)*a.yzw); }
+vec4 tcos(vec4 a){ return vec4(cos(a.x), -sin(a.x)*a.yzw); }
+vec4 ttan(vec4 a){ return vec4(tan(a.x), a.yzw/(cos(a.x)*cos(a.x))); }
+
+vec4 tpow(vec4 a, float p){ return pow(a.x, p - 1.0)*vec4(a.x, p*a.yzw); }
+
+//the inverse stereographic lift in vec4 duals — the stereo wrapper
+//(equation-transpiler §3) lifts the seeded x, y, z to S³ through this
+void invStereo(in vec4 x, in vec4 y, in vec4 z, out vec4 X, out vec4 Y, out vec4 Z, out vec4 W){
+    vec4 denom = vec4(1.0, 0.0, 0.0, 0.0) + tsqr(x) + tsqr(y) + tsqr(z);
+    vec4 wNum  = denom - vec4(2.0, 0.0, 0.0, 0.0);
+
+    X = 2.*tdiv(x, denom);
+    Y = 2.*tdiv(y, denom);
+    Z = 2.*tdiv(z, denom);
+    W = tdiv(wNum, denom);
+}
+
