@@ -40,14 +40,37 @@ const RAW = import.meta.glob('../../glsl/objects/varieties/formulas/*.glsl',
 
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
 
-//every `T <name>(T a, T b, T c[, T d])` is a formula: 3-ary = affine-only,
-//4-ary = projective (parameter NAMES are positional here — the hand
-//catalogue predates the x,y,z convention being load-bearing)
+//a formula file is either all-FLOAT (transpiler input: standard float GLSL
+//formulas, migration end state) or all-T (the hand dual rung: three-seed
+//include path). Detection: a `float <name>(float x, ...)` formula present
+//means float. Migration is file-atomic, so mixed files never exist.
+//
+//Float files may annotate trailing-parameter defaults:
+//  //@default <fn>.<param> <value>
+//a scene may then omit the parameter (the default bakes) or override it
+//(a number, or a knob — live moduli).
 function parseFormulaFile(stem, src){
     const file = `glsl/objects/varieties/formulas/${stem}.glsl`;
     const entry = {stem, file, src};
     const found = [];
     const code  = stripComments(src);
+
+    if(/\bfloat\s+\w+\s*\(\s*float\s+x\b/.test(code)){
+        const defaults = {};
+        for(const m of src.matchAll(/^\s*\/\/@default\s+(\w+)\.(\w+)\s+(-?[\d.eE+]+)\s*$/gm)){
+            (defaults[m[1]] ??= {})[m[2]] = parseFloat(m[3]);
+        }
+        for(const d of parseFunctions(src).values()){
+            if(!d.formula) continue;
+            found.push({name: d.name, arity: d.arity, trailing: d.trailing,
+                        defaults: defaults[d.name] ?? {}, float: true, entry});
+        }
+        return found;
+    }
+
+    //the hand-T rung: every `T <name>(T a, T b, T c[, T d])` is a formula
+    //(parameter NAMES are positional here — the hand catalogue predates the
+    //x,y,z convention being load-bearing)
     for(const m of code.matchAll(/\bT\s+(\w+)\s*\(([^)]*)\)\s*\{/g)){
         const params = m[2].split(',').map(s => s.trim()).filter(Boolean);
         if(params.length < 3 || params.length > 4) continue;
@@ -91,11 +114,15 @@ export function varietiesInfo(){
         list.push(f);
         byFile.set(f.entry.file, list);
     }
-    const lines = [`variety formulas — variety(varieties.<name>, {scale, view}):`];
+    const lines = [`variety formulas — variety(varieties.<name>, {scale, view, params}):`];
     for(const [file, list] of [...byFile.entries()].sort()){
         lines.push(`  ${file}`);
         for(const f of list.sort((a, b) => a.name.localeCompare(b.name))){
-            lines.push(`    ${f.name}${f.arity === 4 ? '   (projective: stereo | affine patch)' : ''}`);
+            const ps = (f.trailing ?? []).map(t =>
+                `${t.name}${t.name in (f.defaults ?? {}) ? ` = ${f.defaults[t.name]}` : ''}`).join(', ');
+            lines.push(`    ${f.name}${ps ? `(${ps})` : ''}`
+                + `${f.arity === 4 ? '   (projective: stereo | affine patch)' : ''}`
+                + `${f.float ? '' : '   [hand-T]'}`);
         }
     }
     return lines.join('\n');
@@ -165,11 +192,15 @@ function tSeedData(name, target){
 }
 
 //resolve a params map into GLSL reference texts: knobs stay bare, numbers
-//become named consts — the same rule as everywhere else
+//become named consts — the same rule as everywhere else. `list` entries are
+//names (the eqn rung) or {name, type} (function trailing params, where int
+//is legal — a Chebyshev order).
 function paramRefs(list, values, fx, what){
     const refs = {};
     for(const p of list){
-        refs[p] = fx.value('float', p.toUpperCase(), values[p], `${what} parameter '${p}'`);
+        const name = typeof p === 'string' ? p : p.name;
+        const type = typeof p === 'string' ? 'float' : p.type;
+        refs[name] = fx.value(type, name.toUpperCase(), values[name], `${what} parameter '${name}'`);
     }
     return refs;
 }
@@ -179,7 +210,16 @@ function paramRefs(list, values, fx, what){
 export function planVariety(v, name, fx){
     let defs, usesEntries = [lib.variety.entry];
 
-    if(v.kind === 'formula'){
+    if(v.kind === 'formula' && v.source.float){
+        //a FLOAT catalogue formula: transpiler input, nothing included —
+        //only generated code ships. Defaults fill omitted trailing params.
+        const f = v.source;
+        const merged = {...f.defaults, ...v.params};
+        checkParams({params: f.trailing.map(t => t.name)}, merged);
+        const refs = paramRefs(f.trailing, merged, fx, `variety '${name}'`);
+        defs = emitFunctions({name, src: f.entry.src, formula: f.name, refs, view: v.view}).trimEnd();
+    }
+    else if(v.kind === 'formula'){
         const f    = v.source;
         const view = resolveView(f.name, f.arity, v.view);
         let target = f.name;
@@ -214,7 +254,7 @@ export function planVariety(v, name, fx){
             throw new Error(`scenegen: variety('${name}'): expected exactly one formula in fns: — `
                 + `found ${formulas.length ? formulas.map(f => f.name).join(', ') : 'none'}`);
         }
-        checkParams({params: formulas[0].trailing}, v.params);
+        checkParams({params: formulas[0].trailing.map(t => t.name)}, v.params);
         const refs = paramRefs(formulas[0].trailing, v.params, fx, `variety '${name}'`);
         defs = emitFunctions({name, src: v.source.fns, refs, view: v.view}).trimEnd();
     }

@@ -201,6 +201,30 @@ try{
             const kind = r.arity === 4 ? `projective, degree ${r.degree}, composites` : 'affine';
             console.log(`${spec.name}: OK (${kind}, ${r.checked} pts${fixture})`);
         }
+
+        //--- the catalogue's FLOAT formulas: verify each with its declared
+        //defaults (a parametrized formula without //@default is a loud
+        //error — the gate needs real moduli to sample with)
+        const {varieties} = await server.ssrLoadModule('/js/scenegen/varieties.js');
+        for(const f of Object.values(varieties)){
+            if(!f.float) continue;
+            const missing = f.trailing.filter(t => !(t.name in f.defaults));
+            if(missing.length){
+                console.error(`catalogue ${f.name}: needs //@default ${f.name}.<param> for: ${missing.map(t => t.name).join(', ')}`);
+                failed++;
+                continue;
+            }
+            const r = verifyFunctions({name: f.name, src: f.entry.src, formula: f.name, params: f.defaults});
+            if(r.ok){
+                const kind = r.arity === 4 ? `projective, degree ${r.degree}` : 'affine';
+                console.log(`catalogue ${f.name}: OK (${kind}, ${r.checked} pts)`);
+            }
+            else{
+                console.error(`catalogue ${f.name}: FAILED`);
+                for(const x of r.failures) console.error('  ' + JSON.stringify(x));
+                failed++;
+            }
+        }
         if(failed) process.exitCode = 1;
     }
     else if(wantGoldens){

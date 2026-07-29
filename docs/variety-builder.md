@@ -231,6 +231,44 @@ the easy direction: `tmul`→`*`, `tsqr`→squaring); the T-GLSL parser above is
 still v1, so nothing blocks on rewriting 37 formulas.
 
 
+## 6.5 · The float-source migration — plan (July 2026, in progress)
+
+Decisions settled with the user; execute file-atomically, one commit per
+formula file, gate green at every step.
+
+- **Source of truth:** `algVariety-reference.md` — the PUBLISHED projective
+  float forms, with moduli still free. Better than the hand-T code (which
+  was hand-transpiled FROM them). The doc stays in place as the math
+  archive; formulas not in it (the gallery set) un-transpile mechanically
+  (`tmul`→`*`).
+- **Notation: FLATTEN to the scalar grammar.** The reference's vec4/swizzle
+  idiom is Shadertoy compactness, not speed — GPUs are scalar; both
+  spellings compile to the same arithmetic (and emission is untouched
+  either way). Teaching the transpiler vector types would also make `vec4`
+  mean two things across the toolchain (four scalars in source, a dual in
+  emission). `while` recursions rewrite as counted `for`.
+- **Moduli become TRAILING PARAMETERS** (float or int — int is a small
+  classify() extension, for `Chmutovn`'s order), with catalogue defaults
+  declared as `//@default <fn>.<param> <value>` annotations: a scene may
+  omit them (default bakes) or knob them (a live Kummer μ). Scratch-knob
+  wiring (goldman) dies in the same move.
+- **Migration = EXPANSION:** the never-ported set rides along in its
+  degree's file — Togliatti ×2, Dervish, Sarti8, Chmutov8/Chmutovn,
+  Escudero9 ×2, the minus-root Endrass, Barth6T (~45 formulas total).
+- **Verification:** the gate walks every catalogue float formula (defaults
+  required — a parametrized formula without `//@default` is a loud error):
+  value/gradient/homogeneity/FITTED DEGREE (Sarti12 had better fit 12).
+  Scenes using migrated formulas get golden rebakes + render checks. No JS
+  emulation of the old T code — the float forms are more authoritative.
+- **Mixed catalogue during migration:** a formula FILE is either all-T
+  (three-seed include path, as today) or all-float (transpiler input, NOT
+  included — only generated code ships; helpers keep their float original
+  in the chunk only when a scalar-kind call needs it).
+- **The finale:** with the last file converted, delete the vec2 T library,
+  `#define T vec2` (and its naming gotcha), the three-seed wrapper path,
+  the hand `*Stereo`/patch overloads, and the `VARIETY_DATA` remnants.
+
+
 ## 7 · Mode = node kind, and the marched-sheet rule (the new emission)
 
 - **`object()` + variety base**: the signed field is the region; the solid is

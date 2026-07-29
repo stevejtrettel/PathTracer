@@ -423,7 +423,11 @@ export function parseFunctions(src){
         expect(')', `')'`);
         const scope = new Set(params.map(p => p.name));
         const body  = block(scope);
-        const def   = {name, params, body};
+        //the source span (comment-stripped text): a helper's float ORIGINAL
+        //is re-emitted verbatim when a scalar-kind call site needs it
+        const srcText = clean.slice(ret.pos, toks[at - 1].pos + 1)
+            .split('\n').map(l => l.replace(/\s+$/, '')).join('\n');
+        const def = {name, params, body, srcText};
         classify(def);
         analyze(def, defs);
         defs.set(name, def);
@@ -435,8 +439,9 @@ export function parseFunctions(src){
 }
 
 //formula vs helper: a formula's leading params are 3–4 floats named
-//x, y, z(, w) in order; anything after must be float (the trailing scalar
-//parameters — the knob hooks). Everything else is a helper.
+//x, y, z(, w) in order; anything after is a trailing scalar parameter —
+//float or int (the knob hooks; int for things like a Chebyshev order).
+//Everything else is a helper.
 function classify(def){
     const names = def.params.map(p => p.name);
     const lead  = ['x', 'y', 'z', 'w'];
@@ -444,13 +449,10 @@ function classify(def){
     while(n < 4 && n < def.params.length
           && def.params[n].type === 'float' && names[n] === lead[n]) n++;
     if(n === 3 || n === 4){
-        const trailing = def.params.slice(n);
-        if(trailing.every(p => p.type === 'float')){
-            def.formula  = true;
-            def.arity    = n;
-            def.trailing = trailing.map(p => p.name);
-            return;
-        }
+        def.formula  = true;
+        def.arity    = n;
+        def.trailing = def.params.slice(n).map(p => ({name: p.name, type: p.type}));
+        return;
     }
     def.formula = false;
 }
@@ -477,7 +479,7 @@ function analyze(def, defs){
             }
             if(s.t === 'assign'){
                 if(ints.has(s.name)){ checkInt(s.e, ints, defs); }
-                else if(def.formula && def.trailing.includes(s.name)){
+                else if(def.formula && def.trailing.some(t => t.name === s.name)){
                     throw new Error(`scenegen: equations: '${def.name}' assigns to its parameter '${s.name}' — `
                         + `trailing formula parameters are read-only`);
                 }
@@ -931,15 +933,29 @@ export function verifyEquation({name = '(unnamed)', src, params = {}}, opts = {}
             ok: failures.length === 0, failures};
 }
 
-export function verifyFunctions({name = '(unnamed)', src, params = {}}, opts = {}){
-    const defs = parseFunctions(src);
+//pick the formula out of a function source: an explicit `formula:` name, or
+//the exactly-one rule when unnamed (scene-level sources)
+function pickFormula(defs, formula){
+    if(formula !== undefined){
+        const f = defs.get(formula);
+        if(!f || !f.formula){
+            throw new Error(`scenegen: equations: no formula named '${formula}' in this source `
+                + `(formulas: ${[...defs.values()].filter(d => d.formula).map(d => d.name).join(', ') || 'none'})`);
+        }
+        return f;
+    }
     const formulas = [...defs.values()].filter(d => d.formula);
     if(formulas.length !== 1){
         throw new Error(`scenegen: equations: expected exactly one formula (leading params x, y, z[, w]) — `
             + `found ${formulas.length ? formulas.map(f => f.name).join(', ') : 'none'}`);
     }
-    const f = formulas[0];
-    checkParams({params: f.trailing}, params);
+    return formulas[0];
+}
+
+export function verifyFunctions({name = '(unnamed)', src, params = {}, formula}, opts = {}){
+    const defs = parseFunctions(src);
+    const f = pickFormula(defs, formula);
+    checkParams({params: f.trailing.map(t => t.name)}, params);
 
     const {callValues} = makeCaller(defs);
     const F = (vals)  => callValues(f.name,
@@ -1006,7 +1022,16 @@ function emitScalar(node, ctx, prec = 0){
         case 'mul':   return wrap(`${emitScalar(node.a, ctx, 20)}*${emitScalar(node.b, ctx, 20)}`, 20);
         case 'div':   return wrap(`${emitScalar(node.a, ctx, 20)}/${emitScalar(node.b, ctx, 21)}`, 20);
         case 'call':  return `${node.fn}(${emitScalar(node.args[0], ctx, 0)})`;
-        case 'hcall': return `${node.fn}(${node.args.map((a, i) => emitArg(a, i, node.fn, ctx)).join(', ')})`;
+        case 'hcall': {
+            //a scalar-kind helper call runs the float ORIGINAL — mark it
+            //(and its own callees, transitively) for verbatim re-emission
+            if(ctx.needFloat){
+                for(const fn of callClosure(ctx.defs.get(node.fn), ctx.defs)) ctx.needFloat.add(fn);
+            }
+            const ps = ctx.defs.get(node.fn).params;
+            return `${node.fn}(${node.args.map((a, i) =>
+                ps[i].type === 'int' ? emitInt(a, ctx, 0) : emitScalar(a, ctx, 0)).join(', ')})`;
+        }
         case 'ternary':
             return wrap(`${emitCond(node.cond, ctx)} ? ${emitScalar(node.a, ctx, 6)} : ${emitScalar(node.b, ctx, 6)}`, 5);
         case 'pow': {
@@ -1309,35 +1334,68 @@ function emitStmts(stmts, ctx, indent){
     return lines;
 }
 
-//emit a function source set: a dual twin per function (same names — GLSL
-//overloading resolves against the float originals in the catalogue file),
-//and the data_ wrapper for the ONE formula, calling its twin
-export function emitFunctions({name, src, refs = null, view = null}){
+//the functions a formula transitively calls (helpers only — vocabulary
+//calls are engine-global)
+function callClosure(f, defs){
+    const keep = new Set([f.name]);
+    const walkNode = (n) => {
+        if(!n || typeof n !== 'object') return;
+        if(n.t === 'hcall' && !keep.has(n.fn)){
+            keep.add(n.fn);
+            walkStmts(defs.get(n.fn).body);
+        }
+        if(n.args) n.args.forEach(walkNode);
+        if(n.cond) walkNode(n.cond);
+        walkNode(n.a); walkNode(n.b); walkNode(n.e);
+    };
+    const walkStmts = (stmts) => {
+        for(const s of stmts){
+            walkNode(s.e); walkNode(s.from); walkNode(s.limit); walkNode(s.cond);
+            if(s.then) walkStmts(s.then);
+            if(s.els)  walkStmts(s.els);
+            if(s.body) walkStmts(s.body);
+        }
+    };
+    walkStmts(f.body);
+    return keep;
+}
+
+//emit a function source set: a dual twin per needed function (same names —
+//GLSL overloading), the float ORIGINAL of any helper a scalar-kind call
+//site needs, and the data_ wrapper for the formula, calling its twin.
+//`formula:` selects out of a many-formula source (a catalogue file); the
+//call graph prunes everything the chosen formula does not reach.
+export function emitFunctions({name, src, refs = null, view = null, formula}){
     const defs = parseFunctions(src);
-    const formulas = [...defs.values()].filter(d => d.formula);
-    if(formulas.length !== 1){
-        throw new Error(`scenegen: equations: expected exactly one formula (leading params x, y, z[, w]) — `
-            + `found ${formulas.length ? formulas.map(f => f.name).join(', ') : 'none'}`);
-    }
-    const f = formulas[0];
+    const f = pickFormula(defs, formula);
     name = name ?? f.name;      //the data_ wrapper carries the CALLER's name (the object)
     view = resolveView(name, f.arity, view);
 
-    const pieces = [];
+    const keep      = callClosure(f, defs);
+    const needFloat = new Set();      //helpers with a scalar-kind call site
+    const twins     = new Map();
     for(const def of defs.values()){
-        const ctx = {refs: {}, powers: new Map(), duals: def.duals, ints: def.ints, defs};
+        if(!keep.has(def.name)) continue;
+        const ctx = {refs: {}, powers: new Map(), duals: def.duals, ints: def.ints, defs, needFloat};
         const params = def.params.map(p => {
             const ty = p.type === 'int' ? 'int' : (def.duals.has(p.name) ? 'vec4' : 'float');
             return `${ty} ${p.name}`;
         }).join(', ');
         const body = emitStmts(def.body, ctx, 1);
-        pieces.push([`vec4 ${def.name}(${params}){`, ...body, `}`].join('\n'));
+        twins.set(def.name, [`vec4 ${def.name}(${params}){`, ...body, `}`].join('\n'));
+    }
+
+    const pieces = [];
+    for(const def of defs.values()){
+        if(!keep.has(def.name)) continue;
+        if(needFloat.has(def.name)) pieces.push(def.srcText);
+        pieces.push(twins.get(def.name));
     }
 
     //the wrapper: seeds (per view), then one call into the formula's twin —
-    //trailing parameters stay SCALAR floats (the twin's signature keeps
-    //them scalar, per the kind rule), passed as their GLSL references
-    const trail = f.trailing.map(p => `, ${refs?.[p] ?? p}`).join('');
+    //trailing parameters stay SCALAR (the twin's signature keeps them
+    //scalar per the kind rule; int stays int), passed as their references
+    const trail = f.trailing.map(p => `, ${refs?.[p.name] ?? p.name}`).join('');
     const args  = f.params.slice(0, f.arity).map(p => p.name).join(', ');
     const lines = wrapperHead(name, f.arity, view);
     lines.push(`    vec4 v = ${f.name}(${args}${trail});`);
