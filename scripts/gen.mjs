@@ -141,7 +141,7 @@ try{
         let failed = 0;
         for(const spec of suite){
             //fns: entries are statement-body function sources (stage 5)
-            const arg    = {name: spec.name, src: spec.fns ?? spec.src, params: spec.params};
+            const arg    = {name: spec.name, src: spec.fns ?? spec.src, params: spec.params, formula: spec.formula};
             const verify = spec.fns ? verifyFunctions : verifyEquation;
             const emit   = spec.fns ? emitFunctions   : emitEquation;
             if(spec.expect){

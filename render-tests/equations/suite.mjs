@@ -56,6 +56,14 @@ export default [
             return x*x + z*z - h;
         }`},
 
+    //the catalogue-file shape: several formulas + a shared helper in one
+    //source, `formula:` selecting one — the emission fixture pins the
+    //call-graph PRUNING (pickB and its helper survive; pickA vanishes)
+    {name: 'selector', formula: 'pickB', fns: `
+        float bump(float t){ return t*t - 1.0; }
+        float pickA(float x, float y, float z){ return bump(x) + y + z; }
+        float pickB(float x, float y, float z){ return bump(x) + bump(y) - z*z; }`},
+
     //a TRAILING parameter on a function source: scalar in the twin's
     //signature, a knob hook at the wrapper (the tangle cube's constant)
     {name: 'tangleFns', params: {c: 11.8}, fns: `

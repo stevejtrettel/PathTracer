@@ -1,113 +1,53 @@
 //-------------------------------------------------
 // VARIETY FORMULAS — cubics
-// dual-number defining equations T eqn(T x,T y,T z[,T w]); the engine (T
-// arithmetic, DE, invStereo) lives in glsl/tracer/1Setup/dualNumbers.glsl.
-// #include this file in a scene's objects.glsl to use: cubicTrivial, cubicGenus, clebschCubic, cayleyNodalCubic, myCubic, myCubicStereo.
+// STANDARD FLOAT GLSL defining equations: the generator transpiles each
+// into one-pass dual-number code, and `gen.mjs --equations` verifies the
+// arithmetic (value, gradient, homogeneity, fitted degree) on every run
+// (docs/variety-builder.md §6.5, docs/equation-transpiler.md).
+//
+// 3-ary (x, y, z) = affine. 4-ary (x, y, z, w) homogeneous = projective,
+// drawable as the stereo double cover or the generated w = 1 patch.
+// Trailing parameters are scene knob hooks; //@default holds the classic
+// values, which bake when a scene omits the parameter.
 //-------------------------------------------------
 
-T cubicTrivial(T x, T y, T z){
-    //a  cubic with no genus: singular point without offset
-    // x^2*y+y^2*z+z^2*x=0.1
-
-    float offset = 0.1;
-
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-
-    return tmul(x2,y) + tmul(y2,z) + tmul(z2,x) - T(offset,0);
-
+//a cubic with no genus: a singular point, pushed off the zero set by `offset`
+//  x^2 y + y^2 z + z^2 x = offset
+//@default cubicTrivial.offset 0.1
+float cubicTrivial(float x, float y, float z, float offset){
+    return x*x*y + y*y*z + z*z*x - offset;
 }
 
-
-T cubicGenus(T x, T y, T z){
-    //x^3+y^3+z^3=x+y+z
-    T x3 = tmul(x,x,x);
-    T y3 = tmul(y,y,y);
-    T z3 = tmul(z,z,z);
-
-    return x3 + y3 + z3 - (x+y+z);
+//x^3 + y^3 + z^3 = x + y + z
+float cubicGenus(float x, float y, float z){
+    return x*x*x + y*y*y + z*z*z - (x + y + z);
 }
 
-
-
-
-T clebschCubic(T x, T y, T z ){
-
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T x3 = tmul(x, x2);
-    T y3 = tmul(y, y2);
-    T z3 = tmul(z, z2);
-
-    T term1 = 81.*(x3+y3+z3);
-    T term2 = -189.*(tmul(x2, y)+tmul(x2, z)+tmul(y2, x)+tmul(y2, z)+tmul(z2, x)+tmul(z2, y));
-    T term3 = 54.*tmul(x, y, z)+126.*(tmul(x, y)+tmul(x, z)+tmul(y, z));
-    T term4 = -9.*(x+y+z);
-
-    return term1 + term2 + term3 + term4 + T(1, 0);
-
+//the Clebsch diagonal cubic — all 27 real lines
+float clebschCubic(float x, float y, float z){
+    float x2 = x*x;
+    float y2 = y*y;
+    float z2 = z*z;
+    return 81.0*(x2*x + y2*y + z2*z)
+         - 189.0*(x2*y + x2*z + y2*x + y2*z + z2*x + z2*y)
+         + 54.0*x*y*z + 126.0*(x*y + x*z + y*z)
+         - 9.0*(x + y + z) + 1.0;
 }
 
-T cayleyNodalCubic(T x, T y, T z, T w){
-    // return dot(z.xyz,z.xyz) * z.w + 2. * z.x * z.y * z.z - z.w*z.w*z.w;
-    //https://en.wikipedia.org/wiki/Cayley%27s_nodal_cubic_surface
-
-    //offset to make nonsingular surface:
-    float offset =0.;
-
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T w2 = tsqr(w);
-
-    return tmul(x2 + y2 + z2,w)+2.*tmul(x,y,z)-tmul(w,w,w)-T(offset,0);
+//Cayley's nodal cubic: (x² + y² + z²)·w + 2xyz − w³
+//https://en.wikipedia.org/wiki/Cayley%27s_nodal_cubic_surface
+float cayleyNodalCubic(float x, float y, float z, float w){
+    return (x*x + y*y + z*z)*w + 2.0*x*y*z - w*w*w;
 }
 
-T cayleyNodalCubic(T x, T y, T z){
-    return cayleyNodalCubic(x,y,z,T(1,0));
-}
-
-
-
-
-T myCubic(T x, T y, T z, T w){
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T w2 = tsqr(w);
-    
-    // Pure xyz terms (no w)
-    T term1 = 24. * tmul(x, y, z);
-    T term2 = -30. * tmul(y2, z);
-    T term3 = -15. * tmul(y, z2);
-    
-    // Linear in w
-    T term4 = -24. * tmul(x2, w);
-    T term5 = 50. * tmul(y2, w);
-    T term6 = 42. * tmul(y, z, w);
-    T term7 = 6. * tmul(z2, w);
-    
-    // Quadratic in w
-    T term8 = 64. * tmul(x, w2);
-    T term9 = -95. * tmul(y, w2);
-    T term10 = -28. * tmul(z, w2);
-    
-    // Cubic in w
-    T term11 = -10. * tmul(w2, w);
-    
-    return term1 + term2 + term3 + term4 + term5 + term6 + term7 + term8 + term9 + term10 + term11;
-}
-
-// Affine version (w=1 patch)
-T myCubic(T x, T y, T z){
-    return myCubic(x, y, z, T(1, 0));
-}
-
-// Double cover via inverse stereographic projection to S³
-T myCubicStereo(T x, T y, T z){
-    T X, Y, Z, W;
-    invStereo(x, y, z, X, Y, Z, W);
-    return myCubic(X, Y, Z, W);
+//a hand-tuned cubic, kept from the hand catalogue
+float myCubic(float x, float y, float z, float w){
+    float x2 = x*x;
+    float y2 = y*y;
+    float z2 = z*z;
+    float w2 = w*w;
+    return 24.0*x*y*z - 30.0*y2*z - 15.0*y*z2
+         - 24.0*x2*w + 50.0*y2*w + 42.0*y*z*w + 6.0*z2*w
+         + 64.0*x*w2 - 95.0*y*w2 - 28.0*z*w2
+         - 10.0*w2*w;
 }
