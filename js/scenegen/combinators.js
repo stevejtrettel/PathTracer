@@ -250,25 +250,68 @@ export function round(base, {r} = {}){
     }, 'round(base, {r})');
 }
 
-//SHELL: keep a skin of the given thickness around the surface. The bound
-//inflates by the thickness — the OUTER face lies that far outside the base
-//(a bound that ignored it would tunnel at grazing angles).
-export function shell(base, {thickness} = {}){
-    if(thickness === undefined) throw new Error('scenegen: shell() needs a thickness');
-    if(!(thickness && thickness.__knob) && !(typeof thickness === 'number' && thickness >= 0.006)){
-        throw new Error(`scenegen: shell(): thickness must be at least 0.006 (2*AT_THRESH) — `
-            + `thinner and the classifier cannot separate the two faces (docs/marching.md), got ${JSON.stringify(thickness)}`);
+//SHELL: keep a skin around the surface. Two forms (docs/variety-builder.md
+//§8): {thickness} — symmetric, `abs(d) - T`, today's exact semantics — and
+//{inward, outward} — asymmetric, solid where -inward <= d <= outward,
+//emitted abs(d - (o-i)/2) - (i+o)/2. Either way the bound inflates by the
+//outer face's reach (a bound that ignored it would tunnel at grazing
+//angles), and the total must clear 2*AT_THRESH or the classifier cannot
+//separate the two faces (docs/marching.md).
+export function shell(base, {thickness, inward, outward} = {}){
+    const asym = inward !== undefined || outward !== undefined;
+    if(asym && thickness !== undefined){
+        throw new Error(`scenegen: shell(): give {thickness} OR {inward, outward}, not both`);
+    }
+    if(!asym){
+        if(thickness === undefined) throw new Error('scenegen: shell() needs a thickness (or {inward, outward})');
+        if(!(thickness && thickness.__knob) && !(typeof thickness === 'number' && thickness >= 0.006)){
+            throw new Error(`scenegen: shell(): thickness must be at least 0.006 (2*AT_THRESH) — `
+                + `thinner and the classifier cannot separate the two faces (docs/marching.md), got ${JSON.stringify(thickness)}`);
+        }
+        return appendMod(base, {
+            kind: 'shell', phase: 'field', requiresTrueDF: true,
+            plan(fx){
+                const T = fx.value('float', 'SHELL', thickness, `shell thickness of '${fx.name}'`);
+                return {
+                    expr: (d) => `abs(${d}) - ${T}`,
+                    boundEffect: {inflate: T},
+                };
+            },
+        }, 'shell(base, {thickness})');
+    }
+    //the asymmetric form — each side a number >= 0 or a float knob whose
+    //whole range stays >= 0; their floors must together clear 2*AT_THRESH
+    const side = (v, what) => {
+        if(v === undefined) return 0;
+        if(v && v.__knob){
+            if(v.type !== 'float' || v.min < 0){
+                throw new Error(`scenegen: shell(): the ${what} knob '${v.name}' must be type float with min >= 0`);
+            }
+            return v;
+        }
+        if(!(typeof v === 'number' && v >= 0)){
+            throw new Error(`scenegen: shell(): ${what} must be a number >= 0 or a float knob, got ${JSON.stringify(v)}`);
+        }
+        return v;
+    };
+    const i = side(inward, 'inward');
+    const o = side(outward, 'outward');
+    const floor = (v) => (v && v.__knob ? v.min : v);
+    if(floor(i) + floor(o) < 0.006){
+        throw new Error(`scenegen: shell(): inward + outward must stay at least 0.006 (2*AT_THRESH) across `
+            + `the knobs' whole ranges — the classifier cannot separate thinner faces (docs/marching.md)`);
     }
     return appendMod(base, {
         kind: 'shell', phase: 'field', requiresTrueDF: true,
         plan(fx){
-            const T = fx.value('float', 'SHELL', thickness, `shell thickness of '${fx.name}'`);
+            const I = fx.value('float', 'INWARD',  i, `shell inward of '${fx.name}'`);
+            const O = fx.value('float', 'OUTWARD', o, `shell outward of '${fx.name}'`);
             return {
-                expr: (d) => `abs(${d}) - ${T}`,
-                boundEffect: {inflate: T},
+                expr: (d) => `abs(${d} - (${O} - ${I})*0.5) - (${I} + ${O})*0.5`,
+                boundEffect: {inflate: O},
             };
         },
-    }, 'shell(base, {thickness})');
+    }, 'shell(base, {inward, outward})');
 }
 
 //CLIP and SUBTRACT: intersect with / carve away a placed cutting VOLUME —
@@ -300,6 +343,10 @@ function cutMod(base, spec, kind, operandKey){
     if(!cutter || !cutter.__shape){
         throw new Error(`scenegen: ${kind}() needs ${operandKey}: a called lib shape `
             + `(e.g. lib.box({halfSize: [...]})) to use as the cutting volume`);
+    }
+    if(cutter.__variety){
+        throw new Error(`scenegen: ${kind}(): a variety cannot be a cutter — a cutter must be a `
+            + `boundable placed volume, and a variety's zero set is unbounded`);
     }
     if(cutter.entry.outputs){
         throw new Error(`scenegen: ${kind}(): ${cutter.entry.stem} yields several outputs — `
@@ -334,6 +381,9 @@ function cutMod(base, spec, kind, operandKey){
                 expr: (d, pt) => combine(d, cut.call(pt)),
                 frame: 'local',
                 helperDefs: cut.helperDefs,
+                //the raw cutter call — the marched-sheet form hard-maxes it
+                //outside the abs (docs/variety-builder.md §7)
+                cutCall: (pt) => cut.call(pt),
                 boundEffect: isClip
                     ? {replace: (pt) => `${cut.boundExpr(pt)}${hard ? '' : ` - ${B}`}`}
                     : 'keep',

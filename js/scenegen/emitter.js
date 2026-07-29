@@ -350,7 +350,7 @@ function validateUses(units, includes, bodyPool){
     for(const u of units){
         for(const entry of u.usesEntries){
             const names = [
-                ...[...entry.src.matchAll(/(?:float|int|bool|void|vec[234]|mat[234])\s+(\w+)\s*\(/g)].map(m => m[1]),
+                ...[...entry.src.matchAll(/(?:float|int|bool|void|vec[234]|mat[234]|T)\s+(\w+)\s*\(/g)].map(m => m[1]),
                 ...[...entry.src.matchAll(/\bconst\s+\w+\s+(\w+)\s*=/g)].map(m => m[1]),
             ];
             const pool = bodyPool + includes.filter(e => e.stem !== entry.stem).map(e => e.src).join('\n');

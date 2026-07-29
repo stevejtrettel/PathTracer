@@ -1320,7 +1320,8 @@ export function emitFunctions({name, src, refs = null, view = null}){
             + `found ${formulas.length ? formulas.map(f => f.name).join(', ') : 'none'}`);
     }
     const f = formulas[0];
-    view = resolveView(name ?? f.name, f.arity, view);
+    name = name ?? f.name;      //the data_ wrapper carries the CALLER's name (the object)
+    view = resolveView(name, f.arity, view);
 
     const pieces = [];
     for(const def of defs.values()){
@@ -1337,7 +1338,7 @@ export function emitFunctions({name, src, refs = null, view = null}){
     //trailing parameters ride as constant duals of their GLSL references
     const trail = f.trailing.map(p => `, ${constDual(refs?.[p] ?? p)}`).join('');
     const args  = f.params.slice(0, f.arity).map(p => p.name).join(', ');
-    const lines = wrapperHead(f.name, f.arity, view);
+    const lines = wrapperHead(name, f.arity, view);
     lines.push(`    vec4 v = ${f.name}(${args}${trail});`);
     lines.push(`    return v.yzwx;`);
     lines.push(`}`);

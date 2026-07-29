@@ -19,6 +19,7 @@ export {knob} from './knobs.js';
 export {glsl, valueText} from './glslTag.js';
 export {displace, repLim, carve, accrete,
         mirror, radial, round, shell, clip, subtract, modifier} from './combinators.js';
+export {variety, varieties} from './varieties.js';
 export {field} from './fields.js';
 export {emit} from './emitter.js';
 

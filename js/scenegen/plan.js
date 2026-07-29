@@ -35,6 +35,7 @@
 import {fnum, fvec2, fvec3, indent, pad, commentLines} from './fmt.js';
 import {isGlsl, resolveGlsl, bodyText, qLine} from './glslTag.js';
 import {isMat, matKind} from './materials.js';
+import {planVariety} from './varieties.js';
 
 
 //-------------------------------------------------
@@ -188,7 +189,7 @@ function chainBoundExpr(planned, boundBase, pt){
 //      forceD     introduce `float d` even with no field mods (the
 //                 transformed form the goldens pin)
 //      lip        factor appended to the final distance (non-uniform scale)
-function chainBody(planned, entry, args, {local, bindLocal = false, forceD = false, lip = ''}){
+function chainBody(planned, baseCall, {local, bindLocal = false, forceD = false, lip = ''}){
     const domain    = planned.filter(m => m.fold);
     const fields    = planned.filter(m => m.line || m.expr);
     const localMods = fields.filter(f => f.frame === 'local');
@@ -214,15 +215,15 @@ function chainBody(planned, entry, args, {local, bindLocal = false, forceD = fal
         lines.push(...domain.slice(1).map(m => `    q = ${m.fold('q')};`));
     }
     const basePt   = useQ ? 'q' : local;
-    const baseCall = `${entry.stem}Distance(${withArgs(basePt, args)})`;
-    if(needD) lines.push(`    float d = ${baseCall};`);
+    const baseText = baseCall(basePt);
+    if(needD) lines.push(`    float d = ${baseText};`);
 
     const ptFor = (f) => f.frame === 'local' ? localRef : basePt;
     const divisorTerms = fields.map(f => f.divisor).filter(Boolean);
     let stmts = fields.map(f => `    ${f.expr ? `d = ${f.expr('d', ptFor(f))};` : f.line}`);
     let ret;
     if(!needD){
-        ret = `    return ${baseCall};`;
+        ret = `    return ${baseText};`;
     }
     else if(divisorTerms.length){
         //the Lipschitz divisor of every displacement in the chain, summed;
@@ -266,8 +267,9 @@ function planCutter(shape, fx, tok, at, where){
     if(!planned.length){
         return {call: (pt) => `${shape.entry.stem}Distance(${withArgs(off(pt), args)})`, boundExpr, helperDefs};
     }
+    const cutBase = (pt) => `${shape.entry.stem}Distance(${withArgs(pt, args)})`;
     const fnName = `${tok.toLowerCase()}_${fx.name}`;
-    helperDefs.push(`float ${fnName}(vec3 p){\n${chainBody(planned, shape.entry, args, {local: 'p'})}\n}`);
+    helperDefs.push(`float ${fnName}(vec3 p){\n${chainBody(planned, cutBase, {local: 'p'})}\n}`);
     return {call: (pt) => `${fnName}(${off(pt)})`, boundExpr, helperDefs};
 }
 
@@ -297,10 +299,11 @@ function buildChain(node, c){
     const S   = `${c.NAME}_SCALE`;
     const lip = node.scale ? ` * min(${S}.x, min(${S}.y, ${S}.z))` : '';
 
-    const body = chainBody(c.planned, c.entry, c.args,
+    const body = chainBody(c.planned, c.baseCall,
         {local: c.local, bindLocal: c.transformed, forceD: c.transformed, lip});
     const helpers = c.planned.flatMap(m => m.helperDefs ?? []);
     const sdfDef = toLocal
+        + (c.prefixDefs ? c.prefixDefs + '\n\n' : '')
         + (helpers.length ? helpers.join('\n\n') + '\n\n' : '')
         + `${c.comment}float sdf_${c.name}(vec3 p){\n${body}\n}`;
 
@@ -312,8 +315,8 @@ function buildChain(node, c){
     let boundDef = null;
     if(!c.transformed){
         const fields = c.planned.filter(m => m.line || m.expr);
-        if(fields.length > 0 || c.entry.bound){
-            const expr = chainBoundExpr(c.planned, boundBaseOf(c.entry, c.argFor, c.args), `p - ${c.NAME}_P`);
+        if(fields.length > 0 || (c.entry && c.entry.bound)){
+            const expr = chainBoundExpr(c.planned, c.boundBase, `p - ${c.NAME}_P`);
             boundDef = `float bound_${c.name}(vec3 p){\n    return ${expr};\n}`;
         }
     }
@@ -353,10 +356,11 @@ function planObject(node, forceMarch){
     const name = node.name;
     const NAME = name.toUpperCase();
     if(!node.shape || !node.shape.__shape){
-        throw new Error(`scenegen: ${node.__node}('${name}'): shape must come from lib.<stem>({...})`);
+        throw new Error(`scenegen: ${node.__node}('${name}'): shape must come from lib.<stem>({...}) or variety(...)`);
     }
-    const entry = node.shape.entry;
-    if(entry.outputs){
+    const isVariety = !!node.shape.__variety;
+    const entry = isVariety ? null : node.shape.entry;
+    if(entry && entry.outputs){
         throw new Error(`scenegen: object('${name}'): ${entry.stem} yields several outputs (${entry.outputs.join(', ')}) — `
             + `call it from a group's authored sdf body (with uses: [lib.${entry.stem}])`);
     }
@@ -381,18 +385,36 @@ function planObject(node, forceMarch){
     const fx      = makeFoldCtx(name, NAME, consts, local);
     const planned = mods.map(m => m.plan(fx));
 
-    const argFor = shapeArgs(NAME, node.shape, consts);
-    const args   = entry.params.map(p => argFor[p.name]);
+    //a variety base: its data_ helpers, its varietyDistance base call, and
+    //NO derivable bound of its own — a clip in the chain (bound donation) or
+    //an authored bound: is REQUIRED (docs/variety-builder.md §9)
+    const vplan = isVariety ? planVariety(node.shape.__variety, name, fx) : null;
+    if(isVariety && !node.bound && !mods.some(m => m.kind === 'clip')){
+        throw new Error(`scenegen: ${node.__node}('${name}'): a variety has no derivable bound — clip it to `
+            + `a shape (clip(..., {to: ...}) donates its bound) or author a bound: on the node `
+            + `(docs/variety-builder.md §9)`);
+    }
+
+    const argFor = isVariety ? {} : shapeArgs(NAME, node.shape, consts);
+    const args   = isVariety ? [] : entry.params.map(p => argFor[p.name]);
 
     //trace routing: a modified or transformed shape has no closed form any
     //more, so it loses its trace and marches. A medium boundary is FORCED to
     //march even when it has a trace: odeMarch finds the confining wall only
     //by an sdf_Scene sign change, never trace_Scene (docs/curved-light-scenegen.md)
     const forced   = !!(forceMarch && forceMarch.has(name));
-    const analytic = !!entry.trace && mods.length === 0 && !transformed && !forced;
+    const analytic = !isVariety && !!entry.trace && mods.length === 0 && !transformed && !forced;
     const comment  = node.comment ? commentLines(node.comment) + '\n' : '';
 
-    const ctx = {name, NAME, entry, args, argFor, comment, transformed, planned, local};
+    const baseCall = isVariety
+        ? vplan.call
+        : (pt) => `${entry.stem}Distance(${withArgs(pt, args)})`;
+    const boundBase = isVariety
+        ? (() => 'VARIETY_UNBOUNDED')      //never ships: the validation above guarantees a clip replaces it or an authored bound overrides
+        : boundBaseOf(entry, argFor, args);
+
+    const ctx = {name, NAME, entry, args, argFor, comment, transformed, planned, local,
+                 baseCall, boundBase, prefixDefs: vplan ? vplan.defs : null};
     let {sdfDef, boundDef} = buildChain(node, ctx);
 
     //an authored bound is authored knowledge: it beats anything derived
@@ -408,6 +430,39 @@ function planObject(node, forceMarch){
         boundDef = null;
     }
 
+    //THE MARCHED-SHEET RULE (docs/variety-builder.md §7, from the hand
+    //variety scene): the marcher stops on {s=0} and passes through {s<0} —
+    //abs on the pre-cutter value, cutters HARD-maxed outside the abs so the
+    //clip cap over {s<0} is not drawn. The signed sdf_<name> stays what the
+    //classifier and normals read. Until now every sheet was analytic; this
+    //is the first marched form.
+    let marchDef = null;
+    if(node.__node === 'sheet' && !analytic){
+        if(transformed){
+            throw new Error(`scenegen: sheet('${name}'): a marched sheet cannot carry rotate/scale yet — `
+                + `place it with at: only`);
+        }
+        const bad = mods.find(m => m.phase !== 'domain' && m.kind !== 'clip');
+        if(bad){
+            throw new Error(`scenegen: sheet('${name}'): a marched sheet's chain may carry domain mods and `
+                + `clip only — ${bad.kind}() gives it an interior; use object() (docs/variety-builder.md §7)`);
+        }
+        const domain = planned.filter(m => m.fold);
+        const cuts   = planned.filter(m => m.cutCall);
+        const lines  = [];
+        if(domain.length){
+            lines.push(`    ${pad('vec3', 5)}q = ${domain[0].fold(local)};`);
+            lines.push(...domain.slice(1).map(m => `    q = ${m.fold('q')};`));
+        }
+        lines.push(`    float d = ${baseCall(domain.length ? 'q' : local)};`);
+        let stop = 'abs(d)';
+        for(const c of cuts) stop = `max(${stop}, ${c.cutCall(local)})`;
+        lines.push(`    return ${stop};`);
+        marchDef = `//the marched form: abs stops the ray on {s=0}; the hard max keeps the\n`
+                 + `//cut cap over {s<0} undrawn. sdf_${name} stays signed for faces/normals.\n`
+                 + `float march_${name}(vec3 p){\n${lines.join('\n')}\n}`;
+    }
+
     //a sheet is the same unit with a two-faced region instead of a material.
     //(node.comment belongs to the sdf; region comments come from group specs)
     const region = (node.__node === 'sheet')
@@ -418,26 +473,28 @@ function planObject(node, forceMarch){
     //shape-data outputs available to this region's material: <name>Data injected
     //with the object's own consts baked in (docs/shape-data.md). The call reads q
     //(the material's local point), so the emitter emits it after the q line.
-    region.dataOutputs = (entry.dataOutputs ?? []).map(d => ({
+    region.dataOutputs = ((entry && entry.dataOutputs) ?? []).map(d => ({
         inject: d.inject,
         type:   d.type,
         call:   `${d.fn}(q${d.params.length ? ', ' + d.params.map(p => argFor[p]).join(', ') : ''})`,
     }));
 
+    const marchName = marchDef ? `march_${name}` : `sdf_${name}`;
     return {
         name, NAME, entry,
         //a modifier that calls into a library file (a cutter's shape) rides
         //the include list like a declared uses: — except these can never be
         //stale, the emitted sdf calls them
-        usesEntries: [...(node.uses ?? []).map(u => u.entry), ...mods.flatMap(m => m.uses ?? [])],
+        usesEntries: [...(node.uses ?? []).map(u => u.entry), ...mods.flatMap(m => m.uses ?? []),
+                      ...(vplan ? vplan.usesEntries : [])],
         consts, constsExtra: null, analytic,
         regions: [region],
-        sdfDefs: sdfDef,
+        sdfDefs: sdfDef + (marchDef ? '\n\n' + marchDef : ''),
         boundDef,
         sdfAllLine: (idW) => `    gSDF[${pad(`ID_${NAME}`, idW)}] = sdf_${name}(p);`,
         marchedBlock: analytic ? null : (boundDef
-            ? `    float b_${name} = bound_${name}(p);\n    d = min(d, (b_${name} > BOUND_MARGIN) ? b_${name} : sdf_${name}(p));`
-            : `    d = min(d, sdf_${name}(p));`),
+            ? `    float b_${name} = bound_${name}(p);\n    d = min(d, (b_${name} > BOUND_MARGIN) ? b_${name} : ${marchName}(p));`
+            : `    d = min(d, ${marchName}(p));`),
         traceDef: analytic
             ? `float trace_${name}(Vector tv){\n    return ${entry.stem}Trace(tv, ${NAME}_P, ${entry.trace.map(n => argFor[n]).join(', ')});\n}`
             : null,
