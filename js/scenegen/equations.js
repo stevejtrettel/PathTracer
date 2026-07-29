@@ -1335,8 +1335,9 @@ export function emitFunctions({name, src, refs = null, view = null}){
     }
 
     //the wrapper: seeds (per view), then one call into the formula's twin —
-    //trailing parameters ride as constant duals of their GLSL references
-    const trail = f.trailing.map(p => `, ${constDual(refs?.[p] ?? p)}`).join('');
+    //trailing parameters stay SCALAR floats (the twin's signature keeps
+    //them scalar, per the kind rule), passed as their GLSL references
+    const trail = f.trailing.map(p => `, ${refs?.[p] ?? p}`).join('');
     const args  = f.params.slice(0, f.arity).map(p => p.name).join(', ');
     const lines = wrapperHead(name, f.arity, view);
     lines.push(`    vec4 v = ${f.name}(${args}${trail});`);

@@ -56,6 +56,16 @@ export default [
             return x*x + z*z - h;
         }`},
 
+    //a TRAILING parameter on a function source: scalar in the twin's
+    //signature, a knob hook at the wrapper (the tangle cube's constant)
+    {name: 'tangleFns', params: {c: 11.8}, fns: `
+        float tangle(float x, float y, float z, float c){
+            float x2 = x*x;
+            float y2 = y*y;
+            float z2 = z*z;
+            return x2*x2 - 5.0*x2 + y2*y2 - 5.0*y2 + z2*z2 - 5.0*z2 + c;
+        }`},
+
     //--- the refusals — these MUST fail, for these reasons ------------
     {name: 'whileLoop', fns: 'float bad(float x, float y, float z){ while(x < 1.0){ x = x + 1.0; } return x; }',
      expect: /'while' is outside the statement whitelist/},
