@@ -130,8 +130,10 @@ try{
         //value vs float, dual gradient vs central differences, numeric
         //homogeneity for 4-ary sources — plus the suite's pinned REFUSALS
         //(`expect`), asserted to fail for their stated reason
-        const {verifyEquation} = await server.ssrLoadModule('/js/scenegen/equations.js');
+        const {verifyEquation, emitEquation} = await server.ssrLoadModule('/js/scenegen/equations.js');
         const suite = (await server.ssrLoadModule('/render-tests/equations/suite.mjs')).default;
+        const emitDir = path.join(root, 'render-tests', 'equations', 'emitted');
+        mkdirSync(emitDir, {recursive: true});
         let failed = 0;
         for(const spec of suite){
             if(spec.expect){
@@ -153,16 +155,40 @@ try{
                 continue;
             }
             const r = verifyEquation(spec);
-            if(r.ok && (spec.degree === undefined || spec.degree === r.degree)){
-                const kind = r.arity === 4 ? `projective, degree ${r.degree}` : 'affine';
-                console.log(`${spec.name}: OK (${kind}, ${r.checked} pts)`);
-            }
-            else{
+            if(!r.ok || (spec.degree !== undefined && spec.degree !== r.degree)){
                 console.error(`${spec.name}: FAILED`);
                 for(const f of r.failures) console.error('  ' + JSON.stringify(f));
                 if(r.ok) console.error(`  fitted degree ${r.degree}, suite pinned ${spec.degree}`);
                 failed++;
+                continue;
             }
+
+            //the emission fixture — the goldens discipline applied to the
+            //transpiler: exact emitted text, byte-compared (4-ary emission
+            //arrives with the stage-4 wrapper matrix; verify-only until then)
+            let fixture = '';
+            if(r.arity === 3){
+                const glsl    = emitEquation({name: spec.name, src: spec.src});
+                const fixPath = path.join(emitDir, `${spec.name}.glsl`);
+                if(wantWrite){
+                    writeFileSync(fixPath, glsl, 'utf8');
+                    fixture = ', emitted: baked';
+                }
+                else if(!existsSync(fixPath)){
+                    console.error(`${spec.name}: NO EMISSION FIXTURE — bake with --equations --write`);
+                    failed++;
+                    continue;
+                }
+                else if(glsl !== readFileSync(fixPath, 'utf8')){
+                    console.error(`${spec.name}: emitted GLSL DIFFERS from its fixture`);
+                    reportDiff(glsl, readFileSync(fixPath, 'utf8'));
+                    failed++;
+                    continue;
+                }
+                else{ fixture = ', emitted: OK'; }
+            }
+            const kind = r.arity === 4 ? `projective, degree ${r.degree}` : 'affine';
+            console.log(`${spec.name}: OK (${kind}, ${r.checked} pts${fixture})`);
         }
         if(failed) process.exitCode = 1;
     }

@@ -15,12 +15,17 @@
 //   verify     the self-check gate (§5): dual value vs float value, dual
 //              gradient vs central differences, and for 4-ary sources the
 //              NUMERIC homogeneity check — the sole homogeneity authority.
+//   emit       (stage 2) the same AST as GLSL vec4 forward-mode arithmetic:
+//              the scalar/dual kind rule, hand-catalogue power locals, and
+//              the affine data_ wrapper. Pinned by byte-exact fixtures in
+//              render-tests/equations/emitted/ (--equations --write bakes).
 //
-// Stage 1 is deliberately pure: no GLSL emission (stage 2), no statement
-// bodies (stage 5), no imports, no side effects. The dual arithmetic here is
-// the REFERENCE for what dualNumbers.glsl's vec4 overloads must compute —
-// keep the two in lockstep, formula for formula.
+// Statement bodies arrive at stage 5; the stereo/patch wrappers at stage 4.
+// The dual arithmetic here is the REFERENCE for what dualNumbers.glsl's vec4
+// overloads must compute — keep the two in lockstep, formula for formula.
 //-------------------------------------------------
+
+import {fnum} from './fmt.js';
 
 
 //the function vocabulary (docs/equation-transpiler.md §3) — name -> arity.
@@ -151,6 +156,19 @@ export function parseEquation(src){
 
     const ast = expr(0);
     expect('end', 'end of equation');
+
+    if(!/\b[xyz]\b/.test(src) && !usesW){
+        throw new Error(`scenegen: equations: the equation uses no coordinate (x, y, z, w) — a constant has no zero set`);
+    }
+    for(const p of params){
+        if(p === 'p' || p === 'v' || /^[xyzw]\d+$/.test(p)){
+            throw new Error(`scenegen: equations: parameter '${p}' collides with the emitted wrapper's `
+                + `locals (p, v, and power locals like x2) — rename it`);
+        }
+        if(p in FNS){
+            throw new Error(`scenegen: equations: '${p}' is a function — call it with an argument`);
+        }
+    }
 
     return {src, ast, params: [...params].sort(), arity: usesW ? 4 : 3};
 }
@@ -392,4 +410,212 @@ export function verifyEquation({name = '(unnamed)', src, params = {}},
 
     return {name, src, arity: eq.arity, params: eq.params, checked, degree,
             ok: failures.length === 0, failures};
+}
+
+
+//-------------------------------------------------
+// GLSL emission — stage 2 (docs/equation-transpiler.md §3)
+//
+// The kind rule: a node is SCALAR iff it contains no coordinate — scalars
+// emit as plain float arithmetic (parameter soup stays cheap), duals as
+// vec4 ops. Native vec4 +, -, unary -, scalar* and dual/scalar are correct
+// dual arithmetic and emit as themselves; products of duals emit tmul
+// (n-ary up to 4, the vec2 library's own idiom), powers of a bare
+// coordinate become cached power locals in the hand-catalogue style
+// (x2 = tsqr(x); x3 = tmul(x2, x); x4 = tsqr(x2)), other powers inline
+// their tsqr/tmul chains.
+//
+// Sums are FLATTENED with signs and their scalar terms fold into one
+// trailing constant dual — `- vec4(0.1, 0.0, 0.0, 0.0)`, the hand
+// catalogue's `- T(0.1, 0)` idiom one lane wider. (So `a - (b + c)` emits
+// as `a - b - c`: value-exact, one term per sum — the single sanctioned
+// restructuring; there is no other simplification.)
+//-------------------------------------------------
+
+function isDualNode(node){
+    switch(node.t){
+        case 'var':   return true;
+        case 'num':   return false;
+        case 'param': return false;
+        case 'neg':   return isDualNode(node.a);
+        case 'pow':   return isDualNode(node.a);
+        case 'call':  return isDualNode(node.args[0]);
+        default:      return isDualNode(node.a) || isDualNode(node.b);
+    }
+}
+
+//precedence levels for parenthesization: sum 10, product 20, unary 25
+function emitScalar(node, refs, prec = 0){
+    const wrap = (text, my) => (prec > my ? `(${text})` : text);
+    switch(node.t){
+        case 'num':   return fnum(node.v);
+        case 'param': return refs[node.name];
+        case 'neg':   return wrap(`-${emitScalar(node.a, refs, 25)}`, 12);
+        case 'add':   return wrap(`${emitScalar(node.a, refs, 10)} + ${emitScalar(node.b, refs, 10)}`, 10);
+        case 'sub':   return wrap(`${emitScalar(node.a, refs, 10)} - ${emitScalar(node.b, refs, 11)}`, 10);
+        case 'mul':   return wrap(`${emitScalar(node.a, refs, 20)}*${emitScalar(node.b, refs, 20)}`, 20);
+        case 'div':   return wrap(`${emitScalar(node.a, refs, 20)}/${emitScalar(node.b, refs, 21)}`, 20);
+        case 'call':  return `${node.fn}(${emitScalar(node.args[0], refs, 0)})`;
+        case 'pow': {
+            if(node.n === 0) return '1.0';
+            if(node.n === 1) return emitScalar(node.a, refs, prec);
+            const simple = node.a.t === 'param' || node.a.t === 'num';
+            if(simple && node.n <= 4){
+                const b = emitScalar(node.a, refs, 20);
+                return wrap(Array(node.n).fill(b).join('*'), 20);
+            }
+            return `pow(${emitScalar(node.a, refs, 0)}, ${fnum(node.n)})`;
+        }
+    }
+    throw new Error(`scenegen: equations: cannot emit scalar '${node.t}'`);
+}
+
+const constDual = (text) => `vec4(${text}, 0.0, 0.0, 0.0)`;
+
+//flatten a +/-/neg spine into signed terms — the one restructuring
+function flattenSum(node, sign, out){
+    if(node.t === 'add'){ flattenSum(node.a, sign, out); flattenSum(node.b, sign, out); return; }
+    if(node.t === 'sub'){ flattenSum(node.a, sign, out); flattenSum(node.b, -sign, out); return; }
+    if(node.t === 'neg'){ flattenSum(node.a, -sign, out); return; }
+    out.push({sign, node});
+}
+
+function flattenMul(node, out){
+    if(node.t === 'mul'){ flattenMul(node.a, out); flattenMul(node.b, out); return; }
+    out.push(node);
+}
+
+function emitDual(node, ctx, prec = 0){
+    const wrap = (text, my) => (prec > my ? `(${text})` : text);
+    switch(node.t){
+        case 'var': return node.name;
+        case 'neg': return wrap(`-${emitDual(node.a, ctx, 25)}`, 12);
+
+        case 'add':
+        case 'sub': {
+            const terms = [];
+            flattenSum(node, 1, terms);
+            const duals   = terms.filter(t => isDualNode(t.node));
+            const scalars = terms.filter(t => !isDualNode(t.node));
+            let text = '';
+            for(const t of duals){
+                const e = emitDual(t.node, ctx, 15);
+                text = text === ''
+                    ? (t.sign > 0 ? e : `-${e}`)
+                    : `${text} ${t.sign > 0 ? '+' : '-'} ${e}`;
+            }
+            if(scalars.length){
+                if(scalars.every(t => t.node.t === 'num')){
+                    const v = scalars.reduce((s, t) => s + t.sign*t.node.v, 0);
+                    if(v > 0)      text += ` + ${constDual(fnum(v))}`;
+                    else if(v < 0) text += ` - ${constDual(fnum(-v))}`;
+                    //exactly zero: the scalars cancelled — omit the term
+                }
+                else{
+                    //sign-out when every scalar term is negative: - vec4(r*r, ...)
+                    const flip = scalars.every(t => t.sign < 0);
+                    let s = '';
+                    for(const t of scalars){
+                        const sign = flip ? -t.sign : t.sign;
+                        const e = emitScalar(t.node, ctx.refs, 15);
+                        s = s === ''
+                            ? (sign > 0 ? e : `-${e}`)
+                            : `${s} ${sign > 0 ? '+' : '-'} ${e}`;
+                    }
+                    text += ` ${flip ? '-' : '+'} ${constDual(s)}`;
+                }
+            }
+            return wrap(text, 10);
+        }
+
+        case 'mul': {
+            const factors = [];
+            flattenMul(node, factors);
+            const duals   = factors.filter(isDualNode);
+            const scalars = factors.filter(f => !isDualNode(f));
+            const sText   = scalars.map(f => emitScalar(f, ctx.refs, 20)).join('*');
+            let dText;
+            if(duals.length === 1){ dText = emitDual(duals[0], ctx, 20); }
+            else{
+                let args = duals.map(f => emitDual(f, ctx, 0));
+                while(args.length > 4) args.splice(0, 4, `tmul(${args.slice(0, 4).join(', ')})`);
+                dText = `tmul(${args.join(', ')})`;
+            }
+            return wrap(sText ? `${sText}*${dText}` : dText, 20);
+        }
+
+        case 'div': {
+            const aDual = isDualNode(node.a);
+            const bDual = isDualNode(node.b);
+            if(aDual && bDual) return `tdiv(${emitDual(node.a, ctx, 0)}, ${emitDual(node.b, ctx, 0)})`;
+            if(aDual)          return wrap(`${emitDual(node.a, ctx, 20)}/${emitScalar(node.b, ctx.refs, 21)}`, 20);
+            return `tdiv(${constDual(emitScalar(node.a, ctx.refs, 0))}, ${emitDual(node.b, ctx, 0)})`;
+        }
+
+        case 'pow': {
+            if(node.n === 0) return constDual('1.0');
+            if(node.n === 1) return emitDual(node.a, ctx, prec);
+            if(node.a.t === 'var'){
+                //cached power locals, the hand-catalogue style
+                const set = ctx.powers.get(node.a.name) ?? new Set();
+                ctx.powers.set(node.a.name, set);
+                const need = (n) => {
+                    if(n <= 1) return;
+                    set.add(n);
+                    need(n % 2 === 0 ? n/2 : n - 1);
+                };
+                need(node.n);
+                return `${node.a.name}${node.n}`;
+            }
+            const inline = (n) => {
+                if(n === 1) return emitDual(node.a, ctx, 0);
+                if(n % 2 === 0) return `tsqr(${n === 2 ? emitDual(node.a, ctx, 0) : inline(n/2)})`;
+                return `tmul(${inline(n - 1)}, ${emitDual(node.a, ctx, 0)})`;
+            };
+            return inline(node.n);
+        }
+
+        case 'call': return `t${node.fn}(${emitDual(node.args[0], ctx, 0)})`;
+
+        //a scalar subtree reaching a dual slot (defensive — callers split kinds)
+        default: return constDual(emitScalar(node, ctx.refs, 0));
+    }
+}
+
+//the affine data_ wrapper (§3): seeds, power locals, one expression, and
+//the .yzwx swizzle onto the existing data contract (grad, value)
+export function emitEquation({name, src, refs = null}){
+    if(typeof name !== 'string' || !/^[A-Za-z_]\w*$/.test(name)){
+        throw new Error(`scenegen: equations: emit needs a valid identifier name, got ${JSON.stringify(name)}`);
+    }
+    const eq = parseEquation(src);
+    if(eq.arity === 4){
+        throw new Error(`scenegen: equations: 4-ary emission (the stereo/patch wrappers) is stage 4 — not built yet`);
+    }
+    const ctx = {refs: {}, powers: new Map()};
+    for(const p of eq.params) ctx.refs[p] = refs?.[p] ?? p;
+
+    const body = isDualNode(eq.ast)
+        ? emitDual(eq.ast, ctx, 0)
+        : constDual(emitScalar(eq.ast, ctx.refs, 0));      //unreachable: parse requires a coordinate
+
+    const lines = [
+        `vec4 data_${name}(vec3 p){`,
+        `    vec4 x = vec4(p.x, 1.0, 0.0, 0.0);`,
+        `    vec4 y = vec4(p.y, 0.0, 1.0, 0.0);`,
+        `    vec4 z = vec4(p.z, 0.0, 0.0, 1.0);`,
+    ];
+    for(const v of ['x', 'y', 'z']){
+        const set = ctx.powers.get(v);
+        if(!set) continue;
+        for(const n of [...set].sort((a, b) => a - b)){
+            lines.push(n % 2 === 0
+                ? `    vec4 ${v}${n} = tsqr(${n === 2 ? v : v + n/2});`
+                : `    vec4 ${v}${n} = tmul(${v}${n - 1}, ${v});`);
+        }
+    }
+    lines.push(`    vec4 v = ${body};`);
+    lines.push(`    return v.yzwx;`);
+    lines.push(`}`);
+    return lines.join('\n') + '\n';
 }

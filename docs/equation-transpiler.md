@@ -54,8 +54,11 @@ that are ALREADY correct dual arithmetic and need no function: `a + b`,
 | `tpow(a, float p)` | `pow(a.x, p - 1.0)*vec4(a.x, p*a.yzw)` |
 
 (`tlog`/`tabs`/`tmin`/`tmax` on demand — each is one row, both here and in
-the vocabulary.) Plus a **vec4 `invStereo` overload** — same body as the T
-version, built from the overloaded ops — for the stereo view's lift.
+the vocabulary.) Also 3- and 4-argument `tmul` overloads — the vec2
+library's own idiom, which the emitter uses for flattened products
+(`16.0*tmul(x, z, term)`). Plus a **vec4 `invStereo` overload** — same body
+as the T version, built from the overloaded ops — for the stereo view's
+lift.
 
 
 ## 3 · The transpiler — `js/scenegen/equations.js`
@@ -142,7 +145,7 @@ vec4 data_cubic(vec3 p){
     vec4 x2 = tsqr(x);
     vec4 y2 = tsqr(y);
     vec4 z2 = tsqr(z);
-    vec4 v  = tmul(x2, y) + tmul(y2, z) + tmul(z2, x) - vec4(0.1, 0.0, 0.0, 0.0);
+    vec4 v = tmul(x2, y) + tmul(y2, z) + tmul(z2, x) - vec4(0.1, 0.0, 0.0, 0.0);
     return v.yzwx;
 }
 ```
