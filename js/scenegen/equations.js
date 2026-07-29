@@ -260,6 +260,25 @@ export function evalDual(node, env){
     throw new Error(`scenegen: equations: unknown AST node '${node.t}'`);
 }
 
+const dscale = (s, a) => [s*a[0], s*a[1], s*a[2], s*a[3]];
+
+//the inverse stereographic lift, float and dual — the dual form mirrors the
+//vec4 invStereo overload in dualNumbers.glsl op for op
+function liftStereo(pt){
+    const d = 1 + pt.x*pt.x + pt.y*pt.y + pt.z*pt.z;
+    return {x: 2*pt.x/d, y: 2*pt.y/d, z: 2*pt.z/d, w: (d - 2)/d};
+}
+
+function liftStereoDual(pt){
+    const x = [pt.x, 1, 0, 0], y = [pt.y, 0, 1, 0], z = [pt.z, 0, 0, 1];
+    const denom = dadd(dadd(dadd(dnum(1), dsqr(x)), dsqr(y)), dsqr(z));
+    const wNum  = dsub(denom, dnum(2));
+    return {x: dscale(2, ddiv(x, denom)),
+            y: dscale(2, ddiv(y, denom)),
+            z: dscale(2, ddiv(z, denom)),
+            w: ddiv(wNum, denom)};
+}
+
 //the standard seeding: x/y/z carry the three tangents, w (4-ary) rides as a
 //scalar. `seedW` instead puts THE tangent on w (x/y/z scalar) — how the
 //verify pass reaches the fourth partial with a three-lane dual.
@@ -405,6 +424,48 @@ export function verifyEquation({name = '(unnamed)', src, params = {}},
                 failures.push({kind: 'homogeneity', note: `F(λp) != λ^${d0}·F(p) at the second scale`, pt: bad.pt});
             }
             else{ degree = d0; }
+        }
+    }
+
+    //--- the two R³ views, composed — what actually marches (stage 4) ---
+    //stereo: chain rule through the lift; patch: w pinned to 1. Both dual
+    //composites vs central differences of the float composite.
+    if(eq.arity === 4 && failures.length === 0){
+        const pdual = Object.fromEntries(eq.params.map(p => [p, dnum(params[p])]));
+        const views = [
+            {kind: 'stereo-composite',
+             F: (pt) => evalFloat(eq.ast, floatEnv(eq, liftStereo(pt), params)),
+             D: (pt) => evalDual(eq.ast, {...liftStereoDual(pt), ...pdual})},
+            {kind: 'patch-composite',
+             F: (pt) => evalFloat(eq.ast, floatEnv(eq, {...pt, w: 1}, params)),
+             D: (pt) => evalDual(eq.ast, {x: [pt.x, 1, 0, 0], y: [pt.y, 0, 1, 0],
+                                          z: [pt.z, 0, 0, 1], w: dnum(1), ...pdual})},
+        ];
+        for(const {kind, F, D} of views){
+            let done = 0, tries = 0;
+            while(done < 400 && tries < 8000 && failures.length < 5){
+                tries++;
+                const pt = {x: coord(), y: coord(), z: coord()};
+                const f = F(pt);
+                if(!usable(f)) continue;
+                const d = D(pt);
+                if(!relClose(d[0], f, 1e-9)){
+                    failures.push({kind, sub: 'value', pt, float: f, dual: d[0]});
+                    continue;
+                }
+                for(const [i, n] of ['x', 'y', 'z'].entries()){
+                    const h  = 1e-5*Math.max(1, Math.abs(pt[n]));
+                    const fa = F({...pt, [n]: pt[n] + h});
+                    const fb = F({...pt, [n]: pt[n] - h});
+                    if(!usable(fa) || !usable(fb)) continue;
+                    const num = (fa - fb)/(2*h);
+                    if(!relClose(d[i + 1], num, 1e-4)){
+                        failures.push({kind, sub: 'gradient', coord: n, pt, analytic: d[i + 1], numeric: num});
+                        break;
+                    }
+                }
+                done++;
+            }
         }
     }
 
@@ -582,16 +643,30 @@ function emitDual(node, ctx, prec = 0){
     }
 }
 
-//the affine data_ wrapper (§3): seeds, power locals, one expression, and
-//the .yzwx swizzle onto the existing data contract (grad, value)
-export function emitEquation({name, src, refs = null}){
+//the data_ wrapper matrix (§3/§4): seeds (or the stereo lift, or the w = 1
+//patch), power locals, one expression, and the .yzwx swizzle onto the
+//existing data contract (grad, value). The view rule is variety-builder §4:
+//capability is the SIGNATURE — a 3-ary source is affine, full stop; a 4-ary
+//source defaults to stereo and may opt into the generated patch.
+export function emitEquation({name, src, refs = null, view = null}){
     if(typeof name !== 'string' || !/^[A-Za-z_]\w*$/.test(name)){
         throw new Error(`scenegen: equations: emit needs a valid identifier name, got ${JSON.stringify(name)}`);
     }
     const eq = parseEquation(src);
-    if(eq.arity === 4){
-        throw new Error(`scenegen: equations: 4-ary emission (the stereo/patch wrappers) is stage 4 — not built yet`);
+    if(eq.arity === 3){
+        if(view === 'stereo'){
+            throw new Error(`scenegen: equations: '${name}': the stereo view needs the homogeneous 4-ary `
+                + `form — author it (there is no automatic lift); docs/variety-builder.md §4`);
+        }
+        view = 'affine';
     }
+    else{
+        view = view ?? 'stereo';
+        if(view !== 'stereo' && view !== 'affine'){
+            throw new Error(`scenegen: equations: unknown view '${view}' — 'affine' or 'stereo'`);
+        }
+    }
+
     const ctx = {refs: {}, powers: new Map()};
     for(const p of eq.params) ctx.refs[p] = refs?.[p] ?? p;
 
@@ -599,13 +674,22 @@ export function emitEquation({name, src, refs = null}){
         ? emitDual(eq.ast, ctx, 0)
         : constDual(emitScalar(eq.ast, ctx.refs, 0));      //unreachable: parse requires a coordinate
 
-    const lines = [
-        `vec4 data_${name}(vec3 p){`,
-        `    vec4 x = vec4(p.x, 1.0, 0.0, 0.0);`,
-        `    vec4 y = vec4(p.y, 0.0, 1.0, 0.0);`,
-        `    vec4 z = vec4(p.z, 0.0, 0.0, 1.0);`,
-    ];
-    for(const v of ['x', 'y', 'z']){
+    const lines = [`vec4 data_${name}(vec3 p){`];
+    if(eq.arity === 4 && view === 'stereo'){
+        lines.push(`    vec4 x, y, z, w;`);
+        lines.push(`    invStereo(vec4(p.x, 1.0, 0.0, 0.0),`);
+        lines.push(`              vec4(p.y, 0.0, 1.0, 0.0),`);
+        lines.push(`              vec4(p.z, 0.0, 0.0, 1.0), x, y, z, w);`);
+    }
+    else{
+        lines.push(`    vec4 x = vec4(p.x, 1.0, 0.0, 0.0);`);
+        lines.push(`    vec4 y = vec4(p.y, 0.0, 1.0, 0.0);`);
+        lines.push(`    vec4 z = vec4(p.z, 0.0, 0.0, 1.0);`);
+        if(eq.arity === 4){
+            lines.push(`    vec4 w = vec4(1.0, 0.0, 0.0, 0.0);      //the affine patch: w = 1`);
+        }
+    }
+    for(const v of (eq.arity === 4 ? ['x', 'y', 'z', 'w'] : ['x', 'y', 'z'])){
         const set = ctx.powers.get(v);
         if(!set) continue;
         for(const n of [...set].sort((a, b) => a - b)){

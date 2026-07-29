@@ -163,31 +163,34 @@ try{
                 continue;
             }
 
-            //the emission fixture — the goldens discipline applied to the
-            //transpiler: exact emitted text, byte-compared (4-ary emission
-            //arrives with the stage-4 wrapper matrix; verify-only until then)
-            let fixture = '';
-            if(r.arity === 3){
-                const glsl    = emitEquation({name: spec.name, src: spec.src});
-                const fixPath = path.join(emitDir, `${spec.name}.glsl`);
+            //the emission fixtures — the goldens discipline applied to the
+            //transpiler: exact emitted text, byte-compared. A 3-ary source
+            //has one (affine); a 4-ary has both views (stereo + patch)
+            const forms = r.arity === 3
+                ? [{view: null, file: `${spec.name}.glsl`}]
+                : [{view: 'stereo', file: `${spec.name}.stereo.glsl`},
+                   {view: 'affine', file: `${spec.name}.affine.glsl`}];
+            let fixture = '', bad = false;
+            for(const f of forms){
+                const glsl    = emitEquation({name: spec.name, src: spec.src, view: f.view});
+                const fixPath = path.join(emitDir, f.file);
                 if(wantWrite){
                     writeFileSync(fixPath, glsl, 'utf8');
-                    fixture = ', emitted: baked';
+                    fixture = `, emitted: baked×${forms.length}`;
                 }
                 else if(!existsSync(fixPath)){
-                    console.error(`${spec.name}: NO EMISSION FIXTURE — bake with --equations --write`);
-                    failed++;
-                    continue;
+                    console.error(`${spec.name}: NO EMISSION FIXTURE ${f.file} — bake with --equations --write`);
+                    bad = true;
                 }
                 else if(glsl !== readFileSync(fixPath, 'utf8')){
-                    console.error(`${spec.name}: emitted GLSL DIFFERS from its fixture`);
+                    console.error(`${spec.name}: emitted GLSL DIFFERS from ${f.file}`);
                     reportDiff(glsl, readFileSync(fixPath, 'utf8'));
-                    failed++;
-                    continue;
+                    bad = true;
                 }
-                else{ fixture = ', emitted: OK'; }
+                else{ fixture = `, emitted: OK×${forms.length}`; }
             }
-            const kind = r.arity === 4 ? `projective, degree ${r.degree}` : 'affine';
+            if(bad){ failed++; continue; }
+            const kind = r.arity === 4 ? `projective, degree ${r.degree}, composites` : 'affine';
             console.log(`${spec.name}: OK (${kind}, ${r.checked} pts${fixture})`);
         }
         if(failed) process.exitCode = 1;
