@@ -18,9 +18,26 @@
 //
 // `lib` is the scene-facing face: lib.sphere({radius: 1.2}) returns a shape
 // reference; a typo throws immediately, with the real names listed.
+//
+// FOLDERS ARE ORGANISATION ONLY (docs/shape-library.md §2). The stem is the
+// BASENAME, so a scene writes lib.torus wherever the file sits; two files with
+// the same basename are a loud error. Two subtrees are not shapes and are
+// skipped wholesale:
+//   ops/        the operators — no <stem>Distance, never a lib.<x>, and
+//               ALWAYS COMPILED (glsl/shapes/_vocabulary.glsl), so the emitter
+//               must not inline them either
+//   varieties/  the formula catalogue, parsed separately by varieties.js
 //-------------------------------------------------
 
-const RAW = import.meta.glob('../../glsl/shapes/*.glsl', {query: '?raw', import: 'default', eager: true});
+const RAW = import.meta.glob(['../../glsl/shapes/**/*.glsl',
+                              '!../../glsl/shapes/ops/**',
+                              '!../../glsl/shapes/varieties/**'],
+                             {query: '?raw', import: 'default', eager: true});
+
+//a shape under primitives/ is part of the ALWAYS-COMPILED vocabulary: it is
+//already in the shader via _vocabulary.glsl, so the emitter includes it by
+//reference only and must never inline its source (duplicate definitions).
+const isVocabulary = (file) => file.startsWith('glsl/shapes/primitives/');
 
 
 //---------------------------------------------------------------- parsing
@@ -56,8 +73,7 @@ function parseArgs(raws, file, fnName){
     });
 }
 
-function parseShapeFile(stem, src){
-    const file = `glsl/shapes/${stem}.glsl`;
+function parseShapeFile(stem, file, src){
     const code = stripComments(src);
 
     //---- <stem>Distance: required ---------------------------------------
@@ -151,7 +167,8 @@ function parseShapeFile(stem, src){
         dataOutputs.push({fn, type: returnType(code, fn), params: dparams, inject});
     }
 
-    return {stem, src, file, params, outs, outputs, trace, bound, dataOutputs};
+    return {stem, src, file, vocabulary: isVocabulary(file),
+            params, outs, outputs, trace, bound, dataOutputs};
 }
 
 
@@ -160,13 +177,20 @@ function parseShapeFile(stem, src){
 function build(){
     const shapes = new Map();
     for(const [path, src] of Object.entries(RAW)){
-        const stem = path.split('/').pop().replace(/\.glsl$/, '');
+        const file = path.replace(/^(\.\.\/)+/, '');
+        const stem = file.split('/').pop().replace(/\.glsl$/, '');
+        //the stem is the BASENAME, so two files sharing one is ambiguous
+        const prev = shapes.get(stem);
+        if(prev){
+            throw new Error(`scenegen catalogue: two files share the basename '${stem}.glsl' `
+                + `(${prev.file} and ${file}) — a stem names ONE file, wherever it sits`);
+        }
         if(/^\s*\/\/@noshape/m.test(src)){
             //include-only: no signatures to parse, just the source to inline
-            shapes.set(stem, {stem, src, file: `glsl/shapes/${stem}.glsl`, noshape: true});
+            shapes.set(stem, {stem, src, file, vocabulary: isVocabulary(file), noshape: true});
             continue;
         }
-        shapes.set(stem, parseShapeFile(stem, src));
+        shapes.set(stem, parseShapeFile(stem, file, src));
     }
     return shapes;
 }

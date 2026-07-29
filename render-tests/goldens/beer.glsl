@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/pint.glsl ---
+//--- library: glsl/shapes/models/pint.glsl ---
 //----------------------------------------------------------------------------
 // PINT — a pint glass: the smooth subtraction of two truncated cones (an outer
 // wall and a slightly-raised inner cone carved out to leave the cavity).
@@ -41,7 +41,7 @@ float pintBound(vec3 p, float height, float base, float flare){
 }
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //
@@ -77,7 +77,7 @@ float sphereTrace(Vector tv, vec3 centre, float radius){
 }
 
 
-//--- library: glsl/shapes/room.glsl ---
+//--- library: glsl/shapes/environments/room.glsl ---
 //----------------------------------------------------------------------------
 // ROOM — a closed box, seen from the inside.
 //

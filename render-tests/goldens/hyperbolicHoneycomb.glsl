@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/hyperbolicHoneycomb.glsl ---
+//--- library: glsl/shapes/tilings/hyperbolicHoneycomb.glsl ---
 //----------------------------------------------------------------------------
 // HYPERBOLIC HONEYCOMB — the {4,4,5} Coxeter honeycomb of H^3, drawn in the
 // UPPER HALF-SPACE MODEL: points live in the Euclidean half-space z > 0 and the
@@ -278,7 +278,7 @@ vec2 hyperbolicHoneycombFloorData(vec3 q, int iterations){
 }
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //

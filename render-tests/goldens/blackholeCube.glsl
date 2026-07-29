@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/box.glsl ---
+//--- library: glsl/shapes/primitives/box.glsl ---
 //----------------------------------------------------------------------------
 // BOX — an axis-aligned box, `halfSize` = half-widths.
 //

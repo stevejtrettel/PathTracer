@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/triangle.glsl ---
+//--- library: glsl/shapes/primitives/triangle.glsl ---
 //----------------------------------------------------------------------------
 // TRIANGLE — an equilateral triangular prism, `side` across, `thickness` deep
 // along z (a classic dispersing prism).
@@ -22,7 +22,7 @@ float triangleDistance(vec3 p, float side, float thickness){
 }
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //
@@ -58,7 +58,7 @@ float sphereTrace(Vector tv, vec3 centre, float radius){
 }
 
 
-//--- library: glsl/shapes/room.glsl ---
+//--- library: glsl/shapes/environments/room.glsl ---
 //----------------------------------------------------------------------------
 // ROOM — a closed box, seen from the inside.
 //

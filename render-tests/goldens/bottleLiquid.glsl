@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/bottle.glsl ---
+//--- library: glsl/shapes/models/bottle.glsl ---
 //----------------------------------------------------------------------------
 // BOTTLE — a rounded-cylinder base and neck, smooth-unioned, hollowed to a glass
 // shell with the neck chopped open (and a punt dimple in the base).
@@ -60,7 +60,7 @@ float bottleBound(vec3 p, float baseRadius, float baseHeight, float neckHeight,
 }
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //
@@ -96,7 +96,7 @@ float sphereTrace(Vector tv, vec3 centre, float radius){
 }
 
 
-//--- library: glsl/shapes/room.glsl ---
+//--- library: glsl/shapes/environments/room.glsl ---
 //----------------------------------------------------------------------------
 // ROOM — a closed box, seen from the inside.
 //

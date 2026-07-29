@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/bottleTorus.glsl ---
+//--- library: glsl/shapes/models/bottleTorus.glsl ---
 //----------------------------------------------------------------------------
 // BOTTLETORUS — a torus base and a capped-cone neck, smooth-unioned and hollowed
 // to a glass shell (a decanter-ish ring bottle).
@@ -33,7 +33,7 @@ float bottleTorusBound(vec3 p, float outer, float inner, float height, float thi
 }
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //
@@ -69,7 +69,7 @@ float sphereTrace(Vector tv, vec3 centre, float radius){
 }
 
 
-//--- library: glsl/shapes/room.glsl ---
+//--- library: glsl/shapes/environments/room.glsl ---
 //----------------------------------------------------------------------------
 // ROOM — a closed box, seen from the inside.
 //

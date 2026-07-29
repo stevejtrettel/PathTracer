@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/cubeGrid.glsl ---
+//--- library: glsl/shapes/tilings/cubeGrid.glsl ---
 //----------------------------------------------------------------------------
 // CUBEGRID — a lattice of rounded bars, one per cell, standing on y = 0.
 //
@@ -114,7 +114,7 @@ vec4 cubeGridCellData(vec3 q, float spacing, float height,
 }
 
 
-//--- library: glsl/shapes/plane.glsl ---
+//--- library: glsl/shapes/primitives/plane.glsl ---
 //----------------------------------------------------------------------------
 // PLANE — a half-space, seen from the side its normal points toward.
 //
@@ -153,7 +153,7 @@ float planeTrace(Vector tv, vec3 centre, vec3 normal){
 }
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //

@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //
@@ -39,7 +39,7 @@ float sphereTrace(Vector tv, vec3 centre, float radius){
 }
 
 
-//--- library: glsl/shapes/room.glsl ---
+//--- library: glsl/shapes/environments/room.glsl ---
 //----------------------------------------------------------------------------
 // ROOM — a closed box, seen from the inside.
 //

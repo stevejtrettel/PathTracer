@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //
@@ -39,7 +39,7 @@ float sphereTrace(Vector tv, vec3 centre, float radius){
 }
 
 
-//--- library: glsl/shapes/plane.glsl ---
+//--- library: glsl/shapes/primitives/plane.glsl ---
 //----------------------------------------------------------------------------
 // PLANE — a half-space, seen from the side its normal points toward.
 //
@@ -78,7 +78,7 @@ float planeTrace(Vector tv, vec3 centre, vec3 normal){
 }
 
 
-//--- library: glsl/shapes/gem.glsl ---
+//--- library: glsl/shapes/models/gem.glsl ---
 //----------------------------------------------------------------------------
 // GEM — a brilliant-ish cut stone, girdle radius `size`.
 //
@@ -127,7 +127,7 @@ float gemBound(vec3 p, float size){
 }
 
 
-//--- library: glsl/shapes/room.glsl ---
+//--- library: glsl/shapes/environments/room.glsl ---
 //----------------------------------------------------------------------------
 // ROOM — a closed box, seen from the inside.
 //

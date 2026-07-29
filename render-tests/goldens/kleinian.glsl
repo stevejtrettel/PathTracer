@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/kleinian.glsl ---
+//--- library: glsl/shapes/fractals/kleinian.glsl ---
 //----------------------------------------------------------------------------
 // KLEINIAN — a Jos Leys / Knighty Kleinian-group limit set (the box-fold
 // distance estimator). ONE shape for the whole family: (kleinR, kleinI) are the
@@ -102,7 +102,7 @@ vec3 kleinianOrbitTrapData(vec3 q, float kleinR, float kleinI, int iterations, v
 }
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //

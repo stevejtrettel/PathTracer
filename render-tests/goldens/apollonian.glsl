@@ -3,7 +3,7 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/apollonian.glsl ---
+//--- library: glsl/shapes/fractals/apollonian.glsl ---
 //----------------------------------------------------------------------------
 // APOLLONIAN — the evilryu/mla Apollonian gasket: a domain-repeat + sphere-
 // inversion IFS wrapped in an outer inversion that bounds the space-filler.
@@ -59,7 +59,7 @@ float apollonianBound(vec3 p){
 }
 
 
-//--- library: glsl/shapes/sphere.glsl ---
+//--- library: glsl/shapes/primitives/sphere.glsl ---
 //----------------------------------------------------------------------------
 // SPHERE
 //
