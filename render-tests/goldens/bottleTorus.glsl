@@ -8,8 +8,8 @@
 // BOTTLETORUS — a torus base and a capped-cone neck, smooth-unioned and hollowed
 // to a glass shell (a decanter-ish ring bottle).
 //
-// glsl/shapes/ is the math-only library. Built from sdTorus + sdCappedCone +
-// opMin/Max/OnionDist (glsl/objects/computations.glsl, globally included).
+// glsl/shapes/ is the math-only library. Built from torusDistance + coneDistance +
+// opSmoothUnion/Intersect/Onion (glsl/shapes/ops/, always compiled).
 //----------------------------------------------------------------------------
 
 
@@ -17,55 +17,19 @@
 float bottleTorusDistance(vec3 p, float outer, float inner, float height,
                           float base, float flare, float smoothing, float thickness){
     vec3  conePos = p - vec3(0.0, outer + inner + height, 0.0);
-    float torusD  = sdTorus(p, outer, inner);
-    float neck    = sdCappedCone(conePos, 0.8*height, base, flare*base);
-    float solid   = opMinDist(torusD, neck, smoothing);     //smooth union
-    float shell   = opOnionDist(solid, thickness);          //hollow to a wall
+    float torusD  = torusDistance(p, outer, inner);
+    float neck    = coneDistance(conePos, 0.8*height, base, flare*base);
+    float solid   = opSmoothUnion(torusD, neck, smoothing);     //smooth union
+    float shell   = opOnion(solid, thickness);          //hollow to a wall
     float top     = conePos.y - 1.7;                         //chop the neck open
-    return opMaxDist(shell, top, thickness);
+    return opSmoothIntersect(shell, top, thickness);
 }
 
 
 // bounding cylinder over the whole ring + neck
 float bottleTorusBound(vec3 p, float outer, float inner, float height, float thickness){
-    return bCyl(p, vec2(outer + inner + thickness + 0.3,
-                        outer + inner + height + 2.5 + thickness));
-}
-
-
-//--- library: glsl/shapes/primitives/sphere.glsl ---
-//----------------------------------------------------------------------------
-// SPHERE
-//
-// glsl/shapes/ is the math-only library: plain functions of a point and some
-// floats. No structs, no Frame, no Material, no at()/inside()/setData().
-// Placement, materials and the region interface are emitted by the scene.
-//----------------------------------------------------------------------------
-
-
-// p is in the sphere's own coordinates (origin at the centre)
-float sphereDistance(vec3 p, float radius){
-    return length(p) - radius;
-}
-
-
-// Exact ray intersection, in world coordinates: the distance along tv to the
-// sphere, or maxDist if it is not in front of us. tv.dir is unit length.
-//
-// A ray STARTING INSIDE takes the far root — glass needs that, since a
-// transmitted ray has to find the far wall of the object it just entered.
-float sphereTrace(Vector tv, vec3 centre, float radius){
-    vec3  oc = tv.pos - centre;
-    float b  = dot(oc, tv.dir);
-    float c  = dot(oc, oc) - radius*radius;
-    float disc = b*b - c;
-    if(disc < 0.){ return maxDist; }
-
-    float s = sqrt(disc);
-    float t = -b - s;
-    if(t < 0.){ t = -b + s; }
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
+    return cylinderSlab(p, outer + inner + thickness + 0.3,
+                           outer + inner + height + 2.5 + thickness);
 }
 
 
@@ -95,7 +59,7 @@ const int ROOM_BACK    = 5;
 // Negative in the WALLS, positive in the open interior — the sign convention
 // every other region uses, just turned inside out.
 float roomDistance(vec3 p, vec3 halfSize){
-    return -bBox(p, halfSize);
+    return -boxDistance(p, halfSize);
 }
 
 

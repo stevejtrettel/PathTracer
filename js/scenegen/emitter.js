@@ -458,12 +458,17 @@ export function emit(description, settings = {}){
     }
 
     //library includes, inlined (the chunk is a runtime string, so no #include):
-    //a unit needs its shape's file, plus anything its authored code `uses:`
+    //a unit needs its shape's file, plus anything its authored code `uses:`.
+    //
+    //VOCABULARY IS SKIPPED: primitives/ and ops/ are already compiled into every
+    //shader by glsl/shapes/_vocabulary.glsl, so inlining them here would be a
+    //duplicate definition. lib.sphere still works — the entry supplies the
+    //signature, the shader already has the body (docs/shape-library.md §1).
     const includes = [];
     const seen = new Set();
     for(const u of units){
         for(const entry of [...u.usesEntries, ...(u.entry ? [u.entry] : [])]){
-            if(seen.has(entry.stem)) continue;
+            if(entry.vocabulary || seen.has(entry.stem)) continue;
             seen.add(entry.stem);
             includes.push(entry);
         }

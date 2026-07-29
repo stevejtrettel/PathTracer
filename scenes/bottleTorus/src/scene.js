@@ -1,8 +1,8 @@
 //=====================================================================
 // BOTTLETORUS — a ring-shaped decanter in dense purple glass.
 //
-// The torus+cone profile shape (the port that exercises the new sdTorus and
-// sdCappedCone primitives). A single glass shell with a DENSE scattering interior
+// The torus+cone profile shape (the port that exercises the new torusDistance and
+// coneDistance primitives). A single glass shell with a DENSE scattering interior
 // (small mfp → porcelain-like translucency). Colour is raw absorb, verbatim from
 // the original (Beer extinction) — the vec3 looks purple as a swatch but reads as
 // its complement through the glass, which is the legacy look.

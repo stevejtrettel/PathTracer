@@ -30,6 +30,7 @@
 //-------------------------------------------------
 
 const RAW = import.meta.glob(['../../glsl/shapes/**/*.glsl',
+                              '!../../glsl/shapes/_*.glsl',
                               '!../../glsl/shapes/ops/**',
                               '!../../glsl/shapes/varieties/**'],
                              {query: '?raw', import: 'default', eager: true});

@@ -52,7 +52,7 @@ float cubeGrid_bar(vec3 q, float h, float barHalf, float bevel){
     vec3 ext = vec3(max(barHalf - bevel, 0.0),
                     max(0.5*h    - bevel, 0.0),
                     max(barHalf - bevel, 0.0));
-    return bBox(q - vec3(0.0, 0.5*h, 0.0), ext) - bevel;
+    return boxDistance(q - vec3(0.0, 0.5*h, 0.0), ext) - bevel;
 }
 
 
@@ -97,7 +97,7 @@ float cubeGridDistance(vec3 p, float spacing, float barHalf, float bevel, float 
 float cubeGridBound(vec3 p, float spacing, float bevel, float height, vec2 tiles){
     vec3 c   = vec3(0.0, 0.5*height, 0.0);
     vec3 ext = vec3(spacing*(tiles.x + 0.5), 0.5*height + bevel, spacing*(tiles.y + 0.5));
-    return bBox(p - c, ext);
+    return boxDistance(p - c, ext);
 }
 
 
@@ -111,81 +111,6 @@ vec4 cubeGridCellData(vec3 q, float spacing, float height,
     float swell = valueNoise(vec3(clumpFreq*cell, seed));
     float up    = clamp(q.y/max(height*f, 1.0e-3), 0.0, 1.0);
     return vec4(cubeGrid_id(cell, seed), f, up, swell);
-}
-
-
-//--- library: glsl/shapes/primitives/plane.glsl ---
-//----------------------------------------------------------------------------
-// PLANE — a half-space, seen from the side its normal points toward.
-//
-// Exact and analytic, so a ray never marches toward it — worth having, since
-// the marched step is the PERPENDICULAR distance, which crawls on a ray running
-// nearly parallel to the plane, and a ground plane is used at exactly that angle.
-//
-// CAVEAT, learned the hard way: an analytic plane is NOT a drop-in replacement
-// for a floor term inside a fractal's own DE. Folding `min(p.z - h, dFractal)`
-// into the estimator makes the floor CAP the fractal — it hides everything
-// below it. Split that floor out into a plane object and rays fall straight
-// through into the infinitely fine detail underneath, and the plane is never
-// reached. Use this for a floor the scene genuinely owns.
-//
-// glsl/shapes/ is the math-only library: plain functions of a point and some
-// floats. No structs, no Frame, no Material.
-//----------------------------------------------------------------------------
-
-
-// p is in the plane's own coordinates (origin ON the plane). Negative in the
-// solid half-space behind it, positive in the open half-space it faces.
-float planeDistance(vec3 p, vec3 normal){
-    return dot(p, normal);
-}
-
-
-// Exact ray intersection, in world coordinates: the distance along tv to the
-// plane, or maxDist if it is not in front of us. A ray running away from the
-// plane, or parallel to it, never meets it — and costs nothing to find out.
-float planeTrace(Vector tv, vec3 centre, vec3 normal){
-    float dn = dot(tv.dir, normal);
-    if(abs(dn) < 1.0e-9){ return maxDist; }     //parallel
-    float t = -dot(tv.pos - centre, normal)/dn;
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
-}
-
-
-//--- library: glsl/shapes/primitives/sphere.glsl ---
-//----------------------------------------------------------------------------
-// SPHERE
-//
-// glsl/shapes/ is the math-only library: plain functions of a point and some
-// floats. No structs, no Frame, no Material, no at()/inside()/setData().
-// Placement, materials and the region interface are emitted by the scene.
-//----------------------------------------------------------------------------
-
-
-// p is in the sphere's own coordinates (origin at the centre)
-float sphereDistance(vec3 p, float radius){
-    return length(p) - radius;
-}
-
-
-// Exact ray intersection, in world coordinates: the distance along tv to the
-// sphere, or maxDist if it is not in front of us. tv.dir is unit length.
-//
-// A ray STARTING INSIDE takes the far root — glass needs that, since a
-// transmitted ray has to find the far wall of the object it just entered.
-float sphereTrace(Vector tv, vec3 centre, float radius){
-    vec3  oc = tv.pos - centre;
-    float b  = dot(oc, tv.dir);
-    float c  = dot(oc, oc) - radius*radius;
-    float disc = b*b - c;
-    if(disc < 0.){ return maxDist; }
-
-    float s = sqrt(disc);
-    float t = -b - s;
-    if(t < 0.){ t = -b + s; }
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
 }
 
 

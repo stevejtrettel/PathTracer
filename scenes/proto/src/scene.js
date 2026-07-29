@@ -40,7 +40,7 @@ export default scene({
                 cup   = max(outer, -cavity);
                 drink = max(cavity, q.y - WATER_Y);
             `,
-            bound: glsl`bCyl(q, vec2(CUP_R + 0.15, CUP_H + 0.15))`,
+            bound: glsl`cylinderSlab(q, CUP_R + 0.15, CUP_H + 0.15)`,
             regions: {
                 cup:   {material: glass({absorb: absorbFor([0.86, 0.9, 0.88], 1.2), ior: 1.5})},
                 drink: {material: glass({absorb: absorbFor([0.75, 0.22, 0.12], 0.8), ior: 1.34})},

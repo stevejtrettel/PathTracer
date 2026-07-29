@@ -130,7 +130,7 @@ Stated in the doc and in the error messages, because nothing can check it:
    next to the expression.
 3. **New math belongs in GLSL, not in the fragment.** A one-liner may live
    inline; anything with real structure goes in
-   `glsl/objects/computations.glsl` as an `op…` (engine-global, so the
+   `glsl/shapes/ops/` as an `op…` (always compiled, so the
    fragment can call it) — which is also step 1 of promotion.
 
 
@@ -153,7 +153,7 @@ Each message names the fix, house style (shape-modifiers §6):
 
 ## 5 · Promotion
 
-When a one-off earns a name: move the math to `computations.glsl` (if it
+When a one-off earns a name: move the math to `glsl/shapes/ops/` (if it
 isn't there already), write the ~30-line combinator per shape-modifiers §11
 — its `plan()` returns the same planned instance the hatch built, now with
 named-argument validation — and the scene swaps

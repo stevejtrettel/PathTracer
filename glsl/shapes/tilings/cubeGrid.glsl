@@ -46,7 +46,7 @@ float cubeGrid_bar(vec3 q, float h, float barHalf, float bevel){
     vec3 ext = vec3(max(barHalf - bevel, 0.0),
                     max(0.5*h    - bevel, 0.0),
                     max(barHalf - bevel, 0.0));
-    return bBox(q - vec3(0.0, 0.5*h, 0.0), ext) - bevel;
+    return boxDistance(q - vec3(0.0, 0.5*h, 0.0), ext) - bevel;
 }
 
 
@@ -91,7 +91,7 @@ float cubeGridDistance(vec3 p, float spacing, float barHalf, float bevel, float 
 float cubeGridBound(vec3 p, float spacing, float bevel, float height, vec2 tiles){
     vec3 c   = vec3(0.0, 0.5*height, 0.0);
     vec3 ext = vec3(spacing*(tiles.x + 0.5), 0.5*height + bevel, spacing*(tiles.y + 0.5));
-    return bBox(p - c, ext);
+    return boxDistance(p - c, ext);
 }
 
 

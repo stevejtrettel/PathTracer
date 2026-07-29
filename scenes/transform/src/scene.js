@@ -47,7 +47,7 @@ export default scene({
             at:    [2.6, -0.68, 0.5],
             shape: repLim(lib.sphere({radius: beadRadius}), {spacing, limit}),
             //one box over the whole lattice: the outermost cell centre plus a bead radius
-            bound: glsl`bBox(q, ${{latticeHalf}})`,
+            bound: glsl`boxDistance(q, ${{latticeHalf}})`,
             material: gloss({diffuse: [0.78, 0.26, 0.22], gloss: 0.1, roughness: 0.2}),
         }),
 

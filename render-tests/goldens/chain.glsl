@@ -3,116 +3,6 @@
 //=====================================================================
 
 
-//--- library: glsl/shapes/primitives/plane.glsl ---
-//----------------------------------------------------------------------------
-// PLANE — a half-space, seen from the side its normal points toward.
-//
-// Exact and analytic, so a ray never marches toward it — worth having, since
-// the marched step is the PERPENDICULAR distance, which crawls on a ray running
-// nearly parallel to the plane, and a ground plane is used at exactly that angle.
-//
-// CAVEAT, learned the hard way: an analytic plane is NOT a drop-in replacement
-// for a floor term inside a fractal's own DE. Folding `min(p.z - h, dFractal)`
-// into the estimator makes the floor CAP the fractal — it hides everything
-// below it. Split that floor out into a plane object and rays fall straight
-// through into the infinitely fine detail underneath, and the plane is never
-// reached. Use this for a floor the scene genuinely owns.
-//
-// glsl/shapes/ is the math-only library: plain functions of a point and some
-// floats. No structs, no Frame, no Material.
-//----------------------------------------------------------------------------
-
-
-// p is in the plane's own coordinates (origin ON the plane). Negative in the
-// solid half-space behind it, positive in the open half-space it faces.
-float planeDistance(vec3 p, vec3 normal){
-    return dot(p, normal);
-}
-
-
-// Exact ray intersection, in world coordinates: the distance along tv to the
-// plane, or maxDist if it is not in front of us. A ray running away from the
-// plane, or parallel to it, never meets it — and costs nothing to find out.
-float planeTrace(Vector tv, vec3 centre, vec3 normal){
-    float dn = dot(tv.dir, normal);
-    if(abs(dn) < 1.0e-9){ return maxDist; }     //parallel
-    float t = -dot(tv.pos - centre, normal)/dn;
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
-}
-
-
-//--- library: glsl/shapes/primitives/sphere.glsl ---
-//----------------------------------------------------------------------------
-// SPHERE
-//
-// glsl/shapes/ is the math-only library: plain functions of a point and some
-// floats. No structs, no Frame, no Material, no at()/inside()/setData().
-// Placement, materials and the region interface are emitted by the scene.
-//----------------------------------------------------------------------------
-
-
-// p is in the sphere's own coordinates (origin at the centre)
-float sphereDistance(vec3 p, float radius){
-    return length(p) - radius;
-}
-
-
-// Exact ray intersection, in world coordinates: the distance along tv to the
-// sphere, or maxDist if it is not in front of us. tv.dir is unit length.
-//
-// A ray STARTING INSIDE takes the far root — glass needs that, since a
-// transmitted ray has to find the far wall of the object it just entered.
-float sphereTrace(Vector tv, vec3 centre, float radius){
-    vec3  oc = tv.pos - centre;
-    float b  = dot(oc, tv.dir);
-    float c  = dot(oc, oc) - radius*radius;
-    float disc = b*b - c;
-    if(disc < 0.){ return maxDist; }
-
-    float s = sqrt(disc);
-    float t = -b - s;
-    if(t < 0.){ t = -b + s; }
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
-}
-
-
-//--- library: glsl/shapes/primitives/box.glsl ---
-//----------------------------------------------------------------------------
-// BOX — an axis-aligned box, `halfSize` = half-widths.
-//
-// glsl/shapes/ is the math-only library: plain functions of a point and some
-// floats. No structs, no Frame, no Material, no at()/inside()/setData().
-// Placement, materials and the region interface are emitted by the scene.
-//----------------------------------------------------------------------------
-
-
-// p is in the box's own coordinates (origin at the centre); halfSize = half-widths
-float boxDistance(vec3 p, vec3 halfSize){
-    return bBox(p, halfSize);
-}
-
-
-// Exact ray intersection, in world coordinates: the nearest slab crossing in
-// front of us, or maxDist. A ray STARTING INSIDE takes the far exit — glass
-// needs that, since a transmitted ray has to find the far wall of the box it
-// just entered.
-float boxTrace(Vector tv, vec3 centre, vec3 halfSize){
-    vec3  o   = tv.pos - centre;
-    vec3  inv = 1.0/tv.dir;
-    vec3  t1  = (-halfSize - o)*inv;
-    vec3  t2  = ( halfSize - o)*inv;
-    vec3  lo  = min(t1, t2);
-    vec3  hi  = max(t1, t2);
-    float tN  = max(lo.x, max(lo.y, lo.z));
-    float tF  = min(hi.x, min(hi.y, hi.z));
-    if(tN > tF || tF < 0.){ return maxDist; }   // miss, or entirely behind us
-    float t = (tN > 0.) ? tN : tF;               // outside -> entry; inside -> far exit
-    return min(t, maxDist);
-}
-
-
 //--- library: glsl/shapes/models/gem.glsl ---
 //----------------------------------------------------------------------------
 // GEM — a brilliant-ish cut stone, girdle radius `size`.
@@ -188,7 +78,7 @@ const int ROOM_BACK    = 5;
 // Negative in the WALLS, positive in the open interior — the sign convention
 // every other region uses, just turned inside out.
 float roomDistance(vec3 p, vec3 halfSize){
-    return -bBox(p, halfSize);
+    return -boxDistance(p, halfSize);
 }
 
 
@@ -312,7 +202,7 @@ float sdf_husk(vec3 p){
 
 float sdf_dice(vec3 p){
     float d = boxDistance(p - DICE_P, DICE_HALFSIZE);
-    return opSubtractDist(d, sphereDistance(p - DICE_P - DICE_CUT_P, DICE_CUT_RADIUS), DICE_CUT_BLEND);
+    return opSmoothSubtract(d, sphereDistance(p - DICE_P - DICE_CUT_P, DICE_CUT_RADIUS), DICE_CUT_BLEND);
 }
 
 float sdf_reef(vec3 p){

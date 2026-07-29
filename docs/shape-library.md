@@ -110,8 +110,8 @@ Five schemes exist today (`bBox`, `sdTorus`, `cylinderDistance`, `opMinDist`,
 
 | today | becomes |
 |---|---|
-| `bBox(p, h)` | `boxDistance(p, h)` |
-| `bCyl(p, vec2(r,h))` | `cylinderDistance(p, r, h, 0.0)` |
+| `bBox(p, h)` | `boxDistance(p, h)` — same formula, `bBox` *was* the exact box sdf |
+| `bCyl(p, vec2(r,h))` | `cylinderSlab(p, r, h)` — **not** `cylinderDistance` (see below) |
 | `sdTorus(p, ra, rb)` | `torusDistance(p, ra, rb)` |
 | `sdCappedCone(p, h, r1, r2)` | `coneDistance(p, h, r1, r2)` |
 | `cylinderDistance` (in computations) | `primitives/cylinder.glsl`, same name |
@@ -122,6 +122,16 @@ Five schemes exist today (`bBox`, `sdTorus`, `cylinderDistance`, `opMinDist`,
 There is then exactly **one** box SDF in the codebase, and it is both the
 vocabulary function and the `lib.box` catalogue entry — the duplication that
 made `bBox` and `boxDistance` coexist is structurally gone.
+
+**`bCyl` is not a duplicate of the cylinder, and must not be folded into it.**
+It returns `max(radial, axial)`, which is exact *inside* but an
+UNDERESTIMATE outside the rim; `cylinderDistance` is the exact rounded capped
+cylinder. Both are conservative, so both are legal bounds — but they return
+different numbers, and every current caller uses `bCyl` in a `<stem>Bound`.
+Folding them would silently retune every bound in the library. So
+`primitives/cylinder.glsl` carries an honest pair: `cylinderDistance` (exact,
+the `lib.cylinder` entry) and `cylinderSlab` (the cheap max-form, for bounds).
+Two functions because they are two functions — not accretion.
 
 ---
 

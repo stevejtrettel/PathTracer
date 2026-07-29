@@ -38,5 +38,5 @@ float cocktailGlassDistance(vec3 p, float radius, float height,
 // ball below it, about the y axis. Never overestimates the distance to the
 // surface, so it is safe as an acceleration bound.
 float cocktailGlassBound(vec3 p, float radius, float height, float base){
-    return bCyl(p, vec2(radius + 0.3, height + 2.*base + 1.));
+    return cylinderSlab(p, radius + 0.3, height + 2.*base + 1.);
 }

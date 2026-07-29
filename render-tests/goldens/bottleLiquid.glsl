@@ -9,8 +9,8 @@
 // shell with the neck chopped open (and a punt dimple in the base).
 //
 // glsl/shapes/ is the math-only library: plain functions of a point and floats.
-// Built from cylinderDistance + opMin/Max/OnionDist (glsl/objects/computations.glsl,
-// globally included). `bottleCavity` is the interior surface, for a liquid region
+// Built from cylinderDistance + opSmoothUnion/Intersect/Onion (glsl/shapes/ops/,
+// always compiled). `bottleCavity` is the interior surface, for a liquid region
 // in a group (bottleLiquid); `bottleDistance` is the glass shell for a plain object.
 //----------------------------------------------------------------------------
 
@@ -22,10 +22,10 @@ float bottle_solid(vec3 p, float baseRadius, float baseHeight, float neckRadius,
     float base = cylinderDistance(p, baseRadius, baseHeight, rounded);
     vec3  q    = p - vec3(0.0, baseHeight + neckHeight, 0.0);
     float neck = cylinderDistance(q, neckRadius, neckHeight, rounded);
-    float solid = opMinDist(base, neck, smoothJoin);       //smooth union
+    float solid = opSmoothUnion(base, neck, smoothJoin);       //smooth union
     if(bump != 0.0){
         float dimple = length(p + vec3(0.0, baseHeight, 0.0)) - 0.25;
-        solid = opMaxDist(solid, -dimple, 1.0);             //punt at the base
+        solid = opSmoothIntersect(solid, -dimple, 1.0);             //punt at the base
     }
     return solid;
 }
@@ -36,9 +36,9 @@ float bottle_solid(vec3 p, float baseRadius, float baseHeight, float neckRadius,
 float bottleDistance(vec3 p, float baseRadius, float baseHeight, float neckRadius,
                      float neckHeight, float thickness, float rounded, float smoothJoin, float bump){
     float solid = bottle_solid(p, baseRadius, baseHeight, neckRadius, neckHeight, rounded, smoothJoin, bump);
-    float shell = opOnionDist(solid, thickness);
+    float shell = opOnion(solid, thickness);
     float top   = (p.y - (baseHeight + neckHeight)) - neckHeight/3.0;   //chop the neck open
-    return opMaxDist(shell, top, thickness);
+    return opSmoothIntersect(shell, top, thickness);
 }
 
 
@@ -56,43 +56,7 @@ float bottleBound(vec3 p, float baseRadius, float baseHeight, float neckHeight,
     float yTop = baseHeight + (4.0/3.0)*neckHeight + thickness + 0.1;
     float yBot = -(baseHeight + rounded + thickness + 0.1);
     float R    = baseRadius + thickness + 0.25*smoothJoin + 0.1;
-    return bCyl(p - vec3(0.0, 0.5*(yTop + yBot), 0.0), vec2(R, 0.5*(yTop - yBot)));
-}
-
-
-//--- library: glsl/shapes/primitives/sphere.glsl ---
-//----------------------------------------------------------------------------
-// SPHERE
-//
-// glsl/shapes/ is the math-only library: plain functions of a point and some
-// floats. No structs, no Frame, no Material, no at()/inside()/setData().
-// Placement, materials and the region interface are emitted by the scene.
-//----------------------------------------------------------------------------
-
-
-// p is in the sphere's own coordinates (origin at the centre)
-float sphereDistance(vec3 p, float radius){
-    return length(p) - radius;
-}
-
-
-// Exact ray intersection, in world coordinates: the distance along tv to the
-// sphere, or maxDist if it is not in front of us. tv.dir is unit length.
-//
-// A ray STARTING INSIDE takes the far root — glass needs that, since a
-// transmitted ray has to find the far wall of the object it just entered.
-float sphereTrace(Vector tv, vec3 centre, float radius){
-    vec3  oc = tv.pos - centre;
-    float b  = dot(oc, tv.dir);
-    float c  = dot(oc, oc) - radius*radius;
-    float disc = b*b - c;
-    if(disc < 0.){ return maxDist; }
-
-    float s = sqrt(disc);
-    float t = -b - s;
-    if(t < 0.){ t = -b + s; }
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
+    return cylinderSlab(p - vec3(0.0, 0.5*(yTop + yBot), 0.0), R, 0.5*(yTop - yBot));
 }
 
 
@@ -122,7 +86,7 @@ const int ROOM_BACK    = 5;
 // Negative in the WALLS, positive in the open interior — the sign convention
 // every other region uses, just turned inside out.
 float roomDistance(vec3 p, vec3 halfSize){
-    return -bBox(p, halfSize);
+    return -boxDistance(p, halfSize);
 }
 
 

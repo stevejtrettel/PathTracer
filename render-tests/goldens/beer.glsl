@@ -8,8 +8,8 @@
 // PINT — a pint glass: the smooth subtraction of two truncated cones (an outer
 // wall and a slightly-raised inner cone carved out to leave the cavity).
 //
-// glsl/shapes/ is the math-only library. Built from sdCappedCone + smax
-// (glsl/objects/computations.glsl and 1Setup/math.glsl, globally included).
+// glsl/shapes/ is the math-only library. Built from coneDistance + smax
+// (glsl/shapes/ops/ and 1Setup/math.glsl, always compiled).
 // `pintCavity` is the interior, for a drink region in a group (beer).
 //----------------------------------------------------------------------------
 
@@ -17,14 +17,14 @@
 //the carved-out inner cone — the cavity surface (file-private shared source)
 float pint_inner(vec3 p, float height, float base, float flare, float thickness){
     vec3 pIn = p - vec3(0.0, 2.0*thickness + 0.4, 0.0);
-    return sdCappedCone(pIn, height + 0.2, base - thickness, flare*(base - thickness));
+    return coneDistance(pIn, height + 0.2, base - thickness, flare*(base - thickness));
 }
 
 
 // p is in the pint's own coordinates (origin at the centre). The glass SHELL:
 // the outer cone with the inner cone subtracted.
 float pintDistance(vec3 p, float height, float base, float flare, float thickness){
-    float outerWall = sdCappedCone(p, height, base, flare*base) - 0.1;
+    float outerWall = coneDistance(p, height, base, flare*base) - 0.1;
     return smax(outerWall, -pint_inner(p, height, base, flare, thickness), 0.1);
 }
 
@@ -37,43 +37,7 @@ float pintCavity(vec3 p, float height, float base, float flare, float thickness)
 
 // bounding cylinder over the flared cone
 float pintBound(vec3 p, float height, float base, float flare){
-    return bCyl(p, vec2(max(base, flare*base) + 0.3, height + 1.0));
-}
-
-
-//--- library: glsl/shapes/primitives/sphere.glsl ---
-//----------------------------------------------------------------------------
-// SPHERE
-//
-// glsl/shapes/ is the math-only library: plain functions of a point and some
-// floats. No structs, no Frame, no Material, no at()/inside()/setData().
-// Placement, materials and the region interface are emitted by the scene.
-//----------------------------------------------------------------------------
-
-
-// p is in the sphere's own coordinates (origin at the centre)
-float sphereDistance(vec3 p, float radius){
-    return length(p) - radius;
-}
-
-
-// Exact ray intersection, in world coordinates: the distance along tv to the
-// sphere, or maxDist if it is not in front of us. tv.dir is unit length.
-//
-// A ray STARTING INSIDE takes the far root — glass needs that, since a
-// transmitted ray has to find the far wall of the object it just entered.
-float sphereTrace(Vector tv, vec3 centre, float radius){
-    vec3  oc = tv.pos - centre;
-    float b  = dot(oc, tv.dir);
-    float c  = dot(oc, oc) - radius*radius;
-    float disc = b*b - c;
-    if(disc < 0.){ return maxDist; }
-
-    float s = sqrt(disc);
-    float t = -b - s;
-    if(t < 0.){ t = -b + s; }
-    if(t < 0.){ return maxDist; }
-    return min(t, maxDist);
+    return cylinderSlab(p, max(base, flare*base) + 0.3, height + 1.0);
 }
 
 
@@ -103,7 +67,7 @@ const int ROOM_BACK    = 5;
 // Negative in the WALLS, positive in the open interior — the sign convention
 // every other region uses, just turned inside out.
 float roomDistance(vec3 p, vec3 halfSize){
-    return -bBox(p, halfSize);
+    return -boxDistance(p, halfSize);
 }
 
 

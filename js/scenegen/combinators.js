@@ -116,7 +116,7 @@ export function displace(base, {by, amp} = {}){
 }
 
 //EROSION, the structural opposite of displace: it subtracts a distance field
-//(opCarveFbm, computations.glsl) instead of adding a height field, so the result
+//(opCarveFbm, shapes/ops/carve.glsl) instead of adding a height field, so the result
 //is still a distance field. Two things follow, and they are what the planner
 //derives: no bound inflation (carving only shrinks the solid, so the UNCARVED
 //base already bounds it), and no Lipschitz divisor of its own (the operator
@@ -146,7 +146,7 @@ export function carve(base, {octaves = 6, erosion = 1.0, gain = 0.5, blend = 0.1
 }
 
 //ACCRETION, carve's mirror image: the same fbm sphere lattice GROWS on the
-//surface instead of being eaten from it (opAccreteFbm, computations.glsl).
+//surface instead of being eaten from it (opAccreteFbm, shapes/ops/carve.glsl).
 //The one derivation that flips: accreted material lies OUTSIDE the base, so
 //the bound inflates — each octave attaches at most REACH*s past the surface
 //plus the smooth-union bulge, and the total over octaves is the geometric
@@ -195,7 +195,7 @@ export function repLim(base, {spacing, limit} = {}){
     }, 'repLim(base, {spacing, limit})');
 }
 
-//MIRROR: fold across coordinate planes (opSym*, computations.glsl). A
+//MIRROR: fold across coordinate planes (opSym*, shapes/ops/fold.glsl). A
 //reflection is an isometry, so this is exact.
 const SYM_AXES = {x: 'opSymX', y: 'opSymY', z: 'opSymZ',
                   xy: 'opSymXY', xz: 'opSymXZ', yz: 'opSymYZ', xyz: 'opSymXYZ'};
@@ -213,7 +213,7 @@ export function mirror(base, {axes} = {}){
 }
 
 //RADIAL: fold into one of n wedges around the axis (opRadial*,
-//computations.glsl) — an n-fold rotational symmetry, exact like mirror, with
+//shapes/ops/fold.glsl) — an n-fold rotational symmetry, exact like mirror, with
 //repLim's caveat: the base must stay inside its wedge or the fold
 //overestimates distance across the seam.
 const RADIAL_AXES = {x: 'opRadialX', y: 'opRadialY', z: 'opRadialZ'};
@@ -376,7 +376,7 @@ function cutMod(base, spec, kind, operandKey){
             const B    = hard ? null : fx.value('float', `${tok}_BLEND`, blend, `${kind} blend of '${fx.name}'`);
             const combine = (d, ct) => isClip
                 ? (hard ? `max(${d}, ${ct})`            : `smax(${d}, ${ct}, ${B})`)
-                : (hard ? `opSubtractDist(${d}, ${ct})` : `opSubtractDist(${d}, ${ct}, ${B})`);
+                : (hard ? `opSmoothSubtract(${d}, ${ct})` : `opSmoothSubtract(${d}, ${ct}, ${B})`);
             return {
                 expr: (d, pt) => combine(d, cut.call(pt)),
                 frame: 'local',
@@ -416,7 +416,7 @@ export function modifier(base, {expr, bound} = {}){
     if(authored.includes(';') || /(^|[^=!<>+\-*/])=(?!=)/.test(authored)){
         throw new Error('scenegen: modifier(): expr must be a single EXPRESSION producing the new '
             + 'distance — no statements, no `;`, no assignment. Real structure belongs in '
-            + 'glsl/objects/computations.glsl as an op the expression calls');
+            + 'glsl/shapes/ops/ as an op the expression calls');
     }
     if(bound === undefined){
         throw new Error("scenegen: modifier() must declare its bound — 'keep' if the surface stays "

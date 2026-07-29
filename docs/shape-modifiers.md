@@ -127,7 +127,7 @@ conservatively); the chain nests as one expression, planned by the same fold.
   (plain `max` when `blend` is 0; the `- <NAME>_CLIP_P` is omitted when `at`
   is the origin)
 - subtract line: `d = opSubtractDist(d, <cutter>, BLEND);` — `opSubtractDist(a, b, k)`
-  already exists in `computations.glsl`.
+  already exists in `glsl/shapes/ops/`.
 - clip bound: **replaced** by the CUTTER'S bound — its `Bound` if the catalogue
   has one (else its `Distance`), with the cutter's own chain folded by the same
   keep/inflate rules, minus the blend. A carved cutter donates its uncarved
@@ -159,7 +159,7 @@ below that the classifier cannot separate the two faces (`docs/marching.md`;
 (`opSymX/opSymY/opSymZ/opSymXZ` exist). Exact: a reflection is an isometry.
 
 **`radial(base, {n, axis = 'y'})`** — domain. Needs a **new operator** in
-`glsl/objects/computations.glsl`, beside the other domain folds:
+`glsl/shapes/ops/`, beside the other domain folds:
 
 ```glsl
 //fold space into one of n wedges around the axis — an n-fold rotational symmetry.
@@ -314,7 +314,7 @@ non-black (`node scripts/render-test.mjs --budget 20000 chain`), then hand it ov
 From [`generator.md`](generator.md) and the surrounding code:
 
 - **The emitter emits glue, never math.** New GLSL math (`opRadial*`) goes in
-  `glsl/objects/computations.glsl` beside the other `op*`, and the planner only
+  `glsl/shapes/ops/` beside the other `op*`, and the planner only
   names it. Do not inline formulas into emitted text beyond what the existing
   builders already do.
 - Numbers go through `fnum`/`fvec3` (float32-exact shortest decimal); consts are
@@ -381,7 +381,7 @@ it in one scene first with the `modifier()` escape hatch —
 [`authored-modifiers.md`](authored-modifiers.md) — and promote it here once
 it earns a name.) What one costs:
 
-1. **The math** — an `op…` in `glsl/objects/computations.glsl`, beside the
+1. **The math** — an `op…` in `glsl/shapes/ops/`, beside the
    others. Derive the human math IN ITS COMMENT: the bound effect (where the
    new surface can lie relative to the base's) and, for a distorting mod,
    the Lipschitz divisor. These derivations cannot be parsed from code —

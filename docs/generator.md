@@ -16,7 +16,7 @@ A scene is a JS description. The generator turns it into the GLSL chunk that
 Two rules, both learned the hard way while hand-writing the scenes:
 
 **The generator emits glue and structure. Never math.** Every formula lives in a
-hand-written `.glsl` file — `glsl/shapes/` for named objects, `computations.glsl`
+hand-written `.glsl` file — `glsl/shapes/` for named objects, `glsl/shapes/ops/`
 for operators, `3Materials/` for materials and fields. If the generator ever
 wants to emit an expression more complicated than a call or a combinator, the
 library is missing a function.

@@ -7,9 +7,11 @@
 //----------------------------------------------------------------------------
 
 
-// p is in the box's own coordinates (origin at the centre); halfSize = half-widths
+// p is in the box's own coordinates (origin at the centre); halfSize = half-widths.
+// Exact, inside and out — which is why it doubles as the library's bounding box.
 float boxDistance(vec3 p, vec3 halfSize){
-    return bBox(p, halfSize);
+    vec3 q = abs(p) - halfSize;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
 }
 
 

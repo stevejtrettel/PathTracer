@@ -23,7 +23,7 @@ const int ROOM_BACK    = 5;
 // Negative in the WALLS, positive in the open interior — the sign convention
 // every other region uses, just turned inside out.
 float roomDistance(vec3 p, vec3 halfSize){
-    return -bBox(p, halfSize);
+    return -boxDistance(p, halfSize);
 }
 
 

@@ -7,9 +7,10 @@
 #include 2Space/_space.glsl
 #include 3Materials/_materials.glsl
 
-//shared sdf helpers (op* combinators, bounding shapes). Pure math with plain
-//arguments — no object structs, no Material, no setData. The old object library
-//(objectAPI + basic/ + roomBox) is gone: an object is now six functions the
-//scene supplies, and everything structural about it is written (eventually
-//generated) per scene. See 5Scene/scene.glsl for the contract.
-#include ../objects/computations.glsl
+//the VOCABULARY half of the shape library: the exact primitives every composite
+//is built from, and the operators that combine and fold them. Pure math with
+//plain arguments — no object structs, no Material, no setData. Always compiled,
+//so any shape file or authored scene body may call it with no declaration; the
+//CONTENT half (models, fractals, tilings, varieties, vendor) is inlined by the
+//emitter only when a scene names it. See docs/shape-library.md §1.
+#include ../shapes/_vocabulary.glsl
