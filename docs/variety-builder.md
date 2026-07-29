@@ -1,11 +1,27 @@
 # The variety builder: equations as first-class bases
 
-**Status: PLANNED (July 2026).** Design settled in conversation (this doc is
-the record); not yet built. This is the Phase-2 "big bucket": ~14 legacy
-scenes plus `scenes/variety`, the one scene still hand-written. Requirements
-history: `generator.md` §6. The reference implementation this design is
-extracted from: `scenes/variety/src/scene.glsl` — read it first, its comments
-settle most of the semantics.
+**Status: CORE BUILT (July 2026)** — the transpiler
+([`equation-transpiler.md`](equation-transpiler.md)), the formula catalogue,
+the `variety()` base on the chain, the marched-sheet emission, the
+`shell({inward, outward})` extension, and the clip-or-bound validation are
+all live; `scenes/variety` converted as the pilot (the last hand-written
+`scene.glsl` retired — it had been silently broken since the
+roomFace→roomFaceData migration, so the conversion was also the fix). All
+pre-existing goldens byte-identical throughout. As-built deltas:
+- the hand catalogue OVERLOADS some names (barthDecic: homogeneous 4-ary +
+  hand 3-ary patch) — the 4-ary is the truth, the hand patch is the
+  redundant rung the generated one replaces;
+- the variety scale const is `<NAME>_VSCALE` (SCALE belongs to the
+  transform); `scale: 1` literal emits no const;
+- marched sheets are v1-restricted: untransformed, chains of domain mods +
+  clip only — both loud;
+- `shell({inward})` means depth from the zero set (solid `[-inward, 0]`) —
+  half the old `varietyShell(d, t, 0)` span for the same number;
+- the `{data: glsl\`\`}` escape hatch shipped with v1.
+STILL OWED: the legacy variety bucket (~14 scenes), the float-source
+catalogue migration (§6 end state), `--catalogue` listing varieties, and
+the owner's by-eye pass on the pilot. Requirements history: `generator.md`
+§6; the retired hand scene lives in git history.
 
 
 ## 1 · What a variety is, and what is derived
