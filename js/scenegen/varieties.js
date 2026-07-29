@@ -9,10 +9,9 @@
 //
 // Sources, the rungs of §5:
 //   varieties.<name>                     the CATALOGUE, parsed from
-//                                        glsl/objects/varieties/formulas/
-//                                        (dual-number T formulas — the hand
-//                                        rung until the float-source
-//                                        migration retires it)
+//                                        glsl/shapes/varieties/ (standard
+//                                        float GLSL — transpiler input,
+//                                        never included)
 //   {eqn: 'x^2*y - c', params: {c: …}}   the transpiler string rung
 //   {fns: 'float f(float x, …){…}'}      the transpiler statement rung
 //   {data: glsl`…`}                      the escape hatch: an authored body
