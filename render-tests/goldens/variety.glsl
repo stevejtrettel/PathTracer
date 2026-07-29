@@ -87,219 +87,46 @@ float varietyShell(float dist, float inner, float outer){
 }
 
 
-//--- library: glsl/objects/varieties/formulas/misc.glsl ---
+//--- library: glsl/objects/varieties/formulas/barthSextic.glsl ---
 //-------------------------------------------------
-// VARIETY FORMULAS — misc
+// VARIETY FORMULAS — barthSextic
 // dual-number defining equations T eqn(T x,T y,T z[,T w]); the engine (T
 // arithmetic, DE, invStereo) lives in glsl/tracer/1Setup/dualNumbers.glsl.
-// #include this file in a scene's objects.glsl to use: gyroid, chmutov, kleinBottleVariety, riemannTwoBranch, enneper, goldman, mobiusStripVariety, mobiusStrip3TwistVariety, ellipticFibration, elliptic.
+// #include this file in a scene's objects.glsl to use: barthSextic, sexticStereo.
 //-------------------------------------------------
 
-T gyroid(T x, T y, T z){
-    T term1 = tmul(tsin(x),tcos(y));
-    T term2 = tmul(tsin(y), tcos(z));
-    T term3 = tmul(tsin(z),tcos(x));
-    return 1.*(term1 + term2 + term3);
-}
-
-
-T chmutov(T x, T y, T z) {
-    int n = 2;
-    return tcheb(x,n)+tcheb(y,n)+tcheb(z,n)+tfloat(1.0);
-}
-
-
-T kleinBottleVariety(T x, T y, T z){
-    //order of input variables should be y,x,z for it laying on its side
-    //ian stewart
-   // (x^2+y^2+z^2+2*y-1)*((x^2+y^2+z^2-2*y-1)^2-8*z^2) +16*x*z*(x^2+y^2+z^2-2*y-1)=0
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T r2 =  x2 + y2 + z2;
-    T term1 = r2 + 2.*y - T(1,0);
-    T term2 = r2 - 2.*y - T(1,0);
-
-    return tmul(term1, tsqr(term2) - 8.*z2) + 16.*tmul(x,z,term2);
-}
-
-
-T riemannTwoBranch(T x, T y, T z){
-    //z^2*x^2+(z^2+1)*y^2=5*(z^4+z^2)
+T barthSextic(T x, T y, T z){
 
     T x2 = tsqr(x);
     T y2 = tsqr(y);
     T z2 = tsqr(z);
-    T z4 = tsqr(z2);
+    float phi1=(1.+sqrt(5.))/2., phi2=phi1*phi1;
 
-    return tmul(z2,x2) + tmul(z2+T(1,0), y2) - 5.*(z4+z2);
+    T term1 = 4.*tmul(phi2*x2-y2, phi2*y2-z2, phi2*z2-x2);
+    T term2 = (1.+2.*phi1) * tmul(x2+y2+z2-T(1,0),x2+y2+z2-T(1,0));
+
+    return -(term1-term2);
 }
 
 
-T enneper(T x, T y, T z){
-
-        //doesn't work well as a thickened surface, if we use the variety to thicken it
-        //it gets unnaturally thick near the xy plane
-        float a = 1.;
-        float a2 = a*a;
-        float a3 = a*a*a;
-        T x2 = tsqr(x);
-        T y2 = tsqr(y);
-        T z2 = tsqr(z);
-        T z3 = tmul(z2,z);
-
-    T term1 = a/2.*(y2-x2) + 2./9.* z3 + 2./3.*a2*z;
-    T term2 = a/4.*(y2-x2) - 1./4.*tmul(z,x2+y2+8./9.*z2) + 2./9.*a2*z;
-
-    return -tmul(term1,term1,term1) + 6.*a3*tmul(z,term2,term2);
-
-}
-
-
-
-
-
-T goldman(T x, T y, T z){
-
-    //free parameters, wired to the GUI scratch knobs
-    float a = 2.*scratch1;
-    float b = 2.*scratch2;
-    float c = 2.*scratch3;
-    float d = 2.*scratch4;
-    float k = 4.-a*a-b*b-c*c-a*b*c*d;
+T barthSextic(T x, T y, T z, T w){
 
     T x2 = tsqr(x);
     T y2 = tsqr(y);
     T z2 = tsqr(z);
-    T xyz = tmul(x,tmul(y,z));
+    T w2 = tsqr(w);
+    float phi1=(1.+sqrt(5.))/2., phi2=phi1*phi1;
 
+    T term1 = 4.*tmul(phi2*x2-y2, phi2*y2-z2, phi2*z2-x2);
+    T term2 = (1.+2.*phi1) * tmul(tsqr(x2+y2+z2-w2),w2);
 
-    T term1 = (a*b+c*d)*x + (a*d+b*c)*y + (a*c+b*d)*z + T(k,0);
-    T term2 =x2 + y2 + z2 + xyz;
-
-    return term2-term1;
-
+    return -(term1-term2);
 }
 
-
-//================================
-// MOBIUS BANDS
-//================================
-
-
-T mobiusStripVariety(T x, T y, T z){
-
-    //https://www.imaginary.org/sites/default/files/moebiusband.pdf
-
-    float a = 0.02;
-    float b = 0.6;
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T t2 = x2+y2;
-
-    T term1 = (a-b)*(tmul(x,t2-z2+T(1,0))-2.*tmul(y,z));
-    T term2 = (2.*a + 2.*b + a*b)*t2;
-    T term3 = (a+b)*(t2+z2+T(1,0));
-    T term4 = 2.*(a-b)*(tmul(y,z)-x);
-
-    T side1 = term1-term2;
-    T side2 = (term3+term4);
-
-    return -tsqr(side1)+tmul(t2,tsqr(side2));
-
-}
-
-
-T mobiusStrip3TwistVariety(T x, T y, T z){
-
-    //https://www.imaginary.org/sites/default/files/moebiusband.pdf
-
-    float a = 0.01;
-    float b = 0.33;
-    T x2 = tsqr(x);
-    T y2 = tsqr(y);
-    T z2 = tsqr(z);
-    T t2 = x2+y2;
-    T t4 = tsqr(t2);
-
-    T comp1 = 3.*tmul(x2,y)-tmul(y2,y);
-    T comp2 = tmul(x,x2)-3.*tmul(x,y2);
-
-    T term1 = -2.*(a+b)*t4+(a-b)*(tmul(comp1, t2-z2+T(1,0))-2.*tmul(comp2,z));
-    T term2 = (a+b)*tmul(t2, (t2+z2+T(1,0))) - 2.*(a-b)*(comp1 - tmul(z,comp2)) - 2.*a*b*t2;
-
-    return - tsqr(term1) + tmul(t2,tsqr(term2));
-
-}
-
-
-
-
-
-
-
-
-T ellipticFibration(T x, T y, T t){
-    //from nadir, universal family over X15
-    //t x^2 - x^3 - t y + (1 - t) x y + y^2 = 0
-
-
-
-    //map xy into a disk:
-    float lengthScale = 3.5;
-    T r = tsqrt(tsqr(x)+tsqr(y));
-    T scalingFactor = tsqr(texp(r/lengthScale))+tsqr(texp(-r/lengthScale));
-    scalingFactor -= T(2,0);
-    x = tmul(x,scalingFactor);
-    y = tmul(y,scalingFactor);
-
-
-    t = tmul(t,t,t);
-    t = t/10.;
-
-
-
-    T x2 = tsqr(x);
-    T x3 = tmul(x,x2);
-    T y2 = tsqr(y);
-
-    return tmul(t, x2) - x3 - tmul(t,y) + tmul(T(1,0)-t,x,y) + y2;
-}
-
-
-
-
-T elliptic(T x, T y, T t){
-    //from nadir, universal family over X15
-    //t x^2z - x^3 - t yz^2 + (1 - t) x yz + y^2z = 0
-
-    //expand out the t-axis, shrinking the importance of larger values
-    //T newT = tmul(t,t,t);
-   // newT *= 10.;
-
-    //shrink in the t axis from infinity: for t between -pi/2 and pi/2 shows whole line
-    T newT = ttan(t);
-
-    //use inverse stereographic projection to draw double cover
-    //then, see only one piece by drawing only the lower hemisphere: where (x,y) is in the unit disk
-    //for this to work both scale and bounding box should be set to size 1
-    T X, Y, Z;
-    invStereo(x,y,X,Y,Z);
-
-    T X2 = tsqr(X);
-    T Y2 = tsqr(Y);
-    T Z2 = tsqr(Z);
-    T X3 = tmul(X,X2);
-
-
-    // // a test: a trivial family of ellptic curves
-    // // and its inverse stereographic projection
-    //return tsqr(y) - tmul(x,x,x)-tmul(x,x);
-    //return -(tmul(Y2, Z) - X3 - tmul(X2,Z));
-
-    //nadir's family
-    return -(tmul(newT,X2,Z) - X3 - tmul(newT, Y, Z2) + tmul(T(1,0)-newT,tmul(X,Y,Z)) + tmul(Y2,Z));
+T sexticStereo(T x, T y, T z){
+    T X, Y, Z, W;
+    invStereo(x,y,z,X,Y,Z,W);
+    return barthSextic(X,Y,Z,W);
 }
 
 
@@ -363,24 +190,18 @@ int roomFaceData(vec3 p, vec3 halfSize){
 
 
 //--- the objects, in declaration order (= containment priority, inner to outer)
-const int ID_SHEET = 0;
-const int ID_SOLID = 1;
-const int ID_LIGHT = 2;
-const int ID_ROOM  = 3;
+const int ID_BARTH = 0;
+const int ID_LIGHT = 1;
+const int ID_ROOM  = 2;
 
-const int N_OBJ = 4;
+const int N_OBJ = 3;
 float gSDF[N_OBJ];
 
 
 //--- placement and shape parameters ----------------------------------
-const vec3  SHEET_P           = vec3(-2.4, 1.6, -1.2);
-const float SHEET_CLIP_RADIUS = 1.9;
-const float SHEET_CLIP_BLEND  = 0.06;
-
-const vec3  SOLID_P           = vec3(2.4, 1.6, -1.2);
-const float SOLID_OUTWARD     = 0.0;
-const float SOLID_CLIP_RADIUS = 1.9;
-const float SOLID_CLIP_BLEND  = 0.06;
+const vec3  BARTH_P           = vec3(0.0, 1.9, -1.2);
+const float BARTH_CLIP_RADIUS = 1.9;
+const float BARTH_CLIP_BLEND  = 0.06;
 
 const vec3  LIGHT_P      = vec3(-7.0, 4.0, 2.0);
 const float LIGHT_RADIUS = 1.5;
@@ -393,36 +214,27 @@ const vec3 ROOM_HALFSIZE = vec3(14.25, 7.5, 15.0);
 // the region sdfs
 //---------------------------------------------------------------------
 
-vec4 data_sheet(vec3 p){
-    T vx = enneper(T(p.x, 1.0), T(p.y, 0.0), T(p.z, 0.0));
-    T vy = enneper(T(p.x, 0.0), T(p.y, 1.0), T(p.z, 0.0));
-    T vz = enneper(T(p.x, 0.0), T(p.y, 0.0), T(p.z, 1.0));
+T eqn_barth(T x, T y, T z){
+    return barthSextic(x, y, z, T(1.0, 0.0));      //the affine patch: w = 1
+}
+
+vec4 data_barth(vec3 p){
+    T vx = eqn_barth(T(p.x, 1.0), T(p.y, 0.0), T(p.z, 0.0));
+    T vy = eqn_barth(T(p.x, 0.0), T(p.y, 1.0), T(p.z, 0.0));
+    T vz = eqn_barth(T(p.x, 0.0), T(p.y, 0.0), T(p.z, 1.0));
     return vec4(vx.y, vy.y, vz.y, vx.x);
 }
 
-float sdf_sheet(vec3 p){
-    float d = varietyDistance(data_sheet(varScale*(p - SHEET_P)), varScale);
-    return smax(d, sphereDistance(p - SHEET_P, SHEET_CLIP_RADIUS), SHEET_CLIP_BLEND);
+float sdf_barth(vec3 p){
+    float d = varietyDistance(data_barth(varScale*(p - BARTH_P)), varScale);
+    return smax(d, sphereDistance(p - BARTH_P, BARTH_CLIP_RADIUS), BARTH_CLIP_BLEND);
 }
 
 //the marched form: abs stops the ray on {s=0}; the hard max keeps the
-//cut cap over {s<0} undrawn. sdf_sheet stays signed for faces/normals.
-float march_sheet(vec3 p){
-    float d = varietyDistance(data_sheet(varScale*(p - SHEET_P)), varScale);
-    return max(abs(d), sphereDistance(p - SHEET_P, SHEET_CLIP_RADIUS));
-}
-
-vec4 data_solid(vec3 p){
-    T vx = gyroid(T(p.x, 1.0), T(p.y, 0.0), T(p.z, 0.0));
-    T vy = gyroid(T(p.x, 0.0), T(p.y, 1.0), T(p.z, 0.0));
-    T vz = gyroid(T(p.x, 0.0), T(p.y, 0.0), T(p.z, 1.0));
-    return vec4(vx.y, vy.y, vz.y, vx.x);
-}
-
-float sdf_solid(vec3 p){
-    float d = varietyDistance(data_solid(varScale*(p - SOLID_P)), varScale);
-    d = abs(d - (SOLID_OUTWARD - shellThickness)*0.5) - (shellThickness + SOLID_OUTWARD)*0.5;
-    return smax(d, sphereDistance(p - SOLID_P, SOLID_CLIP_RADIUS), SOLID_CLIP_BLEND);
+//cut cap over {s<0} undrawn. sdf_barth stays signed for faces/normals.
+float march_barth(vec3 p){
+    float d = varietyDistance(data_barth(varScale*(p - BARTH_P)), varScale);
+    return max(abs(d), sphereDistance(p - BARTH_P, BARTH_CLIP_RADIUS));
 }
 
 float sdf_light(vec3 p){
@@ -440,12 +252,8 @@ float sdf_room(vec3 p){
 // the bounds — the acceleration structure (sdf_Scene only; sdfAll stays exact)
 //---------------------------------------------------------------------
 
-float bound_sheet(vec3 p){
-    return sphereDistance(p - SHEET_P, SHEET_CLIP_RADIUS) - SHEET_CLIP_BLEND;
-}
-
-float bound_solid(vec3 p){
-    return sphereDistance(p - SOLID_P, SOLID_CLIP_RADIUS) - SOLID_CLIP_BLEND;
+float bound_barth(vec3 p){
+    return sphereDistance(p - BARTH_P, BARTH_CLIP_RADIUS) - BARTH_CLIP_BLEND;
 }
 
 
@@ -454,16 +262,10 @@ float bound_solid(vec3 p){
 //---------------------------------------------------------------------
 const float NRM_E = 0.0002;
 
-Vector normal_sheet(vec3 p){
+Vector normal_barth(vec3 p){
     vec2 k = vec2(1.0,-1.0)*0.5773;
-    return Vector(p, normalize( k.xyy*sdf_sheet(p + k.xyy*NRM_E) + k.yyx*sdf_sheet(p + k.yyx*NRM_E)
-                              + k.yxy*sdf_sheet(p + k.yxy*NRM_E) + k.xxx*sdf_sheet(p + k.xxx*NRM_E) ));
-}
-
-Vector normal_solid(vec3 p){
-    vec2 k = vec2(1.0,-1.0)*0.5773;
-    return Vector(p, normalize( k.xyy*sdf_solid(p + k.xyy*NRM_E) + k.yyx*sdf_solid(p + k.yyx*NRM_E)
-                              + k.yxy*sdf_solid(p + k.yxy*NRM_E) + k.xxx*sdf_solid(p + k.xxx*NRM_E) ));
+    return Vector(p, normalize( k.xyy*sdf_barth(p + k.xyy*NRM_E) + k.yyx*sdf_barth(p + k.yyx*NRM_E)
+                              + k.yxy*sdf_barth(p + k.yxy*NRM_E) + k.xxx*sdf_barth(p + k.xxx*NRM_E) ));
 }
 
 Vector normal_light(vec3 p){
@@ -485,24 +287,11 @@ Vector normal_room(vec3 p){
 //  only the Medium, for when the object is merely the far side
 //---------------------------------------------------------------------
 
-Material material_sheet(vec3 p, inout Vector n, bool front){
+Material material_barth(vec3 p, inout Vector n, bool front){
     if(front){ return makeGloss(frontColor, sheetGloss, 0.2); }
     return makeGloss(backColor, sheetGloss, 0.2);
 }
-Medium medium_sheet(vec3 p){ return defaultMedium(); }
-
-Medium medium_solid(vec3 p){
-    Medium m = defaultMedium();
-    m.ior    = 1.5;
-    m.absorb = absorbFor(vec3(0.72, 0.86, 0.8), 0.6);
-    return m;
-}
-Material material_solid(vec3 p, inout Vector n){
-    Material m = defaultMaterial();      //glass
-    m.interior = medium_solid(p);
-    m.surf.transmit = 1.0;
-    return m;
-}
+Medium medium_barth(vec3 p){ return defaultMedium(); }
 
 Material material_light(vec3 p, inout Vector n){
     Material m = defaultMaterial();      //light
@@ -541,32 +330,28 @@ float trace_room(Vector tv){
 //---------------------------------------------------------------------
 
 void sdfAll(vec3 p){
-    gSDF[ID_SHEET] = sdf_sheet(p);
-    gSDF[ID_SOLID] = sdf_solid(p);
+    gSDF[ID_BARTH] = sdf_barth(p);
     gSDF[ID_LIGHT] = sdf_light(p);
     gSDF[ID_ROOM ] = sdf_room(p);
 }
 
 Vector normalOf(int id, vec3 p){
-    if(id == ID_SHEET){ return normal_sheet(p); }
-    if(id == ID_SOLID){ return normal_solid(p); }
+    if(id == ID_BARTH){ return normal_barth(p); }
     if(id == ID_LIGHT){ return normal_light(p); }
     return normal_room(p);
 }
 
 //sheets: two-sided surfaces with no interior, excluded from containment
-bool isSheet(int id){ return id == ID_SHEET; }
+bool isSheet(int id){ return id == ID_BARTH; }
 
 Material materialOf(int id, vec3 p, inout Vector n, bool front){
-    if(id == ID_SHEET){ return material_sheet(p, n, front); }
-    if(id == ID_SOLID){ return material_solid(p, n); }
+    if(id == ID_BARTH){ return material_barth(p, n, front); }
     if(id == ID_LIGHT){ return material_light(p, n); }
     return material_room(p, n);
 }
 
 Medium mediumOf(int id, vec3 p){
-    if(id == ID_SHEET){ return medium_sheet(p); }
-    if(id == ID_SOLID){ return medium_solid(p); }
+    if(id == ID_BARTH){ return medium_barth(p); }
     if(id == ID_LIGHT){ return medium_light(p); }
     if(id == ID_ROOM ){ return medium_room(p); }
     return defaultMedium();      //ID_NONE: open air
@@ -583,11 +368,8 @@ float sdf_Scene(Vector tv){
     vec3 p = tv.pos;
     float d = maxDist;
 
-    float b_sheet = bound_sheet(p);
-    d = min(d, (b_sheet > BOUND_MARGIN) ? b_sheet : march_sheet(p));
-
-    float b_solid = bound_solid(p);
-    d = min(d, (b_solid > BOUND_MARGIN) ? b_solid : sdf_solid(p));
+    float b_barth = bound_barth(p);
+    d = min(d, (b_barth > BOUND_MARGIN) ? b_barth : march_barth(p));
 
     return d;
 }
