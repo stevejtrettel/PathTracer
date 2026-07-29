@@ -231,10 +231,28 @@ the easy direction: `tmul`→`*`, `tsqr`→squaring); the T-GLSL parser above is
 still v1, so nothing blocks on rewriting 37 formulas.
 
 
-## 6.5 · The float-source migration — plan (July 2026, in progress)
+## 6.5 · The float-source migration — EXECUTED (July 2026)
 
-Decisions settled with the user; execute file-atomically, one commit per
-formula file, gate green at every step.
+Completed as planned below, file-atomically, gate green at every step. The
+catalogue is now **44 float formulas in `glsl/shapes/varieties/`** (its
+permanent home, beside the `varietyDistance` engine helpers; the reference
+doc moved there as the math archive). The expansion landed: Barth6T, Barth10
+(the published form — the hand decic's untracked rendering bug turned out
+to be a spuriously squared `(2−φ)`), both Endrass roots, Sarti8, Escudero9,
+Togliatti + Dervish, the Chebyshev family with a live int order. Moduli are
+live: kummer.muSqr, barthSextic.tau, goldman's four, the Möbius pairs,
+thistle's c. TWO reference variants were audited out: Togliatti5's `Mu` is
+an overall factor (cannot change a zero set) and Escudero9_2 is a
+hand-written affine patch. Shared twins dedupe chunk-wide (two objects, one
+formula → one emission; the doubleCover scene forced the mechanism). THE
+FINALE SHIPPED: the vec2 `T` library, `#define T vec2` (and the "no
+variable named T" gotcha), the three-seed wrappers, and the hand
+`*Stereo`/patch overloads are deleted — `dualNumbers.glsl` is vec4-only,
+plus `DE` and the dual `invStereo`. `glsl/objects/varieties/` is gone.
+(`VARIETY_DATA` references survive only in the uncompiled legacy
+`glsl/objects/` shadow, which dies with the objects port.)
+
+The plan as executed:
 
 - **Source of truth:** `algVariety-reference.md` — the PUBLISHED projective
   float forms, with moduli still free. Better than the hand-T code (which
