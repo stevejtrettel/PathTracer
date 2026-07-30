@@ -48,9 +48,15 @@
 //   <stem>_helper                                 file-private
 //----------------------------------------------------------------------------
 
+//ops/ is the operator layer and is vocabulary by nature — an operator is a verb,
+//not a noun, so "is it used all the time?" is the wrong question for it (that
+//test is what keeps the platonic solids OUT of this list, since those are content
+//you place). curve.glsl is the specialized one at ~10 lines; if ops/ ever grows
+//something genuinely heavy, that is the moment to revisit.
 #include ./ops/smooth.glsl
 #include ./ops/fold.glsl
 #include ./ops/carve.glsl
+#include ./ops/curve.glsl
 
 #include ./primitives/box.glsl
 #include ./primitives/cone.glsl
