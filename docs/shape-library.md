@@ -1,7 +1,7 @@
 # The shape library
 
-*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–6 are
-executed** (5 and 6 partially, by decision); 7–8 remain (§5). `glsl/shapes/` is the library the scene generator
+*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–7 are
+executed** (5 and 6 partially, by decision); 8 remains (§5). `glsl/shapes/` is the library the scene generator
 draws from; `glsl/objects/` is the pre-generator library, now an archive. This
 file says what the finished library looks like, and stages the move. Authoring
 how-to: [scene-authoring.md](scene-authoring.md) §3; the emitter contract:
@@ -317,25 +317,39 @@ caller, and promoting it changes call sites only, never the maths.
 `standUp`/`plateRot` machinery the ROADMAP wants rewritten; one has a broken
 camera). `line.glsl` landed here as planned.
 
-### Stage 7 · The vendor decision
+### Stage 7 · vendor/ — DONE
 
-`objects/sdf_gallery/` is NVIDIA's `sdf-explorer` corpus, dropped in whole. It
-is not a category — "gallery" names a provenance, not a kind of math:
+**26 models ported** into `glsl/shapes/vendor/`, catalogued as `<stem>(size)
+[bound]`. Additive: no scene changed, goldens untouched.
 
-- `basicGeometry/` (19 files) — Sphere, Cube, Torus, Cone… duplicates of our
-  own primitives, each ~40 lines of licence header around a 3-line IQ function.
-  **Delete outright**, whatever is decided about the rest.
-- `sdfs/` (27 files, 55–400 lines) — real models: Teapot, Elephant, Mech,
-  HumanSkull, Cybertruck, Temple, Jellyfish, UprightPiano.
+`basicGeometry/` (19 files) is dropped — duplicates of our own primitives — and
+goes with the rest of `glsl/objects/` in Stage 8.
 
-**DECIDED (July 29 2026): the 27 stay, in `vendor/`.** The question was
-licensing, not taxonomy — most carry CC BY-NC-SA-3.0 (Teapot, Cheese, Castle,
-Rooks…), a few MIT, so they live in their own folder where the condition is
-structurally visible and never mixed into `models/`. Each file keeps its
-licence header verbatim. Per file the port is mechanical — `float sdf(vec3 p)` →
-`<stem>Distance`, prefix the private helpers, `GALLERY_BOUND` → a real
-`<stem>Bound` — and the old "only one can compile at a time" constraint
-evaporates, since the emitter inlines only what a scene names.
+Per file the port is minimal: the corpus's bare `sdf(vec3)` becomes
+`<stem>_sdf`, and two functions are appended — a `size` parameter (the corpus
+had none) and a bounding sphere. The original copyright block is preserved
+verbatim above the maths.
+
+**27 became 26**: the corpus's `Menger` collided with our own
+`fractals/menger.glsl` (the duplicate-basename guard from Stage 1 caught it).
+Dropped rather than renamed — we already have IQ's Menger ported properly with a
+size parameter, and dropping the corpus copy sheds an NC-licence obligation for
+nothing lost.
+
+⚠ **TWO CAVEATS, both carried over rather than fixed.**
+
+*Bounds are guesses.* The corpus documented only "most models <= 1.5, PixarMike
+and Serpinski ~3", so every model gets `2.2*size` (`3.5*size` for those two) and
+errs LARGE deliberately: too tight punches a visible hole, too loose only costs
+march steps. Tighten by eye once a model has a scene.
+
+*Internal names collide.* These files were written to be compiled ONE AT A TIME.
+A scan found **33 symbols shared by two or more files** — `RotMat` in 10 of
+them, `sdBox` in 9, `sdSphere` in 7, `map` in 5. So naming two vendor models in
+a single scene may fail to compile. The emitter inlines only what a scene names,
+so one-at-a-time works fine, which is how the corpus was always used. Fixing it
+properly means prefixing every internal symbol across 26 files — mechanical but
+large, and worth doing only if a scene actually wants two.
 
 ### Stage 8 · Delete `glsl/objects/`
 
