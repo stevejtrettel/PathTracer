@@ -1,6 +1,12 @@
 //----------------------------------------------------------------------------
 // CYLINDER — a capped cylinder standing on the y axis: `radius` across,
-// `height` = HALF-height, `rounded` = the rim fillet (0 = sharp edges).
+// `height` half-height, `rounded` = the rim fillet (0 = sharp edges).
+//
+// MIND THE EXTENTS when rounded > 0: the fillet is inset from the RADIUS but
+// added to the HEIGHT, so the true half-extents are (radius, height + rounded),
+// not (radius, height). Inherited from the original and left alone because the
+// glassware is built on it — but it means a caller who wants true half-height h
+// passes height = h - rounded.
 //
 // TWO functions, and they are not interchangeable:
 //
