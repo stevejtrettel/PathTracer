@@ -1,7 +1,7 @@
 # The shape library
 
-*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–4 are
-executed**; 5–8 remain (§5). `glsl/shapes/` is the library the scene generator
+*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–5 are
+executed** (5 partially, by decision); 6–8 remain (§5). `glsl/shapes/` is the library the scene generator
 draws from; `glsl/objects/` is the pre-generator library, now an archive. This
 file says what the finished library looks like, and stages the move. Authoring
 how-to: [scene-authoring.md](scene-authoring.md) §3; the emitter contract:
@@ -82,8 +82,9 @@ glsl/shapes/
   models/         on demand    gem bottle bottleTorus cocktailGlass pint
                                trefoil kleinBottle bunny hypDod hypCoxCube
   fractals/       on demand    apollonian kleinian menger breathe
-                               apollonianGasket kleinianSpiral
-  tilings/        on demand    hyperbolicHoneycomb hyperbolicHoneycomb2 cubeGrid
+                               apollonianGasket        (kleinianSpiral deferred)
+  tilings/        on demand    hyperbolicHoneycomb cubeGrid
+                                                (hyperbolicHoneycomb2 deferred)
   environments/   on demand    room checkers
   varieties/      on demand    the formula catalogue (unchanged)
   vendor/         on demand    the 27 NVIDIA/shadertoy models (§7)
@@ -251,15 +252,31 @@ Distance — it is *not* a bound: the sdf is invalid outside the ball, so a
 (`cubicSurface`, `cubicLines`, `plateLines`). Porting it before them would mean
 guessing an interface with no callers to check it against.
 
-### Stage 5 · Fractals and tilings
+### Stage 5 · Fractals — DONE (partial, by decision)
 
-`menger`, `breathe`, `apollonianGasket`, `kleinianSpiral`,
-`hyperbolicHoneycomb2`. Follow the [kleinian.glsl](../glsl/shapes/kleinian.glsl)
-template: one estimator, the classic parameter bundles as presets in
-`js/presets/fractals.js`, orbit traps and region ids as `…Data` outputs
-([shape-data.md](shape-data.md)). Check first whether `kleinianSpiral` is a
-distinct estimator or another box of the existing one — if it is a box, it is a
-preset, not a file.
+`menger`, `breathe`, `apollonianGasket`. **`hyperbolicHoneycomb2` and
+`kleinianSpiral` are deliberately deferred** — to be looked at later, together
+with the question of whether the spiral is a distinct estimator or another box of
+the existing `kleinian`.
+
+`apollonianGasket` is a genuinely different estimator from `apollonian`, not a
+preset of it: fract-fold with a shifting offset versus round-fold with an
+inversion-radius morph. Two folds, two fractals, two files.
+
+⚠ **`apollonianGasket` is flagged unresolved in its own header.** The port is
+faithful, but the estimator is degenerate at default marcher settings: its
+fractal term is never negative (no interior) and its median value inside the unit
+ball is ~3e-5, below epsilon, because `scale` diverges over ten iterations. So a
+ray reads the whole ball as a wall and it renders as a smooth sphere. That is the
+"thin haze read as a solid wall" fractal-DE failure; the fix is a scene-level
+EPSILON override and is by-eye work, not a mechanical port.
+
+`breathe` lost four helpers to the engine — `br_pR`, `br_smin`, `br_smax` were
+verified bit-identical to `rot2`, `smin`, `smax`, and `br_vmax` was dead. It has
+**no bound**, deliberately: the ellipsoid in its estimator is a void SUBTRACTED
+from the middle, not a clip containing the form, so a bound derived from it
+excluded the shape and rendered it invisible. The outer extent comes from the IFS
+escape and would have to be measured before it could be asserted.
 
 ### Stage 6 · The cubic family
 
