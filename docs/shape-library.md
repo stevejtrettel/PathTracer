@@ -1,7 +1,6 @@
 # The shape library
 
-*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–7 are
-executed** (5 and 6 partially, by decision); 8 remains (§5). `glsl/shapes/` is the library the scene generator
+*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **ALL STAGES EXECUTED** (5 and 6 partially, by decision — see each). `glsl/shapes/` is the library the scene generator
 draws from; `glsl/objects/` is the pre-generator library, now an archive. This
 file says what the finished library looks like, and stages the move. Authoring
 how-to: [scene-authoring.md](scene-authoring.md) §3; the emitter contract:
@@ -351,17 +350,36 @@ so one-at-a-time works fine, which is how the corpus was always used. Fixing it
 properly means prefixing every internal symbol across 26 files — mechanical but
 large, and worth doing only if a scene actually wants two.
 
-### Stage 8 · Delete `glsl/objects/`
+### Stage 8 · Delete `glsl/objects/` — DONE
 
-Once nothing references it. `legacy/` is already excluded from vite,
-render-test and gen-pages and does not compile, so the archive costs nothing to
-drop — git history keeps it. `objectAPI.glsl` and the `OBJECT_*` macros go with
-it. `multiMaterial/` never migrates: those are scene `group()` nodes now, and
-five already have migrated scenes.
+The whole tree is gone. Nothing live referenced it (only prose in comments), and
+`legacy/` was already excluded from vite, render-test and gen-pages, so it cost
+nothing to keep and nothing to drop. `objectAPI.glsl` and the `OBJECT_*` macros
+went with it, as did `sdf_gallery/basicGeometry/` (19 duplicates of our own
+primitives, dropped by decision in Stage 7).
 
-Not in scope, deliberately: `polytopes/` (4D projection — a design question,
-not a port) and the `var*`/`surf*` variety wrappers (superseded by the variety
-builder).
+**RETRIEVAL POINTER.** Four files were deliberately deferred rather than ported,
+and deleting them should not turn that work into archaeology. They are in commit
+`c010ac7` (the last commit before deletion):
+
+```
+git show c010ac7:glsl/objects/fractals/hyperbolicHoneycomb2.glsl
+git show c010ac7:glsl/objects/fractals/kleinianSpiral.glsl
+git show c010ac7:glsl/objects/polytopes/polytope4D.glsl
+git show c010ac7:glsl/objects/polytopes/makePolytopes.glsl
+```
+
+- `hyperbolicHoneycomb2`, `kleinianSpiral` — deferred by the owner; the spiral
+  still carries the open question of whether it is a distinct estimator or
+  another box of the existing `kleinian`.
+- `polytopes/` — 4D projection, a design question rather than a port.
+
+Two more that need no pointer because they are already handled elsewhere:
+`kleinianEscape` and `kleinianSeahorse` are the two classic parameter boxes of
+the one `kleinian` estimator and live as presets in `js/presets/fractals.js`;
+the `var*Glass`/`var*Clearcoat` wrappers are superseded by the variety builder.
+`poincareMarble` is a scene recipe (a glass shell around `hypDod`, which is
+ported), not library code.
 
 ---
 
