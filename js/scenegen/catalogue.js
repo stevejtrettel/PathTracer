@@ -35,10 +35,27 @@ const RAW = import.meta.glob(['../../glsl/shapes/**/*.glsl',
                               '!../../glsl/shapes/varieties/**'],
                              {query: '?raw', import: 'default', eager: true});
 
-//a shape under primitives/ is part of the ALWAYS-COMPILED vocabulary: it is
-//already in the shader via _vocabulary.glsl, so the emitter includes it by
-//reference only and must never inline its source (duplicate definitions).
-const isVocabulary = (file) => file.startsWith('glsl/shapes/primitives/');
+//WHICH FILES ARE ALWAYS COMPILED is read straight off _vocabulary.glsl's own
+//include list — the single source of truth. A vocabulary file is already in the
+//shader, so the emitter references it and must never inline its source
+//(duplicate definitions).
+//
+//Derived, not restated, and that matters: an earlier version tested the folder
+//prefix (primitives/) against a hand-written include list, so the two could
+//silently disagree — a file added to primitives/ but not to the list would be
+//treated as already-compiled while the shader never compiled it, giving an
+//undefined function at runtime. Reading the list makes disagreement impossible.
+//
+//It also separates the two axes cleanly: the FOLDER says what the math is (a
+//dodecahedron is a primitive), the LIST says whether it is worth compiling into
+//every shader (it is not — see docs/shape-library.md §2).
+const VOCAB = import.meta.glob('../../glsl/shapes/_vocabulary.glsl',
+                               {query: '?raw', import: 'default', eager: true});
+
+const VOCABULARY = new Set(Object.values(VOCAB).flatMap(
+    src => [...src.matchAll(/^\s*#include\s+\.\/(\S+)/gm)].map(m => `glsl/shapes/${m[1]}`)));
+
+const isVocabulary = (file) => VOCABULARY.has(file);
 
 
 //---------------------------------------------------------------- parsing

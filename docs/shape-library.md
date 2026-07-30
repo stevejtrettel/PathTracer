@@ -14,11 +14,20 @@ library looks like, and stages the move. Authoring how-to:
 The library splits on a line that is already there in the code, but was never
 named:
 
-- **Vocabulary** — small, exact, universally useful: the primitives every
-  composite is built from (`boxDistance`, `cylinderDistance`) and the operators
-  that combine and fold them (`opSmoothUnion`, `opRepLim`, `opCarveFbm`).
-- **Content** — a named thing you put in a scene: a gem, a Kleinian limit set,
-  a hyperbolic honeycomb, a variety.
+- **Vocabulary** — the operators (`opSmoothUnion`, `opRepLim`, `opCarveFbm`) and
+  the handful of primitives used *all the time*: `box`, `cylinder`, `cone`,
+  `torus` (called by the library's own content files, so they must always be
+  available), plus `sphere` and `plane` (in nearly every scene — sphere is in 18
+  of 33).
+- **Content** — a named thing you put in a scene: a gem, a Kleinian limit set, a
+  hyperbolic honeycomb, a variety. **And the occasional primitives**: the
+  platonic solids, `boxFrame`, `capsule`, `ellipsoid`, `doubleCone`, `triangle`.
+  A dodecahedron is a primitive by taxonomy, but nothing composes one and no
+  scene has yet wanted one, so every shader should not pay for it.
+
+Those are **two different axes**, and conflating them was an early mistake here.
+The FOLDER says what the math is; the vocabulary list says whether every shader
+compiles it. So `primitives/` legitimately holds both.
 
 **Content uses vocabulary. Content never uses content.** That is not an
 aspiration — it is a measured fact about the library as it stands. A scan of
@@ -53,12 +62,16 @@ share geometry.
 
 ```
 glsl/shapes/
-  _vocabulary.glsl        the aggregator setupShader includes
+  _vocabulary.glsl        THE DEFINITION of what is always compiled: its
+                          #include list is what setupShader compiles AND what
+                          the catalogue reads to decide what not to inline, so
+                          the two cannot drift. Out of the list is the default.
 
-  primitives/     ALWAYS COMPILED · catalogue   exact closed forms
-                  box sphere plane triangle cylinder cone doubleCone capsule
-                  torus ellipsoid boxFrame tetrahedron octahedron
-                  dodecahedron icosahedron
+  primitives/     catalogue · MIXED   exact closed forms
+                  always compiled:  box sphere plane cylinder cone torus
+                  on demand:        triangle capsule ellipsoid boxFrame
+                                    doubleCone tetrahedron octahedron
+                                    dodecahedron icosahedron
 
   ops/            ALWAYS COMPILED · not catalogue   the operators
                   smooth.glsl   opSmoothUnion / Intersect / Subtract
