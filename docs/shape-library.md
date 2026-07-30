@@ -1,10 +1,10 @@
 # The shape library
 
-*DESIGN + MIGRATION PLAN, not yet executed (July 2026, branch `scene-builder`).
-`glsl/shapes/` is the library the scene generator draws from; `glsl/objects/` is
-the pre-generator library, now an archive. This file says what the finished
-library looks like, and stages the move. Authoring how-to:
-[scene-authoring.md](scene-authoring.md) §3; the emitter contract:
+*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–4 are
+executed**; 5–8 remain (§5). `glsl/shapes/` is the library the scene generator
+draws from; `glsl/objects/` is the pre-generator library, now an archive. This
+file says what the finished library looks like, and stages the move. Authoring
+how-to: [scene-authoring.md](scene-authoring.md) §3; the emitter contract:
 [generator.md](generator.md) §2.7.*
 
 ---
@@ -80,14 +80,13 @@ glsl/shapes/
 
   ──────────────────────────────────────────────────────────────────────
   models/         on demand    gem bottle bottleTorus cocktailGlass pint
-                               trefoil kleinBottle bunny line
+                               trefoil kleinBottle bunny hypDod hypCoxCube
   fractals/       on demand    apollonian kleinian menger breathe
                                apollonianGasket kleinianSpiral
-  tilings/        on demand    hyperbolicHoneycomb hyperbolicHoneycomb2
-                               hypDod hypCoxCube cubeGrid
+  tilings/        on demand    hyperbolicHoneycomb hyperbolicHoneycomb2 cubeGrid
   environments/   on demand    room checkers
   varieties/      on demand    the formula catalogue (unchanged)
-  vendor/         on demand    the 27 NVIDIA/shadertoy models — IF kept (§7)
+  vendor/         on demand    the 27 NVIDIA/shadertoy models (§7)
 ```
 
 Buckets are by **what the math is**, not by vibe: `primitives/` = exact closed
@@ -240,13 +239,17 @@ icosahedron. Mechanical (§6), with two real edits:
 Additive: no existing scene changes, goldens unchanged. `--catalogue` gains 12
 entries.
 
-### Stage 4 · Models
+### Stage 4 · Models — DONE
 
-`bunny`, `trefoil`, `kleinBottle`, `hypDod`, `hypCoxCube`, `line`. Note
-`bunny`'s **domain guard** (`if(length(p) > 1.) return size*(length(p)-.8);`) —
-that is *not* a bound and must stay inline in the Distance; the sdf is invalid
-outside the ball, so a `<stem>Bound` early-out would still let it paint garbage
-inside the margin band.
+`bunny`, `trefoil`, `kleinBottle`, `hypDod`, `hypCoxCube`. `bunny`'s **domain
+guard** (`if(length(p) > 1.) return size*(length(p)-.8);`) stays inline in the
+Distance — it is *not* a bound: the sdf is invalid outside the ball, so a
+`<stem>Bound` early-out would still let it paint garbage inside the margin band.
+
+**`line.glsl` moved to Stage 6.** It is not a shape — it is a `Line` struct plus
+`lineDist`/`lineNormal`, and its only consumers are the cubic family
+(`cubicSurface`, `cubicLines`, `plateLines`). Porting it before them would mean
+guessing an interface with no callers to check it against.
 
 ### Stage 5 · Fractals and tilings
 
@@ -260,7 +263,6 @@ preset, not a file.
 
 ### Stage 6 · The cubic family
 
-`cubicSurface`, `cubicLines`, `planarConics`, `plateLines`, `boundaryRing`,
 `checkers`. **Its own design pass, not a port** — six coupled, data-driven
 files feeding one polynomial and gradient to five objects with hierarchical
 bounds, overlapping the variety builder and the equation transpiler. Do it
