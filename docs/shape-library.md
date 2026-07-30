@@ -1,6 +1,6 @@
 # The shape library
 
-*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **ALL STAGES EXECUTED** (5 and 6 partially, by decision — see each). `glsl/shapes/` is the library the scene generator
+*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–7 executed**; 8 partial — five unported files deliberately remain (§5). `glsl/shapes/` is the library the scene generator
 draws from; `glsl/objects/` is the pre-generator library, now an archive. This
 file says what the finished library looks like, and stages the move. Authoring
 how-to: [scene-authoring.md](scene-authoring.md) §3; the emitter contract:
@@ -350,36 +350,37 @@ so one-at-a-time works fine, which is how the corpus was always used. Fixing it
 properly means prefixing every internal symbol across 26 files — mechanical but
 large, and worth doing only if a scene actually wants two.
 
-### Stage 8 · Delete `glsl/objects/` — DONE
+### Stage 8 · Delete `glsl/objects/` — PARTIAL, deliberately
 
-The whole tree is gone. Nothing live referenced it (only prose in comments), and
-`legacy/` was already excluded from vite, render-test and gen-pages, so it cost
-nothing to keep and nothing to drop. `objectAPI.glsl` and the `OBJECT_*` macros
-went with it, as did `sdf_gallery/basicGeometry/` (19 duplicates of our own
-primitives, dropped by decision in Stage 7).
+The ported tree is gone (98 files): `basic/`, `shapes/`, the ported `fractals/`,
+`environments/`, `objectAPI.glsl` and the `OBJECT_*` macros, and
+`sdf_gallery/` (its `basicGeometry/` were 19 duplicates of our own primitives;
+its `sdfs/` are now `vendor/`).
 
-**RETRIEVAL POINTER.** Four files were deliberately deferred rather than ported,
-and deleting them should not turn that work into archaeology. They are in commit
-`c010ac7` (the last commit before deletion):
+**FIVE FILES REMAIN, because they are NOT ported.** The rule was delete only what
+has been ported, and these have not been:
 
 ```
-git show c010ac7:glsl/objects/fractals/hyperbolicHoneycomb2.glsl
-git show c010ac7:glsl/objects/fractals/kleinianSpiral.glsl
-git show c010ac7:glsl/objects/polytopes/polytope4D.glsl
-git show c010ac7:glsl/objects/polytopes/makePolytopes.glsl
+glsl/objects/fractals/hyperbolicHoneycomb2.glsl   deferred by the owner
+glsl/objects/fractals/kleinianSpiral.glsl         deferred; still carries the open
+                                                  question of whether it is a
+                                                  distinct estimator or another
+                                                  box of the existing kleinian
+glsl/objects/polytopes/polytope4D.glsl            4D projection — a design
+glsl/objects/polytopes/makePolytopes.glsl         question, not a port
+glsl/objects/multiMaterial/poincareMarble.glsl    a scene recipe (glass shell
+                                                  around hypDod) not yet written
 ```
 
-- `hyperbolicHoneycomb2`, `kleinianSpiral` — deferred by the owner; the spiral
-  still carries the open question of whether it is a distinct estimator or
-  another box of the existing `kleinian`.
-- `polytopes/` — 4D projection, a design question rather than a port.
+They stay on disk until they are ported or explicitly dropped. Git history is not
+a substitute for unfinished work being visible.
 
-Two more that need no pointer because they are already handled elsewhere:
-`kleinianEscape` and `kleinianSeahorse` are the two classic parameter boxes of
-the one `kleinian` estimator and live as presets in `js/presets/fractals.js`;
-the `var*Glass`/`var*Clearcoat` wrappers are superseded by the variety builder.
-`poincareMarble` is a scene recipe (a glass shell around `hypDod`, which is
-ported), not library code.
+Three files were deleted despite having no same-named port, because they are
+genuinely handled elsewhere: `kleinianEscape` and `kleinianSeahorse` are the two
+classic parameter boxes of the ONE `kleinian` estimator and live as presets in
+`js/presets/fractals.js`; the `var*Glass` / `var*Clearcoat` wrappers are
+superseded by the variety builder. If any of those turns out to be wanted,
+`git show c010ac7:<path>` has them.
 
 ---
 
