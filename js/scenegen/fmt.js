@@ -43,6 +43,15 @@ export function fvec3(v){
     return `vec3(${fnum(v[0])}, ${fnum(v[1])}, ${fnum(v[2])})`;
 }
 
+//vec4 literal; equal components collapse to the one-argument form, as vec3 does
+export function fvec4(v){
+    if(!Array.isArray(v) || v.length !== 4){
+        throw new Error(`scenegen: expected [x, y, z, w], got ${JSON.stringify(v)}`);
+    }
+    if(v[0] === v[1] && v[1] === v[2] && v[2] === v[3]) return `vec4(${fnum(v[0])})`;
+    return `vec4(${fnum(v[0])}, ${fnum(v[1])}, ${fnum(v[2])}, ${fnum(v[3])})`;
+}
+
 export function fvec2(v){
     if(!Array.isArray(v) || v.length !== 2){
         throw new Error(`scenegen: expected [x, y], got ${JSON.stringify(v)}`);

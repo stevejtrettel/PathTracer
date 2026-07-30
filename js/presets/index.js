@@ -10,6 +10,10 @@ export {room, sphereLight, fog} from './studio.js';
 export {fbmHeight, fbm2Height} from './fields.js';
 //the named Kleinian boxes: one estimator, its classic parameter bundles
 export {kleinianStandardBox, kleinianSeahorse} from './fractals.js';
+
+//the six regular 4-polytopes — named bundles over the one polytope4D shape
+export {fiveCell, hypercube, sixteenCell, twentyFourCell,
+        oneHundredTwentyCell, sixHundredCell} from './polytopes.js';
 //materials: the archetypes (the model's canonical menu) and their looks, all
 //presets over the scenegen primitives
 export {matte, gloss, metal, plastic, glass, subsurface, light, glow, withCoat,

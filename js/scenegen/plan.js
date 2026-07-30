@@ -32,7 +32,7 @@
 // same fold again, planned by planCutter.
 //-------------------------------------------------
 
-import {fnum, fvec2, fvec3, indent, pad, commentLines} from './fmt.js';
+import {fnum, fvec2, fvec3, fvec4, indent, pad, commentLines} from './fmt.js';
 import {isGlsl, resolveGlsl, bodyText, qLine} from './glslTag.js';
 import {isMat, matKind} from './materials.js';
 import {planVariety} from './varieties.js';
@@ -46,6 +46,7 @@ import {planVariety} from './varieties.js';
 function constText(type, v, where){
     if(v && v.__knob) throw new Error(`scenegen: ${where}: knobs are uniforms — they never become consts`);
     if(isGlsl(v))        return resolveGlsl(v);
+    if(type === 'vec4')  return fvec4(v);
     if(type === 'vec3')  return fvec3(v);
     if(type === 'vec2')  return fvec2(v);
     if(type === 'float') return fnum(v);
