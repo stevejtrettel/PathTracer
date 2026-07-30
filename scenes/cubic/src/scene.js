@@ -8,11 +8,14 @@
 //
 // The surface turns on the `rotation` knob; the diagram stays put.
 //
-// THE DATA IS ITS OWN. scene3d.glsl and scene2d.glsl here are a DIFFERENT
-// surface and a different six points from scenes/cubicSurface and
-// scenes/cubicPlane — this piece was composed with its own configuration, so the
-// files are not shared. Both are machine-written by the cubic-lines project and
-// imported verbatim, filenames kept so a regeneration drops straight in.
+// THE DATA IS THE SAME as the two test scenes: scene3d.glsl is a byte copy of
+// scenes/cubicSurface's and scene2d.glsl of scenes/cubicPlane's, so this piece
+// shows the SAME surface and the SAME six points those two show in isolation —
+// which is what makes them useful as tests of it. (The legacy combined scene had
+// its own unrelated configuration; that is deliberately not carried over.)
+// Both files are machine-written by the cubic-lines project and copied verbatim,
+// filenames kept so a regeneration drops straight in — regenerate all three
+// together to keep them in step.
 //
 // TWO GROUPS, because there are two independent shape evaluations: the surface's
 // polynomial (shared by its shell, its lines and its ring) and the plate's. Each
