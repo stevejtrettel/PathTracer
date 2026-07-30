@@ -201,6 +201,16 @@ Baseline shots first: the affected scenes are already enumerated
 - Bound must be a *conservative underestimate*. A too-tight bound clips the object
   (visible hole); a too-loose bound just costs a little speed. When unsure, err
   large.
+- **Underestimate of WHAT — the true distance, not the sdf.** The invariant is
+  `bound(p) <= dist(p, surface)`. It is NOT `bound(p) <= sdf(p)`, and testing the
+  latter will report false alarms, because many sdfs are themselves underestimates
+  in some directions. Concretely: the platonic solids in `glsl/shapes/primitives/`
+  are an intersection of face slabs, which is exact ON a face but underestimates
+  near a vertex — so their circumsphere bound legitimately EXCEEDS their own sdf
+  out along the vertex directions while still being a true lower bound on distance.
+  The clean way to discharge the invariant for a convex solid is containment: show
+  the solid sits inside the bounding volume, and `|p| - R <= dist(p, ball) <=
+  dist(p, solid)` follows.
 - `BOUND_MARGIN` (0.05) already keeps the bound surface itself out of the hit band;
   no per-object tuning needed.
 - `frame.scale` is applied once in the wrapper; bounds are authored in local units
