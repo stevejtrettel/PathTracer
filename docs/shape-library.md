@@ -1,7 +1,7 @@
 # The shape library
 
-*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–5 are
-executed** (5 partially, by decision); 6–8 remain (§5). `glsl/shapes/` is the library the scene generator
+*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–6 are
+executed** (5 and 6 partially, by decision); 7–8 remain (§5). `glsl/shapes/` is the library the scene generator
 draws from; `glsl/objects/` is the pre-generator library, now an archive. This
 file says what the finished library looks like, and stages the move. Authoring
 how-to: [scene-authoring.md](scene-authoring.md) §3; the emitter contract:
@@ -278,12 +278,44 @@ from the middle, not a clip containing the form, so a bound derived from it
 excluded the shape and rendered it invisible. The outer extent comes from the IFS
 escape and would have to be measured before it could be asserted.
 
-### Stage 6 · The cubic family
+### Stage 6 · The cubic family — PILOT DONE
 
-`checkers`. **Its own design pass, not a port** — six coupled, data-driven
-files feeding one polynomial and gradient to five objects with hierarchical
-bounds, overlapping the variety builder and the equation transpiler. Do it
-after the variety work has settled, against the four `legacy/cubic*` scenes.
+`scenes/cubicSurface` ported as **one group with five regions** (surface, three
+line classes, ring). The legacy `_cachedVal`/`_cachedGrad`/`_cachedPos`/
+`_cachedBBox` file globals are gone: a group evaluates the polynomial once into
+locals and feeds all five regions, which is what those globals were faking.
+
+The four old library files mostly **dissolved** rather than porting: `checkers`
+is six `cylinderDistance` calls, the 2D helpers already lived in the scene, and
+the const arrays are scene data read straight from the machine-written
+`scene3d.glsl` (filename kept, so a regeneration from `cubic-lines` drops in).
+
+Two genuinely new library files:
+- **`ops/curve.glsl` — `opCurveTube`**, the generalized boundary ring: a tube
+  around the curve where ANY two implicit surfaces cross, given each one's value
+  and gradient. The legacy hardcoded the sphere case (`nb = normalize(pos)`).
+  Also draws the curve where two varieties meet each other.
+- **`primitives/line.glsl`** — an infinite line thickened to a radius. Content,
+  not vocabulary; unbounded, so no `<stem>Bound` ever.
+
+**The surface is deliberately not a `variety()`.** A general cubic's 20
+coefficients are machine-generated data, not a formula. Forcing them through the
+equation builder would need the `cubic-lines` exporter to emit JS, would compute
+the polynomial twice (surface and ring could no longer share one evaluation), and
+would change the picture — `DE()` adds a damping term (`+ 5·k`) the legacy
+`val/(|grad| + 0.001)` does not have. `variety()` remains right for the 14
+*formula* varieties.
+
+**Deferred, with the reason recorded in `ops/curve.glsl`:** wiring the tube into
+the modifier chain as `edgeTube(clip(variety(...)))`. The chain passes distances
+between stages, so the variety's gradient dies at the base and the clip's is
+never computed. Real generator surgery — worth doing on a second and third
+caller, and promoting it changes call sites only, never the maths.
+
+**Still owed:** `cubicPlane` (the 2D diagram — same recipe, easy follow-on) and
+`cubic-landscape` / `cubic-portrait` (twice the size, carry the `rotXZ`/
+`standUp`/`plateRot` machinery the ROADMAP wants rewritten; one has a broken
+camera). `line.glsl` landed here as planned.
 
 ### Stage 7 · The vendor decision
 
