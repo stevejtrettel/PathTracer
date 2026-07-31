@@ -34,7 +34,9 @@ const KLEIN_I = 0.0182628;
 const invRadius = knob('invRadius', {label: 'Inversion Radius', min: 0.1, max: 3.0, step: 0.01, value: 0.8});
 const invY      = knob('invY',      {label: 'Inversion Centre y', min: -2.0, max: 3.0, step: 0.01, value: 0.96});
 const invX      = knob('invX',      {label: 'Inversion Centre x', min: -2.0, max: 2.0, step: 0.01, value: 0.0});
-const detail    = knob('detail',    {label: 'Iterations',       min: 6,   max: 60,  step: 1,    value: 24});
+//iterations is an int in the estimator's signature, so the knob must be one
+//too — a float uniform gives 'no matching overloaded function' at compile
+const detail    = knob('detail',    {type: 'int', label: 'Iterations', min: 6, max: 60, step: 1, value: 24});
 const fudge     = knob('fudge',     {label: 'DE Fudge',         min: 0.05, max: 1.0, step: 0.01, value: 0.24});
 
 
