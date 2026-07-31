@@ -139,3 +139,30 @@ varieties-in-glass, and Kleinian gaskets, fewer march steps everywhere — the
 classic marcher and the knobs were removed and the enhanced constants baked in.
 The `render-tests/baseline/` set predates the switch and still matches, so it
 doubles as the reference; the old marcher lives in git history if ever needed.
+
+---
+
+## Per-scene marching constants (July 2026)
+
+`EPSILON`, `maxDist`, `maxMarchSteps`, `MARCH_RELAX`, `MARCH_CONE` and
+`AT_THRESH` are no longer scattered consts in `1Setup/uniforms.glsl` and
+`6Trace/raymarch.glsl`. They are **generated as one block** at the top of the
+assembled shader (`js/shaderData/buildTraceShader.js`), because a scene may
+override the first three with `march: {epsilon, maxDist, maxSteps}`.
+
+They are emitted as plain VALUES, not `#define` hooks: we assemble this shader
+ourselves, so there is no separate compilation unit to guard against and nothing
+to preprocess around.
+
+**`AT_THRESH` became DERIVED**, which was flagged as wanted in
+[generator.md](generator.md) §3.3 and is the reason the block exists at all:
+
+```glsl
+const float AT_THRESH = AT_THRESH_MARGIN*EPSILON*(2. + MARCH_CONE*maxDist);
+```
+
+`MARCH_RELAX`/`MARCH_CONE` moved into the same block because `AT_THRESH` is
+derived from them — a constant and its inputs belong together rather than a file
+apart. At the defaults the formula gives `1.2*0.001*(2 + 0.005*100) = 0.003`,
+exactly the value it had when hand-tuned, which is the evidence the derivation
+is the right one rather than a guess.

@@ -39,6 +39,56 @@ function buildSky(sky){
 }
 
 
+//---------------------------------------------------------------- marching
+// The marcher's tuning constants, generated as ONE block with real numbers.
+//
+// They used to be scattered consts in 1Setup/uniforms.glsl and 6Trace/raymarch.glsl.
+// They live here because a scene may override them (`march: {...}` in its
+// description) — and they are written as plain VALUES rather than #define hooks
+// because we assemble this shader ourselves: there is no separate compilation
+// unit to guard against, so there is nothing to preprocess around.
+//
+// AT_THRESH IS DERIVED, which is the point of the block. Its contract is that it
+// must contain every point the marcher can land on, or setData silently sets
+// nothing and the bounce reuses stale LocalData. raymarch accepts a hit at radius
+// < EPSILON*(1 + MARCH_CONE*t) and backs off by EPSILON, so a landing can sit at
+// |sdf| up to EPSILON*(2 + MARCH_CONE*t), with t up to maxDist. A scene that made
+// EPSILON coarser against a frozen AT_THRESH would get a band too NARROW — a
+// silent, intermittent wrong-material bug. Deriving it makes that unreachable.
+//
+// The margin reproduces the value this constant had when it was hand-tuned:
+// 1.2*0.001*(2 + 0.005*100) = 0.003, exactly.
+const MARCH_DEFAULTS = {epsilon: 0.001, maxDist: 100, maxSteps: 2000};
+
+function marchBlock(march = {}){
+    const known = ['epsilon', 'maxDist', 'maxSteps'];
+    for(const k of Object.keys(march)){
+        if(!known.includes(k)){
+            throw new Error(`scene march: unknown key '${k}' (have: ${known.join(', ')})`);
+        }
+        if(typeof march[k] !== 'number' || !(march[k] > 0)){
+            throw new Error(`scene march: '${k}' must be a positive number, got ${march[k]}`);
+        }
+    }
+    const m = {...MARCH_DEFAULTS, ...march};
+    //integer-valued floats keep their .0, matching the emitter's number rule
+    const f = (x) => Number.isInteger(x) ? `${x}.0` : String(x);
+
+    return `//--- marching constants (generated; a scene overrides them via march:) ---\n`
+        + `const float EPSILON       = ${f(m.epsilon)};\n`
+        + `const float maxDist       = ${f(m.maxDist)};\n`
+        + `const int   maxMarchSteps = ${m.maxSteps};\n\n`
+        + `//over-relaxed sphere tracing (Keinert 2014): the step multiplier, and the\n`
+        + `//cone that widens the hit radius with distance. Tuned by eye, not knobs.\n`
+        + `const float MARCH_RELAX   = 1.2;\n`
+        + `const float MARCH_CONE    = 0.005;\n\n`
+        + `//the hit-classification band, DERIVED so it can never go stale against\n`
+        + `//EPSILON — see the contract in js/shaderData/buildTraceShader.js\n`
+        + `const float AT_THRESH_MARGIN = 1.2;\n`
+        + `const float AT_THRESH = AT_THRESH_MARGIN*EPSILON*(2. + MARCH_CONE*maxDist);\n\n`;
+}
+
+
 let buildTraceShader= function(sceneData, settings){
 
     //newline separators are load-bearing: the glsl plugin can drop a chunk's
@@ -73,7 +123,10 @@ let buildTraceShader= function(sceneData, settings){
     //inject the uniform declarations at the TOP: camera knobs are used inside
     //the setup chunk (camera.glsl), so they must be declared before it.
     let knobDecls = `//--- generated uniforms (knobs) ---\n` + knobUniformDecls(allKnobs) + `\n`;
-    let tracerShader = defineBlock.concat(knobDecls).concat(setupShaderChunk).concat(sceneShaderChunk).concat(traceShaderChunk);
+    //marching constants first: the setup chunk already uses maxDist (analytic
+    //trace functions return it), so they must be declared above it
+    let march = marchBlock(settings.march);
+    let tracerShader = defineBlock.concat(march).concat(knobDecls).concat(setupShaderChunk).concat(sceneShaderChunk).concat(traceShaderChunk);
 
 
     let tracerUniforms = {

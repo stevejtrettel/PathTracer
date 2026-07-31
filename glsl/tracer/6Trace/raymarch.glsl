@@ -41,8 +41,9 @@
 // overestimate distance — varieties, fractals) and the cone-epsilon growth per
 // unit marched distance. Tuned by eye across the whole scene library; these were
 // live marchRelax/marchCone knobs during the A/B (see git history + docs/marching.md).
-const float MARCH_RELAX = 1.2;
-const float MARCH_CONE  = 0.005;
+//MARCH_RELAX and MARCH_CONE are generated with the other marching constants
+//at the top of the assembled shader — AT_THRESH is derived FROM them, so they
+//belong together rather than a file apart (buildTraceShader.js).
 
 
 float raymarch(Vector tv, float stopDist){

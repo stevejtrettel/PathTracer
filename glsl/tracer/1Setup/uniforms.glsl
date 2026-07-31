@@ -30,16 +30,12 @@ uniform float panelToRender;
 //(one value of pi, under two names: the sdf_gallery files use lowercase `pi`)
 const float PI = 3.14159265;
 const float pi = PI;
-const float EPSILON=0.001;
-//hit-classification band for at()/setData. CONTRACT: must contain every point the
-//marcher can land on, or setData silently sets nothing and the bounce reuses stale
-//LocalData. raymarch accepts a hit at radius < EPSILON*(1 + MARCH_CONE*t) and backs
-//off by EPSILON, so the landing can sit at |sdf| up to ~EPSILON*(2 + MARCH_CONE*t);
-//with MARCH_CONE = 0.005 and t up to maxDist = 100 that is 0.0025 — hence 0.003.
-//(was 0.002, which distant grazing hits could exceed.)
-const float AT_THRESH=0.003;
-const int maxMarchSteps=2000;
-const float maxDist=100.;
+//EPSILON, AT_THRESH, maxMarchSteps, maxDist, MARCH_RELAX and MARCH_CONE are NOT
+//here any more: they are GENERATED into one block at the top of the assembled
+//shader (js/shaderData/buildTraceShader.js), because a scene may override them
+//with `march: {...}`. They are emitted with real numbers rather than #define
+//hooks — we assemble the shader ourselves, so there is nothing to preprocess
+//around. See docs/marching.md.
 
 //margin (> EPSILON) at which a bounded object switches from returning its
 //bounding-sphere distance to evaluating its real sdf. Keeps the raw bound out

@@ -526,6 +526,9 @@ export function emit(description, settings = {}){
     const outSettings = {...settings, params};
     if(defines.length) outSettings.defines = defines;
     if(description.sky !== undefined) outSettings.sky = description.sky;
+    //marching overrides are scene identity, like sky: they belong to the
+    //description, and buildTraceShader turns them into the generated block
+    if(description.march !== undefined) outSettings.march = description.march;
 
     return {scene: chunk, settings: outSettings};
 }

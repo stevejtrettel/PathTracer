@@ -372,6 +372,25 @@ This matters only in scattering scenes, where it feeds the emitted
 sky: {type: 'image', src: '/assets/office.jpg'}     //or {type:'solid'|'gradient', ...}
 ```
 
+**Marching** is scene identity too, for the rare scene that needs it:
+
+```js
+march: {epsilon: 0.00005, maxDist: 20, maxSteps: 2000}   //all optional
+```
+
+Almost nothing should set this — the defaults (0.001, 100, 2000) are right for
+solid geometry. It exists for FRACTALS: at the default epsilon the marcher stops
+on a limit set's thin haze and reads it as a solid wall, and a finer one lets it
+see through into the detail. `maxDist` doubles as a ray-length cutoff, fading an
+infinite landscape into sky.
+
+**`AT_THRESH` is derived from these, never set.** Its contract is that it must
+contain every point the marcher can land on, or `setData` silently sets nothing
+and the bounce reuses stale material — so a scene that made epsilon coarser
+against a frozen band would get a silent, intermittent wrong-material bug. The
+derivation (`1.2*epsilon*(2 + MARCH_CONE*maxDist)`) reproduces the old
+hand-tuned 0.003 exactly at the defaults.
+
 ## 10 · Presets
 
 A preset is plain JS returning nodes or fields — ordinary schema use, written

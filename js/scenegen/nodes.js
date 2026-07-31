@@ -115,7 +115,11 @@ export function sheet(name, spec){
 //`ambient:` is the medium of open air (region ID_NONE) — fog/god rays; its
 //fields are validated in emit() against the Medium model. (A curved-light medium,
 //by contrast, is an OBJECT with a position-varying interior IOR, not a scene key.)
-const SCENE_KEYS = new Set(['objects', 'sky', 'glsl', 'ambient']);
+//`march:` overrides the marcher's tuning constants for this scene —
+//{epsilon, maxDist, maxSteps}, all optional. AT_THRESH is DERIVED from them,
+//so a scene cannot break the classifier's contract by setting one
+//(js/shaderData/buildTraceShader.js). Omit it and the engine defaults stand.
+const SCENE_KEYS = new Set(['objects', 'sky', 'glsl', 'ambient', 'march']);
 
 export function scene(spec){
     //drain FIRST: if validation throws, the registries are still clean for the

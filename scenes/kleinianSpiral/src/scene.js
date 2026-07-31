@@ -41,6 +41,15 @@ const fudge     = knob('fudge',     {label: 'DE Fudge',         min: 0.05, max: 
 
 
 export default scene({
+
+    //THE SETTING THAT MAKES THIS FRACTAL VISIBLE AT ALL. The legacy scene set
+    //these as mutable globals in buildObjects; they are scene identity now.
+    //At the engine default (0.001) the marcher stops on the limit set's thin
+    //haze and reads it as a SOLID WALL — 20x finer lets it see through into the
+    //detail. maxDist 20 is the ray-length cutoff the original used, which fades
+    //the infinite landscape into sky. AT_THRESH follows automatically.
+    march: {epsilon: 0.00005, maxDist: 20},
+
     objects: [
 
         object('spiral', {
