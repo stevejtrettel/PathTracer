@@ -1,6 +1,6 @@
 # The shape library
 
-*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **Stages 1–7 executed**; 8 partial — five unported files deliberately remain (§5). `glsl/shapes/` is the library the scene generator
+*DESIGN + MIGRATION PLAN (July 2026, branch `scene-builder`). **ALL STAGES EXECUTED.** `glsl/objects/` is deleted; `glsl/shapes/` is the whole library. `glsl/shapes/` is the library the scene generator
 draws from; `glsl/objects/` is the pre-generator library, now an archive. This
 file says what the finished library looks like, and stages the move. Authoring
 how-to: [scene-authoring.md](scene-authoring.md) §3; the emitter contract:
@@ -350,37 +350,30 @@ so one-at-a-time works fine, which is how the corpus was always used. Fixing it
 properly means prefixing every internal symbol across 26 files — mechanical but
 large, and worth doing only if a scene actually wants two.
 
-### Stage 8 · Delete `glsl/objects/` — PARTIAL, deliberately
+### Stage 8 · Delete `glsl/objects/` — DONE
 
-The ported tree is gone (98 files): `basic/`, `shapes/`, the ported `fractals/`,
-`environments/`, `objectAPI.glsl` and the `OBJECT_*` macros, and
-`sdf_gallery/` (its `basicGeometry/` were 19 duplicates of our own primitives;
-its `sdfs/` are now `vendor/`).
+The tree is gone. Every file was either ported, dissolved into a scene, or
+dropped by decision — the condition was "delete only what has been ported", and
+it is now met rather than waived.
 
-**FIVE FILES REMAIN, because they are NOT ported.** The rule was delete only what
-has been ported, and these have not been:
+The last five, and where each went:
 
-```
-glsl/objects/fractals/hyperbolicHoneycomb2.glsl   deferred by the owner
-glsl/objects/fractals/kleinianSpiral.glsl         deferred; still carries the open
-                                                  question of whether it is a
-                                                  distinct estimator or another
-                                                  box of the existing kleinian
-glsl/objects/polytopes/polytope4D.glsl            4D projection — a design
-glsl/objects/polytopes/makePolytopes.glsl         question, not a port
-glsl/objects/multiMaterial/poincareMarble.glsl    a scene recipe (glass shell
-                                                  around hypDod) not yet written
-```
+| file | disposition |
+|---|---|
+| `polytopes/polytope4D.glsl` + `makePolytopes.glsl` | ported → `models/polytope4D.glsl` + six presets + `scenes/polytope4d` |
+| `multiMaterial/poincareMarble.glsl` | dissolved → `scenes/poincareMarble`: it was a composite struct with hand-written interface logic, which is `nestedIn:` now |
+| `fractals/kleinianSpiral.glsl` | dropped by the owner after the comparison |
+| `fractals/hyperbolicHoneycomb2.glsl` | dropped by the owner (incorrect) |
 
-They stay on disk until they are ported or explicitly dropped. Git history is not
-a substitute for unfinished work being visible.
+Also gone with the tree: `objectAPI.glsl` and the `OBJECT_*` macros, and
+`sdf_gallery/basicGeometry/` (19 duplicates of our own primitives).
 
-Three files were deleted despite having no same-named port, because they are
-genuinely handled elsewhere: `kleinianEscape` and `kleinianSeahorse` are the two
-classic parameter boxes of the ONE `kleinian` estimator and live as presets in
-`js/presets/fractals.js`; the `var*Glass` / `var*Clearcoat` wrappers are
-superseded by the variety builder. If any of those turns out to be wanted,
-`git show c010ac7:<path>` has them.
+**An intermediate state is worth recording as a lesson.** These five were
+deleted once, early, behind a "retrieval pointer" in this document — the
+condition was checked, found unmet, written down, and then overridden anyway.
+They were restored. Git history is not a substitute for unfinished work being
+visible on disk, and a conditional instruction means the condition is obeyed,
+not annotated.
 
 ---
 
