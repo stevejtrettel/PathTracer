@@ -193,7 +193,7 @@ const vec3 ROOM_HALFSIZE = vec3(16.0, 8.0, 18.0);
 //---------------------------------------------------------------------
 
 float sdf_spiral(vec3 p){
-    float d = kleinianDistance(p - SPIRAL_P, SPIRAL_KLEINR, SPIRAL_KLEINI, detail, SPIRAL_OFFSET, SPIRAL_BOX, vec3(invX, invY, 0.0), invRadius, SPIRAL_SIZE, SPIRAL_FOLD, fudge);
+    float d = kleinianDistance(p - SPIRAL_P, SPIRAL_KLEINR, SPIRAL_KLEINI, detail, SPIRAL_OFFSET, SPIRAL_BOX, vec3(invCenter, 0.0), invRadius, SPIRAL_SIZE, SPIRAL_FOLD, fudge);
     return max(d, boxDistance(p - SPIRAL_P - SPIRAL_CLIP_P, SPIRAL_CLIP_HALFSIZE));
 }
 

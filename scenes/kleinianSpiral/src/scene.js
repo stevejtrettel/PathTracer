@@ -32,8 +32,12 @@ const KLEIN_I = 0.0182628;
 
 //the dials of the experiment: the inversion the spiral does not have
 const invRadius = knob('invRadius', {label: 'Inversion Radius', min: 0.1, max: 3.0, step: 0.01, value: 0.8});
-const invY      = knob('invY',      {label: 'Inversion Centre y', min: -2.0, max: 3.0, step: 0.01, value: 0.96});
-const invX      = knob('invX',      {label: 'Inversion Centre x', min: -2.0, max: 2.0, step: 0.01, value: 0.0});
+//one 2D pad rather than two sliders — the centre is a POINT, so dragging it as
+//one reads better than two numbers. z stays pinned at 0; it is a real degree of
+//freedom (the two shipped boxes disagree about it — standard uses z = 0,
+//seahorse z = 1), so add a third dial if the sweep ever wants it.
+const invCenter = knob('invCenter', {type: 'vec2', label: 'Inversion Centre (x, y)',
+                                     min: -2.0, max: 3.0, step: 0.01, value: [0.0, 0.96]});
 //iterations is an int in the estimator's signature, so the knob must be one
 //too — a float uniform gives 'no matching overloaded function' at compile
 const detail    = knob('detail',    {type: 'int', label: 'Iterations', min: 6, max: 60, step: 1, value: 60});
@@ -62,7 +66,7 @@ export default scene({
                 kleinI:          KLEIN_I,
                 iterations:      detail,
                 offset:          [0.0, 0.0, 0.0],
-                inversionCenter: glsl`vec3(${invX}, ${invY}, 0.0)`,
+                inversionCenter: glsl`vec3(${invCenter}, 0.0)`,
                 inversionRadius: invRadius,
                 fudge:           fudge,
             }), {to: lib.box({halfSize: [0.8, 0.7, 0.8]}), at: [0.6, 0.8, -0.7]}),
