@@ -22,7 +22,7 @@
 // reflection, down and it dominates.
 //=====================================================================
 
-import {scene, object, glsl, knob} from '../../../js/scenegen/index.js';
+import {scene, object, clip, lib, glsl, knob} from '../../../js/scenegen/index.js';
 import {room, sphereLight, kleinianSpiralBox, gloss} from '../../../js/presets/index.js';
 
 
@@ -36,7 +36,7 @@ const invY      = knob('invY',      {label: 'Inversion Centre y', min: -2.0, max
 const invX      = knob('invX',      {label: 'Inversion Centre x', min: -2.0, max: 2.0, step: 0.01, value: 0.0});
 //iterations is an int in the estimator's signature, so the knob must be one
 //too — a float uniform gives 'no matching overloaded function' at compile
-const detail    = knob('detail',    {type: 'int', label: 'Iterations', min: 6, max: 60, step: 1, value: 24});
+const detail    = knob('detail',    {type: 'int', label: 'Iterations', min: 6, max: 60, step: 1, value: 60});
 const fudge     = knob('fudge',     {label: 'DE Fudge',         min: 0.05, max: 1.0, step: 0.01, value: 0.24});
 
 
@@ -45,7 +45,10 @@ export default scene({
 
         object('spiral', {
             at:    [0.0, 1.2, 0.0],
-            shape: kleinianSpiralBox({
+            //the spiral is an INFINITE tiling; the legacy scene carved this
+            //exact block out of it ("the spiral we're looking at"), and clip
+            //also donates the bound the estimator cannot derive
+            shape: clip(kleinianSpiralBox({
                 kleinR:          KLEIN_R,
                 kleinI:          KLEIN_I,
                 iterations:      detail,
@@ -53,7 +56,7 @@ export default scene({
                 inversionCenter: glsl`vec3(${invX}, ${invY}, 0.0)`,
                 inversionRadius: invRadius,
                 fudge:           fudge,
-            }),
+            }), {to: lib.box({halfSize: [0.8, 0.7, 0.8]}), at: [0.6, 0.8, -0.7]}),
             material: gloss({diffuse: [0.62, 0.58, 0.52], gloss: 0.15, roughness: 0.25}),
         }),
 

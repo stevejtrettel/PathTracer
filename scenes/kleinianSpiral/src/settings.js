@@ -30,7 +30,7 @@ export const params = [
     { name: 'invRadius', label: 'Inversion Radius',   min: 0.1,  max: 3.0, step: 0.01, value: 0.8 },
     { name: 'invY',      label: 'Inversion Centre y', min: -2.0, max: 3.0, step: 0.01, value: 0.96 },
     { name: 'invX',      label: 'Inversion Centre x', min: -2.0, max: 2.0, step: 0.01, value: 0.0 },
-    { name: 'detail',    type: 'int', label: 'Iterations', min: 6, max: 60, step: 1, value: 24 },
+    { name: 'detail',    type: 'int', label: 'Iterations', min: 6, max: 60, step: 1, value: 60 },
     { name: 'fudge',     label: 'DE Fudge',           min: 0.05, max: 1.0, step: 0.01, value: 0.24 },
     { name: 'roomLight', label: 'Room Light',         min: 0,    max: 2,   step: 0.01, value: 0.6 },
 ];

@@ -171,13 +171,15 @@ float gSDF[N_OBJ];
 
 
 //--- placement and shape parameters ----------------------------------
-const vec3  SPIRAL_P      = vec3(0.0, 1.2, 0.0);
-const float SPIRAL_KLEINR = 1.965295;
-const float SPIRAL_KLEINI = 0.0182628;
-const vec3  SPIRAL_OFFSET = vec3(0.0);
-const vec2  SPIRAL_BOX    = vec2(0.7071, 0.7071);
-const float SPIRAL_SIZE   = 1.0;
-const float SPIRAL_FOLD   = 1.0;
+const vec3  SPIRAL_P             = vec3(0.0, 1.2, 0.0);
+const vec3  SPIRAL_CLIP_P        = vec3(0.6, 0.8, -0.7);
+const vec3  SPIRAL_CLIP_HALFSIZE = vec3(0.8, 0.7, 0.8);
+const float SPIRAL_KLEINR        = 1.965295;
+const float SPIRAL_KLEINI        = 0.0182628;
+const vec3  SPIRAL_OFFSET        = vec3(0.0);
+const vec2  SPIRAL_BOX           = vec2(0.7071, 0.7071);
+const float SPIRAL_SIZE          = 1.0;
+const float SPIRAL_FOLD          = 1.0;
 
 const vec3  KEY_P      = vec3(-8.0, 9.0, 6.0);
 const float KEY_RADIUS = 2.0;
@@ -191,7 +193,8 @@ const vec3 ROOM_HALFSIZE = vec3(16.0, 8.0, 18.0);
 //---------------------------------------------------------------------
 
 float sdf_spiral(vec3 p){
-    return kleinianDistance(p - SPIRAL_P, SPIRAL_KLEINR, SPIRAL_KLEINI, detail, SPIRAL_OFFSET, SPIRAL_BOX, vec3(invX, invY, 0.0), invRadius, SPIRAL_SIZE, SPIRAL_FOLD, fudge);
+    float d = kleinianDistance(p - SPIRAL_P, SPIRAL_KLEINR, SPIRAL_KLEINI, detail, SPIRAL_OFFSET, SPIRAL_BOX, vec3(invX, invY, 0.0), invRadius, SPIRAL_SIZE, SPIRAL_FOLD, fudge);
+    return max(d, boxDistance(p - SPIRAL_P - SPIRAL_CLIP_P, SPIRAL_CLIP_HALFSIZE));
 }
 
 float sdf_key(vec3 p){
@@ -202,6 +205,15 @@ float sdf_key(vec3 p){
 //regionAt() returns ID_NONE there
 float sdf_room(vec3 p){
     return roomDistance(p - ROOM_P, ROOM_HALFSIZE);
+}
+
+
+//---------------------------------------------------------------------
+// the bounds — the acceleration structure (sdf_Scene only; sdfAll stays exact)
+//---------------------------------------------------------------------
+
+float bound_spiral(vec3 p){
+    return boxDistance(p - SPIRAL_P - SPIRAL_CLIP_P, SPIRAL_CLIP_HALFSIZE);
 }
 
 
@@ -319,7 +331,8 @@ float sdf_Scene(Vector tv){
     vec3 p = tv.pos;
     float d = maxDist;
 
-    d = min(d, sdf_spiral(p));
+    float b_spiral = bound_spiral(p);
+    d = min(d, (b_spiral > BOUND_MARGIN) ? b_spiral : sdf_spiral(p));
 
     return d;
 }
