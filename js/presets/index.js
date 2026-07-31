@@ -9,7 +9,7 @@
 export {room, sphereLight, fog} from './studio.js';
 export {fbmHeight, fbm2Height} from './fields.js';
 //the named Kleinian boxes: one estimator, its classic parameter bundles
-export {kleinianStandardBox, kleinianSeahorse} from './fractals.js';
+export {kleinianStandardBox, kleinianSeahorse, kleinianSpiralBox} from './fractals.js';
 
 //the six regular 4-polytopes — named bundles over the one polytope4D shape
 export {fiveCell, hypercube, sixteenCell, twentyFourCell,
