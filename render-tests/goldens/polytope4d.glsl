@@ -183,13 +183,16 @@ int polytope4DPartData(vec3 q, int type, vec4 coords, float vertexRad, float edg
 }
 
 
-// bounding sphere, inherited from the legacy's tuned value: the projected
-// figure lies within radius 2.4. The projection is only bounded because the
-// projection point misses the figure, so this is measured rather than derived —
-// err large if a new (type, coords) pair ever escapes it.
-float polytope4DBound(vec3 p){
-    return length(p) - 2.4;
-}
+// NO BOUND, and there cannot be a constant one. Under the stereographic
+// projection the figure's extent DEPENDS ON THE SPIN: as the S^3 rotation
+// sweeps, cells pass through the projection point and shoot off toward infinity.
+// Measured for the hypercube at vertexRad 0.15, the extent swings from |p| = 1.25
+// at spin -45 to 3.76 at spin 0 — and it is unbounded in principle. The legacy's
+// fixed `length(p) - 2.4` therefore CLIPPED the figure at some spins, which is a
+// bound that silently deletes geometry.
+//
+// A scene that wants finiteness clips explicitly — clip() donates its cutter as
+// the bound, so the cut is visible and chosen rather than accidental.
 
 
 //--- library: glsl/shapes/environments/room.glsl ---
@@ -262,15 +265,17 @@ float gSDF[N_OBJ];
 
 
 //--- placement and shape parameters ----------------------------------
-const vec3 HYPER_P        = vec3(0.0, 1.5, 0.0);
-const int  HYPER_TYPE     = 4;
-const vec4 HYPER_COORDS   = vec4(0.0, 1.0, 0.0, 0.0);
-const vec3 HYPER_SPINAXIS = vec3(0.0, 1.0, 0.1);
+const vec3  HYPER_P           = vec3(0.0, 1.5, 0.0);
+const float HYPER_CLIP_RADIUS = 6.0;
+const int   HYPER_TYPE        = 4;
+const vec4  HYPER_COORDS      = vec4(0.0, 1.0, 0.0, 0.0);
+const vec3  HYPER_SPINAXIS    = vec3(0.0, 1.0, 0.1);
 
-const vec3 DUAL_P        = vec3(0.0, 1.5, 0.0);
-const int  DUAL_TYPE     = 4;
-const vec4 DUAL_COORDS   = vec4(0.0, 0.0, 0.0, 1.0);
-const vec3 DUAL_SPINAXIS = vec3(0.0, 1.0, 0.1);
+const vec3  DUAL_P           = vec3(0.0, 1.5, 0.0);
+const float DUAL_CLIP_RADIUS = 6.0;
+const int   DUAL_TYPE        = 4;
+const vec4  DUAL_COORDS      = vec4(0.0, 0.0, 0.0, 1.0);
+const vec3  DUAL_SPINAXIS    = vec3(0.0, 1.0, 0.1);
 
 const vec3  KEY_P      = vec3(-12.0, 8.0, 2.0);
 const float KEY_RADIUS = 1.5;
@@ -284,11 +289,13 @@ const vec3 ROOM_HALFSIZE = vec3(20.0, 8.25, 15.0);
 //---------------------------------------------------------------------
 
 float sdf_hyper(vec3 p){
-    return polytope4DDistance(p - HYPER_P, HYPER_TYPE, HYPER_COORDS, vertexRad, edgeRad, HYPER_SPINAXIS, spin);
+    float d = polytope4DDistance(p - HYPER_P, HYPER_TYPE, HYPER_COORDS, vertexRad, edgeRad, HYPER_SPINAXIS, spin);
+    return max(d, sphereDistance(p - HYPER_P, HYPER_CLIP_RADIUS));
 }
 
 float sdf_dual(vec3 p){
-    return polytope4DDistance(p - DUAL_P, DUAL_TYPE, DUAL_COORDS, vertexRad, edgeRad, DUAL_SPINAXIS, spin);
+    float d = polytope4DDistance(p - DUAL_P, DUAL_TYPE, DUAL_COORDS, vertexRad, edgeRad, DUAL_SPINAXIS, spin);
+    return max(d, sphereDistance(p - DUAL_P, DUAL_CLIP_RADIUS));
 }
 
 float sdf_key(vec3 p){
@@ -307,11 +314,11 @@ float sdf_room(vec3 p){
 //---------------------------------------------------------------------
 
 float bound_hyper(vec3 p){
-    return polytope4DBound(p - HYPER_P);
+    return sphereDistance(p - HYPER_P, HYPER_CLIP_RADIUS);
 }
 
 float bound_dual(vec3 p){
-    return polytope4DBound(p - DUAL_P);
+    return sphereDistance(p - DUAL_P, DUAL_CLIP_RADIUS);
 }
 
 

@@ -177,10 +177,13 @@ int polytope4DPartData(vec3 q, int type, vec4 coords, float vertexRad, float edg
 }
 
 
-// bounding sphere, inherited from the legacy's tuned value: the projected
-// figure lies within radius 2.4. The projection is only bounded because the
-// projection point misses the figure, so this is measured rather than derived —
-// err large if a new (type, coords) pair ever escapes it.
-float polytope4DBound(vec3 p){
-    return length(p) - 2.4;
-}
+// NO BOUND, and there cannot be a constant one. Under the stereographic
+// projection the figure's extent DEPENDS ON THE SPIN: as the S^3 rotation
+// sweeps, cells pass through the projection point and shoot off toward infinity.
+// Measured for the hypercube at vertexRad 0.15, the extent swings from |p| = 1.25
+// at spin -45 to 3.76 at spin 0 — and it is unbounded in principle. The legacy's
+// fixed `length(p) - 2.4` therefore CLIPPED the figure at some spins, which is a
+// bound that silently deletes geometry.
+//
+// A scene that wants finiteness clips explicitly — clip() donates its cutter as
+// the bound, so the cut is visible and chosen rather than accidental.

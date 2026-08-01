@@ -11,12 +11,19 @@
 // cells swell, pass through infinity and turn inside out. The legacy scene baked
 // one fixed pose (-90 degrees about (0,1,0.1)); here it is live.
 //
+// THE CLIP IS NOT DECORATION. The projected extent depends on the spin — cells
+// pass through the projection point and run off toward infinity, so the figure
+// is unbounded in general (measured: |p| swings from 1.25 to 3.76 across the
+// sweep). The shape therefore carries no bound, and this clip both makes it
+// finite and DONATES the bound the marcher needs. Radius 6 clears the measured
+// range; raise it if a spin pushes the figure through the cut.
+//
 // Vertex and edge are told apart by the shape's `partData` output
 // (docs/shape-data.md), so one region carries both with a material that switches
 // on it — the same channel the room uses for its six walls.
 //=====================================================================
 
-import {scene, object, glsl, knob} from '../../../js/scenegen/index.js';
+import {scene, object, clip, lib, glsl, knob} from '../../../js/scenegen/index.js';
 import {room, sphereLight, hypercube, sixteenCell} from '../../../js/presets/index.js';
 
 
@@ -44,14 +51,16 @@ export default scene({
         //the hypercube (8-cell)
         object('hyper', {
             at:       [0.0, 1.5, 0.0],
-            shape:    hypercube({vertexRad, edgeRad, spinAngle: spin}),
+            shape:    clip(hypercube({vertexRad, edgeRad, spinAngle: spin}),
+                           {to: lib.sphere({radius: 6.0})}),
             material: wireframe(HYPER_VERTEX, HYPER_EDGE),
         }),
 
         //and its dual, in the same place
         object('dual', {
             at:       [0.0, 1.5, 0.0],
-            shape:    sixteenCell({vertexRad, edgeRad, spinAngle: spin}),
+            shape:    clip(sixteenCell({vertexRad, edgeRad, spinAngle: spin}),
+                           {to: lib.sphere({radius: 6.0})}),
             material: wireframe(DUAL_VERTEX, DUAL_EDGE),
         }),
 

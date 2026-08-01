@@ -26,7 +26,7 @@ let location = { position: position, facing: facing };
 export {location};
 
 export const params = [
-    { name: 'coreRadius', label: 'Hollow Core', min: 0,  max: 0.9, step: 0.01, value: 0.4 },
+    { name: 'coreRadius', label: 'Hollow Core', min: 0,  max: 0.35, step: 0.01, value: 0.0 },
     { name: 'roomLight',  label: 'Room Light',  min: 0,  max: 2,   step: 0.01, value: 0.5 },
 ];
 
