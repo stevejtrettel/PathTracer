@@ -150,7 +150,7 @@ float sdf_halo(vec3 p){
     vec3  q = p - HALO_P;
     float d = gemDistance(q, HALO_SIZE);
     d = min(d, abs(d - gap) - 0.04);
-    return opSmoothSubtract(d, planeDistance(p - HALO_P, HALO_CUT_NORMAL));
+    return opSubtract(d, planeDistance(p - HALO_P, HALO_CUT_NORMAL));
 }
 
 float sdf_lamp(vec3 p){

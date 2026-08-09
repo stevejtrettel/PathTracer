@@ -376,7 +376,7 @@ function cutMod(base, spec, kind, operandKey){
             const B    = hard ? null : fx.value('float', `${tok}_BLEND`, blend, `${kind} blend of '${fx.name}'`);
             const combine = (d, ct) => isClip
                 ? (hard ? `max(${d}, ${ct})`            : `smax(${d}, ${ct}, ${B})`)
-                : (hard ? `opSmoothSubtract(${d}, ${ct})` : `opSmoothSubtract(${d}, ${ct}, ${B})`);
+                : (hard ? `opSubtract(${d}, ${ct})`       : `opSmoothSubtract(${d}, ${ct}, ${B})`);
             return {
                 expr: (d, pt) => combine(d, cut.call(pt)),
                 frame: 'local',
