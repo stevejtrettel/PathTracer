@@ -1,7 +1,8 @@
 # Bounding-volume acceleration: uniform system + as-built record
 
 > **Status: implemented** (branch `refactor`, July 2026). Stages A–E below were
-> carried out and render-tested against baselines in `render-tests/baseline/`.
+> carried out and render-tested against the local render-test screenshots
+> (`render-tests/*.png`, untracked — there is no committed baseline set).
 > An "As built" section at the end records where reality differed from the plan.
 
 
@@ -179,8 +180,8 @@ one step that changes a working path, so it renders-tests on its own.
 
 ## Rollout (behaviour-frozen, render-test between stages)
 
-Baseline shots first: the affected scenes are already enumerated
-(`render-tests/baseline/`). After each stage, re-render the same set and diff.
+Baseline shots first: screenshot the affected scenes with `render-test.mjs`.
+After each stage, re-render the same set and diff.
 
 - **Stage A — API change + migrate the 8.** `objectAPI.glsl` signature; convert
   `box`, `cubicSurface`, six varieties from radius to bound-sdf. No visual change.

@@ -410,8 +410,10 @@ explaining the math (the ports so far are the standard —
 [gem.glsl](../glsl/shapes/gem.glsl), [cubeGrid.glsl](../glsl/shapes/cubeGrid.glsl)).
 
 Demos come later, as their own pass: every shape earns a scene so it is
-render-tested rather than orphaned (the ROADMAP already flags `menger`,
-`trefoil` and `hypDod` as library surface no scene exercises).
+render-tested rather than orphaned. (`menger`, `trefoil` and `hypDod` — once
+flagged here as unexercised — now have `scenes/menger`, `scenes/trefoil`, and
+`scenes/poincareMarble`/`scenes/hyperbolic`; the vendor bucket remains mostly
+scene-less by choice.)
 
 ---
 

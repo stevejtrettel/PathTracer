@@ -8,12 +8,13 @@ the first field in this family.
 > TL;DR — two mechanisms, both scene-owned, both zero-cost when unused:
 > **(1) surface fields**: in `setData_Objects`, sample a `Material` at the hit
 > point and hand it to `applyMaterial(path, mat)`
-> ([setImpactData.glsl](../glsl/tracer/3Materials/setImpactData.glsl)) — every
+> (now `setData_Scene` in [scene.glsl](../glsl/tracer/5Scene/scene.glsl)) — every
 > field of `Material` (albedo, roughness, specularity, emission, IOR…) can vary
 > over the surface. **(2) volume fields**: `indexField(p)` + the bounded-medium
 > contract, exactly as before, except the `return 1.;` boilerplate is gone —
 > the engine supplies that default; a medium scene `#define SCENE_INDEX_FIELD`s
-> above its real one. Demo: [scenes/marble](../scenes/marble).
+> above its real one. Demo: [scenes/luneburg](../scenes/luneburg) (the original
+> `scenes/marble` demo was retired in the materials overhaul).
 
 ## The taxonomy
 

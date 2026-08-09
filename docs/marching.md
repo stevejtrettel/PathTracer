@@ -137,8 +137,9 @@ it could be A/B-validated against the frozen reference per scene. Once confirmed
 uniform, geometry-identical win — same images across fractals, varieties,
 varieties-in-glass, and Kleinian gaskets, fewer march steps everywhere — the
 classic marcher and the knobs were removed and the enhanced constants baked in.
-The `render-tests/baseline/` set predates the switch and still matches, so it
-doubles as the reference; the old marcher lives in git history if ever needed.
+The pre-switch render-test screenshots (local, untracked — `render-tests/*.png`)
+still matched, so they doubled as the reference; the old marcher lives in git
+history if ever needed.
 
 ---
 

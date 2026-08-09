@@ -12,8 +12,8 @@ uniform mat3 facing;
 uniform vec3 location;
 uniform float frameNumber;
 
-//camera/render/scratch knob uniforms (aperture, fov, exposure, focusHelp,
-//maxBounces, scratch1..4, ...) are generated from the knob lists and injected
+//camera/render/scratch knob uniforms (aperture, fov, exposure, maxBounces,
+//scratch1..4, uDebugMode, ...) are generated from the knob lists and injected
 //at the top of the shader by buildTraceShader.js. See js/shaderData/knobs.js.
 
 uniform bool renderPanel;

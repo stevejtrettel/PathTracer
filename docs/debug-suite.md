@@ -1,6 +1,7 @@
 # Debug suite — design plan
 
-> **Status: planned.** A coherent, permanent set of visual debugging lenses for
+> **Status: BUILT** (slices 1–3, all 9 modes — see the build record at the end;
+> this header once said "planned"). A coherent, permanent set of visual debugging lenses for
 > authoring SDFs and inspecting the renderer. Supersedes the narrower
 > `bound-debug-view.md` (its modes are folded in here). Companion to
 > `docs/bounding-volumes.md`.
@@ -164,8 +165,9 @@ precedent, `maxBounces` the int precedent). The suite is one new knob group:
 ```js
 // engineKnobs.js — a 'debug' group → its own GUI tab
 const debugKnobs = [
-  { name: 'uDebugMode',  label: 'Mode', type: 'int', min: 0, max: 8, step: 1, value: 0, group: 'debug' },
+  { name: 'uDebugMode',  label: 'Mode', type: 'int', min: 0, max: 9, step: 1, value: 0, group: 'debug' },
   { name: 'dbgHeatScale',label: 'Heat Scale', min: 8, max: 512, step: 1, value: 128, group: 'debug' },
+  { name: 'dbgFocusBand',label: 'Focus Band', min: 0.002, max: 2, step: 0.002, value: 0.1, group: 'debug' },
 ];
 ```
 

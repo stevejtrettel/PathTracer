@@ -124,9 +124,10 @@ widgets (not every control is a knob — resize/save/download are engine actions
 
 ```
 Scene    knobs: named params + scratch
-Camera   knobs: fov · aperture · focalLength · exposure · focusHelp   + pose readout / reset
+Camera   knobs: fov · aperture · focalLength · exposure · focus-peaking toggle   + pose readout / reset
 Render   knob: maxBounces (+ advanced quality later)   actions: resolution · aspect · preview
 Export   actions: Save Image · Download Settings · autosave · HD tiles (whole feature)
+Debug    debug lens dropdown + heat scale / focus band   (added with the debug suite)
 Help     keybinding map + stats
 ```
 
@@ -164,7 +165,8 @@ coupled workflow; splitting its geometry into Render isn't worth the cross-tab f
 - **C2** the new affordances: Render **live Aspect** dropdown (presets incl. √2, re-fits
   canvas; preselects `settings.aspect`); Camera **pose readout + Reset**; **fps stats moved
   into Help** (createScene hands `stats` to UI). `select` generalized to `[label,value]`
-  pairs. Sky-color kept **file-driven** (rarely needs a live knob) — no `colorPicker` built.
+  pairs. Sky-color kept **file-driven** (rarely needs a live knob) — no `colorPicker` built
+  *at the time; one exists now, see below*.
 
 - **C3** Render/Export simplification. **Render tab** = live image: `Scale` (Full/Half/
   Quarter — folds the old Size-to-Screen button + Preview toggle; Quarter == old preview),
@@ -178,5 +180,6 @@ coupled workflow; splitting its geometry into Render isn't worth the cross-tab f
   override + single-tile re-render (recovery). `exposure` stays a Camera control. Auto-stitch
   was **considered and skipped** — per-tile save is the method (robust to memory / lost tiles).
 
-**Phase 5 COMPLETE (C1 + C2 + C3).** Deferred if ever wanted: a `colorPicker` widget for a
-live sky-color knob (Scene tab), and `xyPad` for vec2.
+**Phase 5 COMPLETE (C1 + C2 + C3).** The two widgets deferred here were **since built**:
+`colorPicker` and `xyPad` both live in `js/gui/widgets.js` (routed by `control()`), with
+`type: 'color'` knobs in active use across the room-preset scenes.

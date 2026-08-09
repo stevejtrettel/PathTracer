@@ -39,7 +39,7 @@ replacing today's three `vec2` evaluations with the value computed thrice.
 - **The hand `vec2` path survives only through migration** (decided: the
   statement-level transpiler covers the Chebyshev-class formulas too, so no
   formula NEEDS hand dual code). While hand T-GLSL formulas remain, they
-  keep the three-seed `data_` wrapper exactly as `scenes/variety` writes it —
+  keep the three-seed `data_` wrapper exactly as `scenes/variety-barth` writes it —
   both paths meet at the same `vec4 data_` contract. When the last one is
   converted: the vec2 T library, the three-seed wrappers, and `#define T vec2`
   itself are DELETED — which also retires the "a variable may not be named

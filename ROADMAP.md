@@ -1,82 +1,85 @@
 # Project state & open items
 
-State as of July 2026 (branch `refactor`). The big refactors are **done**; this file is
-now a record of what's in place plus the handful of genuinely open items. For how to run,
-write a scene, or use the object API, see `readme.md`.
+State as of August 2026 (branch `scene-builder`). The big refactors are **done**; this
+file is a record of what's in place plus the genuinely open items. For how to run or
+write a scene, see `readme.md`; per-system design docs live in `docs/`.
 
-## Done
+## Done (each with its authority doc)
 
-- **Object library on the Frame system.** Every object is a struct with a `Frame frame`
-  (similarity transform: rot/pos/scale), a hand-written **local** `sdf(vec3 p, Type obj)`,
-  and `OBJECT_API(Type)` generating the world-facing interface. Convention: `vec3` arg =
-  local coords, `Vector` arg = world ray state. Optional tight bounding via `float bound(Type)`
-  + the `*_B` macros (a real cull; baked into Box, CubicSurface, the surf*/var* families).
-- **Named-params knob system.** Every tunable control is one data object
-  `{name, label, type, min, max, step, value, group}`; one generator (`js/shaderData/knobs.js`)
-  emits the GLSL uniform, the GUI slider, and the `settings.js` serialization. Scenes declare
-  named params in `settings.js`; **44 of 45 scenes** use them (all but the parameterless
-  `skyDemo`) — the earlier `scratch1..4` convention was swept into labeled sliders (see below).
-  `scratch1..4` remain as always-present engine knobs for quick live experiments.
-- **Custom tabbed GUI** (Scene / Camera / Render / Export), a plain vanilla-JS renderer of
-  the knob list. `lil-gui` is gone.
-- **Raw-WebGL2 harness.** three.js fully removed; renderer in `js/ComputeShader.js`, math
-  vendored into `js/math/`. Details in `docs/webgl-migration.md`.
-- **Named-params sweep + collision lesson (July 2026).** The gallery had an unwritten
-  convention — scratch1 = `isotropicScatter`, scratch2 = `meanFreePath`, scratch4 = ceiling
-  light — repeated across ~34 scenes. Converted to named sliders (`sssScatter`, `sssDensity`,
-  `roomLight`, plus one-offs `rotation`/`emission`/`roughAmt`). NOTE for future knobs: a param
-  is a **global** in the assembled shader, so names must avoid collisions — `scatter` clashes
-  with the core `scatter()` fn, `light` with `Sphere light;`, `roughness` with locals.
+- **Raw-WebGL2 harness.** three.js fully removed; renderer in `js/ComputeShader.js`,
+  math vendored into `js/math/`. (`docs/webgl-migration.md`)
+- **Scene generator.** Scenes are declarative `src/scene.js` descriptions; the GLSL
+  scene chunk is emitted by `js/scenegen/`, all 46 scenes converted, hand-written
+  scene GLSL deleted. Byte-exact goldens in `render-tests/goldens/` gate the emitter
+  (`node scripts/gen.mjs --goldens`). (`docs/scene-authoring.md`, `docs/generator.md`)
+- **Shape library.** `glsl/objects/` deleted; `glsl/shapes/` is a two-layer library —
+  always-compiled vocabulary + on-demand catalogue (63 entries), per-scene `march:`
+  constants with derived `AT_THRESH`. (`docs/shape-library.md`)
+- **Modifier chains.** Stacking wrappers `mirror/radial/repLim/round/shell/clip/
+  subtract/carve/accrete/displace` + the authored `modifier()` escape hatch.
+  (`docs/shape-modifiers.md` §10.5 as-built, `docs/authored-modifiers.md`)
+- **Materials as JS value bundles.** Vocabulary in `glsl/tracer/3Materials/`, named
+  materials in `js/presets/materials.js`; Surface+Medium structs, coat/microfacet
+  scatter tree, pure-Fresnel glass, material data as fields. (`docs/material-system.md`,
+  `docs/material-fields.md`)
+- **Marching.** Over-relaxed sphere tracing + adaptive cone epsilon only; per-scene
+  constants. (`docs/marching.md`)
+- **Curved-light transport.** ODE media (graded-index optics, black holes) via
+  symplectic `odeMarch` + the bounded-medium contract. (`docs/curved-light-blackhole.md`)
+- **Spectral dispersion.** `spectral` master switch, refractivity-scaled `iorAt`;
+  off = byte-identical tracer. (`glsl/tracer/1Setup/spectral.glsl`)
+- **Custom tabbed GUI.** Six tabs (Scene/Camera/Render/Export/Debug/Help), knob system
+  (declared via `knob()` in `scene.js`), colorPicker + xyPad widgets, Save-to-Scene.
+  (`docs/gui-design.md`)
+- **Debug suite.** 9 debug lenses (`uDebugMode`), bound shells, focus peaking,
+  step-count heatmap. (`docs/debug-suite.md`)
+- **Equation transpiler.** Parse/verify/emit for variety formulas, gated behind
+  `gen.mjs --equations`, byte-exact fixtures. (`docs/equation-transpiler.md`)
 
-## The shadertoy fractal family (July 2026)
+## Open / owed
 
-Seven shadertoys adapted into the tracer, all on a shared recipe:
-`kleinianSpiral`, `hyperbolicHoneycomb`, `hyperbolicHoneycomb2`, `kleinianSeahorse`,
-`breathe`, `apollonian`, `kleinianEscape` (source shadertoys kept under `shadertoys/`).
+- **Render verification.** There is no image-comparison step: `scripts/render-test.mjs`
+  is screenshot-and-eyeball, `render-tests/*.png` are untracked, and
+  `render-tests/baseline/` is empty (docs that claim otherwise referred to local,
+  never-committed shots). Owed: a tracked baseline set + a diff step. Blocked-ish on
+  the SSS re-tune below (no point baking looks that will change).
+- **SSS re-tune + baseline bake.** The July 2026 subsurface direction-normalization
+  fix legitimately changed the look of ~21 `subSurface` scenes; `meanFreePath` wants
+  a per-scene by-eye re-tune before baselines are baked.
+- **Variety builder, remaining phases.** Per `docs/variety-builder.md`: migrate the
+  legacy variety bucket (~14 scenes), the float-source catalogue end state,
+  `--catalogue` listing varieties, integrate the equation transpiler into the
+  `variety()` base, and the owner's by-eye pass on the pilot.
+- **Deferred hero-wavelength sampling.** Fully designed in `docs/spectral-deferred.md`
+  (draw λ lazily at the first dispersing refraction), not implemented — spectral rays
+  still pay chroma variance on non-dispersing paths.
+- **By-eye pass over the generated scenes.** The scenegen conversion was verified by
+  golden bytes, not by looking at renders; a variety/quality pass over the gallery is
+  still owed.
+- **Legacy demos.** `gen-pages.mjs` has `DEMO_KINDS = []`; the curated demo library
+  under `legacy/` is not yet ported to the region system.
+- **ComputeShader ABI shim.** `js/ComputeShader.js` keeps the three.js-era interface
+  (`material.uniforms[name].value`, `gl_FragColor` rewriting); all callers are owned
+  code, so it could be collapsed someday.
+- **Unwrapped ops.** `opRep` (infinite repeat), `opElongate`, `opTwist`,
+  `opRevolution`, `opExtrusion`, `opSmoothUnion`, `opSmoothIntersect` exist in
+  `glsl/shapes/ops/` with no scenegen wrapper — deliberate library surface, wrap on
+  demand. No per-cell ID comes out of `opRep/opRepLim`, so repeated copies are
+  necessarily identical; that plus a smooth-union between two catalogue shapes are
+  the known expressiveness gaps if they're ever wanted.
+- **`pi` vs `PI`** both exist (lowercase used by vendored `sdf_gallery` files) —
+  unify only if touching those files anyway.
+- **`CAMERA_OFFSET`** (`glsl/tracer/2Space/camera.glsl`) is a legacy world offset
+  baked into every saved pose; removing it means reframing every scene.
 
-- **Recipe.** Extract only the SDF/DE and camera; discard the shadertoy's own renderer
-  (AO, fog, bloom, DOF, lighting) — our path tracer supplies that. New object file per shape
-  under `glsl/objects/fractals/`, standard object API. Fractal DEs overestimate, so bake a
-  fudge factor into the returned distance and tune by eye.
-- **Coloring convention.** Objects stay geometry-only and expose a *probe* —
-  `vec4/vec3 orbitTrap(vec3 p, obj)` or `int region(vec3 p, obj)` — and the scene owns the
-  palette, applied as a **followup to `setData`**:
-  ```glsl
-  void setData_Objects(inout Path path){
-      setData(path, obj);                          // geometry + flat base material
-      if( at(path.tv, obj) ){                      // recolor followup, scene-owned
-          vec3 p = toLocal(obj.frame, path.tv.pos);
-          path.dat.surfDiffuse = myColor(p);       // uses the probe; edit freely
-      }
-  }
-  ```
-  This keeps the `Material` struct unchanged (no core edits) while allowing position-dependent
-  color. Deform parameters (`time`, `KleinR/I`, `r2`, fold depth) are struct fields driven by
-  named params.
-- **Per-scene rendering knobs (not geometry!).** `maxDist` and `EPSILON` are mutable globals
-  settable in `buildObjects` — a shorter `maxDist` gives a ray-length cutoff (fade to sky),
-  a finer `EPSILON` lets the marcher see through a fractal's thin "haze" instead of reading it
-  as a solid wall. Infinite tilings can be carved to a finite hero block with a clip box.
-- **Camera conversion.** shadertoy EYE/TARGET/UP → our `position = EYE - CAMERA_OFFSET`,
-  `facing` rows `= [right | up | -forward]`. (Watch the basis arithmetic — a slip gives a
-  subtly-wrong pose.)
+## Gotchas worth re-reading
 
-## Open / deferred
-
-- **cubic-portrait camera aim** — renders near-black; the x=0 object stack is mostly out of
-  frame. Re-aim `facing` by eye in the app (WASD + pose readout + Save to Scene).
-- **Cubic scenes' rotation machinery** — `rotXZ`/`standUp`/`plateRot` mutate positions in a
-  pseudo-world; could fold into object frames and delete the scene-level code (needs eyeballing).
-- **Glass shells don't inherit variety frames** — `createVar*Glass` places the shell with
-  `makeFrame(var.frame.pos)` (no rotation/scale). Fine today; revisit if a scene rotates a
-  wrapped variety.
-- **Local-unit thresholds** — the surf* edge-band (0.005) and the gasket bail-out are in local
-  units, so they scale *with* the object (arguably correct; only matters for `frame.scale != 1`).
-- **`pi` vs `PI`** both exist (lowercase used by vendored `sdf_gallery` files) — unify only if
-  touching those files anyway.
-- **Orphan library objects** — `menger`, `trefoil`, `poincareMarble`/`hypDod` have no scene.
-  Kept deliberately (library surface); a tiny demo scene each would keep them render-tested.
-- **render-test gotcha** — `vite-plugin-glsl` caches the inlined `setupShader`, so editing an
-  *included* `.glsl` without touching the parent serves a stale shader. `rm -rf node_modules/.vite`
-  before render-testing include changes; kill stray dev servers first (a squatter on :5173
-  makes render-test screenshot the wrong app).
+- **Knob names are globals** in the assembled shader — avoid collisions with engine
+  symbols (`scatter`, `light`, `roughness`...). `checkReserved` throws at declaration
+  time for the known engine names.
+- **render-test:** `vite-plugin-glsl` caches the inlined `setupShader`, so editing an
+  *included* `.glsl` without touching the parent serves a stale shader —
+  `rm -rf node_modules/.vite` first. Kill stray dev servers (a squatter on :5173
+  makes render-test screenshot the wrong app). Spectral/small-light scenes (e.g.
+  `gem`) converge far too slowly for the default budget; a speckled-but-nonblack
+  frame still proves the shader compiled.

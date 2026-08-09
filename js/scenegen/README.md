@@ -32,7 +32,7 @@ the standard room) is a preset: plain JS you import.
 | `index.js` | the public surface — everything a scene.js imports |
 | `nodes.js` | `scene()` / `object()` / `group()` / `sheet()` — validated plain-data nodes; groups are always AUTHORED sdf bodies; `uses: [lib.x]` declares library calls inside authored code. `scene()` drains the knob/field registries onto the description, so the returned value is SELF-CONTAINED and `emit()` is pure |
 | `catalogue.js` | `glsl/shapes/*.glsl` parsed into builders (`lib.sphere({...})`); no companion JS files, the .glsl signatures ARE the metadata |
-| `combinators.js` | the two shape wrappers: `displace(by, amp)`, `repLim(spacing, limit)` |
+| `combinators.js` | the shape wrappers (eleven): `displace`, `repLim`, `carve`, `accrete`, `mirror`, `radial`, `round`, `shell`, `clip`, `subtract`, plus the authored `modifier()` escape hatch |
 | `fields.js` | `field()` — ONE kind: an authored GLSL function + declared `{gradBound, range}` (required only to displace) |
 | `materials.js` | the material PRIMITIVES only: `material({surf, interior})` (the escape hatch — a `{surf, interior}` bundle from raw struct fields), `withSurface`/`withMedium`/`named` merges, `matKind` (from set-fields), `absorbFor`, `checkArgs`. Names NO material — every named material (archetypes + looks) is a preset in `js/presets/materials.js` |
 | `knobs.js` | `knob()` — self-registering tunables, drained by scene() |

@@ -4,7 +4,7 @@
 ([`equation-transpiler.md`](equation-transpiler.md)), the formula catalogue,
 the `variety()` base on the chain, the marched-sheet emission, the
 `shell({inward, outward})` extension, and the clip-or-bound validation are
-all live; `scenes/variety` converted as the pilot (the last hand-written
+all live; `scenes/variety` (since renamed `scenes/variety-barth`) converted as the pilot (the last hand-written
 `scene.glsl` retired — it had been silently broken since the
 roomFace→roomFaceData migration, so the conversion was also the fix). All
 pre-existing goldens byte-identical throughout. As-built deltas:

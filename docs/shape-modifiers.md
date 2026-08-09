@@ -126,8 +126,9 @@ conservatively); the chain nests as one expression, planned by the same fold.
   `toLocal_<name>(p)` on a transformed node, so the cut rides the transform
   (plain `max` when `blend` is 0; the `- <NAME>_CLIP_P` is omitted when `at`
   is the origin)
-- subtract line: `d = opSubtractDist(d, <cutter>, BLEND);` — `opSubtractDist(a, b, k)`
-  already exists in `glsl/shapes/ops/`.
+- subtract line: `d = opSubtract(d, <cutter>);` when `blend` is 0, else
+  `d = opSmoothSubtract(d, <cutter>, BLEND);` (as-built: the plan's single
+  `opSubtractDist` was split into these two by the ops rename).
 - clip bound: **replaced** by the CUTTER'S bound — its `Bound` if the catalogue
   has one (else its `Distance`), with the cutter's own chain folded by the same
   keep/inflate rules, minus the blend. A carved cutter donates its uncarved
@@ -137,7 +138,8 @@ conservatively); the chain nests as one expression, planned by the same fold.
   lattice, a limit set) gets a bound it could not otherwise have.
   **The `- BLEND` is required**, not cosmetic: the polynomial smax bulges outward
   by up to `blend/4`, and a bound that ignores it tunnels at the cut edge. (The
-  hand-written `scenes/variety/src/scene.glsl` does exactly this by hand:
+  hand-written `scenes/variety/src/scene.glsl` (git history; now the generated
+  `scenes/variety-barth`) did exactly this by hand:
   `bound_sheet = sphereDistance(q, CLIP_R + CLIP_SMOOTH)`.)
 - subtract bound: base, unchanged (the result is inside the base).
 - Sign convention to state in the doc comment: `planeDistance` is negative behind
