@@ -18,16 +18,10 @@
 //the cap. maxBounces keeps its meaning: full-effort depth.
 const int   RR_TAIL_LEN = 12;
 const float RR_TAIL     = 0.75;
-
-//THE ROULETTE DELAY: no roulette before RR_START. From bounce 0, kills run at
-//p = throughput and survivors are boosted back to full strength — so a dark
-//wall's indirect light arrives as RARE FULL-WEIGHT samples (albedo 0.1: 90%
-//dead after one bounce, the rest at weight 1 = speckle). With no light sampling
-//in this tracer, later bounces are the ONLY light those pixels get. Letting the
-//throughput accumulate deterministically first trades a little marching (paths
-//live ≥ RR_START segments) for frequent-dim samples instead. Unbiased: survival
-//probability 1 is legal roulette. 0 restores the old behavior exactly.
-const int   RR_START = 2;
+//(a RR_START delay — skip roulette for the first bounces to smooth dark-wall
+//speckle — was built and REVERTED Aug 2026: with 0.1-albedo walls and expensive
+//marching, it tripled the cost of most primary paths and glass scenes converged
+//visibly slower at equal wall-clock. Bounce-0 roulette is load-bearing here.)
 
 
 vec3 pathTrace(Path path){
@@ -64,11 +58,8 @@ vec3 pathTrace(Path path){
         updateFromSurface(path);
 #endif
 
-        //probabilistically kill rays: free flight before RR_START, throughput
-        //roulette in the body, wind-down past maxBounces
-        if(bounceIndex >= RR_START){
-            roulette(path, bounceIndex < maxBounces ? 1. : RR_TAIL);
-        }
+        //probabilistically kill rays; past maxBounces, wind the path down
+        roulette(path, bounceIndex < maxBounces ? 1. : RR_TAIL);
 
         if(!path.keepGoing){ break; }
 
