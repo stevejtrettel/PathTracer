@@ -10,8 +10,8 @@
 // Turn the wall thin and the immersion's self-intersection becomes legible.
 //=====================================================================
 
-import {scene, object, lib, knob} from '../../../js/scenegen/index.js';
-import {room, sphereLight, matte} from '../../../js/presets/index.js';
+import {scene, object, lib, knob, glsl} from '../../../js/scenegen/index.js';
+import {room, sphereLight, glass} from '../../../js/presets/index.js';
 
 
 const bottleSize = knob('bottleSize', {label: 'Bottle Size',    min: 0.2, max: 1.6,  step: 0.01,  value: 0.9});
@@ -28,10 +28,10 @@ export default scene({
             //reads as a plain vase and the self-intersection is hidden
             rotate:   {axis: [0.0, 1.0, 0.0], angle: 60},
             shape:    lib.kleinBottle({size: bottleSize, thickness: wallThick}),
-            material: matte({diffuse: [0.8, 0.74, 0.64]}),
+            material: glass({absorb: glsl`0.1*vec3(0.3, 0.05, 0.2)`, ior: 1.5}),
         }),
 
-        sphereLight({name: 'key', at: [7.0, 13.0, 10.0], radius: 3.0, power: 3200}),
-        room({center: [0.0, 10.0, 0.0], half: [14.0, 10.0, 22.0], knobs: {roomLight: {value: 1.8}}}),
+        sphereLight({name: 'key', at: [7.0, 13.0, 10.0], radius: 3.0, power: 400}),
+        room({center: [0.0, 10.0, 0.0], half: [14.0, 10.0, 22.0]}),
     ],
 });

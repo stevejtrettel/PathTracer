@@ -56,17 +56,22 @@ void updateFromSky(inout Path path){
 
 
 
-void roulette(inout Path path){
+void roulette(inout Path path, float scale){
 
     // As the light left gets smaller, the ray is more likely to get terminated early.
     // Survivors have their value boosted to make up for fewer samples being in the average.
+
+    // scale (0,1] forces survival below what the throughput alone would give — any
+    // value is unbiased, since the boost divides by the same p. pathTrace passes
+    // RR_TAIL past maxBounces to wind deep paths down instead of truncating them;
+    // everyone else passes 1.
 
     // p MUST be capped at 1: survival probability is min(|light|,1), and the unbiased
     // boost is 1/that. Dividing by an uncapped p>1 (which never terminates) silently
     // DELETES energy — invisible while throughput stays <=1, but spectral tints start
     // near 4 in their dominant channel, so every spectral path was losing most of its
     // weight at the first roulette (wavelength-dependently: band centres lost most).
-    float p = min(LInf_Norm(path.light), 1.);
+    float p = scale * min(LInf_Norm(path.light), 1.);
     if (randomFloat() > p){
         path.keepGoing = false;
     }
@@ -75,3 +80,5 @@ void roulette(inout Path path){
         path.light *= 1. / p;
     }
 }
+
+void roulette(inout Path path){ roulette(path, 1.); }

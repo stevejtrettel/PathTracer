@@ -6,7 +6,7 @@ let uiParams = {
     fov: 42,
     spectral: false,
     dispersion: 0.2,
-    maxBounces: 6,
+    maxBounces: 32,
     scratch1: 0.5,
     scratch2: 0.5,
     scratch3: 0.5,
