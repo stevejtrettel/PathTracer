@@ -24,12 +24,37 @@ const sceneRoot = process.env.SCENE_ROOT
 // settings.js contents to <scene root>/<name>/src/settings.js. The scene is a
 // single validated path segment (no slashes / dots / traversal); the root it
 // lives under is resolved here, never taken from the request.
+//
+// Only the GUI's own page may write. Without these checks ANY web page open
+// while `npm run dev` runs could POST here — a text/plain body is a "simple"
+// request that needs no CORS preflight — and replace a scene's settings.js,
+// which then runs as code when the scene opens:
+//   - JSON only: a cross-site page can only send JSON after a CORS preflight,
+//     which this handler never approves
+//   - a local Host: stops DNS rebinding (a hostile name pointed at 127.0.0.1)
+//   - Origin (when the browser sends one) must be this same host
+// (So Save to Scene only works from localhost / 127.0.0.1, which is how
+// `npm run dev` serves.)
+function isOwnPage(req){
+    let host   = req.headers.host ?? '';
+    let local  = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host);
+    let json   = /^application\/json\b/.test(req.headers['content-type'] ?? '');
+    let origin = req.headers.origin;
+    let same   = !origin || origin === `http://${host}` || origin === `https://${host}`;
+    return local && json && same;
+}
+
 function saveSettingsPlugin(){
     return {
         name: 'save-settings',
         configureServer(server){
             server.middlewares.use('/__save-settings', (req, res, next) => {
                 if(req.method !== 'POST') return next();
+                if(!isOwnPage(req)){
+                    res.statusCode = 403;
+                    res.end(JSON.stringify({ ok: false, error: 'refused: not a same-origin JSON request from localhost' }));
+                    return;
+                }
                 let body = '';
                 req.on('data', (chunk) => { body += chunk; });
                 req.on('end', () => {
