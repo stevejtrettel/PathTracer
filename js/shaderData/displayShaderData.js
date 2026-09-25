@@ -10,6 +10,10 @@ let  displayShaderData = {
         },
         accTex: {
             value: null
+        },
+        //the exposure knob (pass: 'display'): set by PathTracer from settings
+        exposure: {
+            value: 1
         }
     }
 };

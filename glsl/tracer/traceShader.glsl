@@ -59,9 +59,9 @@ vec3 newFrame(vec2 fragCoord ){
         return debugPass(uDebugMode, path);
     }
 
-    //do one trace out into the scene, adjusted by the exposure
+    //do one trace out into the scene
     vec3 col = pathTrace(path);
-    return exposure * col;
+    return col;   //(exposure is applied by the display pass)
 
 }
 

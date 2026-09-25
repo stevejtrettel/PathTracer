@@ -2,6 +2,7 @@
 
 uniform vec3 iResolution;
 uniform sampler2D accTex;
+uniform float exposure;   //applied here, to the average: changing it needs no re-render
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
@@ -10,6 +11,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     //if the accumulation texture is smaller than the screen (preview mode),
     //it stretches to fill (pixelated, since the texture uses NearestFilter)
     vec3 color = texture(accTex, fragCoord / iResolution.xy).rgb;
+
+    color *= exposure;
 
     // convert unbounded HDR color range to SDR color range
     // (alternate tone map available: Uncharted2, see postprocess.glsl)

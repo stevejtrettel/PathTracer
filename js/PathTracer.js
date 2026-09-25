@@ -55,6 +55,10 @@ class PathTracer{
         this.tracer = new ComputeShader(shaders.tracer, this.gl, res, 1);
         this.accumulate = new ComputeShader(shaders.accumulate, this.gl, res, 2);
         this.display = new ComputeShader(shaders.display, this.gl, res, 0);
+        //display-time knobs (exposure): their starting values
+        for(let [name, u] of Object.entries(shaders.tracer.displayUniforms ?? {})){
+            this.display.updateUniforms({[name]: u.value});
+        }
 
         //the sky sampler needs a real texture; the uniforms were assembled before
         //the gl context existed, so build it here from the scene's sky descriptor

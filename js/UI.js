@@ -61,6 +61,11 @@ class UI{
             //keyboard paths (slider nudge keys, tab-focused controls)
             if(pathtracer.rendering) return;
             this.values[knob.name] = value;   // stored as-is (array for color/vec2) for serialization
+            //a display-time knob (exposure) acts on the finished average: re-draw only
+            if(knob.pass === 'display'){
+                pathtracer.display.updateUniforms({ [knob.name]: toUniformValue(knob, value) });
+                return;
+            }
             pathtracer.tracer.updateUniforms({ [knob.name]: toUniformValue(knob, value) });
             pathtracer.reset();
         };

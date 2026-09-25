@@ -14,7 +14,9 @@ const cameraKnobs = [
     { name: 'aperture',    label: 'Aperture',     min: 0,  max: 0.3, step: 0.0005, value: 0,    group: 'camera' },
     { name: 'focalLength', label: 'Focal Length', min: 0,  max: 40,  step: 0.01,  value: 14.92, group: 'camera' },
     { name: 'fov',         label: 'FOV',          min: 15, max: 140, step: 1,     value: 29,    group: 'camera' },
-    { name: 'exposure',    label: 'Exposure',     min: 0,  max: 2,   step: 0.01,  value: 1,     group: 'camera' },
+    // pass: 'display' — a uniform of the DISPLAY shader, applied to the finished
+    // average, so moving it re-draws without restarting the render
+    { name: 'exposure',    label: 'Exposure',     min: 0,  max: 2,   step: 0.01,  value: 1,     group: 'camera', pass: 'display' },
 ];
 
 // Render-quality controls -> Render folder/tab

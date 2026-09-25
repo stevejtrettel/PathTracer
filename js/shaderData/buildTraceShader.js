@@ -119,6 +119,10 @@ let buildTraceShader= function(sceneData, settings){
     //serialization (see js/shaderData/knobs.js).
     let sceneParams = settings.params ?? [];
     let allKnobs = [...withValues(engineKnobs, uiParams), ...sceneParams];
+    //knobs that act at DISPLAY time (pass: 'display', e.g. exposure) are uniforms
+    //of the display shader, not the tracer: moving them doesn't restart the render
+    let tracerKnobs  = allKnobs.filter(k => k.pass !== 'display');
+    let displayKnobs = allKnobs.filter(k => k.pass === 'display');
 
     //scene-injected compile-time switches: settings.defines = ['NAME', ...] each
     //become a #define at the very TOP of the shader — above every tracer chunk —
@@ -132,7 +136,7 @@ let buildTraceShader= function(sceneData, settings){
 
     //inject the uniform declarations at the TOP: camera knobs are used inside
     //the setup chunk (camera.glsl), so they must be declared before it.
-    let knobDecls = `//--- generated uniforms (knobs) ---\n` + knobUniformDecls(allKnobs) + `\n`;
+    let knobDecls = `//--- generated uniforms (knobs) ---\n` + knobUniformDecls(tracerKnobs) + `\n`;
     //marching constants first: the setup chunk already uses maxDist (analytic
     //trace functions return it), so they must be declared above it
     let march = marchBlock(settings.march);
@@ -193,14 +197,15 @@ let buildTraceShader= function(sceneData, settings){
 
     };
 
-    //add a uniform for every knob (camera/render/scratch + scene params)
-    Object.assign(tracerUniforms, knobUniforms(allKnobs));
+    //add a uniform for every tracer knob (camera/render/scratch + scene params)
+    Object.assign(tracerUniforms, knobUniforms(tracerKnobs));
 
 
     return {
         shader: tracerShader,
         uniforms: tracerUniforms,
         sky: sky,                //descriptor: PathTracer builds the GL texture
+        displayUniforms: knobUniforms(displayKnobs),   //PathTracer hands these to the display pass
     }
 }
 
