@@ -16,6 +16,11 @@ class PathTracer{
         //HD tile render state (null when idle); see startHDRender()
         this.hd = null;
 
+        //live-view render scale (Render tab: Full/Half/Quarter). Lives here, not
+        //in the UI, so that resize() — including the one that ends an HD render —
+        //keeps it.
+        this.viewScale = 1;
+
         //true while an HD render is in progress: locks the inputs that would
         //restart accumulation (camera keys + GUI knobs) so a stray touch can't
         //wreck a long tiled export. Live-view tweaking is unaffected.
@@ -36,6 +41,7 @@ class PathTracer{
             throw new Error(msg);
         }
         document.body.appendChild(this.canvas);
+        this.maxTextureSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
         this.size = res;
         this._setCanvasSize(res);
 
@@ -158,15 +164,23 @@ class PathTracer{
         //HD tile render: render each tile to `spp` samples, save it, advance;
         //restore the view size when the whole grid is done (see startHDRender)
         if(this.hd && this.hd.active){
+            let hd = this.hd;
             let pr = this.tracer.material.uniforms.panelToRender.value;
-            if(pr < this.hd.stopAfter){
-                if(this.frameCount >= this.hd.spp){
-                    let row = Math.floor(pr / this.hd.root), col = pr % this.hd.root;
-                    this.saveImage(`hd_${this.hd.spp}spp_r${row}c${col}`);
+            if(pr < hd.stopAfter){
+                if(this.frameCount >= hd.spp){
+                    //the shader lays panel pr out at x = floor(pr/root) from the LEFT
+                    //and y = pr % root from the BOTTOM (camera.glsl panelFragCoord);
+                    //name tiles by row from the TOP and column from the left, the
+                    //way they are stitched
+                    let col = Math.floor(pr / hd.root), row = hd.root - 1 - (pr % hd.root);
+                    let saved = this.saveImage(`hd_${hd.spp}spp_${hd.root}x${hd.root}_r${row}c${col}`);
+                    hd.tiles.push(saved.then((blob) => ({row, col, blob})));
                     this.tracer.material.uniforms.panelToRender.value = pr + 1;
                     this.reset();
                 }
             } else {
+                //a whole grid (not a one-tile re-render) also gets stitched
+                if(hd.stopAfter === hd.N && hd.start === 0 && hd.N > 1){ this._stitchHD(hd); }
                 this.stopHDRender();
             }
         }
@@ -178,6 +192,10 @@ class PathTracer{
     }
 
 
+    //download the canvas as <label>.png (default: spp + timestamp). Returns a
+    //promise of the PNG blob. toBlob snapshots the canvas now and encodes off the
+    //main thread — unlike toDataURL, which blocks and builds a huge string at HD
+    //tile sizes.
     saveImage(label){
 
         let name = label;
@@ -185,21 +203,54 @@ class PathTracer{
             const date = new Date();
             let day = date.getDate();
             let month = date.getMonth() + 1;
-            let hour = date.getHours();
-            let minute = date.getMinutes();
+            let hour = String(date.getHours()).padStart(2, '0');
+            let minute = String(date.getMinutes()).padStart(2, '0');
             name = `${this.frameCount}spp pathtrace ${month}-${day}-${hour}${minute}`;
         }
 
-        let link = document.createElement('a');
-        link.download = name + '.png';
-        link.href = this.canvas.toDataURL("image/png");
-        link.click();
+        return new Promise((resolve) => {
+            this.canvas.toBlob((blob) => {
+                if(!blob){ console.error(`saveImage: could not encode ${name}.png`); resolve(null); return; }
+                downloadBlob(blob, name + '.png');
+                resolve(blob);
+            }, 'image/png');
+        });
+    }
+
+
+    //assemble the saved tiles of a finished HD render into the full image and
+    //download it too. The tiles are already on disk, so if this fails (browsers
+    //cap a canvas at ~16k px a side / ~268M px) nothing is lost but convenience.
+    async _stitchHD(hd){
+        try {
+            let tiles = (await Promise.all(hd.tiles)).filter((t) => t.blob);
+            let canvas = document.createElement('canvas');
+            canvas.width  = hd.root * hd.tileW;
+            canvas.height = hd.root * hd.tileH;
+            let g = canvas.getContext('2d');
+            if(!g) throw new Error(`a ${canvas.width}×${canvas.height} canvas is too large for this browser`);
+            for(let t of tiles){
+                let bmp = await createImageBitmap(t.blob);
+                g.drawImage(bmp, t.col * hd.tileW, t.row * hd.tileH);
+                bmp.close();
+            }
+            let blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+            if(!blob) throw new Error(`could not encode a ${canvas.width}×${canvas.height} image`);
+            downloadBlob(blob, `hd_${hd.spp}spp_${canvas.width}x${canvas.height}.png`);
+        } catch(err){
+            console.error(`HD stitch failed (the tiles themselves were saved): ${err.message ?? err}`);
+        }
     }
 
 
     //plan a square √N tiling of a finalW×finalH image so each tile is <= maxTile
     //and (when possible) >= minTile. Tiles share the final image's aspect ratio.
     planHD(finalW, finalH, maxTile=4000, minTile=1000){
+        //Max Tile comes from a free number field: 0 / negative / NaN made root
+        //infinite (and the loop below never ended). A tile can't exceed the GPU's
+        //texture limit either.
+        if(!(maxTile > 0)) maxTile = 4000;
+        maxTile = Math.min(maxTile, this.maxTextureSize);
         let maxDim = Math.max(finalW, finalH);
         let root = Math.max(1, Math.ceil(maxDim / maxTile));
         while(root > 1 && maxDim / root < minTile) root--;   //don't go below minTile
@@ -218,12 +269,18 @@ class PathTracer{
     //opts.tile renders ONLY that one tile (recovery); opts.maxTile caps tile px.
     startHDRender(finalW, finalH, spp, opts={}){
         if(this.rendering) return;   //re-entry would clobber hdRestore with the tile size
+        //the inputs come from free number fields
+        finalW = Math.max(1, Math.round(finalW) || 1);
+        finalH = Math.max(1, Math.round(finalH) || 1);
+        spp    = Math.max(1, Math.round(spp) || 1);
         let plan = this.planHD(finalW, finalH, opts.maxTile);
-        let start = (opts.tile != null) ? Math.min(Math.max(opts.tile, 0), plan.N - 1) : 0;
+        let start = (opts.tile != null) ? Math.min(Math.max(Math.round(opts.tile) || 0, 0), plan.N - 1) : 0;
 
         //remember the current view size, to restore when the render finishes
         this.hdRestore = {x: this.size.x, y: this.size.y};
 
+        //(set before resize: tiles always render at full scale, see resize)
+        this.rendering = true;
         this.resize({x: plan.tileW, y: plan.tileH});
         this.tracer.updateUniforms({numPanels: plan.N, panelToRender: start, renderPanel: true});
         this.reset();
@@ -232,10 +289,13 @@ class PathTracer{
             active:    true,
             root:      plan.root,
             N:         plan.N,
+            tileW:     plan.tileW,
+            tileH:     plan.tileH,
             spp:       spp,
+            start:     start,
             stopAfter: (opts.tile != null) ? start + 1 : plan.N,
+            tiles:     [],   //promises of {row, col, blob}, for the stitch
         };
-        this.rendering = true;
     }
 
     //end an HD render: on natural completion (all tiles saved) OR user cancel.
@@ -250,11 +310,15 @@ class PathTracer{
         this.reset();
     }
 
+    //res is the canvas size. The live view may trace at a fraction of it
+    //(Render tab Scale: the display stretches it up); HD tiles never do.
     resize(res){
         this.size = res;
         this._setCanvasSize(res);
-        this.tracer.setSize(res);
-        this.accumulate.setSize(res);
+        let s = this.rendering ? 1 : this.viewScale;
+        let r = {x: Math.max(1, Math.floor(s * res.x)), y: Math.max(1, Math.floor(s * res.y))};
+        this.tracer.setSize(r);
+        this.accumulate.setSize(r);
         this.display.setSize(res);
     }
 
@@ -264,6 +328,18 @@ class PathTracer{
 
 
 
+}
+
+
+//trigger a browser download of a blob
+function downloadBlob(blob, filename){
+    let url = URL.createObjectURL(blob);
+    let link = document.createElement('a');
+    link.download = filename;
+    link.href = url;
+    link.click();
+    //revoking straight away can cancel the download in some browsers
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 

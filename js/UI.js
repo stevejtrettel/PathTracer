@@ -176,25 +176,19 @@ class UI{
         //CURRENT canvas (so a chosen aspect is respected). Full = native;
         //Half/Quarter render smaller and let the display stretch them up
         //(pixelated but fast) — Quarter is the old "preview".
-        let viewScale = 1;
-        const applyScale = () => {
-            let base = pathtracer.size;
-            let r = {x: Math.max(1, Math.floor(viewScale * base.x)),
-                     y: Math.max(1, Math.floor(viewScale * base.y))};
-            pathtracer.tracer.setSize(r);
-            pathtracer.accumulate.setSize(r);
-            pathtracer.reset();
-        };
+        //(the scale lives on the path tracer, so resize() keeps it — including
+        //the resize that restores the view after an HD render)
         ren.append(select('Scale', [['Full', 1], ['Half', 0.5], ['Quarter', 0.25]], 1, (scale) => {
-            viewScale = scale;
-            applyScale();
+            pathtracer.viewScale = scale;
+            pathtracer.resize(pathtracer.size);
+            pathtracer.reset();
         }));
 
         //live aspect ratio: re-fit the canvas to a preset ratio, keeping the
         //current Scale. Preselects the scene's settings.aspect (so
         //cubic-portrait/landscape land on √2).
         ren.append(select('Aspect', ASPECTS, pathtracer.settings.aspect ?? null,
-            (aspect) => { pathtracer.resize(fitAspect(aspect)); applyScale(); }));
+            (aspect) => { pathtracer.resize(fitAspect(aspect)); pathtracer.reset(); }));
 
         //samples accumulated (live) + restart accumulation
         ren.append(section('Samples'));

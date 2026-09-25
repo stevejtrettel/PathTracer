@@ -44,16 +44,15 @@ Camera buildCamFromUniforms(){
 //-------------------------------------------------
 
 //pinhole camera setup
+//fragCoord already carries the subpixel jitter (added in cameraRay, before any
+//panel rescaling, so it stays one OUTPUT pixel wide)
 Vector initializeRay(vec2 fragCoord, float FOV){
 
     // the ray starts at the origin; cameraRay() below moves it into world position
     vec3 rayPosition = ORIGIN;
 
-    // calculate subpixel camera jitter for anti aliasing
-    vec2 jitter = vec2(randomFloat(), randomFloat()) - 0.5f;
-
     // calculate coordinates of the ray target on the imaginary pixel plane.
-    vec2 planeCoords=((fragCoord+jitter)/iResolution.xy) * 2.0f - 1.0f;
+    vec2 planeCoords=(fragCoord/iResolution.xy) * 2.0f - 1.0f;
 
     // correct for aspect ratio
     float aspectRatio = iResolution.x / iResolution.y;
@@ -98,12 +97,16 @@ vec2 panelFragCoord(vec2 fragCoord, float nPanels, float panelToRender){
 
     //if we have a valid panel to render chosen:
    if(panelToRender<nPanels){
-       float resize = sqrt(nPanels);
-       float panelFraction = panelToRender/resize;
+       //the panels form a resize x resize grid. Integer-safe: sqrt and
+       //floor(fract(i/r)*r) can land a hair below an integer on some GPUs
+       //(e.g. panel 5 of 9 -> 1.9999999 -> column 1), rendering one tile twice
+       //and never rendering another. Must agree with PathTracer.newFrame's
+       //row = floor(pr/root), col = pr % root.
+       float resize = floor(sqrt(nPanels)+0.5);
 
        //get the panel we are on
-       float panelRow = floor(panelFraction);
-       float panelColumn = floor(fract(panelFraction)*resize);
+       float panelRow = floor((panelToRender+0.5)/resize);
+       float panelColumn = panelToRender - resize*panelRow;
        vec2 chosenPanel=vec2(panelRow, panelColumn);
 
        //move the fragcoord appropriately so its focused just on this panel
@@ -125,6 +128,13 @@ vec2 panelFragCoord(vec2 fragCoord, float nPanels, float panelToRender){
 //-------------------------------------------------
 
 Vector cameraRay(vec2 fragCoord, Camera cam){
+
+    //subpixel camera jitter for anti aliasing. Added BEFORE the panel rescaling:
+    //panelFragCoord divides by sqrt(numPanels), so jitter added after it would
+    //spread each HD-tile pixel over sqrt(numPanels) output pixels (a box blur).
+    //Same random draws in the same order as before, so non-panel renders are
+    //unchanged.
+    fragCoord += vec2(randomFloat(), randomFloat()) - 0.5f;
 
     //if we are rendering by panels, set the correct panel
     if(cam.renderPanel){

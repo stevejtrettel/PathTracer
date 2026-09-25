@@ -106,6 +106,10 @@ gallery entry.
   overlay, speed, orbit, Copy Pose / Save to Scene / Download Settings),
   **Render** (preview scale, samples, Reset), **Export** (Save Image, Auto Save,
   and tiled HD rendering with a Stop button for output larger than the screen).
+  HD tiles download as they finish, named `hd_<spp>spp_<N>x<N>_r<row>c<col>` (row
+  counted from the top, column from the left); when the whole grid is done the
+  stitched image downloads too, as `hd_<spp>spp_<W>x<H>.png` (if the browser can
+  hold a canvas that big — about 16k px a side).
 - A shader-error overlay reports GLSL compile errors in-page during development.
 
 ## Notes

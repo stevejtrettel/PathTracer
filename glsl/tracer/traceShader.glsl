@@ -21,6 +21,10 @@ vec3 newFrame(vec2 fragCoord ){
 
     // initialize the random number seed from pixel and frame
     seed = randomSeed(fragCoord, frameNumber);
+    //HD tiles see tile-local fragCoords and restart frameNumber, so without this
+    //every tile would draw the same random streams and its leftover noise would
+    //repeat tile after tile across the stitched image
+    if(renderPanel){ seed ^= uint(panelToRender + 1.) * 2654435761u; }
 
     //spectral rendering: this ray's wavelength. Random across the visible band when
     //the spectral toggle is on; a fixed mid-wavelength (no shift, neutral tint) when
