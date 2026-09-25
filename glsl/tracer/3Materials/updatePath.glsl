@@ -8,10 +8,32 @@
 
 void updateFromVolume(inout Path path){
 
+    //a glowing medium adds light all along the segment, each bit of it dimmed by
+    //the absorption between there and here: e(1-exp(-s d))/s, which is e*d as
+    //s -> 0. (Scattering media bill their interior legs in the walk; this is
+    //everything else — glass, the air, the last leg through fog.)
+    if(length(path.medium.emit)>0.0001){
+        vec3 s = path.medium.absorb;
+        vec3 e = path.medium.emit;
+        vec3 glow = mix(e*path.distance, e*(1.-exp(-s*path.distance))/max(s, vec3(1e-6)), step(vec3(1e-6), s));
+        path.pixel += path.light * glow;
+    }
+
     vec3 beersLaw = path.medium.absorb*path.distance;
 
     if(length(beersLaw)>0.0001){
         path.light *= exp( -beersLaw );
+    }
+}
+
+
+//light given off by the surface just hit. Added BEFORE scatter(): the lobe choice
+//can change the throughput (a rough metal's multi-bounce tints it) and a
+//transmit into a scattering interior skips updateFromSurface entirely, and
+//neither should touch what the surface itself emits toward us.
+void emitFromSurface(inout Path path){
+    if(path.dat.render && length(path.dat.surf.emit)>0.001){
+        path.pixel += path.light * path.dat.surf.emit;
     }
 }
 
@@ -21,10 +43,7 @@ void updateFromSurface(inout Path path){
     //only do this if we are actually rendering the material
     if(path.dat.render){
 
-        //add in emissive lighting
-        if (length(path.dat.surf.emit)>0.001){
-            path.pixel += path.light * path.dat.surf.emit;
-        }
+        //(emission was added before scatter: see emitFromSurface)
 
         //pick up the chosen lobe's tint — the ONLY place throughput changes at
         //a surface (the probabilities already carried the energy fractions).

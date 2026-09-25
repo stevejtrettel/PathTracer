@@ -66,7 +66,8 @@ vec2 randomGaussian2D(){
     float u=randomFloat();
     float v=randomFloat();
 
-    float r=sqrt(abs(2.*log(u)));
+    //(u is exactly 0 once in 2^32 draws: log(0) = -inf -> a NaN sample)
+    float r=sqrt(abs(2.*log(max(u, 1e-37))));
     float x=r*cos(2.*PI*v);
     float y=r*sin(2.*PI*v);
 
@@ -93,7 +94,9 @@ float randomGaussian(float mean, float stdev){
 //https://www.baeldung.com/cs/sampling-exponential-distribution
 float randomExponential(float mean){
     float u = randomFloat();
-    float x = - mean * log(1.-u);
+    //(randomFloat() rounds to exactly 1.0 about once in 2^25 draws: log(0) would
+    //make an infinite flight)
+    float x = - mean * log(max(1.-u, 1e-30));
     return x;
 }
 

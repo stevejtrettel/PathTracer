@@ -48,10 +48,8 @@ float ambientTransport(inout Path path, float distance){
         distance = raymarch( path.tv, distance );
     }
 
-    //absorption + emission over the final leg to the surface
-    float last = min(distance, maxDist);
-    path.pixel += path.light * path.medium.emit * last;
-    path.light *= exp(-path.medium.absorb * last);
+    //the final leg to the surface is billed by updateFromVolume in pathTrace
+    //(stepForward sets path.distance to it); billing it here too absorbed twice
 
     return distance;
 #endif

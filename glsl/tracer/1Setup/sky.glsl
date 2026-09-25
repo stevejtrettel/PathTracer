@@ -54,18 +54,17 @@ vec3 toSphCoordsNoSeam(vec3 v){
 
 vec3 skyTex(vec3 v){
 
-    vec3 angles=toSphCoordsNoSeam(v);
+    //equirectangular lookup at full resolution. This used to be textureGrad with
+    //the screen derivatives of a DIFFERENT angle (atan(y,|x|), to dodge the seam):
+    //that picked mip ~7 at the image centre and ~9 after a bounce, so the sky
+    //was blurred and image-sky lighting collapsed toward its average colour, and
+    //derivatives inside the bounce loop's divergent control flow are undefined
+    //(blackholeCube did not render the same twice). Accumulating jittered
+    //samples already anti-aliases, so level 0 is the right lookup.
+    float x=(atan(-v.z,v.x)+PI)/(2.*PI);
+    float y=1.-acos(clamp(v.y,-1.,1.))/PI;
 
-    //theta coordinates (x=real, y=to trick the derivative so there's no seam)
-    float x=(angles.x+PI)/(2.*PI);
-    float z=(angles.z+PI)/(2.*PI);
-
-    float y=1.-angles.y/PI;
-
-    vec2 uv=vec2(x,y);
-    vec2 uv2=vec2(z,y);//grab the other arctan piece;
-
-    return SRGBToLinear(textureGrad(sky,uv,dFdx(uv2), dFdy(uv2)).rgb);
+    return SRGBToLinear(textureLod(sky,vec2(x,y),0.).rgb);
 
 }
 

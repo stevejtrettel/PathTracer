@@ -39,6 +39,9 @@ vec3 pathTrace(Path path){
         updateFromSky(path);
         if(!path.keepGoing){ break; }
 
+        //light emitted by the surface we landed on
+        emitFromSurface(path);
+
         //scatter the path off in a new direction
         scatter(path);
 
