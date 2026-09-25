@@ -226,7 +226,7 @@ Medium   medium_knot  (vec3 p){ return defaultMedium(); }
 
 Material material_key(vec3 p, inout Vector n){
     Material m = defaultMaterial();      //light
-    m.surf.emit = 4200.0*vec3(0.9);
+    m.surf.emit = 135.0*vec3(0.9);
     return m;
 }
 Medium   medium_key  (vec3 p){ return defaultMedium(); }

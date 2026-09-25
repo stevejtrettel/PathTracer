@@ -33,7 +33,7 @@ export default scene({
 
         //a big dark room with a pale floor to catch the rainbow caustic
         room({
-            center: [0.0, 12.0, -7.0], half: [30.0, 14.0, 23.0],
+            center: [0.0, 12.0, 1.5], half: [30.0, 14.0, 31.5],
             knobs: {
                 roomLight:  {value: 0.0},
                 floorColor: {value: [0.55, 0.55, 0.55]},

@@ -46,7 +46,7 @@ export default scene({
             material: chalk,
         }),
 
-        sphereLight({name: 'key', at: [7.0, 15.0, 11.0], radius: 3.0, power: 3800}),
-        room({center: [0.0, 11.0, 0.0], half: [15.0, 11.0, 28.0], knobs: {roomLight: {value: 1.7}}}),
+        sphereLight({name: 'key', at: [7.0, 15.0, 11.0], radius: 3.0, power: 155}),
+        room({center: [0.0, 11.0, 0.0], half: [15.0, 11.0, 28.0], knobs: {roomLight: {value: 0.5}}}),
     ],
 });

@@ -321,7 +321,7 @@ Medium   medium_coxcube  (vec3 p){ return defaultMedium(); }
 
 Material material_key(vec3 p, inout Vector n){
     Material m = defaultMaterial();      //light
-    m.surf.emit = 3800.0*vec3(0.9);
+    m.surf.emit = 155.0*vec3(0.9);
     return m;
 }
 Medium   medium_key  (vec3 p){ return defaultMedium(); }

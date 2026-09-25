@@ -22,7 +22,7 @@ export default scene({
             material: matte({diffuse: [0.8, 0.72, 0.6]}),
         }),
 
-        sphereLight({name: 'key', at: [8.0, 16.0, 12.0], radius: 3.5, power: 4200}),
-        room({center: [0.0, 11.0, 0.0], half: [16.0, 11.0, 26.0], knobs: {roomLight: {value: 1.8}}}),
+        sphereLight({name: 'key', at: [8.0, 16.0, 12.0], radius: 3.5, power: 135}),
+        room({center: [0.0, 11.0, 0.0], half: [16.0, 11.0, 26.0], knobs: {roomLight: {value: 0.5}}}),
     ],
 });

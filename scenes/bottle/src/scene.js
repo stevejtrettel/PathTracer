@@ -37,6 +37,6 @@ export default scene({
 
         sphereLight({at: [-6.0, 3.0, 0.0], radius: 1.0, color: [0.9, 0.9, 0.9], power: 150}),
 
-        room({center: [-5.75, 6.5, -5.0], half: [14.25, 7.5, 15.0], knobs: {roomLight: {value: 0.5}}}),
+        room({center: [-5.75, 6.5, -2.25], half: [14.25, 7.5, 17.75], knobs: {roomLight: {value: 0.5}}}),
     ],
 });

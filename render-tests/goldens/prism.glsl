@@ -105,8 +105,8 @@ const float PRISM_THICKNESS = 2.5;
 const vec3  LIGHT_P      = vec3(9.0, 4.0, -12.0);
 const float LIGHT_RADIUS = 1.5;
 
-const vec3 ROOM_P        = vec3(0.0, 12.0, -7.0);
-const vec3 ROOM_HALFSIZE = vec3(30.0, 14.0, 23.0);
+const vec3 ROOM_P        = vec3(0.0, 12.0, 1.5);
+const vec3 ROOM_HALFSIZE = vec3(30.0, 14.0, 31.5);
 
 
 //---------------------------------------------------------------------

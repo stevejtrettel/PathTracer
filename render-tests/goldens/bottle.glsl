@@ -148,8 +148,8 @@ const float BOTTLE_BUMP       = 1.0;
 const vec3  LIGHT_P      = vec3(-6.0, 3.0, 0.0);
 const float LIGHT_RADIUS = 1.0;
 
-const vec3 ROOM_P        = vec3(-5.75, 6.5, -5.0);
-const vec3 ROOM_HALFSIZE = vec3(14.25, 7.5, 15.0);
+const vec3 ROOM_P        = vec3(-5.75, 6.5, -2.25);
+const vec3 ROOM_HALFSIZE = vec3(14.25, 7.5, 17.75);
 
 
 //---------------------------------------------------------------------

@@ -48,7 +48,7 @@ export default scene({
         at('frame',  lib.boxFrame({halfSize: [1.0, 1.0, 1.0], edge: frameEdge}),   0.0, 1.3),
         at('hour',   lib.doubleCone({height: 1.2, radius: hourFlare}),             3.1, 1.5),
 
-        sphereLight({name: 'key', at: [8.0, 16.0, 12.0], radius: 3.2, power: 4200}),
-        room({center: [0.0, 12.0, 0.0], half: [16.0, 12.0, 34.0], knobs: {roomLight: {value: 2.0}}}),
+        sphereLight({name: 'key', at: [8.0, 16.0, 12.0], radius: 3.2, power: 160}),
+        room({center: [0.0, 12.0, 0.0], half: [16.0, 12.0, 34.0], knobs: {roomLight: {value: 0.5}}}),
     ],
 });
