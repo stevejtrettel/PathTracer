@@ -1,4 +1,5 @@
 import {Vector3,Matrix3,Matrix4} from "./math/index.js";
+import {isTypingTarget} from "./gui/widgets.js";
 
 
 class KeyControls{
@@ -7,6 +8,9 @@ class KeyControls{
         //execute update when a key is pressed automatically!
         document.addEventListener('keydown', e => this.down(e));
         document.addEventListener('keyup', e => this.up(e));
+        //if the window loses focus mid-press the keyup never arrives: let go of
+        //everything, or the camera keeps flying (and resetting) on its own
+        window.addEventListener('blur', () => this.releaseAll());
 
         this.translateSpeed = 0.03;
         this.rotateSpeed = 0.007;   //fixed turn rate; independent of fly speed
@@ -51,6 +55,10 @@ class KeyControls{
 
     down(event){
 
+        //arrow keys in a number field step its value: don't also fly the camera
+        //(same rule the UI's X / H shortcuts use)
+        if(isTypingTarget(event.target)) return;
+
         if(event.code === "ShiftLeft" || event.code === "ShiftRight") this.boosted = true;
 
         for(const dir in this.translate){
@@ -79,6 +87,12 @@ class KeyControls{
                 this.rotate[dir].pressed = false;
             }
         }
+    }
+
+    releaseAll(){
+        this.boosted = false;
+        for(const dir in this.translate){ this.translate[dir].pressed = false; }
+        for(const dir in this.rotate){ this.rotate[dir].pressed = false; }
     }
 
     isPressed(){

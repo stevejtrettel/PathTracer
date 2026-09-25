@@ -43,9 +43,12 @@ class PathTracer{
         this.controls = new KeyControls(this.settings.location);
 
         //the shaders
-        this.tracer = new ComputeShader(shaders.tracer, this.gl, res);
-        this.accumulate = new ComputeShader(shaders.accumulate, this.gl, res);
-        this.display = new ComputeShader(shaders.display, this.gl, res);
+        //(render targets: the tracer's output is only read by accumulate -> 1;
+        //accumulate reads its own last frame -> 2; display draws to the screen -> 0.
+        //At a 4000px HD tile each RGBA32F target is ~180MB, so this matters.)
+        this.tracer = new ComputeShader(shaders.tracer, this.gl, res, 1);
+        this.accumulate = new ComputeShader(shaders.accumulate, this.gl, res, 2);
+        this.display = new ComputeShader(shaders.display, this.gl, res, 0);
 
         //the sky sampler needs a real texture; the uniforms were assembled before
         //the gl context existed, so build it here from the scene's sky descriptor

@@ -58,7 +58,11 @@ function shared(gl){
 
 class ComputeShader {
     //data = { shader: fragmentSource, uniforms: {name:{value}} }
-    constructor(data, gl, res = {x: window.innerWidth, y: window.innerHeight}){
+    //numTargets = how many float render targets this pass needs:
+    //  2 ping-pong (reads its own previous output: accumulate)
+    //  1 single    (output only read by another pass: the tracer)
+    //  0 none      (only ever draws to the screen: display)
+    constructor(data, gl, res = {x: window.innerWidth, y: window.innerHeight}, numTargets = 2){
         this.gl  = gl;
         this.res = res;
 
@@ -71,10 +75,11 @@ class ComputeShader {
         this.program = this._buildProgram(data.shader);
         this._cacheUniforms();
 
-        //two float render targets, ping-ponged (see render())
-        this.a = this._makeTarget(res.x, res.y);
-        this.b = this._makeTarget(res.x, res.y);
-        this.data = this.b.tex;
+        //float render targets, ping-ponged (see render()); with one target a and
+        //b are the same object, so the swap is a no-op
+        this.a = numTargets > 0 ? this._makeTarget(res.x, res.y) : null;
+        this.b = numTargets > 1 ? this._makeTarget(res.x, res.y) : this.a;
+        this.data = this.b ? this.b.tex : null;
 
         this.updateUniforms({ iResolution: new Vector3(res.x, res.y, 0.) });
     }
@@ -205,7 +210,8 @@ class ComputeShader {
     setSize(res){
         let gl = this.gl;
         this.res = res;
-        for(let t of [this.a, this.b]){
+        for(let t of new Set([this.a, this.b])){
+            if(!t) continue;
             gl.bindTexture(gl.TEXTURE_2D, t.tex);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, res.x, res.y, 0, gl.RGBA, gl.FLOAT, null);
             t.w = res.x; t.h = res.y;

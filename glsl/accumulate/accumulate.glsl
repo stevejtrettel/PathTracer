@@ -33,8 +33,10 @@ void mainImage(out vec4 fragColor, in ivec2 pixelCoord )
     vec4 new = newFrame(pixelCoord);
     vec4 prev = accFrame(pixelCoord);
 
-    //discard a pixel if it has 'nan' values in the new frame
-    new = isnan(length(new)) ? vec4(0,0,0,1) : new;
+    //discard a pixel if it has 'nan' or 'inf' values in the new frame
+    //(either one would poison this pixel of the running average for good)
+    float len = length(new);
+    new = (isnan(len) || isinf(len)) ? vec4(0,0,0,1) : new;
 
     //blend them together
     float blend = (frameNumber < 2. || prev.a == 0.0f) ? 1.0f :  1. / (1. + 1./prev.a);

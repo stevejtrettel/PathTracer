@@ -212,16 +212,22 @@ Vector normal_room(vec3 p){
 //  only the Medium, for when the object is merely the far side
 //---------------------------------------------------------------------
 
-Material material_klein(vec3 p, inout Vector n){
-    Material m = defaultMaterial();      //matte
-    m.surf.diffuse = vec3(0.8, 0.74, 0.64);
+Medium medium_klein(vec3 p){
+    Medium m = defaultMedium();
+    m.ior    = 1.5;
+    m.absorb = 0.1*vec3(0.3, 0.05, 0.2);
     return m;
 }
-Medium   medium_klein  (vec3 p){ return defaultMedium(); }
+Material material_klein(vec3 p, inout Vector n){
+    Material m = defaultMaterial();      //glass
+    m.interior = medium_klein(p);
+    m.surf.transmit = 1.0;
+    return m;
+}
 
 Material material_key(vec3 p, inout Vector n){
     Material m = defaultMaterial();      //light
-    m.surf.emit = 3200.0*vec3(0.9);
+    m.surf.emit = 400.0*vec3(0.9);
     return m;
 }
 Medium   medium_key  (vec3 p){ return defaultMedium(); }
