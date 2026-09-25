@@ -75,12 +75,13 @@ float raymarch(Vector tv, float stopDist){
             //surface-exact landing (t + signedRadius) leaves sdf ~= 0 at the hit,
             //so inside() = (sdf < 0) becomes a float-noise coin flip -> the normal
             //randomly negates (setImpactData) -> ring-structured normal speckle
-            //centred on head-on incidence. Subtracting EPSILON along the ray backs
-            //the hit off to the starting side (sdf ~= +/-EPSILON, sign = sgn) in
+            //centred on head-on incidence. Subtracting GEO_EPS along the ray backs
+            //the hit off to the starting side (sdf ~= +/-GEO_EPS, sign = sgn) in
             //all four approach/overshoot x outside/inside cases, so inside() is
             //stable. (signedRadius already retreats an over-relaxed overshoot; this
-            //adds the safety margin on top.)
-            return t + signedRadius - EPSILON;
+            //adds the safety margin on top. GEO_EPS, not EPSILON: a back-off finer
+            //than float32 can resolve does nothing — see buildTraceShader.js.)
+            return t + signedRadius - GEO_EPS;
         }
 
         //analytic stop: exit ONLY when the SAFE (unrelaxed) sphere clears it —

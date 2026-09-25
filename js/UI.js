@@ -132,7 +132,7 @@ class UI{
                 home.facing[0], home.facing[1], home.facing[2],
                 home.facing[3], home.facing[4], home.facing[5],
                 home.facing[6], home.facing[7], home.facing[8]
-            );
+            ).orthonormalize();
             pathtracer.tracer.updateUniforms({
                 location: pathtracer.controls.position,
                 facing:   pathtracer.controls.facing,

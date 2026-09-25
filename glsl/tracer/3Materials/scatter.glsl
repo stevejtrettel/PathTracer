@@ -79,7 +79,7 @@ void scatter( inout Path path ){
         path.medium=path.dat.back;
         path.region=path.dat.backID;
         path.subSurface=false;
-        flow(path.tv, 10.*EPSILON);
+        flow(path.tv, 10.*GEO_EPS);
         return;
     }
 
@@ -208,6 +208,6 @@ void scatter( inout Path path ){
 
     //----set the new vector and push off the surface
     path.tv=newDir;
-    flow(path.tv, 10.*EPSILON);
+    flow(path.tv, 10.*GEO_EPS);
 
 }

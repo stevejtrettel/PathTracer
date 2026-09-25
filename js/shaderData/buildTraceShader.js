@@ -58,7 +58,16 @@ function buildSky(sky){
 //
 // The margin reproduces the value this constant had when it was hand-tuned:
 // 1.2*0.001*(2 + 0.005*100) = 0.003, exactly.
+//
+// GEO_EPS is EPSILON's POSITIONAL twin, and the one the band is derived from.
+// EPSILON says how close counts as a hit; GEO_EPS is how far we back off or push
+// off a surface. Those can't be finer than float32 can place a point (one ulp is
+// ~2e-6 at |p| ~ 16): apollonianGasket marches at EPSILON = 1e-7 and, with the
+// band derived from that, 54% of its key-light hits went unclaimed. GEO_EPS
+// never drops below GEO_EPS_FLOOR; for every scene with EPSILON above the floor
+// it IS EPSILON, so their constants (and renders) are unchanged.
 const MARCH_DEFAULTS = {epsilon: 0.001, maxDist: 100, maxSteps: 2000};
+const GEO_EPS_FLOOR = 2e-5;
 
 function marchBlock(march = {}){
     const known = ['epsilon', 'maxDist', 'maxSteps'];
@@ -76,6 +85,7 @@ function marchBlock(march = {}){
 
     return `//--- marching constants (generated; a scene overrides them via march:) ---\n`
         + `const float EPSILON       = ${f(m.epsilon)};\n`
+        + `const float GEO_EPS       = ${f(Math.max(m.epsilon, GEO_EPS_FLOOR))};   //positional twin: back-offs + pushes\n`
         + `const float maxDist       = ${f(m.maxDist)};\n`
         + `const int   maxMarchSteps = ${m.maxSteps};\n\n`
         + `//over-relaxed sphere tracing (Keinert 2014): the step multiplier, and the\n`
@@ -85,7 +95,7 @@ function marchBlock(march = {}){
         + `//the hit-classification band, DERIVED so it can never go stale against\n`
         + `//EPSILON — see the contract in js/shaderData/buildTraceShader.js\n`
         + `const float AT_THRESH_MARGIN = 1.2;\n`
-        + `const float AT_THRESH = AT_THRESH_MARGIN*EPSILON*(2. + MARCH_CONE*maxDist);\n\n`;
+        + `const float AT_THRESH = AT_THRESH_MARGIN*GEO_EPS*(2. + MARCH_CONE*maxDist);\n\n`;
 }
 
 
@@ -161,7 +171,7 @@ let buildTraceShader= function(sceneData, settings){
                 location.facing[0],location.facing[1],location.facing[2],
                 location.facing[3],location.facing[4],location.facing[5],
                 location.facing[6],location.facing[7],location.facing[8]
-            )
+            ).orthonormalize()   //saved poses can be slightly off a rotation (see Matrix3)
         },
         location: {
             value: new Vector3(

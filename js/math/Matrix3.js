@@ -178,6 +178,36 @@ class Matrix3 {
 
 	}
 
+	// (not from three.js) Snap to the nearest rotation by Gram-Schmidt on the
+	// columns. Camera poses drift off orthonormal as small rotations pile up
+	// (and got saved that way); the shader's sphereTrace assumes unit ray
+	// directions, and a 0.04% stretch stopped camera rays 0.045 short of glass
+	// spheres 12 units away. A matrix that is already a rotation comes back
+	// unchanged to float32 precision. Assumes a right-handed frame (det > 0).
+	orthonormalize() {
+
+		const te = this.elements;
+		let ax = te[ 0 ], ay = te[ 1 ], az = te[ 2 ];
+		let bx = te[ 3 ], by = te[ 4 ], bz = te[ 5 ];
+
+		let la = Math.hypot( ax, ay, az );
+		ax /= la; ay /= la; az /= la;
+
+		const d = ax * bx + ay * by + az * bz;
+		bx -= d * ax; by -= d * ay; bz -= d * az;
+		let lb = Math.hypot( bx, by, bz );
+		bx /= lb; by /= lb; bz /= lb;
+
+		te[ 0 ] = ax; te[ 1 ] = ay; te[ 2 ] = az;
+		te[ 3 ] = bx; te[ 4 ] = by; te[ 5 ] = bz;
+		te[ 6 ] = ay * bz - az * by;
+		te[ 7 ] = az * bx - ax * bz;
+		te[ 8 ] = ax * by - ay * bx;
+
+		return this;
+
+	}
+
 }
 
 export { Matrix3 };

@@ -71,14 +71,20 @@ float roomDistance(vec3 p, vec3 halfSize){
 }
 
 
-// Exact ray intersection, in world coordinates. The ray is inside the box, so
-// this is simply the distance at which it leaves: the nearest of the three
-// far slab crossings.
+// Exact ray intersection, in world coordinates. Inside the box this is simply
+// the distance at which the ray leaves: the nearest of the three far slab
+// crossings. A camera may also sit OUTSIDE (behind the see-through fourth wall,
+// as about half the scenes do): then the far crossing is only a wall if the ray
+// actually passes through the box; a ray that misses it sees the sky, rather
+// than landing on a point that is on no wall (nothing claims it).
 float roomTrace(Vector tv, vec3 centre, vec3 halfSize){
     vec3  o  = tv.pos - centre;
-    vec3  tm = max((-halfSize - o)/tv.dir, (halfSize - o)/tv.dir);
+    vec3  t0 = (-halfSize - o)/tv.dir;
+    vec3  t1 = ( halfSize - o)/tv.dir;
+    vec3  tm = max(t0, t1);
+    vec3  tn = min(t0, t1);
     float t  = min(tm.x, min(tm.y, tm.z));
-    if(t < 0.){ return maxDist; }
+    if(t < 0. || max(tn.x, max(tn.y, tn.z)) > t){ return maxDist; }
     return min(t, maxDist);
 }
 

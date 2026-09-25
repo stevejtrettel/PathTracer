@@ -49,7 +49,7 @@ class KeyControls{
             location.facing[0],location.facing[1],location.facing[2],
             location.facing[3],location.facing[4],location.facing[5],
             location.facing[6],location.facing[7],location.facing[8]
-        );
+        ).orthonormalize();
 
     }
 
@@ -120,12 +120,16 @@ class KeyControls{
             }
         }
 
+        let rotated = false;
         for(const dir in this.rotate){
             if(this.rotate[dir].pressed){
                 let rot = new Matrix4().makeRotationAxis(this.rotate[dir].axis, this.rotateSpeed);
                 this.facing.multiply(new Matrix3().setFromMatrix4(rot));
+                rotated = true;
             }
         }
+        //many small rotations drift off a rotation matrix: snap back (see Matrix3)
+        if(rotated){ this.facing.orthonormalize(); }
 
     }
 

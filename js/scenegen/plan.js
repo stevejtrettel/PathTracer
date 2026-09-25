@@ -493,7 +493,13 @@ function planObject(node, forceMarch){
         regions: [region],
         sdfDefs: sdfDef + (marchDef ? '\n\n' + marchDef : ''),
         boundDef,
-        sdfAllLine: (idW) => `    gSDF[${pad(`ID_${NAME}`, idW)}] = sdf_${name}(p);`,
+        //a marched sheet is CLAIMED with the function it is marched with: its
+        //sdf_ clips with a smooth max, its march_ with a hard one, and landings in
+        //the blend band near the rim (|sdf_| > AT_THRESH there) went unclaimed —
+        //a see-through ring. march_ is unsigned, so a sheet also never counts as
+        //containing a point (regionAt). Normals still come from the signed sdf_.
+        sdfAllLine: (idW) => `    gSDF[${pad(`ID_${NAME}`, idW)}] = ${marchName}(p);`,
+        marchCall: analytic ? null : `${marchName}(p)`,   //entrySection carves nested regions out of it
         marchedBlock: analytic ? null : (boundDef
             ? `    float b_${name} = bound_${name}(p);\n    d = min(d, (b_${name} > BOUND_MARGIN) ? b_${name} : ${marchName}(p));`
             : `    d = min(d, ${marchName}(p));`),

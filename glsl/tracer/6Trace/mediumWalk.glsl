@@ -95,7 +95,7 @@ void walkInterior(inout Path path, float mfp, float blur){
         if(!insideOf(path.region, temp.pos)){
             flowDist=bisect_Scatter(tv,flowDist,path.region);
             if(volumeActive){ absorbEmit(path, flowDist); }
-            flow(tv,flowDist-EPSILON/2.);
+            flow(tv,flowDist-GEO_EPS/2.);
             path.tv=tv;
             path.distance=depth+flowDist;
             path.numScatters=float(i);
@@ -153,7 +153,7 @@ void mediumWalk(inout Path path){
             //reflect back inside and keep walking; the exit data's reflect
             //side IS the interior (aboveHorizon keeps the bounce inward)
             path.tv = aboveHorizon(vReflect(path.tv, facet), path.dat.normal);
-            nudge(path.tv, path.dat.normal, 5.*EPSILON);
+            nudge(path.tv, path.dat.normal, 5.*GEO_EPS);
             path.medium = path.dat.front;
             path.region = path.dat.frontID;
         }
@@ -164,7 +164,7 @@ void mediumWalk(inout Path path){
             if(vDot(path.tv, path.dat.normal) > 0.){ path.tv = vReflect(path.tv, path.dat.normal); }
             path.medium = path.dat.back;
             path.region = path.dat.backID;
-            nudge(path.tv, path.dat.normal, -5.*EPSILON);
+            nudge(path.tv, path.dat.normal, -5.*GEO_EPS);
             path.subSurface = false;
             return;
         }

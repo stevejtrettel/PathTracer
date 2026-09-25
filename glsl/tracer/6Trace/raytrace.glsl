@@ -13,7 +13,7 @@ float raytrace(Vector tv, float stopDist){
     //if we hit something
     if(dist<stopDist){
         //move slightly less than the full distance to stop right before the object
-        return dist- EPSILON/2.;
+        return dist- GEO_EPS/2.;
     }
 
     //otherwise, return the threshold

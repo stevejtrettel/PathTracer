@@ -304,13 +304,31 @@ function dispatchersSection(units, regions, scatters, airMedium){
         + `Medium mediumOf(int id, vec3 p){\n${regions.map(r => row(r, `medium_${r.name}(p)`)).join('\n')}\n    return ${airMedium};      //ID_NONE: open air\n}`;
 }
 
+//A container marched as part of the union would HIDE what is nested in it:
+//inside the marble but outside the core, min(core, marble) is just the marble,
+//so a ray walking the interior steps straight through the core's wall and the
+//core is never hit. So the union marches the container's SHELL instead,
+//max(container, -nested), which vanishes on both walls. (sdfAll keeps the exact
+//per-object sdfs, so claiming and containment are unchanged.)
+function carveNested(u, regions){
+    const inner = regions.filter(x => x.nestedIn && u.regions.some(r => r.name === x.nestedIn));
+    if(!inner.length) return u.marchedBlock;
+    if(!u.marchCall){
+        throw new Error(`scenegen: '${inner[0].nestedIn}' contains nested regions but is a group — `
+            + `nesting inside a group is not supported yet`);
+    }
+    const shell = inner.reduce((acc, x) => `max(${acc}, -sdf_${x.name}(p))`, u.marchCall);
+    return u.marchedBlock.replace(u.marchCall, shell);
+}
+
 function entrySection(units){
     const marched = units.filter(u => u.marchedBlock);
     const traced  = units.filter(u => u.traceDef);
+    const regions = units.flatMap(u => u.regions);
 
     const sdfScene = marched.length
         ? `float sdf_Scene(Vector tv){\n    vec3 p = tv.pos;\n    float d = maxDist;\n\n`
-          + marched.map(u => u.marchedBlock).join('\n\n') + `\n\n    return d;\n}`
+          + marched.map(u => carveNested(u, regions)).join('\n\n') + `\n\n    return d;\n}`
         : `//nothing marches: every surface here has a closed-form intersection\n`
           + `float sdf_Scene(Vector tv){\n    return maxDist;\n}`;
 

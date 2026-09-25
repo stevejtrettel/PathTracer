@@ -83,7 +83,7 @@ class OrbitControls{
         let pos = this.controls.position;
         let rel = pos.clone().sub(this.pivot).applyMatrix3(R3);
         pos.copy(this.pivot).add(rel);
-        this.controls.facing.premultiply(R3);        // world rotation of orientation
+        this.controls.facing.premultiply(R3).orthonormalize();   // world rotation of orientation (snap off drift)
     }
 
     //drag -> orbit. Yaw about world-up (azimuth), pitch about camera-right
