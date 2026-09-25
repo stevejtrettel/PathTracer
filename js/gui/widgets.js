@@ -50,6 +50,14 @@ function fmt(v){
 }
 
 
+// double-click a knob's NAME: back to the value it started with (the scene's).
+// Every knob widget uses this, so the gesture is the same everywhere.
+function resetOnDoubleClick(label, reset){
+    label.title = 'double-click to reset';
+    label.addEventListener('dblclick', reset);
+}
+
+
 // keyboard nudge: click a slider to select it (focus), then =/+ and -/_ step it
 // by one step. Installed once; a no-op unless a slider is focused, so it never
 // interferes with the camera keys (which are all other keys).
@@ -95,16 +103,51 @@ function slider(knob, onChange){
         onChange(v);
     });
 
-    //select this slider for =/- nudging by clicking its NAME or VALUE (not the
-    //track — that would move the value). Focusing selects without changing
-    //anything; blur (clicking away) deselects.
+    //set a value from outside the track (reset, typed entry): kept exactly —
+    //the track only shows it, snapped to its step — and clamped to the range
+    let min = parseFloat(input.min), max = parseFloat(input.max);
+    let setValue = (v) => {
+        v = Math.min(max, Math.max(min, knob.type === 'int' ? Math.round(v) : v));
+        input.value = v;
+        readout.textContent = fmt(v);
+        onChange(v);
+    };
+
+    //select this slider for =/- nudging by clicking its NAME (not the track —
+    //that would move the value). Focusing selects without changing anything;
+    //blur (clicking away) deselects.
     installNudge();
     input.addEventListener('focus', () => { selectedSlider = input; row.classList.add('knob-selected'); });
     input.addEventListener('blur',  () => { if(selectedSlider === input) selectedSlider = null; row.classList.remove('knob-selected'); });
-    for(let target of [label, readout]){
-        target.style.cursor = 'pointer';
-        target.addEventListener('mousedown', (e) => { e.preventDefault(); input.focus(); });
-    }
+    label.style.cursor = 'pointer';
+    label.addEventListener('mousedown', (e) => { e.preventDefault(); input.focus(); });
+    resetOnDoubleClick(label, () => setValue(knob.value));
+
+    //click the VALUE to type one: Enter or clicking away commits, Esc cancels
+    readout.title = 'click to type a value';
+    readout.style.cursor = 'text';
+    readout.addEventListener('click', () => {
+        let field = el('input', 'knob-edit');
+        field.type  = 'number';
+        field.step  = 'any';
+        field.value = readout.textContent;
+        readout.replaceWith(field);
+        field.focus();
+        field.select();
+        let open = true;
+        let close = (commit) => {
+            if(!open) return;
+            open = false;
+            field.replaceWith(readout);
+            let v = parseFloat(field.value);
+            if(commit && Number.isFinite(v)) setValue(v);
+        };
+        field.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter')  close(true);
+            if(e.key === 'Escape') close(false);
+        });
+        field.addEventListener('blur', () => close(true));
+    });
 
     row.append(input, readout);
     return row;
@@ -114,12 +157,14 @@ function slider(knob, onChange){
 // bool knob:  [ label · checkbox ]
 function toggle(knob, onChange){
     let row = el('div', 'knob');
-    row.append(el('label', 'knob-label', knob.label ?? knob.name));
+    let label = el('label', 'knob-label', knob.label ?? knob.name);
+    row.append(label);
 
     let input = el('input', 'knob-check');
     input.type    = 'checkbox';
     input.checked = !!knob.value;
     input.addEventListener('change', () => onChange(input.checked));
+    resetOnDoubleClick(label, () => { input.checked = !!knob.value; onChange(input.checked); });
 
     row.append(input);
     return row;
@@ -138,12 +183,14 @@ function hexToRgb(hex){
 }
 function colorPicker(knob, onChange){
     let row = el('div', 'knob');
-    row.append(el('label', 'knob-label', knob.label ?? knob.name));
+    let label = el('label', 'knob-label', knob.label ?? knob.name);
+    row.append(label);
 
     let input = el('input', 'knob-color');
     input.type  = 'color';
     input.value = rgbToHex(knob.value);
     input.addEventListener('input', () => onChange(hexToRgb(input.value)));
+    resetOnDoubleClick(label, () => { input.value = rgbToHex(knob.value); onChange([...knob.value]); });
 
     row.append(input);
     return row;
@@ -154,7 +201,8 @@ function colorPicker(knob, onChange){
 // min/max; the pad's y runs bottom(min)->top(max).
 function xyPad(knob, onChange){
     let row = el('div', 'knob knob-xy');
-    row.append(el('label', 'knob-label', knob.label ?? knob.name));
+    let label = el('label', 'knob-label', knob.label ?? knob.name);
+    row.append(label);
 
     let pad = el('div', 'knob-pad');
     let dot = el('div', 'knob-pad-dot');
@@ -182,6 +230,8 @@ function xyPad(knob, onChange){
     pad.addEventListener('mousedown', (e) => { dragging = true; setFromEvent(e); });
     window.addEventListener('mousemove', (e) => { if(dragging) setFromEvent(e); });
     window.addEventListener('mouseup',   ()  => { dragging = false; });
+
+    resetOnDoubleClick(label, () => { val = [knob.value[0], knob.value[1]]; place(); onChange([val[0], val[1]]); });
 
     place();
     row.append(pad, readout);

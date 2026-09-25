@@ -100,17 +100,25 @@ gallery entry.
 ## Controls
 
 - Keyboard flying: arrow keys translate; `'`/`/` move up/down; WASD + QE rotate.
-  Hold Shift for a speed boost; the fly Speed slider lives on the Camera tab.
+  Speeds are per second, so heavy scenes fly as fast as light ones. Hold Shift for a
+  speed boost; the fly Speed slider lives on the Camera tab. While the camera moves
+  the view traces at quarter resolution (Render tab: Fast Preview While Moving).
 - Mouse orbit (toggle on the Camera tab): drag to orbit the origin, pinch/scroll to zoom.
-- UI panel tabs: **Camera** (aperture / focal length / fov / exposure, focus-help
-  overlay, speed, orbit, Copy Pose / Save to Scene / Download Settings),
-  **Render** (preview scale, samples, Reset, Aim at Lights), **Export** (Save Image, Auto Save,
-  and tiled HD rendering with a Stop button for output larger than the screen).
+- Keys: **H** shows/hides the panel, **X** saves the image, **P** pauses/resumes.
+- Knobs: double-click a knob's name to reset it to the scene's value; click a
+  slider's value to type one.
+- UI panel tabs: **Camera** (aperture / focal length / fov / exposure — live, it
+  doesn't restart the render — focus-help overlay, speed, orbit, Copy Pose /
+  Save to Scene / Download Settings), **Render** (preview scale, aspect, Aim at
+  Lights, samples, Pause, Stop At N spp, Reset), **Export** (Save Image, Auto Save,
+  and tiled HD rendering with a Stop button and a time-left estimate for output
+  larger than the screen). The canvas re-fits when the window is resized.
   HD tiles download as they finish, named `hd_<spp>spp_<N>x<N>_r<row>c<col>` (row
   counted from the top, column from the left); when the whole grid is done the
   stitched image downloads too, as `hd_<spp>spp_<W>x<H>.png` (if the browser can
   hold a canvas that big — about 16k px a side).
-- A shader-error overlay reports GLSL compile errors in-page during development.
+- An on-screen error box reports GLSL compile errors, and scene errors (a
+  description the generator rejects), in-page during development.
 
 ## Notes
 

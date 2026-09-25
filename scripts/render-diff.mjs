@@ -71,10 +71,11 @@ const scenes = wanted.length ? wanted : allScenes;
 if (!existsSync(chrome)) { console.error(`Chrome not found at ${chrome} (set CHROME_BIN)`); process.exit(1); }
 
 
-//---- runs in each page before its scripts: hold the render loop until the
-//---- sky image has loaded (its onload restarts accumulation), then let
-//---- exactly `frames` frames through and stop. Only the loop named
-//---- `animate` (createScene.js) is counted; the UI's refresh loop runs free.
+//---- runs in each page before its scripts: hold the render loop until it has
+//---- started (so the path tracer, and its sky image, exist) and the sky image
+//---- has loaded (its onload restarts accumulation), then let exactly `frames`
+//---- frames through and stop. Only the loop named `animate` (createScene.js)
+//---- is counted; the UI's refresh loop and other rAF waits run free.
 const pageSetup = (frames) => `(() => {
   const realRAF = window.requestAnimationFrame.bind(window);
   const RealImage = window.Image;
@@ -98,7 +99,7 @@ const pageSetup = (frames) => `(() => {
     return realRAF(cb);
   };
   const tryStart = () => {
-    if (document.readyState !== 'complete' || pending > 0) { setTimeout(tryStart, 50); return; }
+    if (document.readyState !== 'complete' || pending > 0 || held.length === 0) { setTimeout(tryStart, 50); return; }
     started = true;
     held.splice(0).forEach((cb) => { n++; realRAF(cb); });
   };

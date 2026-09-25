@@ -1,11 +1,15 @@
 //-------------------------------------------------
-// SHADER ERROR OVERLAY
+// ERROR OVERLAY
 //-------------------------------------------------
-// Called from ComputeShader._buildProgram when a program fails to link. A
-// failed shader would otherwise be a silent black canvas; this surfaces the
-// GLSL error on-screen — the message plus the offending lines from the
-// COMPILED fragment source (every #include is concatenated and shimFragment
-// prepends a header, so a bare line number is useless without the source).
+// A failed shader or a scene the generator rejects would otherwise be a silent
+// black canvas with the message only in the console; this puts it on-screen.
+//   showShaderError  from ComputeShader._buildProgram when a program fails to
+//                    link: the GLSL error plus the offending lines of the
+//                    COMPILED fragment source (every #include is concatenated
+//                    and shimFragment prepends a header, so a bare line number
+//                    is useless without the source)
+//   watchErrors      from createScene: any other uncaught error (scenegen throws
+//                    while main.js runs emit(), a JS bug)
 //
 // Note: the line is in the compiled shader, not mapped back to the original
 // .glsl include file — that (a full source map across vite-plugin-glsl) is a
@@ -24,7 +28,6 @@ function ensureBox(){
     let bar = document.createElement('div');
     bar.className = 'shader-error-bar';
     let title = document.createElement('span');
-    title.textContent = 'Shader compile error';
     let close = document.createElement('button');
     close.className = 'shader-error-close';
     close.textContent = '✕';
@@ -36,6 +39,7 @@ function ensureBox(){
 
     box.append(bar, body);
     box.body = body;
+    box.titleEl = title;
     document.body.append(box);
     return box;
 }
@@ -85,7 +89,25 @@ export function showShaderError(gl, program, vs, fs){
     //keep the console output too
     console.error('Shader error:\n' + log + (snippet ? '\n\n' + snippet : ''));
 
+    showError('Shader compile error', log + (snippet ? '\n\n' + snippet : ''));
+}
+
+
+// put any message up in the overlay (a title bar and a monospace body)
+export function showError(title, text){
     let el = ensureBox();
+    el.titleEl.textContent = title;
     el.style.display = 'flex';
-    el.body.textContent = log + (snippet ? '\n\n' + snippet : '');
+    el.body.textContent = text;
+}
+
+
+// route uncaught errors and rejections into the overlay. Installed once, when
+// createScene is imported — before the scene's main.js runs emit().
+let watching = false;
+export function watchErrors(){
+    if(watching) return;
+    watching = true;
+    window.addEventListener('error', (e) => showError('Scene error', e.error?.stack ?? e.message));
+    window.addEventListener('unhandledrejection', (e) => showError('Scene error', e.reason?.stack ?? String(e.reason)));
 }

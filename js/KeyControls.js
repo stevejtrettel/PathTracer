@@ -12,13 +12,16 @@ class KeyControls{
         //everything, or the camera keeps flying (and resetting) on its own
         window.addEventListener('blur', () => this.releaseAll());
 
-        this.translateSpeed = 0.03;
-        this.rotateSpeed = 0.007;   //fixed turn rate; independent of fly speed
+        //rates per SECOND (update() scales by the frame time), so a heavy scene
+        //flies as fast as a light one. These are the old per-frame steps (0.03
+        //and 0.007) at 60 fps.
+        this.translateSpeed = 1.8;    //units per second
+        this.rotateSpeed = 0.42;      //radians per second; independent of fly speed
 
-        //fly speed: a live multiplier on the TRANSLATE step only (set from the
+        //fly speed: a live multiplier on the TRANSLATE rate only (set from the
         //Camera tab), plus a hold-Shift boost for coarse repositioning. Rotation
         //is deliberately left out — turning is scale-independent, so it stays a
-        //fixed rate. speed=1 reproduces the original 0.03 move step.
+        //fixed rate.
         this.speed = 1;
         this.boostFactor = 5;
         this.boosted = false;
@@ -106,7 +109,8 @@ class KeyControls{
         return pressed;
     }
 
-    update(){
+    //move for dt seconds of the held keys
+    update(dt){
 
         //fly speed scales translation only (× slider × Shift boost); rotation
         //keeps its fixed rate so turning doesn't get faster with move speed
@@ -114,7 +118,7 @@ class KeyControls{
 
         for(const dir in this.translate){
             if(this.translate[dir].pressed){
-                let newTrans = this.translate[dir].action.clone().multiplyScalar(this.translateSpeed * mult);
+                let newTrans = this.translate[dir].action.clone().multiplyScalar(this.translateSpeed * mult * dt);
                 newTrans.applyMatrix3(this.facing)
                 this.position.add(newTrans);
             }
@@ -123,7 +127,7 @@ class KeyControls{
         let rotated = false;
         for(const dir in this.rotate){
             if(this.rotate[dir].pressed){
-                let rot = new Matrix4().makeRotationAxis(this.rotate[dir].axis, this.rotateSpeed);
+                let rot = new Matrix4().makeRotationAxis(this.rotate[dir].axis, this.rotateSpeed * dt);
                 this.facing.multiply(new Matrix3().setFromMatrix4(rot));
                 rotated = true;
             }

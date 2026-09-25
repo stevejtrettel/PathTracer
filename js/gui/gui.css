@@ -169,6 +169,20 @@
   pointer-events: none;
 }
 
+/* typed entry that temporarily replaces a slider's value readout */
+.knob-edit {
+  flex: 0 0 52px;
+  width: 52px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #6ea8fe;
+  border-radius: 3px;
+  color: #eaeaea;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  padding: 0 3px;
+}
+
 .knob-num, .knob-select {
   flex: 1;
   min-width: 0;
@@ -325,4 +339,19 @@
   pointer-events: none;
   user-select: none;
   font-variant-numeric: tabular-nums;
+}
+
+
+/* transient notice while the tracer shader compiles (createScene) */
+.pt-notice {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 90;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background: rgba(20, 20, 24, 0.85);
+  color: #eaeaea;
+  font: 13px system-ui, sans-serif;
 }

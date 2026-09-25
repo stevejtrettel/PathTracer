@@ -1,5 +1,5 @@
 import Panel from "./gui/Panel.js";
-import {el, control, toggle, button, numberField, select, section, collapsible, isTypingTarget, fitAspect} from "./gui/widgets.js";
+import {el, control, toggle, button, numberField, select, section, collapsible, isTypingTarget} from "./gui/widgets.js";
 import {serializeKnobs, serializeUiParams, withValues, toUniformValue} from "./shaderData/knobs.js";
 import {cameraKnobs, renderKnobs, scratchKnobs, debugKnobs, engineKnobs} from "./shaderData/engineKnobs.js";
 
@@ -28,15 +28,24 @@ const ASPECTS = [
     ['portrait √2', 1/Math.SQRT2],
 ];
 
+// seconds as a short duration: "42s", "3m 12s", "1h 05m"
+function fmtDuration(secs){
+    secs = Math.max(0, Math.round(secs));
+    if(secs < 60)   return `${secs}s`;
+    if(secs < 3600) return `${Math.floor(secs / 60)}m ${String(secs % 60).padStart(2, '0')}s`;
+    return `${Math.floor(secs / 3600)}h ${String(Math.floor(secs / 60) % 60).padStart(2, '0')}m`;
+}
+
 class UI{
     constructor(pathtracer){
 
-        //X saves an image (S is the camera pitch-down key). Skip while typing in
-        //a field so 'x' still types normally.
+        //single-key shortcuts: X saves an image (S is the camera pitch-down key),
+        //P pauses / resumes. Skipped while typing in a field, so the letters
+        //still type normally; a held key's auto-repeat fires only once.
         window.addEventListener('keydown', (e) => {
-            if(e.key !== 'x' && e.key !== 'X') return;
-            if(isTypingTarget(document.activeElement)) return;
-            pathtracer.saveImage();
+            if(e.repeat || isTypingTarget(document.activeElement)) return;
+            if(e.key === 'x' || e.key === 'X') pathtracer.saveImage();
+            if(e.key === 'p' || e.key === 'P') pathtracer.paused = !pathtracer.paused;
         });
 
         //engine-owned knobs, with per-scene values pulled from settings.uiParams
@@ -183,24 +192,35 @@ class UI{
         //(pixelated but fast) — Quarter is the old "preview".
         //(the scale lives on the path tracer, so resize() keeps it — including
         //the resize that restores the view after an HD render)
-        ren.append(select('Scale', [['Full', 1], ['Half', 0.5], ['Quarter', 0.25]], 1, (scale) => {
-            pathtracer.viewScale = scale;
-            pathtracer.resize(pathtracer.size);
-            pathtracer.reset();
-        }));
+        ren.append(select('Scale', [['Full', 1], ['Half', 0.5], ['Quarter', 0.25]], 1,
+            (scale) => pathtracer.setViewScale(scale)));
+
+        //while the camera moves (keys or mouse), trace at quarter scale so flying
+        //stays responsive; the chosen Scale returns a moment after it stops
+        ren.append(toggle({label: 'Fast Preview While Moving', value: pathtracer.previewWhileMoving},
+            (on) => { pathtracer.previewWhileMoving = on; }));
 
         //live aspect ratio: re-fit the canvas to a preset ratio, keeping the
-        //current Scale. Preselects the scene's settings.aspect (so
-        //cubic-portrait/landscape land on √2).
-        ren.append(select('Aspect', ASPECTS, pathtracer.settings.aspect ?? null,
-            (aspect) => { pathtracer.resize(fitAspect(aspect)); pathtracer.reset(); }));
+        //current Scale (and re-fit to it when the window resizes). Preselects the
+        //scene's settings.aspect (so cubic-portrait/landscape land on √2).
+        ren.append(select('Aspect', ASPECTS, pathtracer.aspect,
+            (aspect) => pathtracer.setAspect(aspect)));
 
-        //samples accumulated (live) + restart accumulation
+        //samples accumulated (live), pause, an optional stopping point, restart
         ren.append(section('Samples'));
         const spp = el('div', 'gui-pose');
         ren.append(spp);
+        const pauseBtn = button('Pause', () => { pathtracer.paused = !pathtracer.paused; });
+        ren.append(pauseBtn);
+        ren.append(numberField('Stop At (spp, 0 = never)', pathtracer.stopAt,
+            (v) => { pathtracer.stopAt = Math.max(0, Math.round(v)); }));
         const refreshSpp = () => {
-            spp.textContent = `${Math.floor(pathtracer.frameCount)} spp`;
+            let n = Math.floor(pathtracer.frameCount);
+            let state = pathtracer.paused ? ' · paused'
+                      : pathtracer.holding ? ' · done'
+                      : '';
+            spp.textContent = `${n} spp${state}`;
+            pauseBtn.textContent = pathtracer.paused ? 'Resume' : 'Pause';
         };
         ren.append(button('Reset Samples', () => pathtracer.reset()));
 
@@ -250,10 +270,12 @@ class UI{
             //lock the controls (grey the tab bodies) while an HD render runs, so
             //touching a knob can't restart accumulation. Tabs/hamburger stay live.
             panel.el.classList.toggle('rendering', pathtracer.rendering);
-            if(pathtracer.hd && pathtracer.hd.active){
+            let progress = pathtracer.hdProgress();
+            if(progress){
                 let pr = pathtracer.tracer.material.uniforms.panelToRender.value;
                 let fn = Math.floor(pathtracer.frameCount);
-                hdInfo.textContent = `tile ${pr + 1}/${pathtracer.hd.N} · ${fn}/${pathtracer.hd.spp} spp`;
+                let eta = progress.eta === null ? '' : ` · ${fmtDuration(progress.eta)} left`;
+                hdInfo.textContent = `tile ${pr + 1}/${pathtracer.hd.N} · ${fn}/${pathtracer.hd.spp} spp${eta}`;
             } else {
                 let s = fullSize();
                 let p = pathtracer.planHD(s.w, s.h, hd.maxTile);
@@ -284,10 +306,19 @@ class UI{
 
         help.append(section('Panel'));
         let panelKeys = el('div', 'gui-keys');
-        for(let [k, d] of [['H', 'show / hide panel'], ['X', 'save image'], ['= / −', 'nudge selected slider']]){
+        for(let [k, d] of [['H', 'show / hide panel'], ['X', 'save image'], ['P', 'pause / resume'],
+                           ['= / −', 'nudge selected slider']]){
             panelKeys.append(el('span', 'key', k), el('span', 'desc', d));
         }
         help.append(panelKeys);
+
+        help.append(section('Knobs'));
+        let knobKeys = el('div', 'gui-keys');
+        for(let [k, d] of [['click name', 'select for = / − nudging'], ['double-click name', 'reset to the scene\'s value'],
+                           ['click value', 'type a value (Enter / Esc)']]){
+            knobKeys.append(el('span', 'key', k), el('span', 'desc', d));
+        }
+        help.append(knobKeys);
 
         help.append(section('Camera Keys'));
         let keys = el('div', 'gui-keys');

@@ -1,7 +1,8 @@
 import "../style.css";
 
 import FpsMeter from "./FpsMeter.js";
-import {fitAspect} from "./gui/widgets.js";
+import {el, fitAspect} from "./gui/widgets.js";
+import {watchErrors} from "./gui/ErrorOverlay.js";
 
 import PathTracer from "./PathTracer.js";
 import UI from "./UI.js";
@@ -22,7 +23,16 @@ import buildTraceShader from "./shaderData/buildTraceShader.js";
 // (environment/objects are the scene's GLSL strings; settings is its default
 // export: { uiParams, location, params?, aspect? }.)
 
-function createScene({scene, environment, objects, settings}){
+
+//errors outside the shader (a scene the generator rejects, a JS bug) go to the
+//on-screen overlay too. Installed on import, before main.js calls emit().
+watchErrors();
+
+//resolves after the browser has painted the next frame
+const nextPaint = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+
+async function createScene({scene, environment, objects, settings}){
 
     //stats readout (fps): a minimal always-on overlay pinned to the upper-right
     //corner (see .fps-meter in gui.css). Updated once per frame by stats.end().
@@ -44,9 +54,24 @@ function createScene({scene, environment, objects, settings}){
     //also editable live in the Render panel.
     let res = fitAspect(settings.aspect);
 
+    //compiling the tracer can take a few seconds (big scenes, some GPUs) and
+    //blocks the page while it runs: put a notice up and let it paint first
+    let notice = el('div', 'pt-notice', 'Compiling shader…');
+    document.body.append(notice);
+    await nextPaint();
+
     //build and run the path tracer
     let pathtracer = new PathTracer(shaders, settings, res);
     let ui = new UI(pathtracer);
+    notice.remove();
+
+    //keep the canvas fitted to the window. Debounced: resize fires continuously
+    //while a window edge is dragged, and each re-fit restarts the render.
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => pathtracer.fitToWindow(), 150);
+    });
 
     function animate(){
         requestAnimationFrame(animate);

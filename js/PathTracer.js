@@ -1,6 +1,13 @@
 import ComputeShader from "./ComputeShader.js";
 import KeyControls from "./KeyControls.js";
 import OrbitControls from "./OrbitControls.js";
+import {fitAspect} from "./gui/widgets.js";
+
+
+//while the camera is moving the live view traces at (at most) this fraction of
+//the canvas, and returns to its chosen scale this long after the last move
+const MOTION_SCALE    = 0.25;
+const MOTION_SETTLE_MS = 250;
 
 
 //class to run the path tracer from
@@ -20,6 +27,24 @@ class PathTracer{
         //in the UI, so that resize() — including the one that ends an HD render —
         //keeps it.
         this.viewScale = 1;
+
+        //the canvas's width/height ratio (null = fill the window): the Render
+        //tab's Aspect, kept so a window resize can re-fit to it
+        this.aspect = settings.aspect ?? null;
+
+        //fast preview while moving: trace at MOTION_SCALE while the camera moves,
+        //back to viewScale once it settles (see noteMotion / _settleMotion)
+        this.previewWhileMoving = true;
+        this.moving = false;
+        this.lastMotion = 0;
+
+        //hold the live view: paused, or finished at stopAt samples (0 = never).
+        //The last image stays up; an HD render is never held.
+        this.paused = false;
+        this.stopAt = 0;
+
+        //wall-clock of the previous frame, for frame-rate-independent flying
+        this.lastFrameTime = performance.now();
 
         //true while an HD render is in progress: locks the inputs that would
         //restart accumulation (camera keys + GUI knobs) so a stray touch can't
@@ -76,7 +101,7 @@ class PathTracer{
 
         this.orbitEnabled = true;
         this.orbit = new OrbitControls(this.canvas, this.controls, {
-            onChange: () => { this.tracer.updateUniforms({facing: this.controls.facing, location: this.controls.position}); this.reset(); },
+            onChange: () => this.cameraMoved(),
             target:   target,
             enabled:  () => this.orbitEnabled && !this.rendering,
         });
@@ -125,24 +150,54 @@ class PathTracer{
         return this.tracer.material.uniforms.frameNumber.value;
     }
 
-    //per-frame bookkeeping: advance the frame counters and poll the keyboard
+    //the camera pose changed (keys or mouse): push it and start the average over
+    cameraMoved(){
+        this.tracer.updateUniforms({
+            facing: this.controls.facing,
+            location: this.controls.position,
+        });
+        this.reset();
+        this.noteMotion();
+    }
+
+    //per-frame input: fly on held keys (distance per SECOND, so heavy scenes
+    //don't fly slower), and let the motion preview settle once movement stops
+    handleInput(){
+        let now = performance.now();
+        //capped, so one slow frame (a shader compile, a hitch) can't fling the camera
+        let dt = Math.min((now - this.lastFrameTime) / 1000, 0.1);
+        this.lastFrameTime = now;
+
+        if(!this.rendering && this.controls.isPressed()){
+            this.controls.update(dt);
+            this.cameraMoved();
+        }
+        this._settleMotion(now);
+    }
+
+    //advance the frame counters (one more sample per pixel)
     tick(){
         this.tracer.material.uniforms.frameNumber.value +=1.;
         this.accumulate.material.uniforms.frameNumber.value += 1.;
+    }
 
-        if(!this.rendering && this.controls.isPressed()){
-            this.controls.update();
-            this.tracer.updateUniforms({
-                facing: this.controls.facing,
-                location: this.controls.position,
-            });
-           this.reset();
-        }
+    //is the live view on hold (paused, or done at stopAt samples)?
+    get holding(){
+        if(this.hd && this.hd.active) return false;
+        return this.paused || (this.stopAt > 0 && this.frameCount >= this.stopAt);
     }
 
 
-
     newFrame(){
+
+        this.handleInput();
+
+        //on hold: nothing new to trace, but redraw the last average (so display-
+        //time knobs like exposure still apply)
+        if(this.holding){
+            this.display.renderToScreen();
+            return;
+        }
 
         this.tick();
 
@@ -169,6 +224,7 @@ class PathTracer{
         //restore the view size when the whole grid is done (see startHDRender)
         if(this.hd && this.hd.active){
             let hd = this.hd;
+            hd.samplesDone++;   //for the ETA (see hdProgress)
             let pr = this.tracer.material.uniforms.panelToRender.value;
             if(pr < hd.stopAfter){
                 if(this.frameCount >= hd.spp){
@@ -272,7 +328,7 @@ class PathTracer{
     //saved as it finishes, so a crash mid-render only loses the current tile.
     //opts.tile renders ONLY that one tile (recovery); opts.maxTile caps tile px.
     startHDRender(finalW, finalH, spp, opts={}){
-        if(this.rendering) return;   //re-entry would clobber hdRestore with the tile size
+        if(this.rendering) return;   //already rendering: ignore a second start
         //the inputs come from free number fields
         finalW = Math.max(1, Math.round(finalW) || 1);
         finalH = Math.max(1, Math.round(finalH) || 1);
@@ -280,11 +336,10 @@ class PathTracer{
         let plan = this.planHD(finalW, finalH, opts.maxTile);
         let start = (opts.tile != null) ? Math.min(Math.max(Math.round(opts.tile) || 0, 0), plan.N - 1) : 0;
 
-        //remember the current view size, to restore when the render finishes
-        this.hdRestore = {x: this.size.x, y: this.size.y};
-
-        //(set before resize: tiles always render at full scale, see resize)
+        //(set before resize: tiles always render at full scale, see _applyScale;
+        //the live view is re-fitted to the window when the render ends)
         this.rendering = true;
+        this.moving = false;
         this.resize({x: plan.tileW, y: plan.tileH});
         this.tracer.updateUniforms({numPanels: plan.N, panelToRender: start, renderPanel: true});
         this.reset();
@@ -299,7 +354,20 @@ class PathTracer{
             start:     start,
             stopAfter: (opts.tile != null) ? start + 1 : plan.N,
             tiles:     [],   //promises of {row, col, blob}, for the stitch
+            startTime:   performance.now(),   //for the ETA (hdProgress)
+            samplesDone: 0,
         };
+    }
+
+    //progress of the running HD render: samples done / total, and an ETA in
+    //seconds from the average time per sample so far (null until measurable)
+    hdProgress(){
+        let hd = this.hd;
+        if(!hd || !hd.active) return null;
+        let total = hd.spp * (hd.stopAfter - hd.start);
+        let secs  = (performance.now() - hd.startTime) / 1000;
+        let eta   = hd.samplesDone > 0 ? secs / hd.samplesDone * (total - hd.samplesDone) : null;
+        return {done: hd.samplesDone, total, eta};
     }
 
     //end an HD render: on natural completion (all tiles saved) OR user cancel.
@@ -310,20 +378,70 @@ class PathTracer{
         if(this.hd) this.hd.active = false;
         this.rendering = false;
         this.tracer.updateUniforms({renderPanel: false, panelToRender: 0});
-        this.resize(this.hdRestore);
-        this.reset();
+        this.fitToWindow();
     }
 
-    //res is the canvas size. The live view may trace at a fraction of it
-    //(Render tab Scale: the display stretches it up); HD tiles never do.
+    //res is the canvas size (the traced size follows from it: see _applyScale)
     resize(res){
         this.size = res;
         this._setCanvasSize(res);
-        let s = this.rendering ? 1 : this.viewScale;
-        let r = {x: Math.max(1, Math.floor(s * res.x)), y: Math.max(1, Math.floor(s * res.y))};
+        this.display.setSize(res);
+        this._applyScale();
+    }
+
+    //size the tracer + accumulation for the current canvas. The live view may
+    //trace at a fraction of it — the Render tab's Scale, or MOTION_SCALE while
+    //the camera moves — and the display stretches it up; HD tiles never do.
+    _applyScale(){
+        let s = this.rendering ? 1
+              : this.moving    ? Math.min(this.viewScale, MOTION_SCALE)
+              :                  this.viewScale;
+        let r = {x: Math.max(1, Math.floor(s * this.size.x)), y: Math.max(1, Math.floor(s * this.size.y))};
         this.tracer.setSize(r);
         this.accumulate.setSize(r);
-        this.display.setSize(res);
+    }
+
+    //the Render tab's Scale (1, 0.5, 0.25)
+    setViewScale(scale){
+        this.viewScale = scale;
+        this._applyScale();
+        this.reset();
+    }
+
+    //the Render tab's Aspect (width/height, null = fill the window)
+    setAspect(aspect){
+        this.aspect = aspect;
+        this.fitToWindow();
+    }
+
+    //fit the canvas to the window at the current aspect (window resize, Aspect,
+    //end of an HD render). Not during an HD render: tiles have their own size.
+    //A fit that changes nothing (a resize event that kept the size) keeps the
+    //render going.
+    fitToWindow(){
+        if(this.rendering) return;
+        let res = fitAspect(this.aspect);
+        if(res.x === this.size.x && res.y === this.size.y) return;
+        this.resize(res);
+        this.reset();
+    }
+
+    //the camera just moved: drop to the motion preview scale (if enabled)
+    noteMotion(){
+        this.lastMotion = performance.now();
+        if(this.previewWhileMoving && !this.moving && !this.rendering){
+            this.moving = true;
+            this._applyScale();
+        }
+    }
+
+    //back to the full view scale once the camera has been still for a moment
+    _settleMotion(now){
+        if(this.moving && now - this.lastMotion > MOTION_SETTLE_MS){
+            this.moving = false;
+            this._applyScale();
+            this.reset();
+        }
     }
 
     printLocation(){
