@@ -1,0 +1,2 @@
+Chrome/153.0.8010.53 | ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Unspecified Version)
+160x120, 32 frames

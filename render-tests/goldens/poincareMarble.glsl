@@ -238,7 +238,7 @@ Vector normal_room(vec3 p){
 Medium medium_core(vec3 p){
     Medium m = defaultMedium();
     m.ior    = 2.5;
-    m.absorb = vec3(7.5, 20.794, 22.147);
+    m.absorb = absorbFor(vec3(0.69, 0.35, 0.33), 1.0);
     return m;
 }
 Material material_core(vec3 p, inout Vector n){

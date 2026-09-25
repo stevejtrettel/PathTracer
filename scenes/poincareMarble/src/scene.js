@@ -23,7 +23,7 @@
 // face spheres from inside. The legacy fixed it at 0.4.
 //=====================================================================
 
-import {scene, object, lib, knob} from '../../../js/scenegen/index.js';
+import {scene, object, lib, knob, absorbFor} from '../../../js/scenegen/index.js';
 import {room, sphereLight, glass} from '../../../js/presets/index.js';
 
 
@@ -47,7 +47,10 @@ export default scene({
             scale:    SCALE,
             nestedIn: 'marble',
             shape:    lib.hypDod({rCent: coreRadius}),
-            material: glass({absorb: [7.5, 20.794, 22.147], ior: 2.5}),
+            //the legacy's red-brown, reached after 1 unit of glass. (The legacy's
+            //raw absorb [7.5, 20.794, 22.147] was tuned for thin hollowed-out
+            //slivers; through the solid core at this scale it is simply black.)
+            material: glass({absorb: absorbFor([0.69, 0.35, 0.33], 1.0), ior: 2.5}),
         }),
 
         //the ball that bounds the hyperbolic space
