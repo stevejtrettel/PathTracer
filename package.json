@@ -4,7 +4,8 @@
     "dev": "node scripts/run-example.mjs dev",
     "build": "node scripts/run-example.mjs build",
     "preview": "node scripts/run-example.mjs preview",
-    "gen": "node scripts/gen.mjs"
+    "gen": "node scripts/gen.mjs",
+    "render-diff": "node scripts/render-diff.mjs"
   },
   "devDependencies": {
     "vite": "^6.3.2",

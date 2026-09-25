@@ -17,8 +17,13 @@ Each scene is its own Vite page (`scenes/<name>/index.html`); the root `index.ht
 is a gallery linking to them all. Both are generated — after adding or removing a
 scene folder, run `node scripts/gen-pages.mjs` to regenerate them.
 
-`node scripts/render-test.mjs <scene>...` headlessly screenshots scenes into
-`render-tests/` — useful for checking nothing broke after engine changes.
+`npm run render-diff` renders every scene small (160×120, 32 frames) and compares it
+with the reference images in `render-tests/baselines/`: each scene comes back
+`identical`, `rounding`, or `CHANGED` (with a side-by-side in `render-tests/diff/`).
+The tracer is deterministic, so a change that shouldn't alter anything must come back
+identical. References are machine-specific; rebake deliberately with
+`npm run render-diff -- --bake` after looking. (`node scripts/render-test.mjs <scene>...`
+still takes a single full-window screenshot.)
 
 ## Architecture
 

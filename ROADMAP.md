@@ -38,14 +38,13 @@ write a scene, see `readme.md`; per-system design docs live in `docs/`.
 
 ## Open / owed
 
-- **Render verification.** There is no image-comparison step: `scripts/render-test.mjs`
-  is screenshot-and-eyeball, `render-tests/*.png` are untracked, and
-  `render-tests/baseline/` is empty (docs that claim otherwise referred to local,
-  never-committed shots). Owed: a tracked baseline set + a diff step. Blocked-ish on
-  the SSS re-tune below (no point baking looks that will change).
-- **SSS re-tune + baseline bake.** The July 2026 subsurface direction-normalization
-  fix legitimately changed the look of ~21 `subSurface` scenes; `meanFreePath` wants
-  a per-scene by-eye re-tune before baselines are baked.
+- **Render verification.** `npm run render-diff` (Sep 2026) compares every scene
+  against tracked references in `render-tests/baselines/` (160×120, 32 frames,
+  machine-specific — see the script header). They are *regression* references, not
+  approved looks: rebake whenever a look change is intended.
+- **SSS re-tune.** The July 2026 subsurface direction-normalization fix legitimately
+  changed the look of ~21 `subSurface` scenes; `meanFreePath` wants a per-scene by-eye
+  re-tune (then rebake the render-diff references).
 - **Variety builder, remaining phases.** Per `docs/variety-builder.md`: migrate the
   legacy variety bucket (~14 scenes), the float-source catalogue end state,
   `--catalogue` listing varieties, integrate the equation transpiler into the

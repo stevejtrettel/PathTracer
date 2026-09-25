@@ -5,3 +5,4 @@ dist/
 render-tests/*
 !render-tests/goldens/
 !render-tests/equations/
+!render-tests/baselines/
