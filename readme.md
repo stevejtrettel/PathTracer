@@ -104,7 +104,7 @@ gallery entry.
 - Mouse orbit (toggle on the Camera tab): drag to orbit the origin, pinch/scroll to zoom.
 - UI panel tabs: **Camera** (aperture / focal length / fov / exposure, focus-help
   overlay, speed, orbit, Copy Pose / Save to Scene / Download Settings),
-  **Render** (preview scale, samples, Reset), **Export** (Save Image, Auto Save,
+  **Render** (preview scale, samples, Reset, Aim at Lights), **Export** (Save Image, Auto Save,
   and tiled HD rendering with a Stop button for output larger than the screen).
   HD tiles download as they finish, named `hd_<spp>spp_<N>x<N>_r<row>c<col>` (row
   counted from the top, column from the left); when the whole grid is done the

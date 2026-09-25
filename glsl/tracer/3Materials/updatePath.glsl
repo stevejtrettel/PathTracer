@@ -90,7 +90,9 @@ void roulette(inout Path path, float scale){
     // DELETES energy — invisible while throughput stays <=1, but spectral tints start
     // near 4 in their dominant channel, so every spectral path was losing most of its
     // weight at the first roulette (wavelength-dependently: band centres lost most).
-    float p = scale * min(LInf_Norm(path.light), 1.);
+    //(rrWeight: the bounce's light-aiming weight is left out of the survival
+    //judgement — see aimLights.glsl. It is 1 everywhere else.)
+    float p = scale * min(LInf_Norm(path.light) / path.rrWeight, 1.);
     if (randomFloat() > p){
         path.keepGoing = false;
     }

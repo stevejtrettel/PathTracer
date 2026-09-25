@@ -506,6 +506,11 @@ function planObject(node, forceMarch){
         traceDef: analytic
             ? `float trace_${name}(Vector tv){\n    return ${entry.stem}Trace(tv, ${NAME}_P, ${entry.trace.map(n => argFor[n]).join(', ')});\n}`
             : null,
+        //an emissive analytic sphere is a light a diffuse bounce may aim at
+        //(glsl/tracer/3Materials/aimLights.glsl): its centre and radius
+        light: (analytic && entry.stem === 'sphere' && isMat(node.material) && node.material.surf.emit !== undefined)
+            ? {center: `${NAME}_P`, radius: argFor[entry.trace[0]]}
+            : null,
     };
 }
 

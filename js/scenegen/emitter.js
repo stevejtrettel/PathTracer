@@ -321,6 +321,18 @@ function carveNested(u, regions){
     return u.marchedBlock.replace(u.marchCall, shell);
 }
 
+//the sphere lights a diffuse bounce may aim at. The engine declares these two
+//before the scene chunk (glsl/tracer/3Materials/aimLights.glsl).
+function lightsSection(units){
+    const lights = units.filter(u => u.light).map(u => u.light);
+    const rows = lights.map((l, i) => (i < lights.length - 1)
+        ? `    if(i == ${i}){ c = ${l.center}; r = ${l.radius}; return; }`
+        : `    c = ${l.center}; r = ${l.radius};`);
+    return sectionHeader('the lights — emissive spheres a diffuse bounce may aim at (aimLights.glsl)')
+        + `\n\nint numLights(){ return ${lights.length}; }\n\n`
+        + `void lightSphere(int i, out vec3 c, out float r){\n${lights.length ? rows.join('\n') : '    c = vec3(0.); r = 0.;'}\n}`;
+}
+
 function entrySection(units){
     const marched = units.filter(u => u.marchedBlock);
     const traced  = units.filter(u => u.traceDef);
@@ -515,6 +527,7 @@ export function emit(description, settings = {}){
     if(traces) sections.push(traces);
     sections.push(dispatchersSection(units, regions, scatters, ambient ? 'ambientMedium()' : 'defaultMedium()'));
     sections.push(entrySection(units));
+    sections.push(lightsSection(units));
 
     validateUses(units, includes, sections.join('\n'));
 

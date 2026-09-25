@@ -67,6 +67,7 @@ vec3 pathTrace(Path path){
 
         //probabilistically kill rays; past maxBounces, wind the path down
         roulette(path, bounceIndex < maxBounces ? 1. : RR_TAIL);
+        path.rrWeight = 1.;   //the aiming weight only concerns this bounce's roulette
 
         if(!path.keepGoing){ break; }
 

@@ -146,3 +146,14 @@ float trace_Scene(Vector tv){
     d = min(d, trace_ball(tv));
     return d;
 }
+
+
+//---------------------------------------------------------------------
+// the lights — emissive spheres a diffuse bounce may aim at (aimLights.glsl)
+//---------------------------------------------------------------------
+
+int numLights(){ return 0; }
+
+void lightSphere(int i, out vec3 c, out float r){
+    c = vec3(0.); r = 0.;
+}

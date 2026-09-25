@@ -26,6 +26,10 @@ const renderKnobs = [
     // the STRENGTH of the wavelength->IOR shift (prism rainbows) and does nothing
     // until spectral is on. See glsl/tracer/1Setup/spectral.glsl.
     { name: 'spectral',   label: 'Spectral',   type: 'bool', value: false, group: 'render' },
+    // light-aimed diffuse bounces (glsl/tracer/3Materials/aimLights.glsl): half the
+    // diffuse bounces aim at a sphere light, with one weight that keeps the image
+    // the same — only the noise changes. OFF = the plain cosine lobe, to compare.
+    { name: 'aimLights',  label: 'Aim at Lights', type: 'bool', value: true, group: 'render' },
     { name: 'dispersion', label: 'Dispersion', min: 0, max: 0.3, step: 0.005, value: 0, group: 'render' },
 ];
 

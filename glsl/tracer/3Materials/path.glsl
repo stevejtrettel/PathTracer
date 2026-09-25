@@ -92,6 +92,9 @@ struct Path{
     bool keepGoing;
     bool subSurface;//a transmit event entered a scattering interior: run the walk
 
+    float rrWeight;//this bounce's light-aiming weight (aimLights.glsl), already in
+                   //light: roulette judges survival WITHOUT it (see roulette)
+
 };
 
 
@@ -108,6 +111,7 @@ Path initializePath(Vector tv){
     path.totalDistance=0.;
     path.keepGoing=true;
     path.subSurface=false;
+    path.rrWeight=1.;
 
     path.type=1;
 

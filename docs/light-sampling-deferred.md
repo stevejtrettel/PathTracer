@@ -1,5 +1,16 @@
 # Deferred sphere-light sampling (NEE)
 
+> **Sep 2026 — what was built instead:** a forward-only relative of this,
+> `glsl/tracer/3Materials/aimLights.glsl`. A diffuse bounce draws its direction
+> from a 50/50 mix of the cosine lobe and the cone toward a sphere light, and is
+> then traced forward like any other bounce — no shadow ray, no connection, so
+> no two-point problem in curved space (the cone is just a worse guess there).
+> The price is one closed-form weight (lobe density / mixture density), plus
+> roulette judging survival without it. Measured 1.7–7.8x fewer samples for the
+> same error on the room scenes; unbiased (image energy matches to 0.1%). The
+> Render tab's "Aim at Lights" toggles it. Sphere lights only for now: any other
+> emitter would need a bounding ball per shape.
+
 The design for unbiased next-event estimation of sphere lights — worked out in
 full, then deliberately not built (August 2026) because our small-light scenes
 put their noise exactly where NEE is blind. Companion to

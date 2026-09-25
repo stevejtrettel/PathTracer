@@ -14,6 +14,10 @@
 // fractions (F comes from the interface's index ratio, floored by the artistic
 // gloss knob), so the throughput only ever picks up tints in updateFromSurface.
 // Dividing by a probability here would double-count lobe energy.
+//
+// The ONE exception: the diffuse lobe may aim its direction at a sphere light
+// (aimLights.glsl), which costs a single closed-form weight on the throughput —
+// the lobe's density over the aimed mixture's. Everything else is weight-free.
 //-------------------------------------------------
 
 
@@ -71,6 +75,10 @@ float thinFilmReflect(float cosI, float nf, float d){
 }
 
 
+//diffuse bounces may aim at the sphere lights (forward only; see the file)
+#include aimLights.glsl
+
+
 void scatter( inout Path path ){
 
     //unrendered materials: pass straight through into the medium beyond
@@ -123,8 +131,8 @@ void scatter( inout Path path ){
     //from the path's PCG stream
     bool firstHit = (pathBounce == 0);
     float random = firstHit ? ldSample2D(LD_BOUNCE_EVT).x : randomFloat();
-    vec3 sphereDir = firstHit ? unitVec3From(ldSample2D(LD_BOUNCE_DIR)) : randomUnitVec3();
-    Vector diffuseDir=vNormalize(add(normal, Vector(path.tv.pos, sphereDir)));
+    vec2 dirSample = firstHit ? ldSample2D(LD_BOUNCE_DIR) : vec2(randomFloat(), randomFloat());
+    Vector diffuseDir=vNormalize(add(normal, Vector(path.tv.pos, unitVec3From(dirSample))));
     Vector newDir;
 
     if(random < probCoat){
@@ -207,7 +215,9 @@ void scatter( inout Path path ){
         path.region=path.dat.frontID;
         path.subSurface=false;
 
-        newDir=diffuseDir;
+        //the cosine direction, or a direction aimed at a sphere light (the
+        //sample that made the cosine direction also places the cone sample)
+        newDir=aimDiffuse(path, normal, diffuseDir, dirSample);
 
     }
 
