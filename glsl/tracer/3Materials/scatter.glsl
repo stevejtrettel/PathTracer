@@ -118,8 +118,13 @@ void scatter( inout Path path ){
     //diffuse takes the remainder
 
     //---- select the event --------------------------------------------------
-    float random=randomFloat();
-    Vector diffuseDir=vNormalize(add(normal, randomVector(path.tv.pos)));
+    //at the first hit these come from the pixel's low-discrepancy sequence (the
+    //dimensions whose noise dominates a direct/first-indirect image); after that,
+    //from the path's PCG stream
+    bool firstHit = (pathBounce == 0);
+    float random = firstHit ? ldSample2D(LD_BOUNCE_EVT).x : randomFloat();
+    vec3 sphereDir = firstHit ? unitVec3From(ldSample2D(LD_BOUNCE_DIR)) : randomUnitVec3();
+    Vector diffuseDir=vNormalize(add(normal, Vector(path.tv.pos, sphereDir)));
     Vector newDir;
 
     if(random < probCoat){

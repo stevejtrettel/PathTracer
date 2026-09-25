@@ -28,6 +28,10 @@ vec3 pathTrace(Path path){
 
     for (int bounceIndex = 0; bounceIndex < maxBounces + RR_TAIL_LEN; ++bounceIndex)
     {
+        //(the first bounce draws its event and direction from the pixel's
+        //low-discrepancy sequence: see random.glsl)
+        pathBounce = bounceIndex;
+
         //move forward until the next intersection, update LocalData
         stepForward(path);
 

@@ -81,8 +81,9 @@ Vector initializeRay(vec2 fragCoord, float FOV){
 
 vec2 sampleAperture(Camera cam){
 
-    float theta=2.*PI*randomFloat();
-    float radius=cam.aperture*sqrt(randomFloat());
+    vec2 u = ldSample2D(LD_APERTURE);
+    float theta=2.*PI*u.x;
+    float radius=cam.aperture*sqrt(u.y);
 
     vec2 offset=radius*vec2(cos(theta),sin(theta));
     return offset;
@@ -134,7 +135,7 @@ Vector cameraRay(vec2 fragCoord, Camera cam){
     //spread each HD-tile pixel over sqrt(numPanels) output pixels (a box blur).
     //Same random draws in the same order as before, so non-panel renders are
     //unchanged.
-    fragCoord += vec2(randomFloat(), randomFloat()) - 0.5f;
+    fragCoord += ldSample2D(LD_JITTER) - 0.5f;
 
     //if we are rendering by panels, set the correct panel
     if(cam.renderPanel){
