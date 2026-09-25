@@ -239,10 +239,11 @@ Material material_cup(vec3 p, inout Vector n){
 Medium medium_drink(vec3 p){
     Medium m = defaultMedium();
     vec3 q = p - BEER_P;
-    m.ior    = 1.2;
-    m.absorb = 2.5*vec3(0.03, 0.15, 0.9);
-    m.mfp    = 0.1*(1.0 + 3.0*exp(-pow(abs((q.y - 1.53846154)/0.4), 10.0)));
-    m.blur   = foam(q);
+    m.ior         = 1.2;
+    m.absorb      = 2.5*vec3(0.03, 0.15, 0.9);
+    m.mfp         = 0.1*(1.0 + 3.0*exp(-pow(abs((q.y - 1.53846154)/0.4), 10.0)));
+    m.blur        = foam(q);
+    m.surfaceBlur = foam(q);
     return m;
 }
 Material material_drink(vec3 p, inout Vector n){

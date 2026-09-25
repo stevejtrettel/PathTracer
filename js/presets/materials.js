@@ -66,11 +66,14 @@ export function glass(spec){
 
 //glass whose interior scatters: setting mfp is what compiles the walk in.
 //transmit = 1 structurally — light enters the surface.
+//surfaceBlur (optional, default 0) adds a scattering skin at the surface — see
+//the Medium struct in glsl/tracer/3Materials/material.glsl
 export function subsurface(spec){
-    checkArgs('subsurface', spec, ['absorb', 'ior', 'mfp', 'blur']);
+    checkArgs('subsurface', spec, ['absorb', 'ior', 'mfp', 'blur'], ['surfaceBlur']);
     return named('subsurface', material({surf: {transmit: 1},
                                          interior: {ior: spec.ior, absorb: spec.absorb,
-                                                    mfp: spec.mfp, blur: spec.blur}}));
+                                                    mfp: spec.mfp, blur: spec.blur,
+                                                    ...(spec.surfaceBlur !== undefined ? {surfaceBlur: spec.surfaceBlur} : {})}}));
 }
 
 //surface emission. `emit` is the real field (radiance); compose power*colour

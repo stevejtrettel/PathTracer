@@ -53,8 +53,13 @@ float bisect_Scatter(Vector tv, float dt, int region){
 //walk. Guarded by volumeActive at the call sites, so a pure-scattering medium
 //skips it entirely.
 void absorbEmit(inout Path path, float dl){
-    path.pixel += path.light * path.medium.emit * dl;
-    path.light  *= exp(-path.medium.absorb * dl);
+    //emission integrated against the absorption along the segment (see
+    //updateFromVolume): e(1-exp(-s dl))/s, not e*dl at the leg's starting
+    //throughput, which overcounts once s*dl is not small
+    vec3 s = path.medium.absorb;
+    vec3 T = exp(-s * dl);
+    path.pixel += path.light * mix(path.medium.emit*dl, path.medium.emit*(1.-T)/max(s, vec3(1e-6)), step(vec3(1e-6), s));
+    path.light  *= T;
 }
 
 
@@ -62,7 +67,7 @@ void absorbEmit(inout Path path, float dl){
 //boundary (leaving it ON the surface, still inside) or dies. Applying Beer's
 //law per step makes throughput decay with depth, so roulette culls rays the
 //medium would have absorbed anyway — unbiased, only wasted deep-ray work saved.
-void walkInterior(inout Path path, float mfp, float blur){
+void walkInterior(inout Path path, float mfp, float blur, float surfaceBlur){
 
     int scatterSteps=1000;
     float depth=0.;
@@ -78,12 +83,23 @@ void walkInterior(inout Path path, float mfp, float blur){
     //this medium has any volume interaction
     bool volumeActive = length(path.medium.absorb) > 1e-4 || length(path.medium.emit) > 1e-4;
 
+    //SURFACE BLUR: one extra scatter right at the boundary, before the first
+    //flight — a thin scattering skin over the uniform interior, which sends
+    //some light straight back out near where it came in, barely absorbed (the
+    //milky sheen). 0 = none. surfaceBlur = blur reproduces the old
+    //scatter-first walk exactly (same random draws, same order).
+    if(surfaceBlur > 0.){
+        temp=vNormalize(mix(temp, randomVector(temp.pos), surfaceBlur*surfaceBlur));
+    }
+
     for (int i = 0; i < scatterSteps; i++){
 
-        //choose the scatter direction (normalized so the step below travels
-        //exactly flowDist) and an exponential flight of mean mfp
-        randomDir=randomVector(temp.pos);
-        temp=vNormalize(mix(temp,randomDir,rough));
+        //FLY FIRST, then scatter: each leg starts along the direction the path
+        //arrived with (refracted in at the surface, or reflected back in off
+        //it), and blur acts at the scattering vertex. Scattering at the entry
+        //point instead threw that direction away — up to half of all entering
+        //rays (blur 1) headed straight back out — so the "ballistic limit" as
+        //mfp -> maxDist was not the glass path it should be.
         tv=temp;
         flowDist=randomExponential(mfp);
         flow(temp,flowDist);
@@ -110,6 +126,11 @@ void walkInterior(inout Path path, float mfp, float blur){
         roulette(path);
         if(!path.keepGoing){ return; }
 
+        //scatter at this vertex (normalized so the next flight travels
+        //exactly flowDist)
+        randomDir=randomVector(temp.pos);
+        temp=vNormalize(mix(temp,randomDir,rough));
+
     }
 
     //we got stuck inside the material
@@ -127,10 +148,11 @@ void mediumWalk(inout Path path){
     //interface, whose "beyond" is the outside world.
     float mfp =path.medium.mfp;
     float blur=path.medium.blur;
+    float surfaceBlur=path.medium.surfaceBlur;
 
-    for(int walkTry = 0; walkTry < 8; walkTry++){
+    for(int walkTry = 0; walkTry < 32; walkTry++){
 
-        walkInterior(path, mfp, blur);
+        walkInterior(path, mfp, blur, surfaceBlur);
         if(!path.keepGoing){ return; }   //absorbed or stuck inside
 
         //interface data at the exit point: the leg ends just inside the
@@ -147,9 +169,15 @@ void mediumWalk(inout Path path){
 
         float F = FresnelReflectAmount(iorRatio(path.dat), path.tv, facet, 0., 1.);
         if(randomFloat() < F){
-            //trapped on the very last try: terminate (rare) rather than force
-            //an exit through a possibly-TIR interface
-            if(walkTry == 7){ path.keepGoing = false; return; }
+            //trapped by internal reflection. Past 8 tries, wind the path down with
+            //roulette (unbiased: survivors are boosted) instead of killing it —
+            //the old hard stop at 8 deleted 3-7% of the entering energy, ~27% at
+            //ior 2. The last try still stops, after ~0.75^24 of survival.
+            if(walkTry == 31){ path.keepGoing = false; return; }
+            if(walkTry >= 7){
+                roulette(path, 0.75);
+                if(!path.keepGoing){ return; }
+            }
             //reflect back inside and keep walking; the exit data's reflect
             //side IS the interior (aboveHorizon keeps the bounce inward)
             path.tv = aboveHorizon(vReflect(path.tv, facet), path.dat.normal);

@@ -255,10 +255,11 @@ Vector normal_room(vec3 p){
 
 Medium medium_klein(vec3 p){
     Medium m = defaultMedium();
-    m.ior    = 1.5;
-    m.absorb = vec3(2.8, 1.75, 0.35);
-    m.mfp    = 0.5*sssDensity;
-    m.blur   = sssScatter;
+    m.ior         = 1.5;
+    m.absorb      = vec3(2.8, 1.75, 0.35);
+    m.mfp         = 0.5*sssDensity;
+    m.blur        = sssScatter;
+    m.surfaceBlur = sssScatter;
     return m;
 }
 Material material_klein(vec3 p, inout Vector n){

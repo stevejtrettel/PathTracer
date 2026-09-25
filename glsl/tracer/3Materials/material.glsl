@@ -36,6 +36,9 @@ struct Medium{
     vec3  emit;           //volume emission, 1/length
     float mfp;            //scatter mean free path (maxDist = ballistic: no walk)
     float blur;           //phase width: 0 = forward, 1 = isotropic
+    float surfaceBlur;    //an extra scatter right at the surface each time light enters
+                          //the walk (a scattering skin: foam, a milky film). 0 = none,
+                          //the uniform interior; = blur is the pre-Sep-2026 walk exactly
 };
 
 struct Material{
@@ -72,7 +75,8 @@ Medium defaultMedium(){
         vec3(0.),   //absorb
         vec3(0.),   //emit
         maxDist,    //mfp
-        1.          //blur
+        1.,         //blur
+        0.          //surfaceBlur
     );
 }
 

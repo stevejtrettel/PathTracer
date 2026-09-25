@@ -88,6 +88,8 @@ struct Medium {                   // consumed ALONG a segment
     vec3  emit;                   // volume emission,  1/length
     float mfp;                    // scatter mean free path (maxDist = ballistic)
     float blur;                   // phase width: 0 = forward, 1 = isotropic
+    float surfaceBlur;            // extra scatter at the surface on entering the walk
+                                  // (a scattering skin); = blur is the pre-Sep-2026 walk
 };
 
 struct Material { bool render; Surface surf; Medium interior; };

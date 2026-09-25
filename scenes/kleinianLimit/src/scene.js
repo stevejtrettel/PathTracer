@@ -39,7 +39,11 @@ export default scene({
             //nearly smooth exit — the polish is what keeps the highlights sharp
             material: withSurface(
                 subsurface({absorb: [2.8, 1.75, 0.35], ior: 1.5,
-                            mfp: glsl`0.5*${sssDensity}`, blur: sssScatter}),
+                            mfp: glsl`0.5*${sssDensity}`, blur: sssScatter,
+                            //the milky sheen: a scattering skin as strong as the
+                            //interior's blur (exactly the look before the walk
+                            //started flying before its first scatter)
+                            surfaceBlur: sssScatter}),
                 {roughness: 0.04}),
         }),
 

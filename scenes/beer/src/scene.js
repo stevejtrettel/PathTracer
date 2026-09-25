@@ -57,6 +57,9 @@ export default scene({
                             ior:    1.2,
                             mfp:    glsl`0.1*(1.0 + 3.0*exp(-pow(abs((q.y - ${level})/${thick}), 10.0)))`,
                             blur:   glsl`${foam}(q)`,
+                            //the head's froth scatters right at its surface: a skin
+                            //as strong as the foam's own blur
+                            surfaceBlur: glsl`${foam}(q)`,
                         }),
                         {roughness: glsl`0.6*${foam}(q)`}),
                 },
