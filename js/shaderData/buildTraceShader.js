@@ -62,8 +62,8 @@ function buildSky(sky){
 // GEO_EPS is EPSILON's POSITIONAL twin, and the one the band is derived from.
 // EPSILON says how close counts as a hit; GEO_EPS is how far we back off or push
 // off a surface. Those can't be finer than float32 can place a point (one ulp is
-// ~2e-6 at |p| ~ 16): apollonianGasket marches at EPSILON = 1e-7 and, with the
-// band derived from that, 54% of its key-light hits went unclaimed. GEO_EPS
+// ~2e-6 at |p| ~ 16): apollonianGasket once marched at EPSILON = 1e-7 and, with
+// the band derived from that, 54% of its key-light hits went unclaimed. GEO_EPS
 // never drops below GEO_EPS_FLOOR; for every scene with EPSILON above the floor
 // it IS EPSILON, so their constants (and renders) are unchanged.
 const MARCH_DEFAULTS = {epsilon: 0.001, maxDist: 100, maxSteps: 2000};

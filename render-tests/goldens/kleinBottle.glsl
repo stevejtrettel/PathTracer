@@ -156,8 +156,8 @@ float gSDF[N_OBJ];
 const vec3 KLEIN_P    = vec3(-1.4, 3.0, 0.0);
 const vec3 KLEIN_AXIS = vec3(0.0, 1.0, 0.0);
 
-const vec3  KEY_P      = vec3(7.0, 13.0, 10.0);
-const float KEY_RADIUS = 3.0;
+const vec3  KEY_P      = vec3(-12.0, 4.0, 2.0);
+const float KEY_RADIUS = 1.5;
 
 const vec3 ROOM_P        = vec3(0.0, 10.0, 0.0);
 const vec3 ROOM_HALFSIZE = vec3(14.0, 10.0, 22.0);
@@ -233,7 +233,7 @@ Material material_klein(vec3 p, inout Vector n){
 
 Material material_key(vec3 p, inout Vector n){
     Material m = defaultMaterial();      //light
-    m.surf.emit = 400.0*vec3(0.9);
+    m.surf.emit = 200.0*vec3(0.9);
     return m;
 }
 Medium   medium_key  (vec3 p){ return defaultMedium(); }

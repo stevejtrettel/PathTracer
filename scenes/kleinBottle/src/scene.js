@@ -31,7 +31,9 @@ export default scene({
             material: glass({absorb: glsl`0.1*vec3(0.3, 0.05, 0.2)`, ior: 1.5}),
         }),
 
-        sphereLight({name: 'key', at: [7.0, 13.0, 10.0], radius: 3.0, power: 400}),
+        //a low side light, as the legacy had it: from the left, level with the
+        //bottle, so the glass reads by its edges against the slate room
+        sphereLight({name: 'key', at: [-12.0, 4.0, 2.0], radius: 1.5, power: 200}),
         room({center: [0.0, 10.0, 0.0], half: [14.0, 10.0, 22.0]}),
     ],
 });

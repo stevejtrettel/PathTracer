@@ -7,11 +7,12 @@
 //----------------------------------------------------------------------------
 // APOLLONIAN GASKET — the FRACT-fold gasket, morphed by `foldOffset`.
 //
-// A DIFFERENT ESTIMATOR from fractals/apollonian.glsl, not a preset of it. That
+// The same fold family as fractals/apollonian.glsl, framed differently. That
 // one folds with `p -= 2*round(0.5*p)` and morphs through the inversion radius;
 // this one folds with `p = -1 + 2*fract(0.5*p + foldOffset)` at a fixed scale of
-// 1.5 and morphs by SHIFTING the fold each iteration. Different fold, different
-// fractal — hence two files.
+// 1.5 and morphs by SHIFTING the fold each iteration. At foldOffset 0.5 the two
+// folds agree; what stays different is the framing below (and the +0.2 floor),
+// which makes this one a ball-shaped packing — hence two files.
 //
 // Two things make it renderable at all. An outer sphere INVERSION maps the
 // space-filling gasket into a compact blob, and its conformal factor has to be
@@ -19,25 +20,17 @@
 // 3/|p|^2, so the estimate is scaled back by m/3. And the result is CLIPPED to
 // the unit ball, because the folded fractal is otherwise infinite.
 //
-// THIS ESTIMATOR NEEDS A FINE EPSILON — see scenes/apollonianGasket, which sets
-// `march: {epsilon: 1e-7, maxSteps: 4000}`.
+// KEEP foldOffset NEAR 0.5 (about 0.4..0.6). Away from 0.5 the structure fills
+// in and the estimate is tiny almost everywhere in the ball. Fraction of
+// interior points under the default epsilon (1e-3), 6k samples:
 //
-// It is unusually pessimistic. `res` carries a +0.2 floor so it never reaches
-// zero, and `scale` diverges over the ten iterations, so the returned value is
-// tiny almost EVERYWHERE inside the unit ball rather than only near the gasket.
-// Measured over 200k interior points at foldOffset 0.877:
+//     foldOffset     0.4   0.45   0.5   0.55   0.6   0.877
+//     "solid"        23%   11%    8%    11%    23%   ~98%
 //
-//     percentile     value            epsilon    fraction of the ball it "hits"
-//     0.01%          9.3e-10          1e-3       97.1%   <- the engine default
-//     1%             7.1e-08          1e-5       30.7%
-//     25%            6.7e-06          1e-6        7.7%
-//     50%            3.1e-05          1e-7        1.3%   <- what the scene uses
-//     90%            3.7e-04          1e-8        0.15%
-//
-// At the engine default the marcher counts 97% of the ball as a hit and the
-// object renders as a smooth SPHERE. That is not a bug in this file — the maths
-// is the original's — it is what a distance estimator this conservative costs,
-// and the per-scene `march:` key is how it is paid.
+// 0.877 was the legacy's saved value, and it is why the port rendered as a
+// smooth SPHERE: 98% of the ball read as a wall. Two earlier diagnoses blamed
+// the epsilon (a 1e-7 march override) and then the estimator itself; neither
+// was it. At 0.5 the original maths renders at the default marcher settings.
 //----------------------------------------------------------------------------
 
 

@@ -258,17 +258,18 @@ guessing an interface with no callers to check it against.
 with the question of whether the spiral is a distinct estimator or another box of
 the existing `kleinian`.
 
-`apollonianGasket` is a genuinely different estimator from `apollonian`, not a
-preset of it: fract-fold with a shifting offset versus round-fold with an
-inversion-radius morph. Two folds, two fractals, two files.
+`apollonianGasket` shares its fold family with `apollonian` (fract-fold with a
+shifting offset versus round-fold with an inversion-radius morph; at offset 0.5
+the folds agree) but not its framing: an outer inversion plus a unit-ball clip
+make it a ball-shaped packing. Two framings, two files.
 
-⚠ **`apollonianGasket` is flagged unresolved in its own header.** The port is
-faithful, but the estimator is degenerate at default marcher settings: its
-fractal term is never negative (no interior) and its median value inside the unit
-ball is ~3e-5, below epsilon, because `scale` diverges over ten iterations. So a
-ray reads the whole ball as a wall and it renders as a smooth sphere. That is the
-"thin haze read as a solid wall" fractal-DE failure; the fix is a scene-level
-EPSILON override and is by-eye work, not a mechanical port.
+**`apollonianGasket` rendered as a smooth sphere until Sep 2026** because of
+its saved `foldOffset`, 0.877: away from 0.5 the fract-fold fills in, and at
+0.877 ~98% of the ball lies under the default epsilon. The estimator was never
+broken and needs no epsilon override. At 0.5 it renders at the default marcher
+settings, and the scene's knob is limited to 0.4..0.6. Two earlier diagnoses
+(a 1e-7 epsilon, then a broken estimator) were both wrong; its header has the
+measurements.
 
 `breathe` lost four helpers to the engine — `br_pR`, `br_smin`, `br_smax` were
 verified bit-identical to `rot2`, `smin`, `smax`, and `br_vmax` was dead. It has
