@@ -1,7 +1,7 @@
 # HDR environment maps — plan, and what was built
 
 > **Status (Sep 2026): steps 1–6 are built** — `js/hdr.js` (loader),
-> `_makeSkyTexture` in `js/PathTracer.js` (RGBA16F upload + `skyLinear`),
+> `_makeSkyTexture` in `js/PathTracer.js` (RGBA32F upload + `skyLinear`),
 > `skyTex`/`getSky` in `glsl/tracer/1Setup/sky.glsl` (rotation, intensity,
 > linear-vs-sRGB), the Sky Intensity / Sky Rotation knobs (Render tab), the
 > `pt-sky-ready` event render-diff waits on, and the test scene
@@ -41,7 +41,10 @@ Goal: let a scene's sky be a real HDR image (Radiance `.hdr`), so bright regions
    data is accepted for a 16F internal format), LINEAR min/mag, no mipmaps
    (the shader samples level 0), rows flipped in JS to match the jpg path's
    `UNPACK_FLIP_Y` orientation. 4k×2k = 64 MB of texture; 2k is plenty for
-   a background.
+   a background. *As built (Sep 2026): RGBA32F when `OES_texture_float_linear`
+   is available (4k×2k = 128 MB), because half float tops out at 65504 and an
+   unclipped sun above that uploads as Inf (a black sun: the accumulator drops
+   the sample); without the extension, RGBA16F with values clamped to 65504.*
 3. **Shader** — the sky must know if its texture is sRGB-encoded (jpg) or
    linear (hdr): a uniform (e.g. `skyLinear`, or `skyMode = 3` for "linear
    image") so `skyTex` skips `SRGBToLinear` for HDR.

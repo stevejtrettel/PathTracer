@@ -56,9 +56,15 @@ function parseHDR(buffer){
             pos += 4;
             for(let c = 0; c < 4; c++){
                 for(let x = 0; x < width; ){
+                    //every run must advance x: past the end of the file a count
+                    //reads as undefined (and a corrupt one as 0), and either would
+                    //spin here forever and freeze the page
+                    if(pos >= bytes.length) throw new Error('.hdr file is truncated');
                     let count = bytes[pos++];
-                    if(count > 128){
-                        count -= 128;
+                    let run = count > 128;
+                    if(run) count -= 128;
+                    if(count === 0 || x + count > width) throw new Error('.hdr file is corrupt (bad run length)');
+                    if(run){
                         let v = bytes[pos++];
                         while(count--) scan[4 * x++ + c] = v;
                     } else {

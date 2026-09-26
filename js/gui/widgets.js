@@ -117,6 +117,13 @@ function slider(knob, onChange){
     //that would move the value). Focusing selects without changing anything;
     //blur (clicking away) deselects.
     installNudge();
+    //a focused range input steps itself on the arrow keys (and Home/End/Page),
+    //which are the camera's keys: holding ArrowUp flew forward AND walked the
+    //slider. Cancel only the slider's own response — the event still bubbles to
+    //KeyControls, so the camera flies and the value stays put (=/- nudge it).
+    input.addEventListener('keydown', (e) => {
+        if(/^(Arrow|Page|Home$|End$)/.test(e.key)) e.preventDefault();
+    });
     input.addEventListener('focus', () => { selectedSlider = input; row.classList.add('knob-selected'); });
     input.addEventListener('blur',  () => { if(selectedSlider === input) selectedSlider = null; row.classList.remove('knob-selected'); });
     label.style.cursor = 'pointer';

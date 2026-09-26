@@ -62,6 +62,12 @@ class KeyControls{
         //(same rule the UI's X / H shortcuts use)
         if(isTypingTarget(event.target)) return;
 
+        //a ⌘/Ctrl chord is a browser or app shortcut (⌘A, ⌘E, ⌘↑), not flying.
+        //It matters on macOS in particular: no keyup arrives for a key released
+        //while ⌘ is held, so a camera key pressed inside the chord stuck on and
+        //the camera kept turning (and resetting) on its own.
+        if(event.metaKey || event.ctrlKey) return;
+
         if(event.code === "ShiftLeft" || event.code === "ShiftRight") this.boosted = true;
 
         for(const dir in this.translate){
@@ -77,6 +83,10 @@ class KeyControls{
     }
 
     up(event){
+
+        //(the macOS rule above, other half: a key already held when ⌘ went down
+        //also gets no keyup while ⌘ is held, so letting go of ⌘ lets go of all)
+        if(event.key === "Meta"){ this.releaseAll(); return; }
 
         if(event.code === "ShiftLeft" || event.code === "ShiftRight") this.boosted = false;
 

@@ -223,6 +223,13 @@ void scatter( inout Path path ){
 
     //----set the new vector and push off the surface
     path.tv=newDir;
+    //lift off the surface first, to the side the new ray leaves toward. Pushing
+    //along the ray alone left a GRAZING ray (a mirror or glass reflection at a
+    //silhouette) within EPSILON of the surface it had just left: the next march
+    //re-hit it at once and read the hit as leaving from the inside. Marched glass
+    //got a black rim (white-furnace test: 0.76 at the silhouette instead of 1).
+    //mediumWalk pushes off along the normal the same way.
+    nudge(path.tv, normal, (vDot(newDir, normal) > 0. ? 2. : -2.)*GEO_EPS);
     flow(path.tv, 10.*GEO_EPS);
 
 }

@@ -45,6 +45,8 @@ class PathTracer{
         //The last image stays up; an HD render is never held.
         this.paused = false;
         this.stopAt = 0;
+        //a size change that arrived during a hold, waiting for it to end (see _applyScale)
+        this.scalePending = false;
 
         //wall-clock of the previous frame, for frame-rate-independent flying
         this.lastFrameTime = performance.now();
@@ -57,7 +59,10 @@ class PathTracer{
         //raw WebGL2 canvas + context. preserveDrawingBuffer keeps toDataURL
         //working for saveImage; float render targets need EXT_color_buffer_float.
         this.canvas = document.createElement('canvas');
-        this.gl = this.canvas.getContext('webgl2', {preserveDrawingBuffer: true});
+        //(no antialias / depth: every pass is one full-screen triangle, so a
+        //multisampled, depth-buffered backbuffer changes no pixel and only costs
+        //memory — hundreds of MB at a 4000px HD tile)
+        this.gl = this.canvas.getContext('webgl2', {preserveDrawingBuffer: true, antialias: false, depth: false});
         if(!this.gl || !this.gl.getExtension('EXT_color_buffer_float')){
             const msg = !this.gl
                 ? 'WebGL2 is not available in this browser.'
@@ -121,7 +126,7 @@ class PathTracer{
     //build the sky WebGLTexture from a descriptor ({mode, src, color1, color2}).
     //1x1 white so the sampler is always complete; for image mode the file loads
     //and replaces it, then restarts accumulation:
-    //  .hdr  -> parseHDR, RGBA16F (linear, unbounded; skyLinear tells the shader)
+    //  .hdr  -> parseHDR, RGBA32F (linear, unbounded; skyLinear tells the shader)
     //  other -> an <img>, RGBA8 with no sRGB decode (the shader does SRGBToLinear)
     //Either way the window gets a 'pt-sky-ready' event when the sky is final
     //(right away for solid/gradient skies) — the render-diff tool waits on it.
@@ -141,8 +146,14 @@ class PathTracer{
                 .then((buffer) => {
                     let {width, height, data} = parseHDR(buffer);
                     gl.bindTexture(gl.TEXTURE_2D, tex);
+                    //full float when it can be filtered: an unclipped sun runs past
+                    //half float's largest value (65504), and RGBA16F stores that as
+                    //Inf — the accumulator drops such samples, so the sun went
+                    //black and lit nothing. Without the extension, clamp into range.
+                    let full = !!gl.getExtension('OES_texture_float_linear');
+                    if(!full){ for(let i = 0; i < data.length; i++){ data[i] = Math.min(data[i], 65504); } }
                     //rows already bottom-to-top (parseHDR), so no flipY here
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, width, height, 0, gl.RGBA, gl.FLOAT, data);
+                    gl.texImage2D(gl.TEXTURE_2D, 0, full ? gl.RGBA32F : gl.RGBA16F, width, height, 0, gl.RGBA, gl.FLOAT, data);
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);   //the shader reads level 0 only
                     this.tracer.updateUniforms({skyLinear: true});
                     this.reset();
@@ -223,6 +234,11 @@ class PathTracer{
         if(this.holding){
             this.display.renderToScreen();
             return;
+        }
+        //the hold just ended with a size change still waiting: apply it, from scratch
+        if(this.scalePending){
+            this._applyScale();
+            this.reset();
         }
 
         this.tick();
@@ -419,6 +435,17 @@ class PathTracer{
     //trace at a fraction of it — the Render tab's Scale, or MOTION_SCALE while
     //the camera moves — and the display stretches it up; HD tiles never do.
     _applyScale(){
+        //ON HOLD (paused, or stopped at N) the finished average is what is on
+        //screen, and resizing the targets clears it: a paused view went black on
+        //a window resize or a Scale/Aspect change. So leave them alone — the
+        //display stretches the old average over the new canvas — and let newFrame
+        //apply the size when the hold ends. Never deferred during an HD render
+        //(rendering is set before its resize): tiles must trace at their own size.
+        if(this.holding && !this.rendering){
+            this.scalePending = true;
+            return;
+        }
+        this.scalePending = false;
         let s = this.rendering ? 1
               : this.moving    ? Math.min(this.viewScale, MOTION_SCALE)
               :                  this.viewScale;
