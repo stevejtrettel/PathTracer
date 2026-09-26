@@ -37,13 +37,33 @@ makes the *coordinate* jump `h·n`, which blows up as `n → ∞` near a hole �
 leaps a huge distance, samples `indexField` at garbage points, and diverges.
 Different impact parameters diverge at different radii ⇒ **concentric black rings**.
 
-Fix (in `odeMarch`): choose `h` per step bounded by two limiters:
-- coordinate step: `h·n ≤ ODE_DS_MAX`
-- field change:    `h·|∇n| ≤ ODE_DTOL`   ( `|∇n| = |force|/n` )
+Fix (in `odeMarch`): choose the coordinate step `ds` (affine `h = ds/n`) per step
+from three limits:
+- **the controller:** how much the force `n·∇n` changed over the last step. The
+  next step grows (at most ×2) where it barely changed and shrinks (at most ×½)
+  where it changed a lot, aiming at `ODE_FTOL` (5%) relative change per step.
+  Leapfrog's error comes from the force varying across a step, so this is the
+  quantity to watch.
+- **field change:** `ds·|∇n|/n ≤ ODE_DTOL`, the strong-field guard near a hole.
+- **surfaces:** `ds ≤ max(|sdf_Scene|, ODE_DS_MIN)`, so a step never jumps a wall
+  or a thin shell; in a uniform medium this is plain sphere tracing.
 
-`h = min(ODE_STEP, ODE_DS_MAX/n, ODE_DTOL/|∇n|)`. Far from any mass (`n≈1, ∇n≈0`)
-neither binds, so `h = ODE_STEP` and smooth/weak media are unchanged. The reused
-force keeps it at one gradient eval per step.
+The first step is `ODE_STEP`; the reused force keeps it at one gradient eval per
+step. The gradient's central-difference spacing grows with the step (`0.1·ds`,
+never below `ODE_GRAD_EPS`): far from a hole `n` changes by only ~1e-6 across a
+0.002 stencil, which float32 cannot resolve cleanly, and the rounding noise made
+the controller refuse to grow the step (most rays hit `maxMarchSteps`). Bounding the change in `n` alone is not enough: far from the hole `n` barely
+changes while the force still falls off like 1/r², and with only the last two
+limits rays landed 5–25 px off a fine-step reference.
+
+Measured against a fine-step reference (JS port of the marcher, Sep 2026): a
+`blackhole` ray took ~1750 steps at the old fixed 0.03 cap — nearly all of them
+walking the ~55 units to the far wall — and ~180 with the controller, at equal or
+better accuracy (float32 emulation: 99% of exit directions within 1.2 px vs
+2.3 px before). `luneburg` went 158 → 66 steps and got more accurate;
+`blackholeCube` 93 → 54. On the GPU (640×480, 257 frames) `blackhole` went
+18.1 s → 5.9 s (the harness's frame-rate floor) and `blackholeMulti` 36.2 s →
+8.5 s, with images the same by eye.
 
 ### 2. Capture
 
@@ -97,11 +117,9 @@ now it follows the one contract like everything else.
    (a RoomBox, an analytic Sphere) inside a medium region will silently lose those
    surfaces.** Give such geometry an sdf, or keep it outside the medium.
 
-2. **The leapfrog step is curvature-adaptive, not sdf-aware.** A sign-change test
-   cannot see a thin shell that one step crosses *and* exits — the bisection only
-   refines a crossing that was detected. No current scene puts thin marched shells
-   deep inside a medium; if one ever does, the hardening is a step clamp
-   `h ≤ max(|sdf_Scene|, h_min)` so steps shrink near marched surfaces.
+2. **Thin shells inside a medium are safe.** The step never exceeds the distance
+   to the nearest marched surface (`ODE_DS_MIN` floor), so a step cannot cross a
+   shell and exit it again unseen; the sign-change test then bisects the crossing.
 
 ## The demo scenes
 
@@ -112,5 +130,5 @@ now it follows the one contract like everything else.
 | `luneburg` | `n=√(2−(r/R)²)` in a sphere | IOR-1, seamless | back-lit room |
 
 `mass` is a per-scene knob (black-hole scenes cap it at 0.5 — beyond that the field is
-stiff enough that the shadow is all you see). `ODE_DS_MAX` / `ODE_DTOL` / `ODE_CAPTURE`
+stiff enough that the shadow is all you see). `ODE_FTOL` / `ODE_DTOL` / `ODE_CAPTURE`
 are the tuning constants, `#define`-overridable per scene.

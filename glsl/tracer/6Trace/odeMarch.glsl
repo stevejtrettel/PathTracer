@@ -40,19 +40,22 @@
 //-------------------------------------------------
 
 #ifndef ODE_STEP
-#define ODE_STEP 0.03           // leapfrog parameter step (arc length per step ≈ n·ODE_STEP)
+#define ODE_STEP 0.03          // the FIRST coordinate step; the controller below takes over from there
+#endif
+#ifndef ODE_FTOL
+#define ODE_FTOL 0.05          // target relative change of the force n·∇n per step (the step controller)
 #endif
 #ifndef ODE_GRAD_EPS
-#define ODE_GRAD_EPS 0.002     // central-difference epsilon for ∇n
+#define ODE_GRAD_EPS 0.002     // smallest central-difference epsilon for ∇n (it grows with the step)
 #endif
 #ifndef ODE_CAPTURE
 #define ODE_CAPTURE 50.        // n above this = captured (black-hole horizon)
 #endif
-#ifndef ODE_DS_MAX
-#define ODE_DS_MAX 0.05        // max COORDINATE step h·|mom|; caps the |mom|=n blow-up near a BH point
-#endif
 #ifndef ODE_DTOL
 #define ODE_DTOL 0.05          // max fractional change of n per step (strong-field accuracy)
+#endif
+#ifndef ODE_DS_MIN
+#define ODE_DS_MIN 0.02        // floor on the surface limit, so a ray can still reach (and cross) a wall
 #endif
 
 
@@ -67,13 +70,20 @@ float indexFieldOf(int id, vec3 p){ return 1.; }
 float odeIndex(int reg, vec3 p){ return max(indexFieldOf(reg, p), 1e-3); }   // physical n ≥ 0; fp floor
 
 // force F(r) = n·∇n = ½∇(n²), central differences of region `reg`'s index field
-vec3 odeForce(int reg, vec3 p){
-    vec2 e = vec2(ODE_GRAD_EPS, 0.);
+// at spacing `eps`. odeMarch scales eps WITH THE STEP (0.1·ds, never below
+// ODE_GRAD_EPS). A fixed 0.002 is fine near a hole but not far from one: there
+// n changes by only ~1e-6 across the stencil while float32 resolves n near 1 to
+// ~1e-7, so the force came out several percent rounding noise, the controller read
+// that as the force changing and never let the step grow (the GPU hit maxMarchSteps
+// on most rays). Differencing at the scale of the step keeps the signal far above
+// the rounding, and the field is smooth at that scale wherever the step is long.
+vec3 odeForce(int reg, vec3 p, float eps){
+    vec2 e = vec2(eps, 0.);
     vec3 g = vec3(
         odeIndex(reg, p+e.xyy) - odeIndex(reg, p-e.xyy),
         odeIndex(reg, p+e.yxy) - odeIndex(reg, p-e.yxy),
         odeIndex(reg, p+e.yyx) - odeIndex(reg, p-e.yyx)
-    ) / (2.*ODE_GRAD_EPS);
+    ) / (2.*eps);
     return odeIndex(reg, p) * g;
 }
 
@@ -92,8 +102,12 @@ void odeMarch(inout Path path){
     vec3 r   = path.tv.pos;
     vec3 mom = odeIndex(reg, r) * path.tv.dir;
     float arc = 0.;
-    float startSgn = sign(sdf_Scene(path.tv));   // side we start on (inside the medium: < 0)
-    vec3 force = odeForce(reg, r);                // reused across leapfrog steps
+    float sd0 = sdf_Scene(path.tv);
+    float startSgn = sign(sd0);                   // side we start on (inside the medium: < 0)
+    float surf = abs(sd0);                        // distance to the nearest surface
+    vec3 force = odeForce(reg, r, ODE_GRAD_EPS);  // reused across leapfrog steps
+    float ds   = ODE_STEP;                        // coordinate step length, adapted every step
+    float dF   = -1.;                             // relative force change over the last step (none yet)
 
     for(int i = 0; i < maxMarchSteps; i++){
 
@@ -107,32 +121,44 @@ void odeMarch(inout Path path){
             return;
         }
 
-        // --- ADAPTIVE affine step h ---------------------------------------------
-        // The drift is r += h·mom with |mom| = n, so a FIXED h overshoots wildly
-        // where n is large (approaching a black-hole point) — that overshoot is
-        // the exploding, concentric-ring garbage. Bound two things per step:
-        //   (1) the COORDINATE step   h·n      ≤ ODE_DS_MAX
-        //   (2) the fractional change  h·|∇n|  ≤ ODE_DTOL   (|∇n| = |force|/n)
-        // Far from any mass (n≈1, ∇n≈0) neither binds and h = ODE_STEP, so smooth
-        // media (e.g. the Luneburg lens) integrate exactly as before.
+        // --- ADAPTIVE step: coordinate length ds, affine h = ds/n ---------------
+        // (1) THE CONTROLLER. Leapfrog's error comes from the force changing across
+        //     a step, so watch how much it changed over the LAST one: grow the step
+        //     (at most x2) where it barely changed, shrink it (at most x1/2) where
+        //     it changed a lot. Far from any mass the force hardly changes and the
+        //     step grows geometrically — a black-hole ray used to walk its ~55
+        //     units at 0.03 per step (~1750 steps); now ~180, at the same accuracy.
+        // (2) the fractional change of n per step  ds·|∇n|/n <= ODE_DTOL — the
+        //     strong-field guard near a black-hole point (|∇n| = |force|/n).
+        // (3) never step further than the nearest surface (with a small floor), so
+        //     a long step cannot jump a wall or a thin shell inside the medium. In a
+        //     uniform medium (no force) this IS sphere tracing.
+        // Bounding n alone is NOT enough: with only (2) and (3), rays far from the
+        // hole landed 5-25 px off a fine-step reference.
+        if(dF >= 0.){ ds *= clamp(ODE_FTOL / max(dF, 1e-9), 0.5, 2.); }
         float gradN = length(force) / max(n, 1e-6);
-        float h = min(ODE_STEP, ODE_DS_MAX / n);
-        h = min(h, ODE_DTOL / max(gradN, 1e-6));
+        ds = min(ds, ODE_DTOL * n / max(gradN, 1e-6));
+        ds = min(ds, max(surf, ODE_DS_MIN));
+        float h = ds / n;
 
         // --- variable-step kick-drift-kick (force reused across steps) ----------
         vec3 rBefore = r;            // step start (on the startSgn side)
+        vec3 forceBefore = force;
         mom += 0.5*h*force;          // half kick   (force at r)
         r  += h*mom;                 // drift
-        force = odeForce(reg, r);    // force at the new r (this step's 2nd kick + next step's 1st)
+        force = odeForce(reg, r, max(ODE_GRAD_EPS, 0.1*ds));   // force at the new r (2nd kick + next step's 1st)
         mom += 0.5*h*force;          // half kick
         arc += length(mom)*h;        // ds ≈ n·h
+        ds = length(mom)*h;          // the coordinate step actually taken
+        dF = length(force - forceBefore) / max(length(forceBefore), 1e-12);
 
         vec3 dir = normalize(mom);    // world ray: unit tangent = mom/|mom|
 
         // reached the next surface? (sdf_Scene changed sign along the curve)
-        if(startSgn * sdf_Scene(Vector(r, dir)) < 0.){
+        float sd = sdf_Scene(Vector(r, dir));
+        if(startSgn * sd < 0.){
             // The step crossed the surface. Bisect the (near-linear) step so we land
-            // WITHIN AT_THRESH of it — otherwise the overshoot (up to n·ODE_STEP) is
+            // WITHIN AT_THRESH of it — otherwise the overshoot (up to ODE_DS_MIN) is
             // bigger than AT_THRESH, setData's at() test misses, and the boundary
             // interaction is skipped (that overshoot, banded by exit angle, was the
             // concentric-ring artifact).
@@ -148,6 +174,7 @@ void odeMarch(inout Path path){
         }
 
         path.tv = Vector(r, dir);
+        surf = abs(sd);
 
         if(length(r) > maxDist){ break; }  // escaped to infinity (unbounded / global media)
     }

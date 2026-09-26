@@ -124,8 +124,8 @@ starts curving immediately). The field is fixed for the traversal because
 | `blackholeCube` | `(1+M/r)²` in a box | n≫1 at the wall → genuine refraction + TIR |
 
 The "global" black holes are media in a large sphere (radius 40): big enough that
-`n ≈ 1` at the wall and that the far wall sits inside the marcher's arc budget
-(`maxMarchSteps · ODE_STEP ≈ 60` units). There is no truly-unbounded case and no
+`n ≈ 1` at the wall. (The adaptive step reaches the far wall in ~180 steps, well
+inside `maxMarchSteps`.) There is no truly-unbounded case and no
 zero-region scene — every medium is a bounded object. `blackholeCube` needs
 `glsl/shapes/box.glsl` (added with this port).
 
