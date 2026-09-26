@@ -2,6 +2,7 @@ import ComputeShader from "./ComputeShader.js";
 import KeyControls from "./KeyControls.js";
 import OrbitControls from "./OrbitControls.js";
 import {fitAspect} from "./gui/widgets.js";
+import {parseHDR} from "./hdr.js";
 
 
 //while the camera is moving the live view traces at (at most) this fraction of
@@ -116,9 +117,12 @@ class PathTracer{
     }
 
     //build the sky WebGLTexture from a descriptor ({mode, src, color1, color2}).
-    //1x1 white so the sampler is always complete; for image mode, an <img> loads
-    //and replaces it (flipY, mipmaps, trilinear filtering, RGBA8 with no sRGB
-    //decode — the shader does its own SRGBToLinear), then restarts accumulation.
+    //1x1 white so the sampler is always complete; for image mode the file loads
+    //and replaces it, then restarts accumulation:
+    //  .hdr  -> parseHDR, RGBA16F (linear, unbounded; skyLinear tells the shader)
+    //  other -> an <img>, RGBA8 with no sRGB decode (the shader does SRGBToLinear)
+    //Either way the window gets a 'pt-sky-ready' event when the sky is final
+    //(right away for solid/gradient skies) — the render-diff tool waits on it.
     _makeSkyTexture(desc){
         let gl = this.gl;
         let tex = gl.createTexture();
@@ -128,7 +132,23 @@ class PathTracer{
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        if(desc && desc.src){
+        let ready = () => window.dispatchEvent(new Event('pt-sky-ready'));
+        if(desc && desc.src && /\.hdr$/i.test(desc.src)){
+            fetch(desc.src)
+                .then((r) => { if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
+                .then((buffer) => {
+                    let {width, height, data} = parseHDR(buffer);
+                    gl.bindTexture(gl.TEXTURE_2D, tex);
+                    //rows already bottom-to-top (parseHDR), so no flipY here
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, width, height, 0, gl.RGBA, gl.FLOAT, data);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);   //the shader reads level 0 only
+                    this.tracer.updateUniforms({skyLinear: true});
+                    this.reset();
+                })
+                .catch((err) => console.error(`sky .hdr failed to load: ${desc.src} (${err.message ?? err})`))
+                .finally(ready);
+        }
+        else if(desc && desc.src){
             let img = new Image();
             img.onload = () => {
                 gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -138,9 +158,13 @@ class PathTracer{
                 gl.generateMipmap(gl.TEXTURE_2D);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
                 this.reset();
+                ready();
             };
-            img.onerror = () => console.error('sky image failed to load: ' + desc.src);
+            img.onerror = () => { console.error('sky image failed to load: ' + desc.src); ready(); };
             img.src = desc.src;
+        }
+        else {
+            ready();
         }
         return tex;
     }

@@ -1,4 +1,15 @@
-# HDR environment maps — plan (Sep 2026, not built yet)
+# HDR environment maps — plan, and what was built
+
+> **Status (Sep 2026): steps 1–6 are built** — `js/hdr.js` (loader),
+> `_makeSkyTexture` in `js/PathTracer.js` (RGBA16F upload + `skyLinear`),
+> `skyTex`/`getSky` in `glsl/tracer/1Setup/sky.glsl` (rotation, intensity,
+> linear-vs-sRGB), the Sky Intensity / Sky Rotation knobs (Render tab), the
+> `pt-sky-ready` event render-diff waits on, and the test scene
+> `scenes/hdrSky` (sky: `public/assets/monkstown_castle_2k.hdr`, Poly Haven
+> CC0 — soft, brightest pixel ~39, converges evenly). **Still open: the firefly
+> caveat below**, for skies with a small bright sun — e.g. Poly Haven's
+> sunflowers_puresky: a ~40-pixel sun up to ~70,000 carrying 47% of the light,
+> found by diffuse bounces only by chance (tried, and dropped from the repo).
 
 Goal: let a scene's sky be a real HDR image (Radiance `.hdr`), so bright regions
 — windows, the sun, a softbox — actually LIGHT the scene instead of clipping at

@@ -72,24 +72,16 @@ if (!existsSync(chrome)) { console.error(`Chrome not found at ${chrome} (set CHR
 
 
 //---- runs in each page before its scripts: hold the render loop until it has
-//---- started (so the path tracer, and its sky image, exist) and the sky image
-//---- has loaded (its onload restarts accumulation), then let exactly `frames`
-//---- frames through and stop. Only the loop named `animate` (createScene.js)
-//---- is counted; the UI's refresh loop and other rAF waits run free.
+//---- started and the sky is final (PathTracer fires 'pt-sky-ready' once its
+//---- image or .hdr has loaded — which restarts accumulation — or at once for
+//---- a solid/gradient sky), then let exactly `frames` frames through and
+//---- stop. Only the loop named `animate` (createScene.js) is counted; the
+//---- UI's refresh loop and other rAF waits run free.
 const pageSetup = (frames) => `(() => {
   const realRAF = window.requestAnimationFrame.bind(window);
-  const RealImage = window.Image;
-  let pending = 0, started = false, n = 0;
+  let skyReady = false, started = false, n = 0;
   const held = [];
-  window.Image = function (...a) {
-    const img = new RealImage(...a);
-    pending++;
-    const done = () => { pending--; };
-    img.addEventListener('load', done);
-    img.addEventListener('error', done);
-    return img;
-  };
-  window.Image.prototype = RealImage.prototype;
+  window.addEventListener('pt-sky-ready', () => { skyReady = true; });
   window.__rd = { done: false };
   window.requestAnimationFrame = (cb) => {
     if (cb.name !== 'animate') return realRAF(cb);
@@ -99,7 +91,7 @@ const pageSetup = (frames) => `(() => {
     return realRAF(cb);
   };
   const tryStart = () => {
-    if (document.readyState !== 'complete' || pending > 0 || held.length === 0) { setTimeout(tryStart, 50); return; }
+    if (document.readyState !== 'complete' || !skyReady || held.length === 0) { setTimeout(tryStart, 50); return; }
     started = true;
     held.splice(0).forEach((cb) => { n++; realRAF(cb); });
   };

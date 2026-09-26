@@ -5,6 +5,7 @@
 
 uniform vec3 iResolution;
 uniform sampler2D sky;
+uniform bool skyLinear;   //image sky already linear (.hdr) — else sRGB-encoded (.jpg)
 uniform int skyMode;      //0 image · 1 solid · 2 gradient
 uniform vec3 skyColor1;   //solid color / gradient top
 uniform vec3 skyColor2;   //gradient bottom

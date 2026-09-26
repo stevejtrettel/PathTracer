@@ -61,10 +61,16 @@ vec3 skyTex(vec3 v){
     //derivatives inside the bounce loop's divergent control flow are undefined
     //(blackholeCube did not render the same twice). Accumulating jittered
     //samples already anti-aliases, so level 0 is the right lookup.
+    //Sky Rotation knob: turn the image about the vertical (0 = as authored)
+    float a = radians(skyRotation), c = cos(a), s = sin(a);
+    v = vec3(c*v.x + s*v.z, v.y, -s*v.x + c*v.z);
+
     float x=(atan(-v.z,v.x)+PI)/(2.*PI);
     float y=1.-acos(clamp(v.y,-1.,1.))/PI;
 
-    return SRGBToLinear(textureLod(sky,vec2(x,y),0.).rgb);
+    vec3 texel = textureLod(sky,vec2(x,y),0.).rgb;
+    //an .hdr is stored linear (and unbounded); a .jpg is sRGB-encoded 0..1
+    return skyLinear ? texel : SRGBToLinear(texel);
 
 }
 
@@ -75,14 +81,15 @@ vec3 skyTex(vec3 v){
 //-------------------------------------------------
 
 vec3 getSky(vec3 dir){
+    //Sky Intensity knob scales every kind of sky (HDRIs vary wildly in scale)
     if(skyMode == 1){
-        return SRGBToLinear(skyColor1);
+        return skyIntensity * SRGBToLinear(skyColor1);
     }
     if(skyMode == 2){
         float t = 0.5*(dir.y + 1.0);            //-1 (down) .. +1 (up)
-        return SRGBToLinear(mix(skyColor2, skyColor1, t));
+        return skyIntensity * SRGBToLinear(mix(skyColor2, skyColor1, t));
     }
-    return skyTex(dir);                          //image (already sRGB->linear)
+    return skyIntensity * skyTex(dir);           //image (linear either way)
 }
 
 

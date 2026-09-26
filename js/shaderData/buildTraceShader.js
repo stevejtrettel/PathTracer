@@ -158,6 +158,9 @@ let buildTraceShader= function(sceneData, settings){
         sky: {
             value: null
         },
+        skyLinear: {
+            value: false   //set by PathTracer when an .hdr sky loads
+        },
         skyMode: {
             value: sky.mode
         },

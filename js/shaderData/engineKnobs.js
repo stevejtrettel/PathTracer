@@ -32,6 +32,11 @@ const renderKnobs = [
     // diffuse bounces aim at a sphere light, with one weight that keeps the image
     // the same — only the noise changes. OFF = the plain cosine lobe, to compare.
     { name: 'aimLights',  label: 'Aim at Lights', type: 'bool', value: true, group: 'render' },
+    // the environment: a multiplier on whatever the sky is (HDRIs come in very
+    // different absolute scales), and a turn of the image about the vertical
+    // (degrees) to put its bright parts where the composition wants them
+    { name: 'skyIntensity', label: 'Sky Intensity', min: 0, max: 4,   step: 0.01, value: 1, group: 'render' },
+    { name: 'skyRotation',  label: 'Sky Rotation',  min: 0, max: 360, step: 1,    value: 0, group: 'render' },
     { name: 'dispersion', label: 'Dispersion', min: 0, max: 0.3, step: 0.005, value: 0, group: 'render' },
 ];
 
