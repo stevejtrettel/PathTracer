@@ -25,6 +25,13 @@ identical. References are machine-specific; rebake deliberately with
 `npm run render-diff -- --bake` after looking. (`node scripts/render-test.mjs <scene>...`
 still takes a single full-window screenshot.)
 
+**CI** (`.github/workflows/ci.yml`) runs on every push to `main`: the goldens and
+equation fixtures, and `render-diff --smoke --software`, which compiles and renders
+every scene for two frames in headless Chrome on SwiftShader (the runner has no GPU)
+and fails on a shader error, a JS error or a blank canvas. It compares no pixels —
+the references only mean something on the machine that baked them. Run the same
+smoke test locally with `npm run render-diff -- --smoke --software` (about 2 min).
+
 ## Architecture
 
 Three full-screen fragment shaders run in sequence each frame (driven by `js/PathTracer.js`,

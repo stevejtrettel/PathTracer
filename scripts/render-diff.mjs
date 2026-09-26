@@ -4,7 +4,10 @@
 //   node scripts/render-diff.mjs                  compare every scene
 //   node scripts/render-diff.mjs glassball gem    compare just these
 //   node scripts/render-diff.mjs --bake [...]     (re)write the references from the current code
-//   options: --frames N (default 32)   --size WxH (default 160x120)
+//   node scripts/render-diff.mjs --smoke [...]    only check every scene RUNS (CI): no compare
+//   options: --frames N (default 32; 2 with --smoke)   --size WxH (default 160x120)
+//            --software   render with SwiftShader (Chrome's CPU renderer), as on a
+//                         GPU-less CI machine
 //
 // Each scene gets a verdict:
 //   identical   same bytes as the reference
@@ -18,6 +21,12 @@
 //   unstable    the scene doesn't render the same twice on this machine (checked
 //               by rendering it again), so it can't be compared
 //   FAILED      shader/JS error or timeout
+//   BLANK       (--smoke) the canvas came out all black: nothing was drawn
+//
+// --smoke is what CI runs (.github/workflows/ci.yml): a CI machine has no GPU,
+// so its pixels can never match references baked on yours, but it can still
+// catch a scene that no longer compiles or throws. Every scene gets `ok`,
+// FAILED or BLANK, and nothing is written.
 //
 // Why this works: the tracer is deterministic — the same code on the same
 // machine renders the same bytes every time (seed = pixel + frame). So an
@@ -47,16 +56,19 @@ const chrome =
 
 //---- arguments -----------------------------------------------------------
 const args = process.argv.slice(2);
-let bake = false, frames = 32, W = 160, H = 120;
+let bake = false, smoke = false, software = false, frames = null, W = 160, H = 120;
 const wanted = [];
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--bake') bake = true;
+  else if (args[i] === '--smoke') smoke = true;
+  else if (args[i] === '--software') software = true;
   else if (args[i] === '--frames') frames = parseInt(args[++i], 10);
   else if (args[i] === '--size') [W, H] = args[++i].split('x').map((n) => parseInt(n, 10));
   else wanted.push(args[i]);
 }
-if (!(frames > 0) || !(W > 0) || !(H > 0)) {
-  console.error('usage: node scripts/render-diff.mjs [--bake] [--frames N] [--size WxH] [scene...]');
+frames ??= smoke ? 2 : 32;
+if (!(frames > 0) || !(W > 0) || !(H > 0) || (bake && smoke)) {
+  console.error('usage: node scripts/render-diff.mjs [--bake | --smoke] [--software] [--frames N] [--size WxH] [scene...]');
   process.exit(1);
 }
 
@@ -146,6 +158,21 @@ async function comparePngs(refUrl, nowUrl) {
 }
 
 
+//---- runs in a page: the brightest channel value in a PNG data URL (0 = blank)
+async function maxChannel(url) {
+  const i = new Image();
+  await new Promise((res, rej) => { i.onload = res; i.onerror = rej; i.src = url; });
+  const c = document.createElement('canvas');
+  c.width = i.width; c.height = i.height;
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(i, 0, 0);
+  const d = g.getImageData(0, 0, i.width, i.height).data;
+  let m = 0;
+  for (let k = 0; k < d.length; k += 4) m = Math.max(m, d[k], d[k + 1], d[k + 2]);
+  return m;
+}
+
+
 //---- minimal DevTools-protocol client ----------------------------------------
 async function launchChrome() {
   const profile = mkdtempSync(path.join(tmpdir(), 'render-diff-'));
@@ -153,7 +180,10 @@ async function launchChrome() {
     '--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
     '--no-first-run', '--no-default-browser-check', '--hide-scrollbars', '--mute-audio',
     '--enable-gpu', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader',
-    ...(process.platform === 'darwin' ? ['--use-angle=metal'] : []),
+    ...(software ? ['--use-angle=swiftshader'] : process.platform === 'darwin' ? ['--use-angle=metal'] : []),
+    //GitHub's Ubuntu runners restrict the user namespaces Chrome's sandbox needs;
+    //CI only ever loads our own pages from localhost
+    ...(process.env.CI ? ['--no-sandbox'] : []),
     'about:blank',
   ];
   const proc = spawn(chrome, flags, { stdio: ['ignore', 'ignore', 'pipe'] });
@@ -218,8 +248,10 @@ const port = server.httpServer.address().port;
 const cdp = await launchChrome();
 
 let failed = 0, changed = 0, unstable = 0, machine = null;
-mkdirSync(baseDir, { recursive: true });
-if (!bake) rmSync(diffDir, { recursive: true, force: true });
+if (!smoke) {
+  mkdirSync(baseDir, { recursive: true });
+  if (!bake) rmSync(diffDir, { recursive: true, force: true });
+}
 
 //render one scene in a fresh tab; resolves to the canvas as a PNG data URL,
 //rejects on a shader/JS error or a timeout
@@ -276,7 +308,11 @@ try {
       const now = await renderScene(scene);
       const ref = path.join(baseDir, `${scene}.png`);
 
-      if (bake) {
+      if (smoke) {
+        const m = await evaluate(cdp, cmpSession, `(${maxChannel.toString()})(${JSON.stringify(now)})`);
+        if (m > 0) verdict = 'ok';
+        else { verdict = 'BLANK'; detail = 'the canvas is all black'; failed++; }
+      } else if (bake) {
         writeFileSync(ref, png(now));
         verdict = 'baked';
       } else if (!existsSync(ref)) {
@@ -323,7 +359,9 @@ try {
     console.log(`${verdict.padEnd(9)} ${secs}s  ${scene.padEnd(24)} ${detail}`);
   }
 
-  if (bake && machine) {
+  if (smoke) {
+    if (machine) console.log(`\n(rendered with ${machine})`);
+  } else if (bake && machine) {
     writeFileSync(machineFile, `${machine}\n${W}x${H}, ${frames} frames\n`);
   } else if (machine && existsSync(machineFile)) {
     const bakedOn = readFileSync(machineFile, 'utf8').split('\n')[0];
@@ -336,7 +374,9 @@ try {
   await server.close();
 }
 
-if (!bake) {
+if (smoke) {
+  console.log(`${scenes.length} scenes: ${scenes.length - failed} ran, ${failed} failed`);
+} else if (!bake) {
   console.log(`\n${scenes.length} scenes: ${changed} changed, ${failed} failed` + (unstable ? `, ${unstable} unstable` : '') +
     (changed ? ` (side-by-sides in render-tests/diff/)` : ''));
 }

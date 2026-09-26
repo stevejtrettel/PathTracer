@@ -1,0 +1,53 @@
+# CI: runs on every push to main (and on pull requests into it).
+#
+#   generator  the byte-exact goldens + the equation fixtures (seconds). Fails
+#              when a scene's generated shader, or a shape file it inlines,
+#              changed without re-baking: `node scripts/gen.mjs --goldens --write`.
+#
+#   scenes     every scene compiled and rendered for two frames in headless
+#              Chrome (SwiftShader: the runner has no GPU). Fails on a shader
+#              compile error, a JS error, or a blank canvas. No pixel comparison:
+#              render-diff's references are only meaningful on the machine that
+#              baked them, so that stays a local check (npm run render-diff).
+#
+# Results show as a check mark / cross next to each commit on GitHub.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  generator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Goldens (generated scene shaders, byte-exact)
+        run: node scripts/gen.mjs --goldens
+      - name: Equation fixtures
+        run: node scripts/gen.mjs --equations
+
+  scenes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Every scene compiles and renders (SwiftShader)
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: node scripts/render-diff.mjs --smoke --software
