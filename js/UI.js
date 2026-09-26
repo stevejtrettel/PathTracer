@@ -196,7 +196,9 @@ class UI{
             (scale) => pathtracer.setViewScale(scale)));
 
         //while the camera moves (keys or mouse), trace at quarter scale so flying
-        //stays responsive; the chosen Scale returns a moment after it stops
+        //stays responsive; the chosen Scale returns a moment after it stops.
+        //Off by default; a scene opts in with previewWhileMoving: true in its
+        //settings (Save to Scene records the toggle's state)
         ren.append(toggle({label: 'Fast Preview While Moving', value: pathtracer.previewWhileMoving},
             (on) => { pathtracer.previewWhileMoving = on; }));
 
@@ -357,6 +359,11 @@ class UI{
                 contents += `let ${key} = ${JSON.stringify(pathtracer.settings[key])};\n`;
                 exportKeys.push(`${key}: ${key}`);
             }
+        }
+        //the fast-preview-while-moving opt-in, as currently toggled (off = omitted)
+        if(pathtracer.previewWhileMoving){
+            contents += `let previewWhileMoving = true;\n`;
+            exportKeys.push('previewWhileMoving: previewWhileMoving');
         }
         contents += `\nexport default {${exportKeys.join(', ')}};`;
         return contents;

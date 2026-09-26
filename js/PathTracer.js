@@ -34,8 +34,10 @@ class PathTracer{
         this.aspect = settings.aspect ?? null;
 
         //fast preview while moving: trace at MOTION_SCALE while the camera moves,
-        //back to viewScale once it settles (see noteMotion / _settleMotion)
-        this.previewWhileMoving = true;
+        //back to viewScale once it settles (see noteMotion / _settleMotion).
+        //OFF unless the scene's settings ask for it (previewWhileMoving: true) —
+        //the resolution drop is distracting; the Render tab can toggle it live.
+        this.previewWhileMoving = settings.previewWhileMoving ?? false;
         this.moving = false;
         this.lastMotion = 0;
 

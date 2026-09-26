@@ -85,9 +85,12 @@ saved settings. Authored GLSL escape hatches (`` glsl`...` `` fragments, `materi
 
 **`src/settings.js`** — saved *values* only: `uiParams` (aperture, focalLength,
 exposure, fov, ...), `location` (`{position, facing}` camera pose), `params` (current
-knob values), and optionally `sky` — `{type:'image', src}` (default
-`/assets/office.jpg`), `{type:'solid', color}`, or `{type:'gradient', top, bottom}`.
-Knob *declarations* live in `scene.js`; settings only overrides their values.
+knob values), and optionally `sky` — `{type:'image', src}` (a `.jpg`, or an HDR
+`.hdr` such as `/assets/monkstown_castle_2k.hdr`; default `/assets/office.jpg`),
+`{type:'solid', color}`, or `{type:'gradient', top, bottom}` — and
+`previewWhileMoving: true` to trace at quarter resolution while the camera moves
+(off by default). Knob *declarations* live in `scene.js`; settings only overrides
+their values.
 
 In dev mode the UI's **Save to Scene** button writes the current camera/parameters
 straight back into the scene's `settings.js`; **Download Settings** downloads the
@@ -101,8 +104,9 @@ gallery entry.
 
 - Keyboard flying: arrow keys translate; `'`/`/` move up/down; WASD + QE rotate.
   Speeds are per second, so heavy scenes fly as fast as light ones. Hold Shift for a
-  speed boost; the fly Speed slider lives on the Camera tab. While the camera moves
-  the view traces at quarter resolution (Render tab: Fast Preview While Moving).
+  speed boost; the fly Speed slider lives on the Camera tab. Optionally the view
+  traces at quarter resolution while the camera moves (Render tab: Fast Preview
+  While Moving — off unless the scene's settings set `previewWhileMoving: true`).
 - Mouse orbit (toggle on the Camera tab): drag to orbit the origin, pinch/scroll to zoom.
 - Keys: **H** shows/hides the panel, **X** saves the image, **P** pauses/resumes.
 - Knobs: double-click a knob's name to reset it to the scene's value; click a
