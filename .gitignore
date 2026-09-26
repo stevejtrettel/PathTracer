@@ -6,3 +6,6 @@ render-tests/*
 !render-tests/goldens/
 !render-tests/equations/
 !render-tests/baselines/
+
+# scratch output from reviews/experiments (comparison images, one-off scripts)
+audit/
