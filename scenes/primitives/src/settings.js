@@ -25,7 +25,7 @@ let location = { position: position, facing: facing };
 export {location};
 
 export const params = [
-    { name: 'solidSize',  label: 'Platonic Inradius', min: 0.4, max: 2.0, step: 0.01, value: 1.1 },
+    { name: 'solidSize',  label: 'Platonic Radius', min: 0.4, max: 2.0, step: 0.01, value: 1.1 },
     { name: 'coneTop',    label: 'Cone Top Radius',   min: 0.0, max: 1.4, step: 0.01, value: 0.35 },
     { name: 'rimRound',   label: 'Cylinder Rim',      min: 0.0, max: 0.6, step: 0.01, value: 0.12 },
     { name: 'tubeRadius', label: 'Torus Tube',        min: 0.1, max: 0.8, step: 0.01, value: 0.38 },

@@ -6,7 +6,7 @@
 // sized consistently with the icosahedron?"). Every knob here is a real shape
 // parameter off the catalogue, so the page is an instrument.
 //
-// Row 1 is the platonic solids, which all take `size` as an INRADIUS and so
+// Row 1 is the platonic solids, which all take `size` as a CIRCUMRADIUS and so
 // share one knob. Rows 2 and 3 are the rest, each with its own defining dial.
 //=====================================================================
 
@@ -15,7 +15,7 @@ import {room, sphereLight, matte} from '../../../js/presets/index.js';
 
 
 //the platonics share one size: that is what makes them comparable
-const solidSize  = knob('solidSize',  {label: 'Platonic Inradius', min: 0.4, max: 2.0, step: 0.01, value: 1.1});
+const solidSize  = knob('solidSize',  {label: 'Platonic Radius', min: 0.4, max: 2.0, step: 0.01, value: 1.1});
 //and one dial each for the others
 const coneTop    = knob('coneTop',    {label: 'Cone Top Radius',   min: 0.0, max: 1.4, step: 0.01, value: 0.35});
 const rimRound   = knob('rimRound',   {label: 'Cylinder Rim',      min: 0.0, max: 0.6, step: 0.01, value: 0.12});
@@ -31,7 +31,7 @@ const at   = (name, shape, x, y) => object(name, {at: [x, y, 0.0], shape, materi
 export default scene({
     objects: [
 
-        //---- row 1: the platonic solids, one shared inradius ----------------
+        //---- row 1: the platonic solids, one shared circumradius ------------
         at('tetra',  lib.tetrahedron({size: solidSize}),  -4.6, 7.4),
         at('octa',   lib.octahedron({size: solidSize}),   -1.5, 7.4),
         at('dodeca', lib.dodecahedron({size: solidSize}),  1.5, 7.4),

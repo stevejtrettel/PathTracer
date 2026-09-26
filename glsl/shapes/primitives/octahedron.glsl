@@ -1,5 +1,6 @@
 //----------------------------------------------------------------------------
-// OCTAHEDRON — a regular octahedron with vertices `size` from the centre.
+// OCTAHEDRON — a regular octahedron with vertices `size` from the centre: its
+// CIRCUMRADIUS, as for all four platonic solids here (they fit the same ball).
 //
 // IQ's exact octahedron, valid everywhere.
 //

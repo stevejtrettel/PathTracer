@@ -5,38 +5,66 @@
 
 //--- library: glsl/shapes/primitives/tetrahedron.glsl ---
 //----------------------------------------------------------------------------
-// TETRAHEDRON — a triangular pyramid standing on its base: 2*size tall, base
-// side 1.73*size. NOT regular (a regular one that tall would have base side
-// 2.45*size), and `size` is not its inradius, unlike the other platonics.
+// TETRAHEDRON — a regular tetrahedron of CIRCUMRADIUS `size` (centre to
+// vertex), standing on a face: apex at y = size, base at y = -size/3 (a regular
+// tetrahedron's inradius is a third of its circumradius).
 //
-// A cheap max form, NOT an exact distance: the horizontal half-space term is
-// tapered by height (the `abs(0.5 - y)` factor), which is how a cheap taper is
-// done, and it underestimates near the edges. Fine for marching, wrong if you
-// wanted true distance.
+// `size` is the CIRCUMRADIUS (centre to vertex), the same for all four platonic
+// solids here: at one size they fit the same ball, which is what makes a lineup
+// of them comparable. (It was the inradius until Sep 2026 — then a regular
+// tetrahedron, whose circumradius is 3 inradii, dwarfed the rest.)
 //
-// GAINED A `size` PARAMETER IN THE PORT — the legacy
-// objects/basic/tetrahedron.glsl was locked to one size.
+// The same construction as primitives/icosahedron.glsl, but with half-spaces
+// instead of slabs — a tetrahedron is not centrally symmetric, so each of its
+// four faces needs its own normal: dot(p, n) <= r for every face, and the max
+// over the normals minus r is the distance estimate. Exact on the faces, a
+// conservative underestimate near edges and vertices.
+//
+// The normals: the base's straight down, and three sides rising at 1/3 (any two
+// faces of a regular tetrahedron meet with normals at cos = -1/3), their
+// horizontal parts at the same three bearings the old taper had.
+//
+// REWRITTEN (Sep 2026). The port's version was a cheap tapered max form: 2*size
+// tall on a base of side 1.73*size — too tall to be regular — with a `size`
+// that was no radius of it, and a taper that overstated distance by 3%.
 //
 // glsl/shapes/primitives/ is vocabulary: always compiled, callable from any
 // shape file and from authored scene GLSL with no declaration.
 //----------------------------------------------------------------------------
 
 
-// p is in the tetrahedron's own coordinates (origin at the centre).
-// 0.866025 = cos(30 degrees).
+// the four face normals: sqrt(8)/3 = 0.9428090 horizontal and 1/3 vertical on
+// the three sides, at bearings (cos, sin) = (0.8660254, 0.5), (-0.8660254, 0.5),
+// (0, -1) in the xz plane
+const vec3 TETRA_NORMALS[4] = vec3[4](
+    vec3( 0.0,       -1.0,        0.0),
+    vec3( 0.8164966,  0.3333333,  0.4714045),
+    vec3(-0.8164966,  0.3333333,  0.4714045),
+    vec3( 0.0,        0.3333333, -0.9428090)
+);
+
+
+// p is in the tetrahedron's own coordinates (origin at the centre — for a
+// regular tetrahedron the incentre, centroid and circumcentre coincide)
 float tetrahedronDistance(vec3 p, float size){
-    vec3 q = 0.5*p/size;
-    //the tapered term's gradient is (0.866, 0.25, 0.5): length 1.0308, so it
-    //overstated distance by 3% until divided back (the zero set is unchanged)
-    float d = max(abs(q.y) - 0.5,
-                  (max(abs(q.x)*0.866025 + q.z*0.5, -q.z) - 0.25*abs(0.5 - q.y))/1.0308);
-    return 2.0*size*d;
+    float d = dot(p, TETRA_NORMALS[0]);
+    for(int i = 1; i < 4; i++){
+        d = max(d, dot(p, TETRA_NORMALS[i]));
+    }
+    return d - size/3.0;       //the faces sit at the inradius
+}
+
+
+// the circumscribed sphere: the vertices sit exactly on it
+float tetrahedronBound(vec3 p, float size){
+    return length(p) - size;
 }
 
 
 //--- library: glsl/shapes/primitives/octahedron.glsl ---
 //----------------------------------------------------------------------------
-// OCTAHEDRON — a regular octahedron with vertices `size` from the centre.
+// OCTAHEDRON — a regular octahedron with vertices `size` from the centre: its
+// CIRCUMRADIUS, as for all four platonic solids here (they fit the same ball).
 //
 // IQ's exact octahedron, valid everywhere.
 //
@@ -79,7 +107,13 @@ float octahedronBound(vec3 p, float size){
 
 //--- library: glsl/shapes/primitives/dodecahedron.glsl ---
 //----------------------------------------------------------------------------
-// DODECAHEDRON — a regular dodecahedron of INRADIUS `size` (centre to face).
+// DODECAHEDRON — a regular dodecahedron of CIRCUMRADIUS `size` (centre to
+// vertex); its inradius is size/1.2584086.
+//
+// `size` is the CIRCUMRADIUS (centre to vertex), the same for all four platonic
+// solids here: at one size they fit the same ball, which is what makes a lineup
+// of them comparable. (It was the inradius until Sep 2026 — then a regular
+// tetrahedron, whose circumradius is 3 inradii, dwarfed the rest.)
 //
 // The dual of primitives/icosahedron.glsl, and the same construction: the
 // intersection of slabs |dot(p, n)| <= r over the face normals, exact on the
@@ -112,27 +146,33 @@ const vec3 DODECA_NORMALS[6] = vec3[6](
 
 // p is in the dodecahedron's own coordinates (origin at the centre)
 float dodecahedronDistance(vec3 p, float size){
-    vec3  q = p/size;
+    float r = size/1.2584086;      //the inradius: where the face slabs sit
+    vec3  q = p/r;
     float d = 0.0;
     for(int i = 0; i < 6; i++){
         d = max(d, abs(dot(q, DODECA_NORMALS[i])));
     }
-    return (d - 1.0)*size;
+    return (d - 1.0)*r;
 }
 
 
-// the circumscribed sphere. For a regular dodecahedron the circumradius is
-// 1.2584086 times the inradius — the SAME ratio as the icosahedron's, which is
-// a property dual Platonic solids share (verified to 7 places, not assumed).
+// the circumscribed sphere: the vertices sit exactly on it. (The circumradius
+// is 1.2584086 times the inradius — the SAME ratio as the icosahedron's, which
+// is a property dual Platonic solids share; verified to 7 places, not assumed.)
 float dodecahedronBound(vec3 p, float size){
-    return length(p) - 1.2584086*size;
+    return length(p) - size;
 }
 
 
 //--- library: glsl/shapes/primitives/icosahedron.glsl ---
 //----------------------------------------------------------------------------
-// ICOSAHEDRON — a regular icosahedron of INRADIUS `size` (centre to face, the
-// only radius that makes this formula's `size` mean one thing).
+// ICOSAHEDRON — a regular icosahedron of CIRCUMRADIUS `size` (centre to
+// vertex); its inradius is size/1.2584086.
+//
+// `size` is the CIRCUMRADIUS (centre to vertex), the same for all four platonic
+// solids here: at one size they fit the same ball, which is what makes a lineup
+// of them comparable. (It was the inradius until Sep 2026 — then a regular
+// tetrahedron, whose circumradius is 3 inradii, dwarfed the rest.)
 //
 // A polyhedron as the INTERSECTION OF SLABS: for each face normal n, the solid
 // satisfies |dot(p, n)| <= r, so max over the normals minus r is a distance
@@ -175,19 +215,20 @@ const vec3 ICOSA_NORMALS[10] = vec3[10](
 
 // p is in the icosahedron's own coordinates (origin at the centre)
 float icosahedronDistance(vec3 p, float size){
-    vec3  q = p/size;
+    float r = size/1.2584086;      //the inradius: where the face slabs sit
+    vec3  q = p/r;
     float d = 0.0;
     for(int i = 0; i < 10; i++){
         d = max(d, abs(dot(q, ICOSA_NORMALS[i])));
     }
-    return (d - 1.0)*size;
+    return (d - 1.0)*r;
 }
 
 
-// the circumscribed sphere. For a regular icosahedron the circumradius is
-// 1.2584086 times the inradius.
+// the circumscribed sphere: the vertices sit exactly on it (the circumradius
+// is 1.2584086 times the inradius)
 float icosahedronBound(vec3 p, float size){
-    return length(p) - 1.2584086*size;
+    return length(p) - size;
 }
 
 
@@ -489,6 +530,10 @@ float sdf_room(vec3 p){
 //---------------------------------------------------------------------
 // the bounds — the acceleration structure (sdf_Scene only; sdfAll stays exact)
 //---------------------------------------------------------------------
+
+float bound_tetra(vec3 p){
+    return tetrahedronBound(p - TETRA_P, solidSize);
+}
 
 float bound_octa(vec3 p){
     return octahedronBound(p - OCTA_P, solidSize);
@@ -793,7 +838,8 @@ float sdf_Scene(Vector tv){
     vec3 p = tv.pos;
     float d = maxDist;
 
-    d = min(d, sdf_tetra(p));
+    float b_tetra = bound_tetra(p);
+    d = min(d, (b_tetra > BOUND_MARGIN) ? b_tetra : sdf_tetra(p));
 
     float b_octa = bound_octa(p);
     d = min(d, (b_octa > BOUND_MARGIN) ? b_octa : sdf_octa(p));
