@@ -83,10 +83,14 @@ float cubeGridDistance(vec3 p, float spacing, float barHalf, float bevel, float 
     float clear = max(max(p.y - height, 0.0), max(-p.y, 0.0));
     d = min(d, length(vec2(ring, clear)));
 
-    //---- the block: cells |cell| <= tiles, cut on cell walls ----------------
-    //bars are inset from their cell by spacing/2 - barHalf, so this never slices
-    //one; outside the block it reads as the distance to the wall, an underestimate
-    vec2  e     = abs(p.xz) - spacing*(tiles + 0.5);
+    //---- the block: cells -tiles..tiles, cut on cell walls ------------------
+    //bars are inset from their cell by spacing/2 - barHalf, so a cut on the walls
+    //never slices one; outside the block it reads as the distance to the wall, an
+    //underestimate. Cell c spans [c, c+1]*spacing, so the block is [-tiles,
+    //tiles+1]*spacing — centred half a cell off the origin. (Centring it ON the
+    //origin cut through the middle of the outermost cells: their bars came out
+    //sliced lengthwise, 2*tiles whole bars and two halves per row.)
+    vec2  e     = abs(p.xz - 0.5*spacing) - spacing*(tiles + 0.5);
     float block = min(max(e.x, e.y), 0.0) + length(max(e, 0.0));
     return max(d, block);
 }
@@ -95,7 +99,7 @@ float cubeGridDistance(vec3 p, float spacing, float barHalf, float bevel, float 
 // the block, as a bounding box: the tile extent in xz, the tallest possible bar
 // in y. IQ's own bounding volume was this same slab.
 float cubeGridBound(vec3 p, float spacing, float bevel, float height, vec2 tiles){
-    vec3 c   = vec3(0.0, 0.5*height, 0.0);
+    vec3 c   = vec3(0.5*spacing, 0.5*height, 0.5*spacing);    //the block's centre (see above)
     vec3 ext = vec3(spacing*(tiles.x + 0.5), 0.5*height + bevel, spacing*(tiles.y + 0.5));
     return boxDistance(p - c, ext);
 }
