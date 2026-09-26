@@ -120,9 +120,16 @@ float hc_rayDistVertical(vec3 p, vec2 targetEnd){
     return (length(q) >= q0.z) ? dLine : hc_pointDist(p, HC_VERTEX_0);
 }
 
-//convert a hyperbolic distance to a conservative Euclidean distance estimate
+//convert a signed hyperbolic distance to a conservative Euclidean one. A
+//hyperbolic ball of radius d about a point at height z is a Euclidean ball that
+//reaches down to z·e^-d, so the Euclidean distance is at least z·(1 - e^-d) —
+//on EITHER side of the surface. The legacy converted only the outside and
+//returned the raw hyperbolic depth inside, which near the ideal boundary is 1/z
+//times too deep: a ray landing a hair inside a thin tube read as far inside,
+//missed setData's AT_THRESH band, and passed through unclaimed (~0.45% of paths
+//per frame, nearly all later bounces near the floor; finer epsilons made it worse).
 float hc_toEuclid(float dh, float z){
-    return (dh <= 0.0) ? dh : max(0.0, z * (1.0 - exp(-dh)));
+    return sign(dh) * z * (1.0 - exp(-abs(dh)));
 }
 
 
