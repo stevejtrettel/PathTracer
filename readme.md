@@ -25,8 +25,8 @@ identical. References are machine-specific; rebake deliberately with
 `npm run render-diff -- --bake` after looking. (`node scripts/render-test.mjs <scene>...`
 still takes a single full-window screenshot.)
 
-**CI** (`.github/workflows/ci.yml`) runs on every push to `main`: the goldens and
-equation fixtures, and `render-diff --smoke --software`, which compiles and renders
+**CI** (`.github/workflows/ci.yml`) runs on every push to `main`: the goldens, the
+equation fixtures and the generator checks, and `render-diff --smoke --software`, which compiles and renders
 every scene for two frames in headless Chrome on SwiftShader (the runner has no GPU)
 and fails on a shader error, a JS error or a blank canvas. It compares no pixels —
 the references only mean something on the machine that baked them. Run the same
@@ -58,7 +58,10 @@ glsl/tracer/traceShader.glsl      (engine: scene assembly, bounce loop, main())
 The middle chunk is emitted by the scene generator (`js/scenegen/`) from a declarative
 JavaScript description — no scene GLSL is hand-written anymore. `npm run gen <scene>`
 prints the emitted chunk; the byte-exact copies in `render-tests/goldens/` are the
-emitter's regression gate (`node scripts/gen.mjs --goldens`).
+emitter's regression gate (`node scripts/gen.mjs --goldens`). The goldens only cover
+inputs some scene uses, so `node scripts/gen.mjs --checks` runs the edge cases in
+`render-tests/scenegen/checks.mjs` too: inputs the generator must refuse with a clear
+error, or emit correctly.
 
 The engine sections live in numbered folders reflecting concatenation order:
 `1Setup` (uniforms, math, dual-number variety DE, RNG, sky), `2Space` (Vector/Frame

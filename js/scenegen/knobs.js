@@ -51,10 +51,11 @@ export function knob(name, opts = {}){
 
 //collect the knobs a scene declared, collapsing duplicates and refusing
 //conflicts. Called once, by scene(), which stores the result on the
-//description — emit() reads it from there.
+//description — emit() reads it from there. The registry empties FIRST, so a
+//conflict thrown below cannot leave it wedged for the next evaluation.
 export function drainKnobs(){
     const byName = new Map();
-    for(const k of registry){
+    for(const k of registry.splice(0)){
         const prev = byName.get(k.name);
         if(!prev){ byName.set(k.name, k); continue; }
         if(JSON.stringify(prev) !== JSON.stringify(k)){
@@ -62,6 +63,12 @@ export function drainKnobs(){
             throw new Error(`scenegen: knob '${k.name}' declared twice with different ${differs.join('/')}`);
         }
     }
-    registry.length = 0;
     return [...byName.values()];
+}
+
+//forget every declaration: a scene whose module threw BEFORE reaching scene()
+//left its knobs here, and they would leak into the next scene evaluated in
+//the same process (scripts/gen.mjs runs every scene in one)
+export function clearKnobs(){
+    registry.length = 0;
 }

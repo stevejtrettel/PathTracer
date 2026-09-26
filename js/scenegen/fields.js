@@ -49,7 +49,7 @@ export function isField(x){
 
 export function drainFields(){
     const byName = new Map();
-    for(const f of registry){
+    for(const f of registry.splice(0)){      //emptied first, as drainKnobs does
         const prev = byName.get(f.name);
         if(prev && JSON.stringify(prev) !== JSON.stringify(f)){
             const differs = Object.keys(f).filter(k => JSON.stringify(f[k]) !== JSON.stringify(prev[k]));
@@ -57,6 +57,10 @@ export function drainFields(){
         }
         byName.set(f.name, f);
     }
-    registry.length = 0;
     return [...byName.values()];
+}
+
+//forget every declaration (see clearKnobs)
+export function clearFields(){
+    registry.length = 0;
 }

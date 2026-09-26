@@ -41,6 +41,8 @@ vec4 tsin(vec4 a){ return vec4(sin(a.x), cos(a.x)*a.yzw); }
 vec4 tcos(vec4 a){ return vec4(cos(a.x), -sin(a.x)*a.yzw); }
 vec4 ttan(vec4 a){ return vec4(tan(a.x), a.yzw/(cos(a.x)*cos(a.x))); }
 
+//a real power: pow() is undefined for a.x < 0 (and at a.x = 0 when p < 1), so
+//only for a value known to be positive — integer powers go through tsqr/tmul
 vec4 tpow(vec4 a, float p){ return pow(a.x, p - 1.0)*vec4(a.x, p*a.yzw); }
 
 

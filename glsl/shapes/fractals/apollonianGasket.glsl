@@ -56,7 +56,10 @@ float apollonianGasketDistance(vec3 p, float radius, float foldOffset){
     }
 
     float res  = min(abs(q.z) + abs(q.x), min(abs(q.x) + abs(q.y), abs(q.y) + abs(q.z))) + 0.2;
-    float dist = 0.25*res/scale * m/3.0;
+    //back to world units: the chain was ×radius, ×1/m (the inversion), ×3,
+    //×scale (the folds), so divide the whole of it back out. (The /radius was
+    //missing; it goes last so radius 1.0 stays bit-identical.)
+    float dist = 0.25*res/scale * m/3.0/radius;
 
     return max(dist, ballDist);
 }

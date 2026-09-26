@@ -101,12 +101,18 @@ function serializeUiParams(knobs, values){
 }
 
 
+// a JS string literal in the file's single-quote style, escaped: a label like
+// "Wall's Tint" used to write an unparseable settings.js
+function quoted(s){
+    return `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n')}'`;
+}
+
 // 3. settings.js:  the `export const params = [...]` block, with current values
 function serializeKnobs(knobs, values){
     let rows = knobs.map(normalize).map(k => {
-        let parts = [`name: '${k.name}'`];
-        if(k.type !== 'float') parts.push(`type: '${k.type}'`);
-        if(k.label !== k.name) parts.push(`label: '${k.label}'`);
+        let parts = [`name: ${quoted(k.name)}`];
+        if(k.type !== 'float') parts.push(`type: ${quoted(k.type)}`);
+        if(k.label !== k.name) parts.push(`label: ${quoted(k.label)}`);
         if(k.type === 'float' || k.type === 'int' || k.type === 'vec2' || k.type === 'vec3'){
             parts.push(`min: ${k.min}`, `max: ${k.max}`, `step: ${k.step}`);
         }

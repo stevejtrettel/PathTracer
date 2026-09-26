@@ -169,11 +169,6 @@ vec3 castle_normal(vec3 p) {
 }
 
 
-float castle_sdf(vec3 p) {
-    //float dist = clamp(pow(distance(p, pInit)*.1,12.0),0.,1.);
-    return 0.;
-}
-
 float castle_sdf(vec3 p){
     p += vec3(0.,.3,0.);
     const float scale = 0.3;

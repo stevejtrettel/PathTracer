@@ -1,8 +1,10 @@
 # CI: runs on every push to main (and on pull requests into it).
 #
-#   generator  the byte-exact goldens + the equation fixtures (seconds). Fails
-#              when a scene's generated shader, or a shape file it inlines,
-#              changed without re-baking: `node scripts/gen.mjs --goldens --write`.
+#   generator  the byte-exact goldens + the equation fixtures + the generator's
+#              edge-case checks (seconds). Fails when a scene's generated shader,
+#              or a shape file it inlines, changed without re-baking
+#              (`node scripts/gen.mjs --goldens --write`), or when an input the
+#              generator must refuse or handle (render-tests/scenegen/) regresses.
 #
 #   scenes     every scene compiled and rendered for two frames in headless
 #              Chrome (SwiftShader: the runner has no GPU). Fails on a shader
@@ -36,6 +38,8 @@ jobs:
         run: node scripts/gen.mjs --goldens
       - name: Equation fixtures
         run: node scripts/gen.mjs --equations
+      - name: Generator edge cases
+        run: node scripts/gen.mjs --checks
 
   scenes:
     runs-on: ubuntu-latest

@@ -214,14 +214,15 @@ vec2 hc_boundaryToAffine(vec2 p){
 
 HcMap hc_mapScene(vec3 worldP, int foldIter){
     HcMap res;
-    res.d = 1e6;
-    res.mat = HC_NONE;
-
-    if(worldP.z <= 0.0) return res;
-
     //the ideal-boundary floor
     res.d = worldP.z - HC_FLOOR_Z;
     res.mat = HC_FLOOR;
+
+    //below the boundary the half-space model has nothing more to say, but the
+    //point is still INSIDE the floor. (This used to return +1e6 — "far away,
+    //empty" — so an over-relaxed step that landed below z = 0 read as a clear
+    //path and the ray went through the floor.)
+    if(worldP.z <= 0.0) return res;
 
     //fold into the fundamental chamber
     vec3 p = hc_toAffine(worldP);

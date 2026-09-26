@@ -29,11 +29,17 @@ float kleinBottle_sd(vec3 p, float thickness){
     p.xy *= rot2(PI/2.);
 
     vec3  q = p + vec3(1. - cos((1. - p.y)/3.*PI), 0, 0);
-    float y = pow(sin((1. - p.y)/3.*PI/2.), 2.);
+    float s = sin((1. - p.y)/3.*PI/2.);
+    float y = s*s;                                  //(not pow(s, 2.): undefined for s < 0)
 
     // SIDE HANDLE (stretched xz cylinder), hollowed
     float sideHandle = max(max(abs(length(q.xz) - 0.5 + 0.25*y) - thickness, q.y - 1.0), -q.y - 2.0);
-    d = min(d, sideHandle);
+    //the handle's centre and radius both slide with height, so this term changes
+    //up to 1.545x faster than distance (measured: audit/distance/klein.mjs) — the
+    //0.8 below left the whole bottle at 1.24, and an over-relaxed march can step
+    //through a thin wall. Scaling the one term keeps its zero set (the geometry
+    //is unchanged) and brings the bottle to 0.99 without slowing the other parts.
+    d = min(d, 0.8*sideHandle);
 
     // LOWER BASE: the opening (half an xz torus)
     q = p - vec3(0, 1, 0);

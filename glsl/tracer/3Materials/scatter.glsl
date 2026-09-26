@@ -123,6 +123,16 @@ void scatter( inout Path path ){
     }
     float probSpecular=(1.-probCoat)*F;
     float probTransmit=(1.-probCoat)*(1.-F)*surf.transmit;
+    //FROSTED GLASS, FROM INSIDE, PAST THE CRITICAL ANGLE: the clear part of the
+    //surface reflects everything (total internal reflection) but the frosted
+    //part (1 - transmit) still scatters. Without this, light the frost threw
+    //into a steep angle inside the glass could never be scattered back out.
+    float cosF=-vDot(path.tv, facet);
+    bool insideTIR = path.dat.frontID == path.dat.hit && ratio > 1. && ratio*ratio*(1.-cosF*cosF) > 1.;
+    if(insideTIR && surf.transmit > 0.){
+        probSpecular=(1.-probCoat)*surf.transmit;
+        probTransmit=0.;
+    }
     //diffuse takes the remainder
 
     //---- select the event --------------------------------------------------

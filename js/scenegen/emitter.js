@@ -18,8 +18,8 @@
 
 import {pad, commentLines, indent} from './fmt.js';
 import {isGlsl, resolveGlsl, bodyText, qLine, valueText} from './glslTag.js';
-import {isMat, matKind, matIsMedium, SURF_FIELDS, MEDIUM_FIELDS} from './materials.js';
-import {planNode} from './plan.js';
+import {isMat, matKind, matIsMedium, SURF_FIELDS, MEDIUM_FIELDS, SURF_TYPES, MEDIUM_TYPES} from './materials.js';
+import {planNode, knobFor} from './plan.js';
 
 
 //-------------------------------------------------
@@ -116,12 +116,18 @@ function mediumSection(media){
 
     const isMedium = `bool isMedium(int id){ return ${media.map(r => `id == ID_${r.NAME}`).join(' || ')}; }`;
 
+    //the dispatcher reads the field at the region's OWN local point (a group
+    //slot's is its group's placement; a rotated/scaled object's is toLocal_,
+    //which the sdfs section defines further down — hence the prototype)
+    const protos = media.filter(r => r.localPoint.startsWith('toLocal_'))
+        .map(r => `vec3 toLocal_${r.name}(vec3 p);`);
     const rows = media.map(r =>
-        `    if(id == ID_${r.NAME}){ return indexField_${r.name}(p - ${r.NAME}_P); }`).join('\n');
+        `    if(id == ID_${r.NAME}){ return indexField_${r.name}(${r.localPoint}); }`).join('\n');
     const indexFieldOf = `float indexFieldOf(int id, vec3 p){\n${rows}\n    return 1.0;   //not a medium: vacuum\n}`;
 
     return sectionHeader('the media — a per-region varying index the ODE marcher bends light through')
-        + '\n\n' + fieldFns.join('\n\n') + '\n\n' + isMedium + '\n\n' + indexFieldOf;
+        + '\n\n' + fieldFns.join('\n\n') + '\n\n' + isMedium + '\n\n'
+        + (protos.length ? protos.join('\n') + '\n' : '') + indexFieldOf;
 }
 
 //"is p inside region k" — NOT sdf < 0 when regions nest: the shell's solid
@@ -155,11 +161,15 @@ function normalsSection(regions){
 }
 
 //aligned `<lhs>.<field> = <value>;` rows for the fields a bundle sets, in
-//the struct's own declaration order
-function assignLines(lhs, order, fields){
-    const keys = order.filter(k => fields[k] !== undefined);
+//the struct's own declaration order. `types` maps each field to its GLSL
+//type, so a knob of the wrong kind is a JS error here, not a shader error.
+function assignLines(lhs, types, fields){
+    const keys = Object.keys(types).filter(k => fields[k] !== undefined);
     const w = Math.max(...keys.map(k => `${lhs}.${k}`.length));
-    return keys.map(k => `    ${pad(`${lhs}.${k}`, w)} = ${valueText(fields[k])};`).join('\n');
+    const text = (k) => (fields[k] && fields[k].__knob)
+        ? knobFor(types[k], fields[k], `material field ${k}`)
+        : valueText(fields[k]);
+    return keys.map(k => `    ${pad(`${lhs}.${k}`, w)} = ${text(k)};`).join('\n');
 }
 
 //a bundle emitted as one material function body: defaultMaterial() + the
@@ -173,8 +183,8 @@ function bundleBody(m, interiorFrom, localPoint){
     const stamp = m.name ? `      //${m.name}` : '';
     const lines = [`    Material m = defaultMaterial();${stamp}`];
     if(interiorFrom) lines.push(`    m.interior = ${interiorFrom};`);
-    if(Object.keys(m.surf).length) lines.push(assignLines('m.surf', SURF_FIELDS, m.surf));
-    if(!interiorFrom && Object.keys(m.interior).length) lines.push(assignLines('m.interior', MEDIUM_FIELDS, m.interior));
+    if(Object.keys(m.surf).length) lines.push(assignLines('m.surf', SURF_TYPES, m.surf));
+    if(!interiorFrom && Object.keys(m.interior).length) lines.push(assignLines('m.interior', MEDIUM_TYPES, m.interior));
     lines.push('    return m;');
     const body = lines.join('\n');
     return qLine(body, localPoint) + body;
@@ -220,7 +230,7 @@ function materialFns(r){
         }
         //real interior: medium_ first (material_ calls it). Its fields may vary
         //with position (foam), so q is provided when an assignment reads it.
-        const medAssign = assignLines('m', MEDIUM_FIELDS, m.interior);
+        const medAssign = assignLines('m', MEDIUM_TYPES, m.interior);
         const medFn = `Medium ${medName}(vec3 p){\n`
             + `    Medium m = defaultMedium();\n`
             + qLine(medAssign, r.localPoint)
@@ -261,7 +271,7 @@ function ambientSection(ambient){
     return sectionHeader('the ambient medium — open air (ID_NONE) as a scattering medium')
         + '\n\n'
         + `Medium ambientMedium(){\n    Medium m = defaultMedium();\n`
-        + assignLines('m', MEDIUM_FIELDS, ambient) + '\n'
+        + assignLines('m', MEDIUM_TYPES, ambient) + '\n'
         + `    return m;\n}`;
 }
 
@@ -470,7 +480,8 @@ export function emit(description, settings = {}){
     //the wall by an sdf_Scene sign change, never a trace — decided up front, before
     //planning, from the materials on the description nodes.
     const forceMarch = mediumNames(description.objects);
-    const units    = description.objects.map(node => planNode(node, forceMarch));
+    const seenFns  = new Map();
+    const units    = description.objects.map(node => planNode(node, forceMarch, seenFns));
     const regions  = units.flatMap(u => u.regions);
     const scatters = regions.some(r => r.scatters);
     validateNames(units, knobs, fields);
@@ -484,7 +495,7 @@ export function emit(description, settings = {}){
         if(r.sheet) throw new Error(`scenegen: '${r.name}' is a sheet with a varying IOR — a sheet has no interior; a medium needs a solid region`);
         r.fieldBody = resolveGlsl(r.material.interior.ior);
         r.material  = {...r.material, interior: {...r.material.interior,
-            ior: {__expr: true, text: `indexField_${r.name}(p - ${r.NAME}_P)`}}};
+            ior: {__expr: true, text: `indexField_${r.name}(${r.localPoint})`}}};
     }
 
     //library includes, inlined (the chunk is a runtime string, so no #include):
@@ -554,7 +565,11 @@ export function emit(description, settings = {}){
         ...(ambient ? ['SCENE_AMBIENT_MEDIUM'] : []),      //compiles ambientTransport in (derived, not hand-#defined)
     ])];
 
-    const outSettings = {...settings, params};
+    //`authored` keeps the settings exactly as the file gave them: Save to Scene
+    //writes THAT back, never the derived defines/sky merged in below — a saved
+    //SCENE_HAS_MEDIA outlives the medium it was derived from, and then the
+    //shader stops compiling
+    const outSettings = {...settings, params, authored: settings};
     if(defines.length) outSettings.defines = defines;
     if(description.sky !== undefined) outSettings.sky = description.sky;
     //marching overrides are scene identity, like sky: they belong to the

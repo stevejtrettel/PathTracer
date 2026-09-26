@@ -77,7 +77,9 @@ vec2 opRevolution(vec3 p, float w){
     return vec2(length(p.xz) - w, p.y);
 }
 
-//TWIST about the y axis, k radians per unit of height
+//TWIST about the y axis, k radians per unit of height. NOT distance-preserving:
+//a point at radius r from the axis moves up to sqrt(1 + k²r²) times as fast, so
+//divide the twisted shape's distance by that (at its largest r) before marching
 vec3 opTwist(vec3 p, float k){
     float c = cos(k*p.y);
     float s = sin(k*p.y);

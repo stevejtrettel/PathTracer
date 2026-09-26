@@ -181,10 +181,30 @@ function makeCall(v, name, fx){
         : `varietyDistance(data_${name}(${S}*${at(pt)}), ${S})`;
 }
 
+//every transpiled function a scene emits, by key ('dual chebH', 'float
+//chebH' — GLSL overloads of one name are two keys). GLSL has ONE function
+//namespace, so a helper two sources both reach must be emitted once, and two
+//different bodies under one name are a loud error rather than a shader one.
+function claimFunctions(seen, pieces, origin, inline){
+    const fresh = [];
+    for(const p of pieces){
+        const prev = seen.get(p.key);
+        if(!prev){ seen.set(p.key, {text: p.text, origin, inline}); fresh.push(p); continue; }
+        if(prev.text !== p.text || prev.inline !== inline){
+            const fn = p.key.split(' ')[1];
+            throw new Error(`scenegen: variety function '${fn}' is defined by both ${prev.origin} and ${origin}`
+                + (prev.text !== p.text ? ' with different bodies' : ' (a catalogue helper cannot be redefined in fns:)')
+                + ' — rename one');
+        }
+    }
+    return fresh;
+}
+
 //plan one variety base: emitted helper text (defs, per-object), shared defs
-//(twins, deduped chunk-wide by the emitter), the base-call closure the
-//chain renders, and the include entries. `fx` is the fold context.
-export function planVariety(v, name, fx){
+//(the catalogue's transpiled functions, deduped chunk-wide by the emitter),
+//the base-call closure the chain renders, and the include entries. `fx` is
+//the fold context; `seen` the scene-wide function claims (claimFunctions).
+export function planVariety(v, name, fx, seen = new Map()){
     let defs, usesEntries = [lib.variety.entry];
 
     if(v.kind === 'formula' && v.source.float){
@@ -197,8 +217,8 @@ export function planVariety(v, name, fx){
         checkParams({params: f.trailing.map(t => t.name)}, merged);
         const refs = paramRefs(f.trailing, merged, fx, `variety '${name}'`);
         const out  = emitFunctions({name, src: f.entry.src, formula: f.name, refs, view: v.view, split: true});
-        return {defs: out.wrapper, call: makeCall(v, name, fx), usesEntries,
-                shared: [{key: `variety twins: ${f.name}`, text: out.twins}]};
+        claimFunctions(seen, out.pieces, `the catalogue formula ${f.name}`, false);
+        return {defs: out.wrapper, call: makeCall(v, name, fx), usesEntries, shared: out.pieces};
     }
     else if(v.kind === 'eqn'){
         const eq = parseEquation(v.source.eqn);
@@ -215,7 +235,11 @@ export function planVariety(v, name, fx){
         }
         checkParams({params: formulas[0].trailing.map(t => t.name)}, v.params);
         const refs = paramRefs(formulas[0].trailing, v.params, fx, `variety '${name}'`);
-        defs = emitFunctions({name, src: v.source.fns, refs, view: v.view}).trimEnd();
+        //inline, ahead of this object's wrapper — but a function an earlier
+        //object's fns: already emitted (one source, two views) is not repeated
+        const out   = emitFunctions({name, src: v.source.fns, refs, view: v.view, split: true});
+        const fresh = claimFunctions(seen, out.pieces, `the fns: of '${name}'`, true);
+        defs = [...fresh.map(p => p.text), out.wrapper].join('\n\n');
     }
     else{      //'data' — the escape hatch: the author owns the math AND the contract
         defs = `//authored data body: returns vec4(grad, value) — the author's contract\n`

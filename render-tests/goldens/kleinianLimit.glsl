@@ -75,7 +75,12 @@ float klein_de(vec3 z, float R, float I, int iter, vec3 offset,
 
     float y  = min(z.y, a - z.y);
     float DE = min(y, 0.24)/max(DF, 1.0);
-    DE = DE * d2 / (invRadius + d*DE);   //sphere-inversion correction
+    //sphere-inversion correction: a distance D in the inverted space pulls back to
+    //D*d²/(R² + d*D). This used R where R² belongs — more cautious for R < 1,
+    //which every box's fudge was tuned on top of (the presets all use 0.8), but
+    //up to R times too far for R > 1 (kleinianSpiral's knob reaches 3): holes.
+    //max(R, R²) is exactly the old value at R <= 1 and the true one above it.
+    DE = DE * d2 / (invRadius*max(invRadius, 1.0) + d*DE);
     return size * DE;
 }
 

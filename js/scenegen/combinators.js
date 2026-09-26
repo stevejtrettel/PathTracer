@@ -100,16 +100,22 @@ export function displace(base, {by, amp} = {}){
     //the bound is the undisplaced shape pushed out by the largest possible
     //displacement — without the inflation it would shave off the peaks
     const maxAbs = Math.max(Math.abs(by.range[0]), Math.abs(by.range[1]));
+    //a NEGATIVE amp (bumps pushed inward) is fine for the surface, but the
+    //divisor and the inflation need its SIZE: 1 + amp*gradBound < 1 would
+    //overestimate distance, and a negative inflation would shrink the bound
+    const canBeNegative = (amp && amp.__knob) ? amp.min < 0 : amp < 0;
     return appendMod(base, {
         kind: 'displace', phase: 'field', breaksTrueDF: true,
         plan(fx){
             const ampT = fx.num(amp, `displace amp of '${fx.name}'`);
+            const size = !canBeNegative ? ampT
+                       : (amp && amp.__knob) ? `abs(${ampT})` : fx.num(-amp);
             return {
                 //statement-only: the += sugar plus the divisor on the return
                 //make displacement genuinely statement-shaped
                 line: `d += ${ampT}*${by.name}(q);`, readsQ: true,
-                divisor: `${ampT}*(${fx.glsl(by.gradBound)})`,
-                boundEffect: {inflate: `${fx.num(maxAbs)}*${ampT}`},
+                divisor: `${size}*(${fx.glsl(by.gradBound)})`,
+                boundEffect: {inflate: `${fx.num(maxAbs)}*${size}`},
             };
         },
     }, 'displace(base, {by, amp})');
@@ -126,8 +132,18 @@ export function displace(base, {by, amp} = {}){
 //caller pass their own DISTANCE field (`by:`, metadata = a declared Lipschitz
 //constant, not displace's {gradBound, range}) is the natural next step and would
 //not change any existing call site. Deferred until a second carving field exists.
+//the fbm blend radius: >= 0 (0 is a hard edge), and a knob's whole range too
+function requireBlend(fn, blend){
+    const ok = (blend && blend.__knob) ? blend.min >= 0 : (typeof blend === 'number' && blend >= 0);
+    if(!ok){
+        throw new Error(`scenegen: ${fn}(): blend must be a number >= 0, or a knob whose min is >= 0, `
+            + `got ${blend && blend.__knob ? `the knob '${blend.name}' (min ${blend.min})` : JSON.stringify(blend)}`);
+    }
+}
+
 export function carve(base, {octaves = 6, erosion = 1.0, gain = 0.5, blend = 0.15, seed = 0.0} = {}){
     requireInt('carve', 'octaves', octaves, {min: 1, max: 10, why: 'it is a GLSL loop count'});
+    requireBlend('carve', blend);
     return appendMod(base, {
         kind: 'carve', phase: 'field', requiresTrueDF: true,
         plan(fx){
@@ -154,6 +170,7 @@ export function carve(base, {octaves = 6, erosion = 1.0, gain = 0.5, blend = 0.1
 //must stay below 1 where carve's may not: the growth itself would diverge.
 export function accrete(base, {octaves = 6, erosion = 1.0, gain = 0.5, blend = 0.15, seed = 0.0} = {}){
     requireInt('accrete', 'octaves', octaves, {min: 1, max: 10, why: 'it is a GLSL loop count'});
+    requireBlend('accrete', blend);
     if(gain && gain.__knob){
         if(gain.min < 0 || gain.max >= 1){
             throw new Error(`scenegen: accrete(): the gain knob '${gain.name}' must keep its range inside [0, 1) — `

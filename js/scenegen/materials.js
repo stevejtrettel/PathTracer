@@ -33,20 +33,24 @@ import {valueText, isGlsl} from './glslTag.js';
 const MODEL = import.meta.glob('../../glsl/tracer/3Materials/material.glsl',
                               {query: '?raw', import: 'default', eager: true});
 
+//{field name: GLSL type}, in declaration order
 function structFields(src, name){
     const m = src.match(new RegExp(`struct\\s+${name}\\s*\\{([^}]*)\\}`));
     if(!m) throw new Error(`scenegen materials: cannot find 'struct ${name}' in material.glsl`);
     const body   = m[1].replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
-    const fields = [...body.matchAll(/\b(?:float|int|bool|vec[234]|mat[234])\s+(\w+)\s*;/g)].map(x => x[1]);
+    const fields = [...body.matchAll(/\b(float|int|bool|vec[234]|mat[234])\s+(\w+)\s*;/g)];
     if(!fields.length) throw new Error(`scenegen materials: parsed no fields from 'struct ${name}'`);
-    return fields;
+    return Object.fromEntries(fields.map(x => [x[2], x[1]]));
 }
 
 const modelSrc = Object.values(MODEL)[0];
 if(!modelSrc) throw new Error('scenegen materials: 3Materials/material.glsl not found for the struct parse');
 
-export const SURF_FIELDS   = structFields(modelSrc, 'Surface');
-export const MEDIUM_FIELDS = structFields(modelSrc, 'Medium');
+//the field TYPES too: a knob filling a field must match it (emitter.js)
+export const SURF_TYPES    = structFields(modelSrc, 'Surface');
+export const MEDIUM_TYPES  = structFields(modelSrc, 'Medium');
+export const SURF_FIELDS   = Object.keys(SURF_TYPES);
+export const MEDIUM_FIELDS = Object.keys(MEDIUM_TYPES);
 
 function checkFields(where, fields, allowed){
     for(const key of Object.keys(fields)){

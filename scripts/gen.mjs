@@ -17,6 +17,10 @@
 //   node scripts/gen.mjs --equations          run the equation-transpiler
 //                                             verify gate over its suite
 //                                             (docs/equation-transpiler.md §5)
+//   node scripts/gen.mjs --checks             run the generator's edge cases
+//                                             (render-tests/scenegen/checks.mjs):
+//                                             inputs no scene uses, each either
+//                                             refused or emitted correctly
 //
 // The goldens are the emitter's regression gate: they pin the exact output of
 // every generated scene, so an emitter change shows its full blast radius as
@@ -46,12 +50,13 @@ const wantMaterials = flag('--materials');
 const wantCheck     = flag('--check');
 const wantGoldens   = flag('--goldens');
 const wantEquations = flag('--equations');
+const wantChecks    = flag('--checks');
 const wantWrite     = flag('--write');
 const outFile       = opt('--out');
 const sceneName     = args[0];
 
-if(!wantCatalogue && !wantMaterials && !wantGoldens && !wantEquations && !sceneName){
-    console.error('usage: node scripts/gen.mjs <scene> [--check | --out <file>]  |  --catalogue  |  --materials  |  --goldens [--write]  |  --equations');
+if(!wantCatalogue && !wantMaterials && !wantGoldens && !wantEquations && !wantChecks && !sceneName){
+    console.error('usage: node scripts/gen.mjs <scene> [--check | --out <file>]  |  --catalogue  |  --materials  |  --goldens [--write]  |  --equations  |  --checks');
     process.exit(1);
 }
 
@@ -109,7 +114,15 @@ function generatedScenes(){
         .sort();
 }
 
+//every scene evaluates in this one process: start each from empty knob/field
+//registries, so a scene that threw cannot leak its declarations into the next
+async function clearRegistries(){
+    (await server.ssrLoadModule('/js/scenegen/knobs.js')).clearKnobs();
+    (await server.ssrLoadModule('/js/scenegen/fields.js')).clearFields();
+}
+
 async function emitScene(name){
+    await clearRegistries();
     const description = (await server.ssrLoadModule(`/scenes/${name}/src/scene.js`)).default;
     const settings    = (await server.ssrLoadModule(`/scenes/${name}/src/settings.js`)).default;
     const {emit}      = await server.ssrLoadModule('/js/scenegen/index.js');
@@ -224,6 +237,32 @@ try{
                 for(const x of r.failures) console.error('  ' + JSON.stringify(x));
                 failed++;
             }
+        }
+        if(failed) process.exitCode = 1;
+    }
+    else if(wantChecks){
+        const {emit} = await server.ssrLoadModule('/js/scenegen/index.js');
+        const cases  = (await server.ssrLoadModule('/render-tests/scenegen/checks.mjs')).default;
+        let failed = 0;
+        for(const c of cases){
+            await clearRegistries();
+            let out = null, error = null;
+            try{ out = emit(c.build()); }
+            catch(e){ error = e; }
+            let problem;
+            if(c.throws){
+                problem = !error ? 'emitted, but should have been refused'
+                        : c.throws.test(error.message) ? null
+                        : `refused for the wrong reason: ${error.message}`;
+            }
+            else if(error){ problem = `threw: ${error.message}`; }
+            else{
+                const names = [...out.scene.matchAll(/^const\s+\w+\s+(\w+)\s*=/gm)].map(m => m[1]);
+                const dup   = names.find((n, i) => names.indexOf(n) !== i);
+                problem = dup ? `const ${dup} declared twice` : c.check(out.scene, out.settings);
+            }
+            if(problem){ console.error(`${c.name}: FAILED — ${problem}`); failed++; }
+            else{ console.log(`${c.name}: OK${c.throws ? ' (refused)' : ''}`); }
         }
         if(failed) process.exitCode = 1;
     }

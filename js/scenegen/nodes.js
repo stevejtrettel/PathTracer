@@ -26,6 +26,17 @@ function checkName(kind, name){
     checkReserved(kind, name);
 }
 
+//scale: [sx, sy, sz], each a positive number. Zero divides by zero in the
+//local frame; a negative component turns the sdf inside out (the distance is
+//multiplied back by the smallest component) — a reflection is mirror()'s job.
+function checkScale(kind, name, scale){
+    if(scale === undefined) return;
+    if(!Array.isArray(scale) || scale.length !== 3 || !scale.every(x => typeof x === 'number' && Number.isFinite(x) && x > 0)){
+        throw new Error(`scenegen: ${kind}('${name}'): scale must be [sx, sy, sz] with every component > 0, `
+            + `got ${JSON.stringify(scale)} (to reflect a shape, use mirror())`);
+    }
+}
+
 function checkUses(name, uses){
     if(uses === undefined) return;
     if(!Array.isArray(uses) || uses.some(u => !u || !u.entry)){
@@ -46,6 +57,7 @@ export function object(name, spec){
     if(!spec.shape)    throw new Error(`scenegen: object('${name}') needs a shape`);
     if(!spec.material) throw new Error(`scenegen: object('${name}') needs a material`);
     if(!spec.at)       throw new Error(`scenegen: object('${name}') needs a placement (at: [x,y,z])`);
+    checkScale('object', name, spec.scale);
     checkUses(name, spec.uses);
     return {__node: 'object', name, ...spec};
 }
@@ -107,6 +119,7 @@ export function sheet(name, spec){
         throw new Error(`scenegen: sheet('${name}') needs BOTH faces (front + back) — `
             + `a one-faced sheet has no meaning; make them equal for a symmetric membrane`);
     }
+    checkScale('sheet', name, spec.scale);
     checkUses(name, spec.uses);
     return {__node: 'sheet', name, ...spec};
 }
@@ -123,7 +136,9 @@ const SCENE_KEYS = new Set(['objects', 'sky', 'glsl', 'ambient', 'march']);
 
 export function scene(spec){
     //drain FIRST: if validation throws, the registries are still clean for the
-    //next (HMR) evaluation of the module
+    //next (HMR) evaluation of the module. (A throw BEFORE scene() — in an
+    //object() among its arguments — is the caller's to clean up: clearKnobs /
+    //clearFields, as scripts/gen.mjs does before each scene.)
     const knobs  = drainKnobs();
     const fields = drainFields();
     for(const key of Object.keys(spec)){

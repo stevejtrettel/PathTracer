@@ -42,6 +42,19 @@ import {planVariety} from './varieties.js';
 // shared pieces
 //-------------------------------------------------
 
+//the GLSL type a knob's uniform is declared with (js/shaderData/knobs.js)
+const KNOB_GLSL = {float: 'float', int: 'int', bool: 'bool', color: 'vec3', vec2: 'vec2'};
+
+//a knob filling a slot of GLSL type `type`, as text: its uniform name, an int
+//knob cast into a float slot, and a loud error for anything else — a knob of
+//the wrong type used to surface only as a shader compile error
+export function knobFor(type, k, where){
+    const kt = KNOB_GLSL[k.type] ?? k.type;
+    if(kt === type) return k.name;
+    if(type === 'float' && kt === 'int') return `float(${k.name})`;
+    throw new Error(`scenegen: ${where}: the ${k.type} knob '${k.name}' cannot fill a ${type} slot`);
+}
+
 //a description value as a typed const's text; knobs are refused (uniforms)
 function constText(type, v, where){
     if(v && v.__knob) throw new Error(`scenegen: ${where}: knobs are uniforms — they never become consts`);
@@ -57,9 +70,11 @@ function constText(type, v, where){
     throw new Error(`scenegen: ${where}: no const formatting for type ${type}`);
 }
 
-//a knob or a plain number, as text
+//a knob or a plain number, as text — for a FLOAT slot (every caller's):
+//an int knob is cast, any other knob type is refused (GLSL ES 3 has no
+//implicit conversions, so it would only fail later, as a shader error)
 function refText(v, where){
-    if(v && v.__knob) return v.name;
+    if(v && v.__knob) return knobFor('float', v, where);
     if(typeof v === 'number') return fnum(v);
     throw new Error(`scenegen: ${where}: expected a knob or a number, got ${JSON.stringify(v)}`);
 }
@@ -72,10 +87,14 @@ function shapeArgs(NAME, shape, consts, where = `lib.${shape.entry.stem}`){
     const argFor = {};
     for(const p of shape.entry.params){
         const v = shape.values[p.name];
-        if(v && v.__knob){ argFor[p.name] = v.name; }
+        if(v && v.__knob){ argFor[p.name] = knobFor(p.type, v, `${where} parameter '${p.name}'`); }
         else if(isGlsl(v)){ argFor[p.name] = resolveGlsl(v); }
         else{
-            const cname = `${NAME}_${p.name.toUpperCase()}`;
+            //a modifier planned first may already own the name (carve's SEED
+            //beside cubeGrid's seed): take the next free one, as fx.value does
+            const base = `${NAME}_${p.name.toUpperCase()}`;
+            let cname = base, i = 2;
+            while(consts.some(c => c.name === cname)) cname = base + i++;
             consts.push({type: p.type, name: cname, text: constText(p.type, v, `${where} parameter '${p.name}'`)});
             argFor[p.name] = cname;
         }
@@ -130,9 +149,7 @@ function makeFoldCtx(name, NAME, consts, local){
     };
 
     function value(type, suffix, v, where){
-        if(v && v.__knob){
-            return (type === 'float' && v.type === 'int') ? `float(${v.name})` : v.name;
-        }
+        if(v && v.__knob) return knobFor(type, v, where);
         const cname = `${NAME}_${claim(used, suffix)}`;
         consts.push({type, name: cname, text: constText(type, v, where)});
         return cname;
@@ -232,9 +249,15 @@ function chainBody(planned, baseCall, {local, bindLocal = false, forceD = false,
         ret = `    return d/(1.0 + ${divisorTerms.join(' + ')})${lip};`;
     }
     else{
+        //the scale factor multiplies the WHOLE folded expression: `d - R*s`
+        //would round a local-unit distance by a world-unit radius
         const last = fields[fields.length - 1];
-        if(last && last.expr){ stmts = stmts.slice(0, -1); ret = `    return ${last.expr('d', ptFor(last))}${lip};`; }
-        else                 { ret = `    return d${lip};`; }
+        if(last && last.expr){
+            stmts = stmts.slice(0, -1);
+            const e = last.expr('d', ptFor(last));
+            ret = lip ? `    return (${e})${lip};` : `    return ${e};`;
+        }
+        else{ ret = `    return d${lip};`; }
     }
     return [...lines, ...stmts, ret].join('\n');
 }
@@ -348,12 +371,23 @@ function makeRegion(name, spec, localPoint){
         medium:   spec.medium ?? null,
         comment:  spec.comment ?? null,
         nestedIn: spec.nestedIn ?? null,
-        scatters: isMat(spec.material) && matKind(spec.material) === 'subsurface',
+        scatters: isMat(spec.material) ? matKind(spec.material) === 'subsurface'
+                                       : authoredScatters(spec.material, spec.medium),
     };
 }
 
+//does an AUTHORED material/medium body give its region a scattering interior?
+//A bundle says so structurally (matKind); authored GLSL can only be read: an
+//mfp assignment, or a GLSL constructor that sets one. Missing it compiled the
+//medium walk out of the shader, so the interior silently became clear glass —
+//reading generously only ever compiles the walk in when it is not needed.
+const SCATTERING_GLSL = /\.mfp\s*=[^=]|\bmake(?:Subsurface|Jade|Porcelain|Wax|Milk|Marble)\s*\(/;
+function authoredScatters(material, medium){
+    return [material, medium].some(x => isGlsl(x) && SCATTERING_GLSL.test(resolveGlsl(x)));
+}
 
-function planObject(node, forceMarch){
+
+function planObject(node, forceMarch, seenFns){
     const name = node.name;
     const NAME = name.toUpperCase();
     if(!node.shape || !node.shape.__shape){
@@ -389,7 +423,7 @@ function planObject(node, forceMarch){
     //a variety base: its data_ helpers, its varietyDistance base call, and
     //NO derivable bound of its own — a clip in the chain (bound donation) or
     //an authored bound: is REQUIRED (docs/variety-builder.md §9)
-    const vplan = isVariety ? planVariety(node.shape.__variety, name, fx) : null;
+    const vplan = isVariety ? planVariety(node.shape.__variety, name, fx, seenFns) : null;
     if(isVariety && !node.bound && !mods.some(m => m.kind === 'clip')){
         throw new Error(`scenegen: ${node.__node}('${name}'): a variety has no derivable bound — clip it to `
             + `a shape (clip(..., {to: ...}) donates its bound) or author a bound: on the node `
@@ -581,8 +615,9 @@ function planGroup(node){
 }
 
 
-export function planNode(node, forceMarch){
-    if(node.__node === 'object' || node.__node === 'sheet') return planObject(node, forceMarch);
+//seenFns: the scene-wide claims on transpiled variety functions (varieties.js)
+export function planNode(node, forceMarch, seenFns = new Map()){
+    if(node.__node === 'object' || node.__node === 'sheet') return planObject(node, forceMarch, seenFns);
     if(node.__node === 'group') return planGroup(node);   //groups already march (never analytic)
     throw new Error(`scenegen: node kind '${node.__node}' is not emittable yet`);
 }

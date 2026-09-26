@@ -15,10 +15,11 @@
 //----------------------------------------------------------------------------
 
 
-//SMOOTH UNION: min(a,b) with a blend of radius k (quadratic form)
+//SMOOTH UNION: min(a,b) with a blend of radius k (quadratic form). k = 0 is
+//the hard min (h is 0 then, and the max() keeps 0/0 from making a NaN)
 float opSmoothUnion(float a, float b, float k){
     float h = max(k - abs(a - b), 0.0);
-    float m = 0.25*h*h/k;
+    float m = 0.25*h*h/max(k, 1e-8);
     return min(a, b) - m;
 }
 

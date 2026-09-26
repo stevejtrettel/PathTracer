@@ -353,10 +353,14 @@ class UI{
         }
         //preserve the non-GUI settings fields (sky, aspect, defines) — the
         //regenerated file used to silently drop them (skyDemo lost its sky on
-        //Save; a demo scene would lose its engine #defines).
+        //Save; a demo scene would lose its engine #defines). Only as the FILE
+        //had them (emit's `authored`): the generator merges derived defines and
+        //the description's sky into the live settings, and writing those back
+        //froze them into settings.js after the scene stopped deriving them.
+        let authored = pathtracer.settings.authored ?? pathtracer.settings;
         for(let key of ['sky', 'aspect', 'defines']){
-            if(pathtracer.settings[key] !== undefined){
-                contents += `let ${key} = ${JSON.stringify(pathtracer.settings[key])};\n`;
+            if(authored[key] !== undefined){
+                contents += `let ${key} = ${JSON.stringify(authored[key])};\n`;
                 exportKeys.push(`${key}: ${key}`);
             }
         }

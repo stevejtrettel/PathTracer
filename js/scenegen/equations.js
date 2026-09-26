@@ -1042,7 +1042,11 @@ function emitScalar(node, ctx, prec = 0){
                 const b = emitScalar(node.a, ctx, 20);
                 return wrap(Array(node.n).fill(b).join('*'), 20);
             }
-            return `pow(${emitScalar(node.a, ctx, 0)}, ${fnum(node.n)})`;
+            //GLSL pow() is undefined for a negative base, and a param or a loop
+            //value can be negative. An even power of |b| is b^n exactly; an odd
+            //one takes its sign from one more factor of b.
+            const even = `pow(abs(${emitScalar(node.a, ctx, 0)}), ${fnum(node.n - node.n % 2)})`;
+            return node.n % 2 === 0 ? even : wrap(`${emitScalar(node.a, ctx, 20)}*${even}`, 20);
         }
     }
     throw new Error(`scenegen: equations: cannot emit scalar '${node.t}'`);
@@ -1385,11 +1389,14 @@ export function emitFunctions({name, src, refs = null, view = null, formula, spl
         twins.set(def.name, [`vec4 ${def.name}(${params}){`, ...body, `}`].join('\n'));
     }
 
+    //one piece per emitted FUNCTION (a float original and its dual twin are
+    //two overloads of one name), so a caller can share them per function:
+    //two formulas calling one helper must emit it once
     const pieces = [];
     for(const def of defs.values()){
         if(!keep.has(def.name)) continue;
-        if(needFloat.has(def.name)) pieces.push(def.srcText);
-        pieces.push(twins.get(def.name));
+        if(needFloat.has(def.name)) pieces.push({key: `float ${def.name}`, text: def.srcText});
+        pieces.push({key: `dual ${def.name}`, text: twins.get(def.name)});
     }
 
     //the wrapper: seeds (per view), then one call into the formula's twin —
@@ -1402,11 +1409,10 @@ export function emitFunctions({name, src, refs = null, view = null, formula, spl
     lines.push(`    return v.yzwx;`);
     lines.push(`}`);
 
-    //split: the twins are SHARED (identical for every object that names the
-    //formula — the emitter dedupes them chunk-wide); the wrapper is the
+    //split: the function pieces are SHARED (identical for every object that
+    //names them — deduped chunk-wide, per function); the wrapper is the
     //per-object piece
-    if(split) return {twins: pieces.join('\n\n'), wrapper: lines.join('\n')};
+    if(split) return {pieces, wrapper: lines.join('\n')};
 
-    pieces.push(lines.join('\n'));
-    return pieces.join('\n\n') + '\n';
+    return [...pieces.map(p => p.text), lines.join('\n')].join('\n\n') + '\n';
 }

@@ -46,8 +46,11 @@ float varietyDistance(vec4 data, float scale){
 //
 // Leave this OFF to keep the variety a sheet: infinitely thin, two-sided, no
 // interior and no refraction.
+//(solid where -inner < dist < outer: the same form the generator's shell()
+//emits. It used to read abs(dist + inner) - inner - outer, which reaches
+//2*inner + outer inward — twice the promised inner thickness.)
 float varietyShell(float dist, float inner, float outer){
-    return abs(dist + inner) - inner - outer;
+    return abs(dist - 0.5*(outer - inner)) - 0.5*(inner + outer);
 }
 
 
