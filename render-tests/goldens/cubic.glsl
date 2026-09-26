@@ -621,10 +621,10 @@ Material material_room(vec3 p, inout Vector n){
     vec3 q = p - ROOM_P;
     int faceData = roomFaceData(q, ROOM_HALFSIZE);
     if(faceData == ROOM_CEILING){ return makeLight(vec3(1.0), roomLight); }
-    if(faceData == ROOM_FLOOR)  { return makeGloss(floorColor, 0.0, wallRough); }
-    if(faceData == ROOM_LEFT)   { return makeGloss(warmColor,  0.0, wallRough); }
-    if(faceData == ROOM_RIGHT)  { return makeGloss(coolColor,  0.0, wallRough); }
-    return makeGloss(wallColor, 0.0, wallRough);
+    if(faceData == ROOM_FLOOR)  { return makeMatte(floorColor); }
+    if(faceData == ROOM_LEFT)   { return makeMatte(warmColor); }
+    if(faceData == ROOM_RIGHT)  { return makeMatte(coolColor); }
+    return makeMatte(wallColor);
 }
 Medium medium_room(vec3 p){ return defaultMedium(); }
 

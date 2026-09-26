@@ -55,7 +55,6 @@ export default scene({
                 wallColor:  {value: [0.015, 0.015, 0.015]},
                 warmColor:  {value: [0.015, 0.015, 0.015]},
                 coolColor:  {value: [0.015, 0.015, 0.015]},
-                wallRough:  {value: 0.25},
             },
         }),
     ],

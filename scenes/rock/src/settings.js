@@ -37,7 +37,6 @@ export const params = [
     { name: 'warmColor',  type: 'color', label: 'Left Wall',  value: [0.52, 0.34, 0.28] },
     { name: 'coolColor',  type: 'color', label: 'Right Wall', value: [0.28, 0.34, 0.52] },
     { name: 'wallColor',  type: 'color', label: 'Walls',      value: [0.44, 0.44, 0.44] },
-    { name: 'wallRough',  label: 'Wall Roughness', min: 0, max: 1, step: 0.01, value: 0.45 },
 ];
 
 export default {uiParams: uiParams, location: location, params: params};

@@ -37,9 +37,17 @@ export function sphereLight({at, radius, color = [0.9, 0.9, 0.9], power = 100, n
 //picks the wall). Declares the shared room knobs; per-scene values come from
 //settings.js as usual. The name is fixed — the material body references the
 //object's own ROOM_HALFSIZE const.
+const ROOM_KNOBS = ['roomLight', 'floorColor', 'warmColor', 'coolColor', 'wallColor'];
+
 export function room({center, half, knobs = {}} = {}){
     //declaration overrides per knob name (ranges, defaults): a scene that
-    //wants a hotter ceiling passes knobs: {roomLight: {max: 3}}
+    //wants a hotter ceiling passes knobs: {roomLight: {max: 3}}. An override
+    //for a knob the room does not have would silently do nothing — refuse it.
+    for(const name of Object.keys(knobs)){
+        if(!ROOM_KNOBS.includes(name)){
+            throw new Error(`room(): no knob '${name}' to override (have: ${ROOM_KNOBS.join(', ')})`);
+        }
+    }
     const k = (name, defaults) => knob(name, {...defaults, ...(knobs[name] ?? {})});
 
     const slate = [0.1006, 0.1194, 0.1412];      //the default wall colour, everywhere
@@ -48,7 +56,8 @@ export function room({center, half, knobs = {}} = {}){
     k('warmColor',  {type: 'color', label: 'Left Wall',  value: slate});
     k('coolColor',  {type: 'color', label: 'Right Wall', value: slate});
     k('wallColor',  {type: 'color', label: 'Walls',      value: slate});
-    k('wallRough',  {label: 'Wall Roughness', min: 0, max: 1, step: 0.01, value: 0.1});
+    //(no Wall Roughness: the walls are matte — with no gloss and no index step
+    //there is no reflection for a roughness to blur, so that knob did nothing)
 
     return object('room', {
         at: center,
@@ -59,10 +68,10 @@ export function room({center, half, knobs = {}} = {}){
         //baking in the room's own halfSize — no re-passing (docs/shape-data.md)
         material: glsl`
             if(faceData == ROOM_CEILING){ return makeLight(vec3(1.0), roomLight); }
-            if(faceData == ROOM_FLOOR)  { return makeGloss(floorColor, 0.0, wallRough); }
-            if(faceData == ROOM_LEFT)   { return makeGloss(warmColor,  0.0, wallRough); }
-            if(faceData == ROOM_RIGHT)  { return makeGloss(coolColor,  0.0, wallRough); }
-            return makeGloss(wallColor, 0.0, wallRough);
+            if(faceData == ROOM_FLOOR)  { return makeMatte(floorColor); }
+            if(faceData == ROOM_LEFT)   { return makeMatte(warmColor); }
+            if(faceData == ROOM_RIGHT)  { return makeMatte(coolColor); }
+            return makeMatte(wallColor);
         `,
     });
 }
