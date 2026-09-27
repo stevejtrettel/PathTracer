@@ -1,5 +1,5 @@
 import Panel from "./gui/Panel.js";
-import {el, control, toggle, button, numberField, select, section, collapsible, isTypingTarget} from "./gui/widgets.js";
+import {el, control, toggle, button, numberField, select, section, collapsible, setEnabled, isTypingTarget} from "./gui/widgets.js";
 import {serializeKnobs, serializeUiParams, withValues, toUniformValue} from "./shaderData/knobs.js";
 import {cameraKnobs, renderKnobs, scratchKnobs, debugKnobs, engineKnobs} from "./shaderData/engineKnobs.js";
 
@@ -106,7 +106,18 @@ class UI{
 
         //--- Camera: lens knobs + live pose readout + reset ---
         const cam = panel.tab('Camera');
-        for(let k of camKnobs) cam.append(control(k, wire(k)));
+        //a pinhole has no lens: its aperture and focus distance mean nothing, so
+        //they grey out while it is chosen
+        const camRows = {};
+        const lensState = () => {
+            for(const name of ['aperture', 'focalLength']) setEnabled(camRows[name], this.values.lens !== 'pinhole');
+        };
+        for(let k of camKnobs){
+            const onChange = (k.name === 'lens') ? (v) => { wire(k)(v); lensState(); } : wire(k);
+            camRows[k.name] = control(k, onChange);
+            cam.append(camRows[k.name]);
+        }
+        lensState();
 
         //focus peaking: a camera aid, so it sits with the lens controls (focalLength
         //above). The toggle flips the focus-peaking debug lens (uDebugMode 8); the band

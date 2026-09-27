@@ -35,7 +35,7 @@ vec3 newFrame(vec2 fragCoord ){
 
 
     //get the initial path at camera
-    Vector tv=cameraRay(fragCoord, cam);
+    Vector tv=cameraRay(cam, fragCoord);
     Path path=initializePath(tv);
 
     //tint the throughput by the wavelength (only while spectral; else stays vec3(1)).

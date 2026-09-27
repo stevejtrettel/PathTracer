@@ -96,6 +96,13 @@ export default {
                                                interior: {ior: 1.5, mfp: 0.05, blur: 0.8}}), {noisy: true}),
     fog:           one(ball, () => matte({diffuse: WHITE}), {ambient: fog({mfp: 4.0, blur: 0.7})}),
 
+    //---- the camera models ------------------------------------------------
+    //camera-independent by construction (every direction sees 1), so these
+    //check each lens model makes only valid rays: no NaN, none lost
+    pinholeCamera:  one(ball, () => matte({diffuse: WHITE}), {ui: {lens: 'pinhole'}}),
+    thinLensCamera: one(ball, () => matte({diffuse: WHITE}), {ui: {lens: 'thinLens', aperture: 0.2, focalLength: 5}}),
+    orthoCamera:    one(ball, () => matte({diffuse: WHITE}), {ui: {lens: 'orthographic', aperture: 0.2, focalLength: 5}}),
+
     //---- light aiming ------------------------------------------------------
     //a lamp of radiance exactly 1 (it emits 1 and reflects nothing) beside the
     //ball: every direction still sees 1, so however diffuse bounces aim at the

@@ -11,7 +11,14 @@
 //     2. the uniform object                    knobUniforms()
 //     3. the settings.js serialization         serializeKnobs()
 //
-// type ∈ float | int | bool | color | vec2 | vec3  (color is a vec3 with a picker)
+// type ∈ float | int | bool | color | vec2 | vec3 | choice
+//   color   a vec3 with a picker
+//   choice  one of a list of NAMED options: {type: 'choice', options: [{name,
+//           label}, ...], value: <an option name>}. A dropdown in the panel, an
+//           int uniform in the shader, plus one generated const per option
+//           (knob `lens`, option `thinLens` -> const int LENS_THIN_LENS = 2;) so
+//           the shader and the panel share one numbering. Saved BY NAME, so
+//           reordering the options can never change a saved scene.
 
 import {Vector2, Vector3} from "../math/index.js";
 
@@ -24,7 +31,14 @@ const GLSL_TYPE = {
     color: 'vec3',
     vec2:  'vec2',
     vec3:  'vec3',
+    choice: 'int',
 };
+
+// the GLSL const for one option of a choice knob: lens + thinLens -> LENS_THIN_LENS
+const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase();
+function optionConst(k, option){
+    return `${snake(k.name)}_${snake(option.name)}`;
+}
 
 
 // fill in defaults so a knob can be as short as {name, value}
@@ -39,6 +53,7 @@ function normalize(knob){
         step:  knob.step ?? 0.001,
         value: knob.value,
         group: knob.group ?? 'scene',
+        ...(knob.options ? {options: knob.options} : {}),
     };
 }
 
@@ -49,7 +64,15 @@ function toUniformValue(k, value){
         case 'color':
         case 'vec3': return new Vector3(value[0], value[1], value[2]);
         case 'vec2': return new Vector2(value[0], value[1]);
-        default:     return value;   // float, bool
+        case 'choice': {
+            let i = k.options.findIndex(o => o.name === value);
+            if(i < 0){
+                throw new Error(`knob '${k.name}': no option '${value}' `
+                    + `(have: ${k.options.map(o => o.name).join(', ')})`);
+            }
+            return i;
+        }
+        default:     return value;   // float, int, bool
     }
 }
 
@@ -58,7 +81,10 @@ function toUniformValue(k, value){
 function knobUniformDecls(knobs){
     return knobs
         .map(normalize)
-        .map(k => `uniform ${GLSL_TYPE[k.type]} ${k.name};`)
+        .map(k => `uniform ${GLSL_TYPE[k.type]} ${k.name};`
+            + (k.type === 'choice'
+                ? k.options.map((o, i) => `\nconst int ${optionConst(k, o)} = ${i};`).join('')
+                : ''))
         .join('\n');
 }
 
@@ -86,6 +112,7 @@ function withValues(knobs, valueMap){
 // formatted as a JS literal for the serializers below
 function serializedValue(k, values){
     let v = values[k.name] ?? k.value;
+    if(typeof v === 'string') return quoted(v);   //a choice: its option's name
     return Array.isArray(v) ? `[${v.join(', ')}]` : v;
 }
 

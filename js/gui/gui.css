@@ -125,6 +125,12 @@
    row tint make the armed slider unmistakable. */
 .knob:focus-within .knob-label { color: #6ea8fe; }
 .knob:focus-within .knob-range { background: rgba(110, 168, 254, 0.4); }
+/* a knob the current settings make meaningless (e.g. Aperture for a pinhole) */
+.knob-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 .knob-selected {
   background: rgba(110, 168, 254, 0.14);
   box-shadow: inset 3px 0 0 #6ea8fe;

@@ -148,7 +148,10 @@ vec3 debugPass(int mode, Path path){
         // the zone colours read clearly. The overlay strength is graduated (vivid at the
         // sharp focal plane, faint far out), so the scene stays grayscale with colour
         // concentrated where focus matters. cyan = sharp, green -> yellow -> red = out.
-        float ad = abs(path.totalDistance - focalLength) / max(dbgFocusBand, 0.0002);
+        //(the lens decides what "in focus" means: a sphere around the camera for
+        //sphere focus, a plane for thin lens and orthographic, everything for pinhole)
+        Camera camera = buildCamFromUniforms();
+        float ad = focusError(camera.lens, toCameraFrame(camera.pose, path.tv.pos)) / max(dbgFocusBand, 0.0002);
         float gray = dot(lit, vec3(0.299, 0.587, 0.114));   // desaturated scene
         vec3  fcol; float amt;                              // zone colour + overlay strength
         if(ad < 1.0)      { fcol = vec3(0.1, 1.0, 1.0);  amt = 0.75; }  // cyan: sharp focus

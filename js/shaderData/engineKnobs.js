@@ -10,9 +10,23 @@
 // renamed from the legacy extra/extra2/extra3/extra4.)
 
 // Camera lens controls -> Camera folder/tab
+//
+// `lens` picks the camera model (glsl/tracer/2Space/camera.glsl, docs/camera-plan.md).
+// Its default is what a scene gets when its settings.js saves no lens: Sphere
+// Focus, the camera every scene was made with. (Save to Scene writes the lens
+// out, so changing this default later leaves saved scenes as they were.)
+// `focalLength` is the FOCUS DISTANCE — the distance to what is sharp — shown
+// under that name; the saved name stays, so old settings files still load.
+const LENS_MODELS = [
+    { name: 'pinhole',      label: 'Pinhole' },
+    { name: 'sphereFocus',  label: 'Sphere Focus' },
+    { name: 'thinLens',     label: 'Thin Lens' },
+    { name: 'orthographic', label: 'Orthographic' },
+];
 const cameraKnobs = [
+    { name: 'lens',        label: 'Lens', type: 'choice', options: LENS_MODELS, value: 'sphereFocus', group: 'camera' },
     { name: 'aperture',    label: 'Aperture',     min: 0,  max: 0.3, step: 0.0005, value: 0,    group: 'camera' },
-    { name: 'focalLength', label: 'Focal Length', min: 0,  max: 40,  step: 0.01,  value: 14.92, group: 'camera' },
+    { name: 'focalLength', label: 'Focus Distance', min: 0, max: 40, step: 0.01,  value: 14.92, group: 'camera' },
     { name: 'fov',         label: 'FOV',          min: 15, max: 140, step: 1,     value: 29,    group: 'camera' },
     // pass: 'display' — a uniform of the DISPLAY shader, applied to the finished
     // average, so moving it re-draws without restarting the render

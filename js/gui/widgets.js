@@ -249,7 +249,8 @@ function xyPad(knob, onChange){
 // the router: a knob's type -> its widget, mirroring the switch in knobs.js.
 function control(knob, onChange){
     switch(knob.type){
-        case 'bool':  return toggle(knob, onChange);
+        case 'bool':   return toggle(knob, onChange);
+        case 'choice': return choice(knob, onChange);
         case 'color': return colorPicker(knob, onChange);
         case 'vec2':  return xyPad(knob, onChange);
         default:      return slider(knob, onChange);   // float, int
@@ -308,6 +309,24 @@ function select(label, options, value, onChange){
     return row;
 }
 
+// choice knob: [ label · dropdown ] over its named options; the value handed
+// to onChange is the option's NAME (knobs.js turns it into the uniform's int)
+function choice(knob, onChange){
+    let row = select(knob.label ?? knob.name, knob.options.map(o => [o.label ?? o.name, o.name]), knob.value, onChange);
+    let sel = row.querySelector('select');
+    resetOnDoubleClick(row.querySelector('.knob-label'), () => {
+        sel.selectedIndex = knob.options.findIndex(o => o.name === knob.value);
+        onChange(knob.value);
+    });
+    return row;
+}
+
+// grey out a knob row the current settings make meaningless (still readable,
+// no longer touchable)
+function setEnabled(row, on){
+    row.classList.toggle('knob-disabled', !on);
+}
+
 // a small section heading inside a tab body
 function section(title){
     return el('div', 'gui-section', title);
@@ -329,4 +348,5 @@ function collapsible(title){
 
 //(slider/colorPicker/xyPad are exported as public widget surface even though
 //UI.js reaches them only through control())
-export {el, control, slider, toggle, colorPicker, xyPad, button, numberField, select, section, collapsible, isTypingTarget, fitAspect};
+export {el, control, slider, toggle, choice, colorPicker, xyPad, button, numberField, select, section, collapsible,
+        setEnabled, isTypingTarget, fitAspect};

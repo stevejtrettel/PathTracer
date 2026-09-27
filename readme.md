@@ -128,9 +128,11 @@ gallery entry.
 - Keys: **H** shows/hides the panel, **X** saves the image, **P** pauses/resumes.
 - Knobs: double-click a knob's name to reset it to the scene's value; click a
   slider's value to type one.
-- UI panel tabs: **Camera** (aperture / focal length / fov / exposure — live, it
-  doesn't restart the render — focus-help overlay, speed, orbit, Copy Pose /
-  Save to Scene / Download Settings), **Render** (preview scale, aspect, Aim at
+- UI panel tabs: **Camera** (Lens — Pinhole, Sphere Focus, Thin Lens or
+  Orthographic, see `docs/camera-plan.md` and `scenes/lenses` — plus aperture,
+  focus distance, fov, exposure (live: it doesn't restart the render), the
+  focus-peaking aid, speed, orbit, Copy Pose / Save to Scene / Download
+  Settings), **Render** (preview scale, aspect, Aim at
   Lights, samples, Pause, Stop At N spp, Reset), **Export** (Save Image, Auto Save,
   and tiled HD rendering with a Stop button and a time-left estimate for output
   larger than the screen). The canvas re-fits when the window is resized.
