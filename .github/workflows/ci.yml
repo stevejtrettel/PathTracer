@@ -11,6 +11,9 @@
 #              compile error, a JS error, or a blank canvas. No pixel comparison:
 #              render-diff's references are only meaningful on the machine that
 #              baked them, so that stays a local check (npm run render-diff).
+#              Then the white-sky energy test (render-tests/energy/): lossless
+#              objects under a white sky must render exactly 1 — a pixel check
+#              that DOES run here, because its answer is exact, not a reference.
 #
 # Results show as a check mark / cross next to each commit on GitHub.
 
@@ -55,3 +58,7 @@ jobs:
         env:
           CHROME_BIN: /usr/bin/google-chrome
         run: node scripts/render-diff.mjs --smoke --software
+      - name: White-sky energy test (SwiftShader)
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: node scripts/render-diff.mjs --energy --software

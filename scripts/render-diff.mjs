@@ -5,7 +5,9 @@
 //   node scripts/render-diff.mjs glassball gem    compare just these
 //   node scripts/render-diff.mjs --bake [...]     (re)write the references from the current code
 //   node scripts/render-diff.mjs --smoke [...]    only check every scene RUNS (CI): no compare
-//   options: --frames N (default 32; 2 with --smoke)   --size WxH (default 160x120)
+//   node scripts/render-diff.mjs --energy [...]   the white-sky energy test (render-tests/energy/)
+//   options: --frames N (default 32; 2 with --smoke; 64 with --energy)
+//            --size WxH (default 160x120; 128x128 with --energy)
 //            --software   render with SwiftShader (Chrome's CPU renderer), as on a
 //                         GPU-less CI machine
 //
@@ -27,6 +29,12 @@
 // so its pixels can never match references baked on yours, but it can still
 // catch a scene that no longer compiles or throws. Every scene gets `ok`,
 // FAILED or BLANK, and nothing is written.
+//
+// --energy runs the cases in render-tests/energy/cases.js instead of the scenes:
+// lossless objects under a white sky, where every pixel must average to exactly
+// 1 (see that file). It reads the average out of the accumulation buffer as
+// floats, and each case is `ok` or FAILED on its own — no references, so it
+// means the same on every machine and runs in CI too.
 //
 // Why this works: the tracer is deterministic — the same code on the same
 // machine renders the same bytes every time (seed = pixel + frame). So an
@@ -56,30 +64,37 @@ const chrome =
 
 //---- arguments -----------------------------------------------------------
 const args = process.argv.slice(2);
-let bake = false, smoke = false, software = false, frames = null, W = 160, H = 120;
+let bake = false, smoke = false, energy = false, software = false, frames = null, W = null, H = null;
 const wanted = [];
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--bake') bake = true;
   else if (args[i] === '--smoke') smoke = true;
+  else if (args[i] === '--energy') energy = true;
   else if (args[i] === '--software') software = true;
   else if (args[i] === '--frames') frames = parseInt(args[++i], 10);
   else if (args[i] === '--size') [W, H] = args[++i].split('x').map((n) => parseInt(n, 10));
   else wanted.push(args[i]);
 }
-frames ??= smoke ? 2 : 32;
-if (!(frames > 0) || !(W > 0) || !(H > 0) || (bake && smoke)) {
-  console.error('usage: node scripts/render-diff.mjs [--bake | --smoke] [--software] [--frames N] [--size WxH] [scene...]');
+frames ??= smoke ? 2 : energy ? 64 : 32;
+W ??= energy ? 128 : 160;
+H ??= energy ? 128 : 120;
+if (!(frames > 0) || !(W > 0) || !(H > 0) || [bake, smoke, energy].filter(Boolean).length > 1) {
+  console.error('usage: node scripts/render-diff.mjs [--bake | --smoke | --energy] [--software] [--frames N] [--size WxH] [scene...]');
   process.exit(1);
 }
 
-const allScenes = readdirSync(path.join(root, 'scenes'), { withFileTypes: true })
+//the scenes — or, with --energy, the energy cases (listed once the vite server
+//is up: cases.js builds scenegen descriptions, which only load through vite)
+const pickScenes = (all, kind) => {
+  for (const s of wanted) {
+    if (!all.includes(s)) { console.error(`${kind} not found: ${s} (have: ${all.join(', ')})`); process.exit(1); }
+  }
+  return wanted.length ? wanted : all;
+};
+let scenes = energy ? null : pickScenes(readdirSync(path.join(root, 'scenes'), { withFileTypes: true })
   .filter((d) => d.isDirectory() && existsSync(path.join(root, 'scenes', d.name, 'main.js')))
   .map((d) => d.name)
-  .sort();
-for (const s of wanted) {
-  if (!allScenes.includes(s)) { console.error(`Scene not found: ${s}`); process.exit(1); }
-}
-const scenes = wanted.length ? wanted : allScenes;
+  .sort(), 'Scene');
 if (!existsSync(chrome)) { console.error(`Chrome not found at ${chrome} (set CHROME_BIN)`); process.exit(1); }
 
 
@@ -172,6 +187,26 @@ async function maxChannel(url) {
   return m;
 }
 
+//---- runs in an energy-test page: the accumulated average, read as FLOATS
+//---- straight from the accumulation target (the true linear values: no tone
+//---- map, no 8-bit rounding), reduced to the numbers the verdict needs
+function energyStats() {
+  const pt = window.__pt, gl = pt.gl, t = pt.accumulate.b;   //b: the target drawn last
+  gl.bindFramebuffer(gl.FRAMEBUFFER, t.fbo);
+  const px = new Float32Array(t.w * t.h * 4);
+  gl.readPixels(0, 0, t.w, t.h, gl.RGBA, gl.FLOAT, px);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  let sum = 0, off = 0, lo = Infinity, hi = -Infinity;
+  const n = t.w * t.h;
+  for (let i = 0; i < px.length; i += 4) {
+    const v = (px[i] + px[i + 1] + px[i + 2]) / 3;
+    sum += v;
+    if (!(Math.abs(v - 1) <= 0.05)) off++;       //(NaN counts as off)
+    lo = Math.min(lo, v); hi = Math.max(hi, v);
+  }
+  return { mean: sum / n, off: off / n, lo, hi, noisy: !!(pt.settings.energy && pt.settings.energy.noisy) };
+}
+
 
 //---- minimal DevTools-protocol client ----------------------------------------
 async function launchChrome() {
@@ -245,10 +280,14 @@ const server = await createServer({
 });
 await server.listen();
 const port = server.httpServer.address().port;
+if (energy) {
+  const cases = (await server.ssrLoadModule('/render-tests/energy/cases.js')).default;
+  scenes = pickScenes(Object.keys(cases), 'Energy case');
+}
 const cdp = await launchChrome();
 
 let failed = 0, changed = 0, unstable = 0, machine = null;
-if (!smoke) {
+if (!smoke && !energy) {
   mkdirSync(baseDir, { recursive: true });
   if (!bake) rmSync(diffDir, { recursive: true, force: true });
 }
@@ -273,7 +312,8 @@ async function renderScene(scene) {
     await cdp.send('Page.enable', {}, sessionId);
     await cdp.send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 1, mobile: false }, sessionId);
     await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: pageSetup(frames) }, sessionId);
-    await cdp.send('Page.navigate', { url: `http://127.0.0.1:${port}/scenes/${scene}/` }, sessionId);
+    const page = energy ? `render-tests/energy/?case=${scene}` : `scenes/${scene}/`;
+    await cdp.send('Page.navigate', { url: `http://127.0.0.1:${port}/${page}` }, sessionId);
 
     const deadline = Date.now() + 180000;
     while (!(await evaluate(cdp, sessionId, 'window.__rd && window.__rd.done')) && !errors.length) {
@@ -287,7 +327,9 @@ async function renderScene(scene) {
       const ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
       return ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : 'unknown GPU';
     })()`);
-    return await evaluate(cdp, sessionId, `document.querySelector('body > canvas').toDataURL('image/png')`);
+    return await evaluate(cdp, sessionId, energy
+      ? `(${energyStats.toString()})()`
+      : `document.querySelector('body > canvas').toDataURL('image/png')`);
   } finally {
     cdp.listeners.splice(cdp.listeners.indexOf(onEvent), 1);
     await cdp.send('Target.closeTarget', { targetId }).catch(() => {});
@@ -308,7 +350,18 @@ try {
       const now = await renderScene(scene);
       const ref = path.join(baseDir, `${scene}.png`);
 
-      if (smoke) {
+      if (energy) {
+        //EXACT cases: every path returns exactly 1, so the mean is 1 to rounding
+        //and (almost) no pixel strays — a one-pixel dark rim fails. NOISY cases
+        //(per-sample weights that only average to 1) are judged on the mean.
+        const r = now;
+        const meanOk = Math.abs(r.mean - 1) <= (r.noisy ? 0.01 : 0.002);
+        const offOk  = r.noisy || r.off <= 0.002;
+        verdict = meanOk && offOk ? 'ok' : 'FAILED';
+        detail = `mean ${r.mean.toFixed(4)}, ${(100 * r.off).toFixed(2)}% of pixels off by > 5% `
+               + `(range ${r.lo.toFixed(3)}..${r.hi.toFixed(3)})${r.noisy ? ', noisy: mean only' : ''}`;
+        if (verdict === 'FAILED') failed++;
+      } else if (smoke) {
         const m = await evaluate(cdp, cmpSession, `(${maxChannel.toString()})(${JSON.stringify(now)})`);
         if (m > 0) verdict = 'ok';
         else { verdict = 'BLANK'; detail = 'the canvas is all black'; failed++; }
@@ -359,7 +412,7 @@ try {
     console.log(`${verdict.padEnd(9)} ${secs}s  ${scene.padEnd(24)} ${detail}`);
   }
 
-  if (smoke) {
+  if (smoke || energy) {
     if (machine) console.log(`\n(rendered with ${machine})`);
   } else if (bake && machine) {
     writeFileSync(machineFile, `${machine}\n${W}x${H}, ${frames} frames\n`);
@@ -374,7 +427,9 @@ try {
   await server.close();
 }
 
-if (smoke) {
+if (energy) {
+  console.log(`${scenes.length} energy cases: ${scenes.length - failed} ok, ${failed} failed`);
+} else if (smoke) {
   console.log(`${scenes.length} scenes: ${scenes.length - failed} ran, ${failed} failed`);
 } else if (!bake) {
   console.log(`\n${scenes.length} scenes: ${changed} changed, ${failed} failed` + (unstable ? `, ${unstable} unstable` : '') +

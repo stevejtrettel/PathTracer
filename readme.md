@@ -25,8 +25,15 @@ identical. References are machine-specific; rebake deliberately with
 `npm run render-diff -- --bake` after looking. (`node scripts/render-test.mjs <scene>...`
 still takes a single full-window screenshot.)
 
+`npm run render-diff -- --energy` is the white-sky energy test (`render-tests/energy/`):
+objects that absorb nothing, under a sky of brightness exactly 1, where every pixel
+must average to exactly 1 — any darker is light the tracer lost, any brighter is light
+it made up. It has an exact answer, so it needs no references and means the same on
+any machine. (Open one case in the browser with `npm run dev` at
+`/render-tests/energy/?case=glass`.)
+
 **CI** (`.github/workflows/ci.yml`) runs on every push to `main`: the goldens, the
-equation fixtures and the generator checks, and `render-diff --smoke --software`, which compiles and renders
+equation fixtures and the generator checks, the energy test, and `render-diff --smoke --software`, which compiles and renders
 every scene for two frames in headless Chrome on SwiftShader (the runner has no GPU)
 and fails on a shader error, a JS error or a blank canvas. It compares no pixels —
 the references only mean something on the machine that baked them. Run the same

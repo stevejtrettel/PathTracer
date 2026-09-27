@@ -7,6 +7,7 @@ render-tests/*
 !render-tests/equations/
 !render-tests/baselines/
 !render-tests/scenegen/
+!render-tests/energy/
 
 # scratch output from reviews/experiments (comparison images, one-off scripts)
 audit/
